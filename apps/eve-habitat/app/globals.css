@@ -1,0 +1,105 @@
+@import "tailwindcss";
+@source "../../../packages/ui/src";
+
+:root {
+  --ink: #172c2b;
+  --muted: #647575;
+  --accent: #087e78;
+  --accent-strong: #06665f;
+  --accent-soft: #dff5f1;
+  --warm: #d97846;
+  --warm-soft: #fff0e7;
+  --surface: #ffffff;
+  --canvas: #f5f7f3;
+  --wash: #eef3ef;
+  --line: #dce6e1;
+  --shadow-card: 0 1px 2px rgba(23, 44, 43, 0.03), 0 12px 32px rgba(23, 44, 43, 0.055);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--canvas);
+  color: var(--ink);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 92% 2%, rgba(8, 126, 120, 0.07), transparent 25rem), var(--canvas);
+  font-family:
+    Inter,
+    Aptos,
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.focus-ring:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 3px solid rgba(8, 126, 120, 0.28);
+  outline-offset: 2px;
+}
+
+.page-enter {
+  animation: page-enter 320ms ease-out both;
+}
+
+.scrollbar-subtle {
+  scrollbar-color: #c4d2cc transparent;
+  scrollbar-width: thin;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+}
