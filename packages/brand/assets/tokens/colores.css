@@ -1,0 +1,49 @@
+/* Evetev S.A.S. — tokens de color oficiales
+   Paleta votada por socios (Manual de marca v2.0)
+   Uso: @import url("https://cdn.jsdelivr.net/gh/EveTev/brand@1/tokens/colores.css"); */
+
+:root{
+  /* Base */
+  --eve-azul-noche:#0A2540;
+  --eve-azul-noche-profundo:#081D33;  /* fondo modo oscuro */
+  --eve-hielo:#EAF2FB;
+  --eve-tinte:#F4F9FD;
+  --eve-linea:#EDF3FA;
+  --eve-pizarra:#64748B;
+  --eve-muted:#94A3B8;
+
+  /* Acción — exclusivo de CTAs. Un botón coral por pantalla. */
+  --eve-coral:#EE3D22;
+  --eve-coral-hover:#CF3016;
+
+  /* Azules funcionales */
+  --eve-electrico:#1E6FEB;   /* enlaces, foco */
+  --eve-mezclado:#144A96;    /* secundario: botones 2os, sliders, switches, gráficos */
+  --eve-cian:#22D3EE;        /* realce sobre oscuro */
+  --eve-teal:#3BAEC2;        /* herencia del isotipo, ilustración */
+
+  /* Violeta Eve — territorio de Eve Intelligence. No usar en botones. */
+  --eve-violeta:#8B5CF6;
+  --eve-violeta-texto:#6D28D9;
+  --eve-violeta-tinte:#EDE9FE;
+
+  /* Semánticos — el error SIEMPRE con ícono + texto, nunca solo color */
+  --eve-exito:#16A34A;
+  --eve-alerta:#D97706;
+  --eve-error:#B91C1C;
+
+  /* Degradados */
+  --eve-grad-corporativo:linear-gradient(90deg,#0A2540 0%,#1E6FEB 55%,#22D3EE 100%);
+  --eve-grad-ia:linear-gradient(90deg,#8B5CF6 0%,#6366F1 50%,#22D3EE 100%);
+
+  /* Forma */
+  --eve-radio-sm:8px;
+  --eve-radio-md:12px;
+  --eve-radio-lg:16px;
+  --eve-radio-pill:999px;
+
+  /* Tipografía */
+  --eve-font-marca:'Baloo 2',sans-serif;
+  --eve-font-ui:'Inter',sans-serif;
+  --eve-font-mono:'JetBrains Mono',monospace;
+}

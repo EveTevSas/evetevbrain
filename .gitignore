@@ -1,0 +1,32 @@
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+.next/
+out/
+build/
+.turbo/
+
+# Tests / cobertura
+coverage/
+playwright-report/
+test-results/
+
+# Entorno (nunca subir secretos — §4 de la constitución)
+.env
+.env.*
+!.env.example
+
+# Logs y temporales
+*.log
+*.tsbuildinfo
+
+# Sistema
+.DS_Store
+
+# Artefactos de tooling / skills de agentes (no son parte del monorepo)
+/.agents/
+/skills-lock.json
+/videos/
+.claude/
