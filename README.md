@@ -6,6 +6,7 @@ vertical: la cuña con la que validamos la plataforma cobrando dinero real.
 
 > La fuente de verdad de cómo trabajamos es la constitución:
 > [`docs/ESTANDARES_INGENIERIA.md`](docs/ESTANDARES_INGENIERIA.md).
+> Estándares de la vertical: [`docs/ESTANDARES_EVEHABITAD.md`](docs/ESTANDARES_EVEHABITAD.md).
 > Servicios y cuentas del stack: [`docs/INFRAESTRUCTURA_Y_CUENTAS.md`](docs/INFRAESTRUCTURA_Y_CUENTAS.md).
 
 ## Estructura (arranque mínimo, §8)
