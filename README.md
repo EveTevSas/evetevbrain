@@ -13,7 +13,8 @@ vertical: la cuña con la que validamos la plataforma cobrando dinero real.
 ```
 apps/
 ├── api/            # EvePay — el núcleo de pagos (NestJS). No conoce el dominio de la vertical.
-└── eve-habitat/    # 1.ª vertical (Next.js): front + su backend de dominio. Consume EvePay por HTTP.
+├── eve-habitat/    # 1.ª vertical (Next.js): front + su backend de dominio. Consume EvePay por HTTP.
+└── website/        # evetev.com — sitio corporativo / marketing (estático, Vercel).
 packages/
 ├── shared/         # contrato de EvePay: tipos + esquemas Zod
 ├── config/         # eslint · prettier · tsconfig base
