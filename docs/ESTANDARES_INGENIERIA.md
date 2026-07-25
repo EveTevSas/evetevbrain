@@ -280,7 +280,7 @@ El árbol de abajo es el **destino, no el punto de partida**. Montar las 4 apps 
 evetev/
 ├── apps/
 │   ├── api/                # EvePay: módulo `pagos` + lo mínimo de ledger
-│   └── web-conjuntos/      # la vertical que lo consume
+│   └── eve-habitat/      # la vertical que lo consume
 ├── packages/
 │   ├── shared/             # tipos y esquemas Zod del contrato
 │   └── config/             # eslint · prettier · tsconfig
@@ -301,7 +301,7 @@ Regla general: **no se abstrae al primer uso, se abstrae al segundo.** Con un so
 
 ### El núcleo es EvePay (la plataforma de pagos)
 
-El `api` **es EvePay** — la plataforma de pagos, el producto. `web-conjuntos` es la primera vertical y consume EvePay por su API/SDK, igual que lo haría un comercio externo (dogfooding: somos nuestro primer cliente). Punto clave: **EvePay no sabe qué es una "cuota" ni un "residente".** Ese dominio pertenece a la vertical de conjuntos y vive con ella; la vertical le pide cobros a EvePay, y EvePay cobra. Esa ignorancia deliberada es lo que hace la plataforma vendible a cualquier comercio.
+El `api` **es EvePay** — la plataforma de pagos, el producto. `eve-habitat` es la primera vertical y consume EvePay por su API/SDK, igual que lo haría un comercio externo (dogfooding: somos nuestro primer cliente). Punto clave: **EvePay no sabe qué es una "cuota" ni un "residente".** Ese dominio pertenece a la vertical de conjuntos y vive con ella; la vertical le pide cobros a EvePay, y EvePay cobra. Esa ignorancia deliberada es lo que hace la plataforma vendible a cualquier comercio.
 
 ![Estructura del monorepo evetev](./assets/estructura-monorepo.svg)
 
@@ -324,7 +324,7 @@ evetev/
 │   │       └── ia/
 │   ├── checkout/               # checkout/elements white-label embebible   (a futuro)
 │   ├── dashboard-merchant/     # panel para los comercios clientes          (a futuro)
-│   ├── web-conjuntos/          # EveHabitad — PRIMERA VERTICAL               (hoy)
+│   ├── eve-habitat/          # EveHabitad — PRIMERA VERTICAL               (hoy)
 │   └── website/                # evetev.com — sitio corporativo / marketing  (hoy)
 ├── packages/
 │   ├── evepay-sdk/             # cliente EvePay que consumen verticales y clientes externos
@@ -345,11 +345,11 @@ evetev/
 
 </details>
 
-**Hoy construyes el mínimo:** `apps/api` con `pagos` (+ lo imprescindible de ledger/conciliación) y `apps/web-conjuntos` que lo consume. `checkout`, `dashboard-merchant` y `evepay-sdk` aparecen cuando el primer cliente externo —o la segunda vertical— los pida, no antes. La interfaz `PaymentProvider` y las fronteras de módulos son las costuras que hacen barato ese crecimiento.
+**Hoy construyes el mínimo:** `apps/api` con `pagos` (+ lo imprescindible de ledger/conciliación) y `apps/eve-habitat` que lo consume. `checkout`, `dashboard-merchant` y `evepay-sdk` aparecen cuando el primer cliente externo —o la segunda vertical— los pida, no antes. La interfaz `PaymentProvider` y las fronteras de módulos son las costuras que hacen barato ese crecimiento.
 
 ### Dónde viven las APIs de una vertical
 
-Pregunta frecuente: si `web-conjuntos` necesita endpoints propios (crear cuota, listar morosos, registrar residente), ¿van en el `api` núcleo? **No.**
+Pregunta frecuente: si `eve-habitat` necesita endpoints propios (crear cuota, listar morosos, registrar residente), ¿van en el `api` núcleo? **No.**
 
 Si `cuotas`, `unidades` y `residentes` entran a EvePay, la plataforma deja de ser vendible: el día que llegue un ecommerce como cliente, viene contaminada con el dominio de propiedad horizontal. **El dominio de la vertical vive con la vertical.**
 
@@ -358,14 +358,14 @@ apps/
 ├── api/                  # EvePay — SOLO pagos. No sabe qué es una cuota.
 │   └── src/modules/      # pagos · ledger · conciliacion · merchants · webhooks · identidad · ia
 │
-└── web-conjuntos/        # LA VERTICAL — front + su propio backend de dominio
+└── eve-habitat/        # LA VERTICAL — front + su propio backend de dominio
     ├── app/
     │   ├── (rutas UI)
     │   └── api/          # ← sus APIs propias: cuotas, unidades, residentes
     └── server/           # casos de uso del dominio conjuntos
 ```
 
-`web-conjuntos` **no es solo un frontend**: es una app completa con su propio backend de dominio, en Route Handlers de Next.js. Cuando necesita cobrar, llama a EvePay por HTTP.
+`eve-habitat` **no es solo un frontend**: es una app completa con su propio backend de dominio, en Route Handlers de Next.js. Cuando necesita cobrar, llama a EvePay por HTTP.
 
 **Por qué no un `apps/api-conjuntos` separado (todavía):** sería una tercera cosa que desplegar y mantener, para un dominio que aún es chico. Con Next.js ya tienes servidor. Se extrae cuando el dolor lo justifique — típicamente cuando aparezca una app móvil de residentes o jobs pesados propios del dominio.
 
@@ -385,7 +385,7 @@ apps/
 
 ### El sistema de diseño (`packages/ui`)
 
-Es transversal a todas las superficies: `website`, `web-conjuntos`, y mañana `checkout` y `dashboard-merchant`. **Va dentro del monorepo, no en repo aparte:** un design system en repo propio obliga a publicarlo versionado y cada cambio de un botón se vuelve publicar → bumpear en cada consumidor → PR aparte. Aquí cambias el componente y ves el efecto en todas las apps en el mismo PR. Repo aparte solo tiene sentido con consumidores externos de ciclo independiente — no es nuestro caso.
+Es transversal a todas las superficies: `website`, `eve-habitat`, y mañana `checkout` y `dashboard-merchant`. **Va dentro del monorepo, no en repo aparte:** un design system en repo propio obliga a publicarlo versionado y cada cambio de un botón se vuelve publicar → bumpear en cada consumidor → PR aparte. Aquí cambias el componente y ves el efecto en todas las apps en el mismo PR. Repo aparte solo tiene sentido con consumidores externos de ciclo independiente — no es nuestro caso.
 
 ```
 packages/
@@ -402,7 +402,7 @@ Separamos **tokens** de **components** a propósito: los tokens son la marca en 
 
 Dos reglas:
 
-- **Ninguna app define colores, tipografías ni espaciados propios.** Si `web-conjuntos` necesita un tono nuevo, se agrega como token en `ui`, no como clase suelta en la app.
+- **Ninguna app define colores, tipografías ni espaciados propios.** Si `eve-habitat` necesita un tono nuevo, se agrega como token en `ui`, no como clase suelta en la app.
 - **La accesibilidad vive aquí, no en cada pantalla.** El contraste AA, el foco visible y los targets táctiles de ~44px (§5) se resuelven una vez en el componente base. Así el cumplimiento es por defecto y no depende de que cada quien se acuerde en su PR.
 
 - **Herramienta:** pnpm workspaces + Turborepo (Turbo cachea y orquesta `build`/`lint`/`test`). Si al inicio se siente de más, arranca con pnpm workspaces solo y agrega Turbo cuando los tiempos duelan.
@@ -576,14 +576,14 @@ Cómo pasa el código de la máquina de cada uno a producción. Coherente con §
 | Qué | Dónde | Notas |
 |---|---|---|
 | `website` (evetev.com) | **Vercel** | Next.js estático (SSG): SEO y velocidad. |
-| `web-conjuntos` | **Vercel** | Front + sus Route Handlers de dominio (§8). |
+| `eve-habitat` | **Vercel** | Front + sus Route Handlers de dominio (§8). |
 | `api` — EvePay | **Railway** | NestJS, monolito modular. Proceso de larga vida. |
 | Base de datos | **Supabase** | Postgres + Auth + RLS. Schemas `evepay` y `conjuntos`. |
 | Workflows durables | **Inngest** | Reintentos de cobro, cobranza, conciliación. |
 | Observabilidad | **Sentry** + **PostHog** | Errores y eventos de producto (que además nutren la IA). |
 | Adquirencia | **Akua** | Externo. Solo lo toca la implementación de `PaymentProvider`. |
 
-**Dominios:** `evetev.com` → website · `app.evetev.com` → web-conjuntos · `api.evetev.com` → EvePay.
+**Dominios:** `evetev.com` → website · `habitat.evetev.com` → eve-habitat · `api.evetev.com` → EvePay.
 
 ### El pipeline
 
