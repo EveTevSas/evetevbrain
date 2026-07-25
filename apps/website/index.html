@@ -1,212 +1,267 @@
 <!DOCTYPE html>
-<!-- saved from url=(0052)#servicios -->
-<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<!-- Evetev — sitio corporativo / marketing.
+     Marca según packages/brand/assets/evetev_brand_styles.md (v1.0):
+     tokens oficiales, logos SIEMPRE desde el CDN de marca (regla T1),
+     coral #EE3D22 exclusivo de acción y un solo CTA coral por vista (C2). -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evetev (v3) — Pagos e inteligencia artificial, sin complicaciones</title>
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Evetev — Pagos e inteligencia artificial, sin complicaciones</title>
+
+<!-- Favicon y mascota desde el CDN de marca (§4) -->
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png">
 <meta name="theme-color" content="#0A2540">
-<link rel="preconnect" href="https://fonts.googleapis.com/">
-<link rel="stylesheet" href="./files/css2">
+
+<!-- Tipografía oficial (§3): Baloo 2 (marca/titulares) + Inter (UI) + JetBrains Mono (técnico) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<!-- Tokens de color oficiales (§2). La redeclaración local en :root actúa de
+     respaldo si el CDN no está disponible. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css">
+
 <style>
 :root{
-  --navy:#0A2540; --elec:#1E6FEB; --cian:#22D3EE; --teal:#3BAEC2; --violeta:#8B5CF6;
-  --coral:#144A96; --coral-h:#0E3568;
-  --piz:#64748B; --muted:#94A3B8; --linea:#EDF3FA; --tinte:#F4F9FD; --blanco:#FDFEFF;
+  /* Respaldo de los tokens oficiales — valores exactos, no aproximar (§2) */
+  --eve-azul-noche:#0A2540;
+  --eve-azul-noche-profundo:#081D33;
+  --eve-hielo:#EAF2FB;
+  --eve-tinte:#F4F9FD;
+  --eve-linea:#EDF3FA;
+  --eve-pizarra:#64748B;
+  --eve-muted:#94A3B8;
+  --eve-coral:#EE3D22;
+  --eve-coral-hover:#CF3016;
+  --eve-electrico:#1E6FEB;
+  --eve-mezclado:#144A96;
+  --eve-cian:#22D3EE;
+  --eve-teal:#3BAEC2;
+  --eve-violeta:#8B5CF6;
+  --eve-violeta-texto:#6D28D9;
+  --eve-violeta-tinte:#EDE9FE;
+  --eve-exito:#16A34A;
+  --eve-alerta:#D97706;
+  --eve-error:#B91C1C;
+  --eve-grad-corporativo:linear-gradient(90deg,#0A2540 0%,#1E6FEB 55%,#22D3EE 100%);
+  --eve-grad-ia:linear-gradient(90deg,#8B5CF6 0%,#6366F1 50%,#22D3EE 100%);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{font-size:16px}
-body{font-family:'Inter',sans-serif;color:var(--navy);background:var(--blanco);line-height:1.65}
+body{font-family:'Inter',sans-serif;color:var(--eve-azul-noche);background:#FDFEFF;line-height:1.65}
 h1,h2,.brand{font-family:'Baloo 2',sans-serif;font-weight:600}
 .wrap{max-width:1040px;margin:0 auto;padding:0 clamp(24px,4.5vw,32px)}
 a{color:inherit;text-decoration:none}
 button{font-family:'Inter',sans-serif;cursor:pointer;border:none;background:none}
-:focus-visible{outline:2px solid var(--elec);outline-offset:2px;border-radius:4px}
-.link{color:var(--elec);font-weight:500;font-size:.85rem}
+:focus-visible{outline:2px solid var(--eve-electrico);outline-offset:2px;border-radius:4px}
+.link{color:var(--eve-electrico);font-weight:500;font-size:.85rem}
 .link:hover{text-decoration:underline}
 
-/* NAV */
-nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--linea);z-index:50}
+/* NAV (§6) */
+nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--eve-linea);z-index:50}
 .nav-in{display:flex;align-items:center;justify-content:space-between;height:60px}
 .logo{display:flex;align-items:center;gap:8px}
-.logo svg{width:32px;height:23px}
+.logo img{width:32px;height:23px;display:block}
 .brand{font-size:1.15rem}
-.menu{display:flex;gap:26px;align-items:center;font-size:.85rem;color:var(--piz)}
-.menu>a:hover{color:var(--navy)}
-.burger{display:none;flex-direction:column;gap:4px;padding:8px}
-.burger span{width:20px;height:2px;background:var(--navy);border-radius:2px;transition:.2s}
+.menu{display:flex;gap:26px;align-items:center;font-size:.85rem;color:var(--eve-pizarra)}
+.menu>a:hover{color:var(--eve-azul-noche)}
+.nav-acciones{display:flex;align-items:center;gap:12px}
+.burger{display:none;flex-direction:column;gap:4px;padding:12px 8px}
+.burger span{width:20px;height:2px;background:var(--eve-azul-noche);border-radius:2px;transition:.2s}
 .drop{position:relative}
-.drop>button{font-size:.85rem;color:var(--piz);display:flex;align-items:center;gap:4px}
-.drop>button:hover{color:var(--navy)}
-.drop-panel{position:absolute;top:30px;left:-10px;background:#fff;border:1px solid var(--linea);border-radius:10px;box-shadow:0 6px 20px rgba(10,37,64,.06);padding:6px;min-width:215px;display:none}
+.drop>button{font-size:.85rem;color:var(--eve-pizarra);display:flex;align-items:center;gap:4px}
+.drop>button:hover{color:var(--eve-azul-noche)}
+.drop-panel{position:absolute;top:30px;left:-10px;background:#fff;border:1px solid var(--eve-linea);border-radius:10px;box-shadow:0 6px 20px rgba(10,37,64,.06);padding:6px;min-width:215px;display:none}
 .drop.open .drop-panel{display:block}
 .drop-panel a{display:flex;gap:9px;align-items:center;padding:9px 11px;border-radius:7px;font-size:.82rem}
-.drop-panel a:hover{background:var(--tinte)}
-.drop-panel svg{width:19px;height:19px;flex:none}
+.drop-panel a:hover{background:var(--eve-tinte)}
+.drop-panel img{width:19px;height:19px;flex:none}
 
-/* BOTONES — coral, complementario del cian */
+/* BOTONES (§6) — jerarquía: coral (1 por vista) → mezclado → ghost → enlace */
 .btn{border-radius:999px;font-weight:600;font-size:.85rem;padding:11px 24px;transition:.15s;display:inline-block;text-align:center}
-.btn-cta{background:var(--coral);color:#fff}
-.btn-cta:hover{background:var(--coral-h)}
-.btn-ghost{border:1px solid #D7E3F0;color:var(--navy);font-weight:500}
-.btn-ghost:hover{border-color:var(--piz)}
+.btn-cta{background:var(--eve-coral);color:#fff}
+.btn-cta:hover{background:var(--eve-coral-hover)}
+.btn-sec{background:var(--eve-mezclado);color:#fff}
+.btn-sec:hover{background:#0E3568}
+.btn-ghost{border:1px solid #D7E3F0;color:var(--eve-azul-noche);font-weight:500}
+.btn-ghost:hover{border-color:var(--eve-pizarra)}
 
-/* HERO */
+/* HERO — degradado solo en pieza expresiva (C6) */
 .hero{padding:clamp(48px,8vw,84px) 0 56px;max-width:640px}
 .hero h1{font-size:clamp(1.9rem,4.6vw,2.6rem);line-height:1.16;margin-bottom:14px}
-.hero p{font-size:clamp(.9rem,1.6vw,.98rem);color:var(--piz);margin-bottom:26px}
+.hero p{font-size:clamp(.9rem,1.6vw,.98rem);color:var(--eve-pizarra);margin-bottom:26px}
 .hero-cta{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.hero-marca{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.hero-marca img{width:46px;height:32px}
 
-/* SERVICIOS hairline */
-.hr{border:none;border-top:1px solid var(--linea)}
-.serv{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--linea)}
-.serv>div{padding:30px 26px;border-right:1px solid var(--linea);border-bottom:1px solid var(--linea)}
+/* SERVICIOS — variante minimalista hairline (§6 tarjetas) */
+.hr{border:none;border-top:1px solid var(--eve-linea)}
+.serv{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--eve-linea)}
+.serv>div{padding:30px 26px;border-right:1px solid var(--eve-linea);border-bottom:1px solid var(--eve-linea)}
 .serv>div:nth-child(3n){border-right:none}
-.serv svg{width:33px;height:33px}
+.serv img{width:33px;height:33px;display:block}
+/* Punto de línea de negocio (§12): eléctrico=EvePay · violeta=Eve Intelligence · teal=Tienda */
+.serv .punto{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
 .serv h3{font-size:.92rem;font-weight:600;margin:13px 0 4px}
-.serv p{font-size:.8rem;color:var(--piz);margin-bottom:10px}
+.serv p{font-size:.8rem;color:var(--eve-pizarra);margin-bottom:10px}
 
-/* TABS */
-.tabs{display:inline-flex;background:var(--tinte);border-radius:999px;padding:4px;gap:2px;flex-wrap:wrap}
-.tab{border-radius:999px;padding:8px 20px;font-size:.82rem;font-weight:500;color:var(--piz)}
-.tab.act{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(10,37,64,.08)}
+/* TABS (§6) */
+.tabs{display:inline-flex;background:var(--eve-tinte);border-radius:999px;padding:4px;gap:2px;flex-wrap:wrap}
+.tab{border-radius:999px;padding:8px 20px;font-size:.82rem;font-weight:500;color:var(--eve-pizarra)}
+.tab.act{background:#fff;color:var(--eve-azul-noche);box-shadow:0 1px 4px rgba(10,37,64,.08)}
 .tab-body{display:none;padding-top:26px;max-width:640px}
 .tab-body.act{display:block}
-.tab-body p{font-size:.88rem;color:var(--piz)}
-.tab-body code{background:var(--tinte);border:1px solid var(--linea);border-radius:6px;padding:2px 8px;font-size:.78rem;color:var(--navy)}
+.tab-body p{font-size:.88rem;color:var(--eve-pizarra)}
+.tab-body code{background:var(--eve-tinte);border:1px solid var(--eve-linea);border-radius:6px;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--eve-azul-noche)}
 
-/* PRECIOS */
-.precios{background:var(--tinte);border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:64px 0}
+/* PRECIOS — cifras protagonistas en Baloo 2 700 (§3) */
+.precios{background:var(--eve-tinte);border-top:1px solid var(--eve-linea);border-bottom:1px solid var(--eve-linea);padding:64px 0}
 .pre-grid{display:flex;gap:44px;align-items:flex-start;flex-wrap:wrap}
 .pre-l{flex:1.2;min-width:290px}
 .pre-l h2{font-size:clamp(1.3rem,2.6vw,1.6rem);margin-bottom:8px}
-.pre-l>p{font-size:.88rem;color:var(--piz);margin-bottom:26px}
-input[type=range]{width:100%;accent-color:var(--navy)}
-.switch{display:flex;align-items:center;gap:12px;margin-top:24px;font-size:.85rem;color:var(--piz);cursor:pointer}
+.pre-l>p{font-size:.88rem;color:var(--eve-pizarra);margin-bottom:26px}
+input[type=range]{width:100%;accent-color:var(--eve-mezclado)}
+.switch{display:flex;align-items:center;gap:12px;margin-top:24px;font-size:.85rem;color:var(--eve-pizarra);cursor:pointer}
 .sw{position:relative;width:42px;height:23px;background:#D7E3F0;border-radius:999px;transition:.2s;flex:none}
 .sw::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;background:#fff;border-radius:50%;transition:.2s}
-#anual:checked + .sw{background:var(--navy)}
+#anual:checked + .sw{background:var(--eve-mezclado)}
 #anual:checked + .sw::after{left:22px}
 #anual{position:absolute;opacity:0}
-.pre-card{flex:1;min-width:280px;background:#fff;border:1px solid var(--linea);border-radius:14px;padding:28px}
-.pre-card .v{font-family:'Baloo 2';font-size:2rem;font-weight:600}
-.pre-card small{color:var(--muted);font-size:.75rem}
+.pre-card{flex:1;min-width:280px;background:#fff;border:1px solid var(--eve-linea);border-radius:14px;padding:28px}
+.pre-card .v{font-family:'Baloo 2',sans-serif;font-size:2.1rem;font-weight:700}
+.pre-card small{color:var(--eve-muted);font-size:.75rem}
 .pre-card ul{list-style:none;margin:18px 0 22px}
-.pre-card li{font-size:.82rem;color:var(--piz);padding:5px 0;display:flex;gap:9px;align-items:center}
-.pre-card li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--elec);flex:none}
+.pre-card li{font-size:.82rem;color:var(--eve-pizarra);padding:5px 0;display:flex;gap:9px;align-items:center}
+.pre-card li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--eve-electrico);flex:none}
 .pre-card .btn{width:100%}
-.detalle-costos{margin-top:14px;border-top:1px solid var(--linea);padding-top:10px}
-.detalle-costos div{display:flex;justify-content:space-between;font-size:.78rem;color:var(--piz);padding:3px 0}
+.detalle-costos{margin-top:14px;border-top:1px solid var(--eve-linea);padding-top:10px}
+.detalle-costos div{display:flex;justify-content:space-between;font-size:.78rem;color:var(--eve-pizarra);padding:3px 0}
 
-/* CARDS con imagen */
+/* TARJETAS con ilustración (§6) */
 .icards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
-.icard{border:1px solid var(--linea);border-radius:14px;overflow:hidden;background:#fff;transition:.2s;display:flex;flex-direction:column}
+.icard{border:1px solid var(--eve-linea);border-radius:14px;overflow:hidden;background:#fff;transition:.2s;display:flex;flex-direction:column}
 .icard:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(10,37,64,.09)}
 .icard .cover{display:block;width:100%;height:auto}
 .icard .cuerpo{padding:18px 22px 22px}
 .icard h3{font-size:.95rem;font-weight:600;margin-bottom:5px}
-.icard p{font-size:.82rem;color:var(--piz);margin-bottom:12px}
+.icard p{font-size:.82rem;color:var(--eve-pizarra);margin-bottom:12px}
 
-/* BANDA imagen portada */
+/* BANDA portada (§6): object-fit cover + velo + contenido en blanco */
 .banda{position:relative;min-height:clamp(240px,38vw,420px);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:36px}
 .banda video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:linear-gradient(120deg,#0A2540,#1E6FEB)}
 .banda::after{content:'';position:absolute;inset:0;background:rgba(10,37,64,.42)}
 .banda .contenido{position:relative;z-index:2;text-align:center;color:#fff;padding:48px clamp(24px,6vw,60px);max-width:760px;margin:0 auto}
 .banda h2{font-size:clamp(1.5rem,3.4vw,2.2rem);margin-bottom:10px;color:#fff}
-.banda p{font-size:clamp(.85rem,1.6vw,.95rem);color:#D6E6F7;margin-bottom:22px}
+.banda p{font-size:clamp(.85rem,1.6vw,.95rem);color:#D6E6F7;margin-bottom:0}
 
-/* FORM contacto */
+/* FORM contacto (§6) */
 .contacto{max-width:580px}
 .contacto h2{font-size:clamp(1.3rem,2.6vw,1.6rem);margin-bottom:8px}
-.contacto>p{font-size:.88rem;color:var(--piz);margin-bottom:26px}
+.contacto>p{font-size:.88rem;color:var(--eve-pizarra);margin-bottom:26px}
 .campo{margin-bottom:18px}
 .campo>label{display:block;font-size:.82rem;font-weight:500;margin-bottom:6px}
-.campo input[type=text],.campo input[type=email],.campo select{width:100%;padding:11px 14px;border:1px solid #DCE7F2;border-radius:9px;font-size:.88rem;font-family:'Inter';background:#fff;color:var(--navy)}
-.campo input:focus,.campo select:focus{outline:2px solid var(--elec);border-color:transparent}
+.campo input[type=text],.campo input[type=email],.campo select{width:100%;padding:11px 14px;border:1px solid #DCE7F2;border-radius:9px;font-size:.88rem;font-family:'Inter',sans-serif;background:#fff;color:var(--eve-azul-noche)}
+.campo input:focus,.campo select:focus{outline:2px solid var(--eve-electrico);border-color:transparent}
+/* Error: SIEMPRE ícono + texto, nunca solo color (C5) */
+.err{display:none;align-items:center;gap:7px;margin-top:7px;font-size:.78rem;color:var(--eve-error)}
+.err svg{width:15px;height:15px;flex:none}
+.err.show{display:flex}
 .checks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.chk{display:flex;gap:14px;align-items:center;font-size:.85rem;color:var(--piz);padding:13px 16px;border:1px solid #DCE7F2;border-radius:9px;cursor:pointer;transition:.15s;line-height:1.3}
-.chk:hover{border-color:var(--piz)}
-.chk input{accent-color:var(--elec);width:17px;height:17px;flex:none;margin:0}
-.chk input:checked ~ span{color:var(--navy);font-weight:500}
+.chk{display:flex;gap:14px;align-items:center;font-size:.85rem;color:var(--eve-pizarra);padding:13px 16px;border:1px solid #DCE7F2;border-radius:9px;cursor:pointer;transition:.15s;line-height:1.3}
+.chk:hover{border-color:var(--eve-pizarra)}
+.chk input{accent-color:var(--eve-electrico);width:17px;height:17px;flex:none;margin:0}
+.chk input:checked ~ span{color:var(--eve-azul-noche);font-weight:500}
 
-/* FAQ */
-details{border-bottom:1px solid var(--linea)}
+/* FAQ (§6) */
+details{border-bottom:1px solid var(--eve-linea)}
 summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:18px 2px;font-weight:500;font-size:.9rem;cursor:pointer;gap:14px}
-summary::after{content:'+';font-family:'Baloo 2';font-size:1.25rem;color:var(--elec);flex:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';font-family:'Baloo 2',sans-serif;font-size:1.25rem;color:var(--eve-electrico);flex:none}
 details[open] summary::after{content:'–'}
-details p{padding:0 2px 18px;color:var(--piz);font-size:.85rem;max-width:640px}
+details p{padding:0 2px 18px;color:var(--eve-pizarra);font-size:.85rem;max-width:640px}
 
-/* MODAL */
+/* MODAL (§6) */
 .overlay{position:fixed;inset:0;background:rgba(10,37,64,.35);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
 .overlay.open{display:flex}
 .modal{background:#fff;border-radius:16px;padding:34px;max-width:400px;width:100%;text-align:center}
-.modal svg{width:52px;height:37px;margin-bottom:14px}
-.modal h3{font-family:'Baloo 2';font-size:1.25rem;margin-bottom:8px}
-.modal p{font-size:.85rem;color:var(--piz);margin-bottom:22px}
+.modal img{width:52px;height:37px;margin-bottom:14px}
+.modal h3{font-family:'Baloo 2',sans-serif;font-size:1.25rem;margin-bottom:8px}
+.modal p{font-size:.85rem;color:var(--eve-pizarra);margin-bottom:22px}
 
 section{padding:64px 0}
 .sec-h{margin-bottom:34px}
 .sec-h h2{font-size:clamp(1.3rem,2.6vw,1.6rem);margin-bottom:6px}
-.sec-h p{font-size:.88rem;color:var(--piz)}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;font-size:.85rem;padding:12px 24px;border-radius:999px;transition:.3s;opacity:0;z-index:110;max-width:90vw;text-align:center}
+.sec-h p{font-size:.88rem;color:var(--eve-pizarra)}
+
+/* TOAST (§6) — ícono + texto (C5) */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--eve-azul-noche);color:#fff;font-size:.85rem;padding:12px 24px;border-radius:999px;transition:.3s;opacity:0;z-index:110;max-width:90vw;display:flex;align-items:center;gap:10px}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast svg{width:17px;height:17px;flex:none}
+
+/* Mascota Eve (§4) */
 .eve-fab{position:fixed;right:22px;bottom:22px;z-index:90;width:64px;height:64px;border-radius:50%;background:#fff;border:2px solid #DCE7F2;box-shadow:0 8px 24px rgba(10,37,64,.18);padding:5px;transition:.2s;cursor:pointer}
 .eve-fab img{width:100%;height:100%;object-fit:contain;display:block}
 .eve-fab:hover{transform:scale(1.07)}
-.eve-burbuja{position:fixed;right:22px;bottom:96px;z-index:90;background:#fff;border:1px solid var(--linea);border-radius:16px 16px 4px 16px;box-shadow:0 12px 32px rgba(10,37,64,.16);padding:16px 18px;max-width:262px;display:none}
+.eve-burbuja{position:fixed;right:22px;bottom:96px;z-index:90;background:#fff;border:1px solid var(--eve-linea);border-radius:16px 16px 4px 16px;box-shadow:0 12px 32px rgba(10,37,64,.16);padding:16px 18px;max-width:262px;display:none}
 .eve-burbuja.open{display:block}
-.eve-burbuja p{font-size:.83rem;color:var(--piz);margin:0 0 12px;line-height:1.5}
-.eve-burbuja b{color:var(--navy)}
-footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
+.eve-burbuja p{font-size:.83rem;color:var(--eve-pizarra);margin:0 0 12px;line-height:1.5}
+.eve-burbuja b{color:var(--eve-azul-noche)}
+
+/* FOOTER (§6) */
+footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
 .foot-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px;padding:56px 0 40px}
-.foot-marca svg{width:40px;height:28px}
+.foot-marca img{width:40px;height:28px}
 .foot-marca .brand{color:#fff;font-size:1.15rem;display:block;margin:10px 0 8px}
 .foot-marca p{font-size:.8rem;line-height:1.6;max-width:250px;color:#8FA8C4}
 .foot-col h4{color:#fff;font-size:.8rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px}
 .foot-col a{display:block;font-size:.83rem;color:#B9CCE0;padding:5px 0}
-.foot-col a:hover{color:#22D3EE}
+.foot-col a:hover{color:var(--eve-cian)}
 .suscribe{padding:0 0 36px}
 .suscribe p{font-size:.83rem;color:#8FA8C4;margin-bottom:10px}
 .sus-row{display:flex;gap:10px;max-width:420px}
-.sus-row input{flex:1;padding:11px 16px;border-radius:999px;border:1px solid #2C4A6B;background:#0F2D4A;color:#fff;font-size:.85rem;font-family:'Inter'}
+.sus-row input{flex:1;padding:11px 16px;border-radius:999px;border:1px solid #2C4A6B;background:#0F2D4A;color:#fff;font-size:.85rem;font-family:'Inter',sans-serif}
 .sus-row input::placeholder{color:#6C87A6}
-.sus-row input:focus{outline:2px solid var(--cian);border-color:transparent}
+.sus-row input:focus{outline:2px solid var(--eve-cian);border-color:transparent}
+.sus-row .btn-sec{border:1px solid #2C4A6B}
 .foot-base{border-top:1px solid #1A3A5C;padding:20px 0;display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:#6C87A6;flex-wrap:wrap;gap:12px}
 .redes{display:flex;gap:14px}
 .redes a{display:flex;width:34px;height:34px;border:1px solid #2C4A6B;border-radius:50%;align-items:center;justify-content:center;transition:.15s}
-.redes a:hover{border-color:#22D3EE}
+.redes a:hover{border-color:var(--eve-cian)}
 .redes svg{width:16px;height:16px;fill:#B9CCE0}
-.redes a:hover svg{fill:#22D3EE}
-@media(max-width:900px){.foot-top{grid-template-columns:1fr 1fr}}
-@media(max-width:540px){.foot-top{grid-template-columns:1fr}.foot-base{flex-direction:column;align-items:flex-start}}
+.redes a:hover svg{fill:var(--eve-cian)}
 
-/* ============ RESPONSIVE ============ */
+/* ============ RESPONSIVE (§7) ============ */
 /* Tablet */
 @media(max-width:1024px){
   .serv{grid-template-columns:1fr 1fr}
-  .serv>div:nth-child(3n){border-right:1px solid var(--linea)}
+  .serv>div:nth-child(3n){border-right:1px solid var(--eve-linea)}
   .serv>div:nth-child(2n){border-right:none}
+  .foot-top{grid-template-columns:1fr 1fr}
 }
-/* Movil */
+/* Móvil */
 @media(max-width:760px){
   .wrap{padding:0 26px}
   .hero{padding-top:60px}
   section{padding:52px 0}
   .burger{display:flex}
-  .menu{display:none;position:absolute;top:60px;left:0;right:0;background:#fff;border-bottom:1px solid var(--linea);flex-direction:column;align-items:stretch;gap:0;padding:8px 0;box-shadow:0 10px 24px rgba(10,37,64,.07)}
+  .nav-acciones .btn-cta{padding:9px 18px;font-size:.8rem}
+  .menu{display:none;position:absolute;top:60px;left:0;right:0;background:#fff;border-bottom:1px solid var(--eve-linea);flex-direction:column;align-items:stretch;gap:0;padding:8px 0;box-shadow:0 10px 24px rgba(10,37,64,.07)}
   .menu.open{display:flex}
   .menu>a,.menu>button{padding:13px 24px;text-align:left}
   .drop{width:100%}
   .drop>button{padding:13px 24px;width:100%;justify-content:space-between}
-  .drop-panel{position:static;border:none;box-shadow:none;background:var(--tinte);border-radius:0;padding:4px 12px}
+  .drop-panel{position:static;border:none;box-shadow:none;background:var(--eve-tinte);border-radius:0;padding:4px 12px}
   .serv{grid-template-columns:1fr}
   .serv>div{border-right:none !important}
   .checks{grid-template-columns:1fr}
   .hero-cta .btn{width:100%}
   .pre-grid{gap:28px}
   .tabs{width:100%;justify-content:center}
+  .foot-top{grid-template-columns:1fr}
+  .foot-base{flex-direction:column;align-items:flex-start}
 }
 /* Escritorio amplio */
 @media(min-width:1440px){
@@ -220,71 +275,45 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
-<style>
-    #kp-app li {
-      padding: 2px 7px;
-      list-style-type: none;
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    #kp-app li a {
-      word-break: break-word;
-      color: #3b3737;
-      font-size: 14px;
-    }
-    #kp-app .volume {
-      margin-left: 5px;
-      word-break: normal;
-      color: #3b3737;
-      font-size: 14px;
-    }
-  </style></head>
+</head>
 <body>
 
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-<defs>
-<path id="iso" d="M 368 21 c 16 5 16 6 74 63 29 29 54 53 54 53 1 -0 25 -24 54 -53 57 -57 57 -57 73 -63 8 -3 9 -3 24 -3 16 -0 16 -0 25 3 5 2 11 5 14 6 6 4 26 24 76 74 64 65 128 131 151 154 37 38 41 42 47 54 6 11 8 20 8 36 0 17 -2 25 -8 37 -5 10 -11 16 -57 63 -24 24 -45 45 -47 48 -14 14 -126 128 -144 146 -18 18 -21 21 -28 24 -16 8 -36 11 -54 7 -15 -3 -34 -15 -46 -29 -2 -2 -18 -18 -35 -36 -17 -18 -36 -37 -41 -42 -6 -6 -10 -10 -12 -10 -1 -0 -5 4 -10 8 -4 5 -11 12 -15 16 -4 4 -22 22 -40 40 -18 18 -35 35 -39 38 -14 12 -30 17 -52 16 -16 -1 -28 -4 -40 -12 -7 -4 9 12 -162 -163 -105 -107 -101 -102 -106 -114 -11 -22 -11 -49 -1 -70 7 -14 4 -11 80 -89 24 -25 67 -69 95 -97 81 -82 90 -91 98 -96 15 -10 23 -12 42 -11 12 0 15 1 22 3 Z M 337 63 c -3 1 -6 2 -8 3 -2 1 -12 11 -23 22 -11 11 -35 36 -54 55 -19 19 -53 54 -76 78 -69 71 -92 94 -93 95 -1 0 -1 2 -1 2 0 1 15 2 110 2 102 -0 110 0 111 2 1 1 0 3 -0 4 -1 2 -1 10 -1 21 0 15 0 19 2 23 1 4 2 5 0 5 -1 0 -50 1 -110 1 -60 -0 -108 0 -109 1 -0 0 15 17 34 36 50 51 69 70 120 122 63 64 85 86 91 89 4 2 7 3 12 3 6 0 8 0 14 -3 8 -4 5 -0 154 -152 15 -15 44 -45 66 -67 46 -46 45 -46 45 -61 0 -14 1 -13 -49 -64 -42 -43 -43 -44 -45 -49 -2 -5 -2 -14 0 -18 4 -8 12 -13 21 -13 8 -0 11 3 55 48 24 24 45 46 47 50 6 7 10 16 13 26 2 6 2 10 2 22 0 10 -0 16 -2 20 -2 8 -7 19 -12 25 -3 4 -74 76 -113 116 -6 6 -11 12 -11 12 0 2 30 33 79 81 18 18 22 22 28 24 8 4 17 4 25 0 6 -3 12 -8 59 -57 11 -12 31 -32 44 -45 13 -13 36 -36 50 -51 15 -15 41 -42 60 -61 18 -18 33 -34 33 -35 0 -1 -30 -1 -108 -1 -59 -0 -109 -0 -109 -1 -1 -0 -1 -1 0 -7 3 -9 3 -31 1 -40 -2 -7 -2 -9 3 -9 23 -0 214 0 215 1 6 1 1 -5 -24 -29 -66 -66 -84 -85 -129 -131 -83 -85 -90 -92 -97 -95 -5 -2 -7 -3 -12 -3 -12 0 -14 1 -45 33 -47 48 -139 141 -160 163 -11 12 -30 31 -42 43 -12 12 -23 24 -24 26 -4 6 -6 12 -5 20 1 12 3 14 37 49 52 54 53 54 57 61 3 5 3 7 3 11 -2 17 -18 26 -33 18 -4 -2 -9 -7 -21 -19 -9 -9 -24 -25 -33 -34 -39 -40 -42 -44 -47 -54 -13 -28 -8 -62 11 -84 6 -6 27 -28 91 -93 16 -16 29 -30 29 -30 0 -1 -25 -27 -71 -74 -32 -32 -35 -35 -45 -36 -3 -0 -8 -0 -10 1 Z"></path>
-<g id="uL" fill="none" stroke-width="74" stroke-linecap="round" stroke-linejoin="round">
-<path d="M408 152 Q500 60 592 152 L848 408 Q940 500 848 592 L592 848 Q500 940 408 848 L152 592 Q60 500 152 408 Z"></path>
-<path d="M605 337 L502 440 Q442 500 502 560 L605 663"></path>
-</g>
-<g id="uR" fill="none" stroke-width="74" stroke-linecap="round" stroke-linejoin="round">
-<path d="M408 152 Q500 60 592 152 L848 408 Q940 500 848 592 L592 848 Q500 940 408 848 L152 592 Q60 500 152 408 Z"></path>
-<path d="M395 337 L498 440 Q558 500 498 560 L395 663"></path>
-</g>
-</defs>
-</svg>
-
-<nav data-landmark-index="0">
+<nav aria-label="Navegación principal">
   <div class="wrap nav-in">
     <a class="logo" href="#" aria-label="Evetev inicio">
-      <svg viewBox="0 0 992 692"><use href="#iso" fill="#0A2540"></use></svg>
+      <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg" alt="" width="32" height="23">
       <span class="brand">Evetev</span>
     </a>
-    <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false"><span></span><span></span><span></span></button>
     <div class="menu" id="menu">
       <div class="drop" id="drop1">
-        <button aria-haspopup="true" aria-expanded="true">Productos <span style="font-size:9px">▾</span></button>
+        <button aria-haspopup="true" aria-expanded="false">Productos <span style="font-size:9px" aria-hidden="true">▾</span></button>
         <div class="drop-panel">
-          <a href="#servicios"><svg viewBox="0 0 1000 1000"><use href="#uL" stroke="#1E6FEB"></use></svg> EvePay</a>
-          <a href="#servicios"><svg viewBox="0 0 1000 1000"><use href="#uR" stroke="#8B5CF6"></use></svg> Eve Intelligence</a>
-          <a href="#servicios"><svg viewBox="0 0 1000 1000"><use href="#uL" stroke="#3BAEC2"></use></svg> Tienda</a>
+          <a href="#servicios"><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-degradado.svg" alt="" width="19" height="19"> EvePay</a>
+          <a href="#servicios"><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-degradado.svg" alt="" width="19" height="19"> Eve Intelligence</a>
+          <a href="#servicios"><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-degradado.svg" alt="" width="19" height="19"> Tienda</a>
         </div>
       </div>
       <a href="#precios">Precios</a>
       <a href="#desarrolladores">Desarrolladores</a>
       <a href="#contacto">Contacto</a>
-      <button class="link" onclick="mostrarToast(&#39;Inicio de sesión: demo visual&#39;)">Entrar</button>
+      <button class="link" onclick="mostrarToast('Inicio de sesión: demo visual')">Entrar</button>
+    </div>
+    <div class="nav-acciones">
+      <!-- ÚNICO botón coral de la vista (regla C2) -->
+      <button class="btn btn-cta" onclick="abrirModal()">Crear cuenta</button>
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 </nav>
 
-<header class="wrap hero" data-landmark-index="1">
+<header class="wrap hero">
+  <div class="hero-marca">
+    <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-gradiente-corporativo.svg" alt="" width="46" height="32">
+  </div>
   <h1>Pagos e inteligencia artificial, sin complicaciones</h1>
   <p>Tarifas transparentes. Tecnología propia. Cero letra menuda.</p>
   <div class="hero-cta">
-    <button class="btn btn-cta" onclick="abrirModal()">Crear cuenta</button>
+    <button class="btn btn-sec" onclick="abrirModal()">Crear cuenta</button>
     <a class="link" href="#servicios">Ver cómo funciona →</a>
   </div>
 </header>
@@ -293,26 +322,28 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
 
 <section id="servicios" class="wrap" style="padding-top:56px">
   <div class="sec-h"><h2>Servicios</h2><p>Seis capacidades, una sola casa de ingeniería.</p></div>
+  <!-- Unidades oficiales del CDN, sin modificar; la línea de negocio se identifica
+       con el punto de color (tokens exactos, §12) -->
   <div class="serv">
-    <div><svg viewBox="0 0 1000 1000"><use href="#uL" stroke="#1E6FEB"></use></svg><h3>EvePay</h3><p>Pasarela de pagos con tarifas transparentes; tu dinero va directo a tu banco.</p><a class="link" href="#precios">Conocer →</a></div>
-    <div><svg viewBox="0 0 1000 1000"><use href="#uR" stroke="#8B5CF6"></use></svg><h3>Eve Intelligence</h3><p>RAG y asistentes de IA entrenados en el conocimiento de tu empresa.</p><a class="link" href="#contacto">Conocer →</a></div>
-    <div><svg viewBox="0 0 1000 1000"><use href="#uL" stroke="#3BAEC2"></use></svg><h3>Tienda</h3><p>Productos seleccionados con logística y plataforma propias.</p><a class="link" href="#contacto">Conocer →</a></div>
-    <div><svg viewBox="0 0 1000 1000"><use href="#uR" stroke="#1E6FEB"></use></svg><h3>Aplicaciones a la medida</h3><p>Apps móviles y de escritorio con nuestra misma ingeniería.</p><a class="link" href="#contacto">Conocer →</a></div>
-    <div><svg viewBox="0 0 1000 1000"><use href="#uL" stroke="#8B5CF6"></use></svg><h3>Adopción de IA</h3><p>Casos de uso concretos, retorno medible, sin humo.</p><a class="link" href="#contacto">Conocer →</a></div>
-    <div><svg viewBox="0 0 1000 1000"><use href="#uR" stroke="#3BAEC2"></use></svg><h3>Analítica financiera</h3><p>Pregúntale a tus datos en lenguaje natural.</p><a class="link" href="#contacto">Conocer →</a></div>
+    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-electrico)"></span>EvePay</h3><p>Pasarela de pagos con tarifas transparentes; tu dinero va directo a tu banco.</p><a class="link" href="#precios">Conocer →</a></div>
+    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-violeta)"></span>Eve Intelligence</h3><p>RAG y asistentes de IA entrenados en el conocimiento de tu empresa.</p><a class="link" href="#contacto">Conocer →</a></div>
+    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-teal)"></span>Tienda</h3><p>Productos seleccionados con logística y plataforma propias.</p><a class="link" href="#contacto">Conocer →</a></div>
+    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-electrico)"></span>Aplicaciones a la medida</h3><p>Apps móviles y de escritorio con nuestra misma ingeniería.</p><a class="link" href="#contacto">Conocer →</a></div>
+    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-violeta)"></span>Adopción de IA</h3><p>Casos de uso concretos, retorno medible, sin humo.</p><a class="link" href="#contacto">Conocer →</a></div>
+    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-electrico)"></span>Analítica financiera</h3><p>Pregúntale a tus datos en lenguaje natural.</p><a class="link" href="#contacto">Conocer →</a></div>
   </div>
 </section>
 
 <section id="desarrolladores" class="wrap">
   <div class="sec-h"><h2>Para comercios y para desarrolladores</h2></div>
-  <div class="tabs" role="tablist">
-    <button class="tab act" role="tab" data-t="t1">Para comercios</button>
-    <button class="tab" role="tab" data-t="t2">Para desarrolladores</button>
+  <div class="tabs" role="tablist" aria-label="Audiencia">
+    <button class="tab act" role="tab" id="tab-t1" aria-controls="t1" aria-selected="true" data-t="t1">Para comercios</button>
+    <button class="tab" role="tab" id="tab-t2" aria-controls="t2" aria-selected="false" data-t="t2">Para desarrolladores</button>
   </div>
-  <div class="tab-body act" id="t1">
+  <div class="tab-body act" id="t1" role="tabpanel" aria-labelledby="tab-t1">
     <p>Enlace de pago listo para compartir por WhatsApp o correo, panel con tus ventas del día y conciliación automática. Sin saber de código, cobrando en minutos.</p>
   </div>
-  <div class="tab-body" id="t2">
+  <div class="tab-body" id="t2" role="tabpanel" aria-labelledby="tab-t2">
     <p>API REST documentada, sandbox desde el día uno y SDKs oficiales. Crear un cobro es una línea: <code>evepay.checkout.create(monto, referencia)</code>. Webhooks firmados para confirmación.</p>
   </div>
 </section>
@@ -322,10 +353,8 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
   <div class="icards">
     <article class="icard">
       <svg class="cover" viewBox="0 0 400 220" role="img" aria-label="Ilustración del checkout de EvePay">
-        <defs><lineargradient id="cv1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0A2540"></stop><stop offset="1" stop-color="#1E6FEB"></stop></lineargradient></defs>
+        <defs><linearGradient id="cv1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0A2540"></stop><stop offset="1" stop-color="#1E6FEB"></stop></linearGradient></defs>
         <rect width="400" height="220" fill="url(#cv1)"></rect>
-        <g opacity="0.16" transform="translate(255,18) scale(0.14)"><use href="#uL" stroke="#FFFFFF"></use></g>
-        <g opacity="0.16" transform="translate(320,110) scale(0.10)"><use href="#uR" stroke="#22D3EE"></use></g>
         <rect x="52" y="34" width="150" height="152" rx="14" fill="#FFFFFF"></rect>
         <rect x="68" y="52" width="70" height="8" rx="4" fill="#CBD5E1"></rect>
         <rect x="68" y="70" width="118" height="14" rx="4" fill="#0A2540"></rect>
@@ -344,9 +373,8 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
     </article>
     <article class="icard">
       <svg class="cover" viewBox="0 0 400 220" role="img" aria-label="Ilustración de asistente de IA conversando">
-        <defs><lineargradient id="cv2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4C1D95"></stop><stop offset="1" stop-color="#8B5CF6"></stop></lineargradient></defs>
+        <defs><linearGradient id="cv2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B5CF6"></stop><stop offset=".5" stop-color="#6366F1"></stop><stop offset="1" stop-color="#22D3EE"></stop></linearGradient></defs>
         <rect width="400" height="220" fill="url(#cv2)"></rect>
-        <g opacity="0.16" transform="translate(30,130) scale(0.12)"><use href="#uR" stroke="#FFFFFF"></use></g>
         <rect x="60" y="44" width="180" height="42" rx="14" fill="#FFFFFF"></rect>
         <rect x="76" y="58" width="120" height="7" rx="3.5" fill="#94A3B8"></rect>
         <rect x="76" y="70" width="86" height="7" rx="3.5" fill="#CBD5E1"></rect>
@@ -364,9 +392,8 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
     </article>
     <article class="icard">
       <svg class="cover" viewBox="0 0 400 220" role="img" aria-label="Ilustración de comercio electrónico">
-        <defs><lineargradient id="cv3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0E7490"></stop><stop offset="1" stop-color="#22D3EE"></stop></lineargradient></defs>
+        <defs><linearGradient id="cv3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0E7490"></stop><stop offset="1" stop-color="#22D3EE"></stop></linearGradient></defs>
         <rect width="400" height="220" fill="url(#cv3)"></rect>
-        <g opacity="0.18" transform="translate(300,26) scale(0.12)"><use href="#uL" stroke="#FFFFFF"></use></g>
         <path d="M120 88 L280 88 L262 178 Q260 190 248 190 L152 190 Q140 190 138 178 Z" fill="#FFFFFF"></path>
         <path d="M160 88 Q160 54 200 54 Q240 54 240 88" stroke="#0A2540" stroke-width="9" fill="none" stroke-linecap="round"></path>
         <rect x="150" y="112" width="100" height="9" rx="4.5" fill="#CBD5E1"></rect>
@@ -389,12 +416,12 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
       <h2>Calcula tu costo sin sorpresas</h2>
       <p>Mueve el control según tus transacciones mensuales (ticket promedio de $80.000). La tarifa mostrada es de referencia.</p>
       <input type="range" id="txs" min="100" max="10000" step="100" value="1500" aria-label="Transacciones mensuales">
-      <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin-top:6px">
-        <span>100</span><b id="txsVal" style="color:var(--navy);font-weight:600">1.500 tx/mes</b><span>10.000</span>
+      <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--eve-muted);margin-top:6px">
+        <span>100</span><b id="txsVal" style="color:var(--eve-azul-noche);font-weight:600">1.500 tx/mes</b><span>10.000</span>
       </div>
       <label class="switch" for="anual">
         <input type="checkbox" id="anual"><span class="sw" aria-hidden="true"></span>
-        <span>Facturación anual de la suscripción <b style="color:var(--elec)">(2 meses gratis)</b></span>
+        <span>Facturación anual de la suscripción <b style="color:var(--eve-electrico)">(2 meses gratis)</b></span>
       </label>
     </div>
     <div class="pre-card">
@@ -402,10 +429,10 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
       <div class="v" id="planTotal">$4.482.000</div>
       <small>Tarifa: 2,8% + $700 por transacción aprobada · suscripción $72.000/mes</small>
       <div class="detalle-costos">
-        <div><span>Ventas procesadas</span><b id="ventas" style="color:var(--navy)">$120.000.000</b></div>
-        <div><span>Comisión (2,8%)</span><b id="comision" style="color:var(--navy)">$3.360.000</b></div>
-        <div><span>Fijo por transacción</span><b id="fijo" style="color:var(--navy)">$1.050.000</b></div>
-        <div><span>Suscripción software</span><b id="sub" style="color:var(--navy)">$72.000</b></div>
+        <div><span>Ventas procesadas</span><b id="ventas" style="color:var(--eve-azul-noche)">$120.000.000</b></div>
+        <div><span>Comisión (2,8%)</span><b id="comision" style="color:var(--eve-azul-noche)">$3.360.000</b></div>
+        <div><span>Fijo por transacción</span><b id="fijo" style="color:var(--eve-azul-noche)">$1.050.000</b></div>
+        <div><span>Suscripción software</span><b id="sub" style="color:var(--eve-azul-noche)">$72.000</b></div>
       </div>
       <ul>
         <li>Tu dinero directo a tu banco (gateway puro)</li>
@@ -413,19 +440,18 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
         <li>Checkout accesible (WCAG)</li>
         <li>Sin permanencia ni costos ocultos</li>
       </ul>
-      <button class="btn btn-cta" onclick="abrirModal()">Empezar ahora</button>
+      <button class="btn btn-sec" onclick="abrirModal()">Empezar ahora</button>
     </div>
   </div>
 </section>
 
-<section class="banda" aria-label="La red de Evetev" data-landmark-index="2">
+<section class="banda" aria-label="La red de Evetev">
   <video autoplay muted loop playsinline preload="metadata" poster="./files/portada-red.jpg" aria-hidden="true">
     <source src="./files/evepay-background.mp4" type="video/mp4">
   </video>
   <div class="contenido">
     <h2>Una red que conecta tu negocio con su dinero</h2>
     <p>Infraestructura propia, monitoreada las 24 horas, diseñada para no fallar en tu mejor día de ventas.</p>
-    <button class="btn btn-cta" onclick="abrirModal()">Conocer la plataforma</button>
   </div>
 </section>
 
@@ -435,7 +461,11 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
     <p>Cuéntanos qué necesitas y te respondemos en un día hábil.</p>
     <div class="campo">
       <label for="fNombre">Nombre</label>
-      <input type="text" id="fNombre" placeholder="María Rodríguez">
+      <input type="text" id="fNombre" placeholder="María Rodríguez" aria-describedby="errNombre">
+      <p class="err" id="errNombre">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+        <span>Cuéntanos tu nombre para responderte.</span>
+      </p>
     </div>
     <div class="campo">
       <label for="fEmail">Correo empresarial</label>
@@ -459,7 +489,7 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
         <label class="chk"><input type="checkbox"><span>Adopción de IA</span></label>
       </div>
     </div>
-    <button class="btn btn-cta" onclick="enviarForm()">Enviar mensaje</button>
+    <button class="btn btn-sec" onclick="enviarForm()">Enviar mensaje</button>
   </div>
 </section>
 
@@ -471,11 +501,11 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
   <details><summary>¿Qué hace Eve Intelligence?</summary><p>Conecta IA a tu operación: búsqueda inteligente sobre tus documentos, asistentes entrenados en tu negocio y analítica en lenguaje natural.</p></details>
 </section>
 
-<footer data-landmark-index="3">
+<footer>
   <div class="wrap">
     <div class="foot-top">
       <div class="foot-marca">
-        <svg viewBox="0 0 992 692"><use href="#iso" fill="#22D3EE"></use></svg>
+        <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-cian.svg" alt="" width="40" height="28">
         <span class="brand">Evetev</span>
         <p>Pagos, inteligencia artificial y comercio electrónico para la empresa latinoamericana. Construido por ingenieros.</p>
       </div>
@@ -505,7 +535,7 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
       <p>Novedades de producto, una vez al mes. Sin spam.</p>
       <div class="sus-row">
         <input type="email" id="susEmail" placeholder="tu@empresa.co" aria-label="Correo para novedades">
-        <button class="btn btn-cta" onclick="suscribir()">Suscribirme</button>
+        <button class="btn btn-sec" onclick="suscribir()">Suscribirme</button>
       </div>
     </div>
     <div class="foot-base">
@@ -513,30 +543,34 @@ footer{background:var(--navy);color:#B9CCE0;margin-top:64px}
       <div class="redes">
         <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V23h-4V8zm7.5 0h3.8v2.05h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V23h-4v-7.9c0-1.88-.03-4.3-2.62-4.3-2.63 0-3.03 2.05-3.03 4.17V23H8V8z"></path></svg></a>
         <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.4l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.6l5.24 6.93 6.06-6.93zm-1.29 19.5h2.04L6.49 3.24H4.3l13.31 17.41z"></path></svg></a>
-        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.21 8.8 2.2 12 2.2zm0 2.2c-3.15 0-3.5.01-4.74.07-1.08.05-1.67.23-2.06.38-.52.2-.89.44-1.28.83-.39.39-.63.76-.83 1.28-.15.39-.33.98-.38 2.06-.06 1.23-.07 1.59-.07 4.74s.01 3.5.07 4.74c.05 1.08.23 1.67.38 2.06.2.52.44.89.83 1.28.39.39.76.63 1.28.83.39.15.98.33 2.06.38 1.23.06 1.59.07 4.74.07s3.5-.01 4.74-.07c1.08-.05 1.67-.23 2.06-.38.52-.2.89-.44 1.28-.83.39-.39.63-.76.83-1.28.15-.39.33-.98.38-2.06.06-1.23.07-1.59.07-4.74s-.01-3.5-.07-4.74c-.05-1.08-.23-1.67-.38-2.06-.2-.52-.44-.89-.83-1.28a3.06 3.06 0 0 0-1.28-.83c-.39-.15-.98-.33-2.06-.38-1.23-.06-1.59-.07-4.74-.07zm0 3.74a5.86 5.86 0 1 1 0 11.72 5.86 5.86 0 0 1 0-11.72zm0 2.2a3.66 3.66 0 1 0 0 7.32 3.66 3.66 0 0 0 0-7.32zm6.1-2.46a1.37 1.37 0 1 1-2.74 0 1.37 1.37 0 0 1 2.74 0z"></path></svg></a>
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.21 8.8 2.2 12 2.2zm0 2.2c-3.15 0-3.5.01-4.74.07-1.08.05-1.67.23-2.06.38-.52.2-.89.44-1.28.83-.39.39-.63.76-.83 1.28-.15.39-.33.98-.38 2.06-.06 1.23-.07 1.59-.07 4.74s.01 3.5.07 4.74c.05 1.08.23 1.67.38 2.06.2.52.44.89.83 1.28.39.39.76.63 1.28.83.39.15.98.33 2.06.38 1.23.06 1.59.07 4.74.07s3.5-.01 4.74-.07c1.08-.05 1.67-.23 2.06-.38.52-.2.89-.44 1.28-.83.39-.39.76-.63.83-1.28.15-.39.33-.98.38-2.06.06-1.23.07-1.59.07-4.74s-.01-3.5-.07-4.74c-.05-1.08-.23-1.67-.38-2.06-.2-.52-.44-.89-.83-1.28a3.06 3.06 0 0 0-1.28-.83c-.39-.15-.98-.33-2.06-.38-1.23-.06-1.59-.07-4.74-.07zm0 3.74a5.86 5.86 0 1 1 0 11.72 5.86 5.86 0 0 1 0-11.72zm0 2.2a3.66 3.66 0 1 0 0 7.32 3.66 3.66 0 0 0 0-7.32zm6.1-2.46a1.37 1.37 0 1 1-2.74 0 1.37 1.37 0 0 1 2.74 0z"></path></svg></a>
       </div>
     </div>
   </div>
 </footer>
 
-<div class="overlay" id="overlay" role="dialog" aria-modal="true">
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
   <div class="modal">
-    <svg viewBox="0 0 992 692"><use href="#iso" fill="#0A2540"></use></svg>
-    <h3>Cuenta creada (demo)</h3>
+    <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg" alt="" width="52" height="37">
+    <h3 id="modalTitulo">Cuenta creada (demo)</h3>
     <p>Así se sentiría la confirmación: silenciosa, clara y sin pasos de más.</p>
-    <button class="btn btn-cta" style="width:100%" onclick="cerrarModal()">Entendido</button>
+    <button class="btn btn-sec" style="width:100%" onclick="cerrarModal()">Entendido</button>
   </div>
 </div>
 
-<button class="eve-fab" onclick="toggleEve()" aria-label="Abrir asistente Eve">
-  <img src="./files/mascota.webp" alt="Eve, la mascota de Evetev">
+<button class="eve-fab" onclick="toggleEve()" aria-label="Abrir asistente Eve" aria-expanded="true" aria-controls="eveBurbuja">
+  <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/mascota/mascota.webp" alt="">
 </button>
 <div class="eve-burbuja open" id="eveBurbuja" role="dialog" aria-label="Mensaje de Eve">
   <p><b>¡Hola! Soy Eve.</b> Cuido que tus pagos lleguen y tus preguntas no se queden sin respuesta. ¿Hablamos?</p>
-  <a class="btn btn-cta" href="#contacto" onclick="toggleEve()" style="display:block;font-size:.8rem;padding:9px 16px">Ir al formulario</a>
+  <a class="btn btn-sec" href="#contacto" onclick="toggleEve()" style="display:block;font-size:.8rem;padding:9px 16px">Ir al formulario</a>
 </div>
 
-<div class="toast" id="toast">Mensaje enviado.</div>
+<div class="toast" id="toast" role="status">
+  <svg class="t-ico-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M8 12.5l2.5 2.5L16 9.5"></path></svg>
+  <svg class="t-ico-err" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+  <span id="toastTxt">Mensaje enviado.</span>
+</div>
 
 <script>
 const burger = document.getElementById('burger'), menu = document.getElementById('menu');
@@ -547,19 +581,21 @@ burger.addEventListener('click', () => {
 menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('open')));
 
 const drop = document.getElementById('drop1');
-drop.querySelector('button').addEventListener('click', () => {
+const dropBtn = drop.querySelector('button');
+dropBtn.addEventListener('click', () => {
   drop.classList.toggle('open');
-  drop.querySelector('button').setAttribute('aria-expanded', drop.classList.contains('open'));
+  dropBtn.setAttribute('aria-expanded', drop.classList.contains('open'));
 });
 document.addEventListener('click', e => {
-  if(!drop.contains(e.target)) drop.classList.remove('open');
+  if(!drop.contains(e.target)) { drop.classList.remove('open'); dropBtn.setAttribute('aria-expanded','false'); }
   if(!menu.contains(e.target) && !burger.contains(e.target)) menu.classList.remove('open');
 });
 
 document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
-  document.querySelectorAll('.tab').forEach(x => x.classList.remove('act'));
+  document.querySelectorAll('.tab').forEach(x => { x.classList.remove('act'); x.setAttribute('aria-selected','false'); });
   document.querySelectorAll('.tab-body').forEach(x => x.classList.remove('act'));
   t.classList.add('act');
+  t.setAttribute('aria-selected','true');
   document.getElementById(t.dataset.t).classList.add('act');
 }));
 
@@ -585,517 +621,42 @@ function cerrarModal(){ overlay.classList.remove('open'); }
 overlay.addEventListener('click', e => { if(e.target === overlay) cerrarModal(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarModal(); });
 
-function mostrarToast(msj){
+function mostrarToast(msj, tipo){
   const t = document.getElementById('toast');
-  if(msj) t.textContent = msj;
+  document.getElementById('toastTxt').textContent = msj || 'Mensaje enviado.';
+  t.querySelector('.t-ico-ok').style.display = tipo === 'error' ? 'none' : '';
+  t.querySelector('.t-ico-err').style.display = tipo === 'error' ? '' : 'none';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2600);
 }
 function enviarForm(){
-  const n = document.getElementById('fNombre').value.trim();
-  if(!n){ mostrarToast('Cuéntanos tu nombre para responderte.'); return; }
-  mostrarToast('Gracias, ' + n + '. Te respondemos en un día hábil.');
+  const n = document.getElementById('fNombre'), err = document.getElementById('errNombre');
+  if(!n.value.trim()){
+    err.classList.add('show');
+    n.setAttribute('aria-invalid','true');
+    n.focus();
+    return;
+  }
+  err.classList.remove('show');
+  n.removeAttribute('aria-invalid');
+  mostrarToast('Gracias, ' + n.value.trim() + '. Te respondemos en un día hábil.');
 }
-function toggleEve(){ document.getElementById('eveBurbuja').classList.toggle('open'); }
+document.getElementById('fNombre').addEventListener('input', () => {
+  document.getElementById('errNombre').classList.remove('show');
+  document.getElementById('fNombre').removeAttribute('aria-invalid');
+});
+function toggleEve(){
+  const b = document.getElementById('eveBurbuja');
+  b.classList.toggle('open');
+  document.querySelector('.eve-fab').setAttribute('aria-expanded', b.classList.contains('open'));
+}
 function suscribir(){
   const e = document.getElementById('susEmail').value.trim();
-  if(!e || !e.includes('@')){ mostrarToast('Escribe un correo válido para suscribirte.'); return; }
+  if(!e || !e.includes('@')){ mostrarToast('Escribe un correo válido para suscribirte.', 'error'); return; }
   document.getElementById('susEmail').value = '';
   mostrarToast('¡Listo! Te llegará una novedad al mes.');
 }
 </script>
 
-
-</body><rq-implicit-test-rule-widget class="rq-element" draggable="true" style="display: none;"><template shadowrootmode="closed">
-    <style>:host {
-  position: fixed !important;
-  z-index: 2147483647 !important;
-  top: 16px;
-  right: 16px;
-}
-
-#container {
-  border-radius: 1rem;
-  padding: 12px 1rem;
-  display: flex;
-  flex-direction: column;
-  color: #fff;
-  font-family: system-ui;
-  background: #1a1a1a;
-  box-shadow: 0px 0px 0px 4px rgba(255, 255, 255, 0.16), 0px 16px 32px 0px rgba(0, 0, 0, 0.24);
-  border: 1px solid #5c5b5b;
-  cursor: move;
-  width: 420px;
-  transition: all 0.2s;
-  position: relative;
-  overflow-x: hidden;
-}
-
-#container.minimized {
-  width: fit-content;
-  height: 56px;
-  padding: 6px;
-  border-radius: 20px;
-}
-
-#container.minimized #test-rule-container,
-#container.minimized #heading-container,
-#container.minimized #info-container {
-  display: none;
-}
-
-#rule-name {
-  font-size: 12px;
-  margin: 4px 0;
-  font-weight: bolder;
-  line-height: 1.4;
-  max-width: 290px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-#heading-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 4px;
-}
-
-#logo-container {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-#heading-container div {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: center;
-}
-
-#actions-container {
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-}
-
-#actions-container button {
-  width: 32px;
-  height: 32px;
-  background: none;
-  border: none;
-  color: #fff;
-  transition: all 0.2s;
-  cursor: pointer;
-  border-radius: 4px;
-  padding: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-#actions-container #close-button svg {
-  width: 10px;
-  height: 10px;
-}
-
-#actions-container button:hover {
-  background: #383838;
-}
-
-#explicit-widget-container {
-  background: #282828;
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 8px;
-}
-
-#implicit-widget-container {
-  padding: 0 4px;
-  margin-top: 8px;
-}
-
-#rule-status-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#test-rule-details {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 4px;
-}
-
-#info-container {
-  display: flex;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 8px 0px;
-  align-items: flex-start;
-  gap: 4px;
-}
-
-#info-icon {
-  align-self: flex-start;
-  width: 16px;
-  height: 16px;
-  color: #bbb;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#info-text {
-  color: #fff;
-  font-size: 11px;
-  line-height: 17px;
-}
-
-#info-text .link {
-  color: #639ff9;
-  font-size: inherit;
-  line-height: 17px;
-  text-decoration-line: underline;
-  text-decoration-style: solid;
-}
-
-#rule-status-comment {
-  align-self: center;
-}
-
-#heading-logo {
-  height: 16px;
-  width: 16px;
-}
-
-#logo-text {
-  color: #fff;
-  font-size: 11px;
-  font-weight: 500;
-}
-
-#view-result-btn {
-  all: unset;
-  background: #1e69ff;
-  color: #fff;
-  border-radius: 4px;
-  padding: 4px 12px;
-  font-size: 12px;
-}
-
-#view-result-btn:hover {
-  cursor: pointer;
-  border-color: #0f4cd9;
-  background: #0f4cd9;
-}
-
-#rule-status {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  gap: 4px;
-}
-
-#rule-applied-status,
-#rule-not-applied-status {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  letter-spacing: 1px;
-  font-size: 10px;
-  font-weight: 500;
-  margin-top: -3px;
-}
-
-#rule-applied-status {
-  color: #28c07a;
-}
-
-#rule-not-applied-status {
-  color: #e09400;
-}
-
-#minimized-details {
-  display: none;
-  pointer-events: none;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  gap: 3px;
-}
-
-#minimized-details.visible {
-  display: flex;
-  pointer-events: auto;
-}
-
-#minimized-logo svg {
-  height: 16px;
-  width: 16px;
-}
-
-#test-rule-minimized-btn {
-  padding: 0;
-  background: transparent;
-  border: none;
-}
-
-#test-rule-minimized-btn span {
-  padding: 6px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-#test-rule-minimized-btn span svg {
-  height: 20px;
-  width: 20px;
-}
-
-.secondary-text {
-  font-size: 11px;
-  color: #b0b0b5b3;
-}
-
-.hidden {
-  display: none !important;
-}
-
-a {
-  color: #9370db;
-}
-
-.warning {
-  background: #5c3111;
-}
-
-.success {
-  background: #104b2f;
-}
-
-#applied-rules-list {
-  margin-top: 8px;
-  max-height: 200px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-#applied-rules-list::-webkit-scrollbar {
-  width: 8px;
-  background: transparent;
-}
-
-#applied-rules-list::-webkit-scrollbar-thumb {
-  background: #353535;
-  border-radius: 8px;
-}
-
-#applied-rules-list-header {
-  font-size: 13px;
-  color: #fff;
-  font-weight: 500;
-}
-
-.applied-rule-list-item {
-  border-radius: 8px;
-  background: #282828;
-  padding: 12px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.25px;
-  margin-top: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.applied-rule-list-item:hover {
-  background: #383838;
-}
-
-.applied-rule-list-item:hover .applied-rule-arrow-icon {
-  opacity: 1;
-}
-
-.applied-rule-list-item:first-child {
-  margin-top: 0;
-}
-
-.applied-rule-item-details {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.applied-rule-icon {
-  align-self: center;
-}
-
-.applied-rule-icon svg {
-  width: 14px;
-  height: 14px;
-  position: relative;
-  top: 2px;
-}
-
-.applied-rule-arrow-icon {
-  transform: scale(1.2);
-  align-self: center;
-  transition: 0.2s all;
-  opacity: 0;
-}
-
-.applied-rule-name {
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-#settings-button {
-  position: relative;
-}
-
-#settings-button[data-tooltip]:hover::after {
-  content: attr(data-tooltip);
-
-  position: absolute;
-  z-index: 1;
-  right: 0px;
-  top: 34px;
-  width: 158px;
-  max-width: 232px;
-  padding: 6px 12px;
-  color: #fff;
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 150%;
-  border-radius: 4px;
-  background: #000;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.16);
-}
-
-.test-rule-widget-progress-bar {
-  height: 6px;
-  background: #3c7ff3;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-
-  animation-name: progressBar;
-  animation-delay: 50ms;
-  animation-direction: normal;
-  animation-duration: 5s;
-  animation-fill-mode: forwards;
-  animation-play-state: running;
-  animation-timing-function: linear;
-}
-
-#container:hover .test-rule-widget-progress-bar {
-  animation-play-state: paused;
-}
-
-@keyframes progressBar {
-  from {
-    width: 100%;
-  }
-
-  to {
-    width: 0%;
-  }
-}
-</style>
-    <div id="container">
-        <div id="minimized-details">
-            <div id="minimized-logo"><svg width="251" height="251" viewBox="0 0 251 251" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M124.408 245.868V188.238C104.504 188.529 82.7544 186.943 60.1611 182.339L60.0545 182.235V216.575C60.0545 223.437 60.7942 228.978 62.2736 233.201C63.7529 237.423 65.8487 240.722 68.5609 243.097C71.5197 245.472 75.0949 247.055 79.2864 247.847C83.7246 248.903 88.7791 249.43 94.4501 249.43C100.121 249.43 105.792 249.035 111.463 248.243C117.381 247.451 121.695 246.66 124.408 245.868Z" fill="white"></path>
-<path d="M124.408 169.866H127.147C152.451 169.356 180.05 165.599 203.571 154.848L203.554 154.824C214.403 148.49 223.773 139.518 231.663 127.906C239.553 116.295 243.498 102.308 243.498 85.9467C243.498 59.821 234.868 39.1052 217.609 23.7992C200.349 8.4932 174.707 0.84021 140.681 0.84021C128.106 0.84021 116.271 1.6319 105.176 3.21527C94.0803 4.53475 84.341 6.77789 75.9578 9.94465C71.0266 11.7919 67.0816 14.2989 64.1228 17.4657C61.4106 20.3685 60.0545 24.5909 60.0545 30.1327V96.5095C71.3817 98.242 114.382 101.954 124.038 101.543V57.8418C126.75 57.314 129.216 56.9182 131.435 56.6543C133.654 56.3904 136.612 56.2584 140.311 56.2584C153.379 56.2584 162.871 58.8974 168.789 64.1753C174.953 69.1893 178.035 76.7103 178.035 86.7384C178.035 96.7664 175.323 104.419 169.899 109.697C164.474 114.711 157.077 117.218 147.708 117.218H124.038V117.008C123.974 117.109 123.915 117.21 123.861 117.313C87.9797 115.588 66.1922 114.066 60.0404 113.204L60.0399 113.194L42.9936 111.502C41.4373 111.348 40.2998 109.961 40.4529 108.404L41.3754 99.0229C41.6423 96.3086 38.2948 94.8199 36.4615 96.8375L0.888601 135.986C-0.0859492 137.058 -0.0924867 138.694 0.873451 139.776L29.4492 171.786C31.0921 173.627 34.1369 172.635 34.3782 170.181L35.0406 163.445C35.2015 161.809 36.7162 160.655 38.336 160.934L60.0545 164.671V164.802L60.1611 164.695C73.4489 166.933 97.4782 170.207 124.408 169.908V169.866Z" fill="white"></path>
-<path d="M175.076 223.305L153.644 186.439C181.486 183.412 203.494 177.208 215.783 172.246C220.496 178.807 225.172 185.139 229.813 191.241C238.443 202.589 245.224 212.881 250.155 222.117C247.689 231.354 243.128 238.479 236.471 243.493C230.06 248.243 222.786 250.618 214.65 250.618C209.225 250.618 204.541 249.958 200.596 248.639C196.651 247.319 193.199 245.472 190.24 243.097C187.281 240.722 184.569 237.819 182.103 234.388C179.638 230.958 177.295 227.263 175.076 223.305Z" fill="white"></path>
-</svg></div>
-            <button id="test-rule-minimized-btn"><span class="success"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<mask id="mask0_2834_1705" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-<rect width="16" height="16" fill="#D9D9D9"></rect>
-</mask>
-<g mask="url(#mask0_2834_1705)">
-<path d="M7.13333 10.4833L11.1667 6.46667L10.2 5.5L7.13333 8.56667L5.76667 7.2L4.81667 8.16667L7.13333 10.4833ZM8 14.5333C7.1 14.5333 6.25 14.3667 5.45 14.0333C4.66111 13.6889 3.96667 13.2222 3.36667 12.6333C2.77778 12.0333 2.31111 11.3389 1.96667 10.55C1.63333 9.75 1.46667 8.9 1.46667 8C1.46667 7.08889 1.63333 6.23889 1.96667 5.45C2.31111 4.66111 2.77778 3.97222 3.36667 3.38333C3.96667 2.78333 4.66111 2.31667 5.45 1.98333C6.25 1.63889 7.1 1.46667 8 1.46667C8.91111 1.46667 9.76111 1.63889 10.55 1.98333C11.3389 2.31667 12.0278 2.78333 12.6167 3.38333C13.2167 3.97222 13.6833 4.66111 14.0167 5.45C14.3611 6.23889 14.5333 7.08889 14.5333 8C14.5333 8.9 14.3611 9.75 14.0167 10.55C13.6833 11.3389 13.2167 12.0333 12.6167 12.6333C12.0278 13.2222 11.3389 13.6889 10.55 14.0333C9.76111 14.3667 8.91111 14.5333 8 14.5333ZM8 13.15C9.43333 13.15 10.65 12.65 11.65 11.65C12.65 10.65 13.15 9.43333 13.15 8C13.15 6.56667 12.65 5.35 11.65 4.35C10.65 3.35 9.43333 2.85 8 2.85C6.56667 2.85 5.35 3.35 4.35 4.35C3.35 5.35 2.85 6.56667 2.85 8C2.85 9.43333 3.35 10.65 4.35 11.65C5.35 12.65 6.56667 13.15 8 13.15Z" fill="#28C07A"></path>
-</g>
-</svg></span></button>
-        </div>
-        <div id="heading-container">
-            <div id="logo-container">
-                <span id="heading-logo"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-  <path d="M7.98439 15.6591V11.9822C6.71565 12.0008 5.32921 11.8996 3.88899 11.6058L3.8822 11.5992V13.7902C3.8822 14.2279 3.92935 14.5815 4.02366 14.8509C4.11796 15.1203 4.25156 15.3307 4.42445 15.4823C4.61305 15.6338 4.84095 15.7348 5.10814 15.7853C5.39105 15.8527 5.71325 15.8864 6.07475 15.8864C6.43625 15.8864 6.79774 15.8611 7.15924 15.8106C7.53645 15.7601 7.8115 15.7096 7.98439 15.6591Z" fill="url(#paint0_linear_2826_2722)"></path>
-  <path d="M7.98439 10.81H8.15909C9.77207 10.7775 11.5313 10.5378 13.0307 9.85185L13.0296 9.85029C13.7212 9.4462 14.3184 8.87374 14.8214 8.13291C15.3243 7.39208 15.5758 6.49972 15.5758 5.45582C15.5758 3.78896 15.0257 2.46725 13.9255 1.4907C12.8253 0.514153 11.1907 0.0258789 9.02172 0.0258789C8.22015 0.0258789 7.46572 0.0763902 6.75845 0.177412C6.05117 0.261597 5.43035 0.404713 4.89596 0.606758C4.58162 0.724617 4.33014 0.884567 4.14154 1.08661C3.96865 1.27182 3.8822 1.54121 3.8822 1.89479V6.12974C4.60426 6.24028 7.34528 6.47711 7.96081 6.45089V3.66268C8.1337 3.629 8.29087 3.60375 8.43233 3.58691C8.57378 3.57008 8.76239 3.56166 8.99815 3.56166C9.83116 3.56166 10.4363 3.73003 10.8135 4.06677C11.2064 4.38667 11.4029 4.86653 11.4029 5.50633C11.4029 6.14614 11.23 6.63442 10.8842 6.97116C10.5384 7.29106 10.0669 7.45101 9.46966 7.45101H7.96081V7.43758C7.95673 7.44399 7.95296 7.45048 7.94952 7.45705C5.66229 7.347 4.27345 7.24991 3.8813 7.19488L3.88127 7.19426L2.79467 7.08629C2.69546 7.07644 2.62295 6.98802 2.63269 6.88881L2.69152 6.29001C2.70853 6.11695 2.49506 6.02204 2.37823 6.15072L0.11053 8.64856C0.0484818 8.71691 0.0480731 8.82113 0.109583 8.89009L1.93123 10.9325C2.03594 11.0499 2.2301 10.9867 2.24547 10.8302L2.28772 10.4002C2.29797 10.2959 2.39452 10.2223 2.49778 10.2401L3.8822 10.4785V10.4869L3.88899 10.4801C4.73603 10.6229 6.26777 10.8318 7.98439 10.8127V10.81Z" fill="url(#paint1_linear_2826_2722)"></path>
-  <path d="M11.2143 14.2195L9.8481 11.8674C11.6229 11.6743 13.0258 11.2785 13.8091 10.9619C14.1095 11.3805 14.4076 11.7844 14.7035 12.1738C15.2536 12.8978 15.6858 13.5544 16.0002 14.1437C15.843 14.733 15.5522 15.1876 15.1279 15.5075C14.7192 15.8106 14.2556 15.9621 13.7369 15.9621C13.3911 15.9621 13.0925 15.92 12.841 15.8359C12.5895 15.7517 12.3695 15.6338 12.1809 15.4823C11.9923 15.3307 11.8194 15.1455 11.6622 14.9267C11.505 14.7078 11.3557 14.4721 11.2143 14.2195Z" fill="url(#paint2_linear_2826_2722)"></path>
-  <path d="M0.0637207 8.77344C0.0645556 8.81521 0.0798203 8.85677 0.109546 8.8901L1.93119 10.9325C2.03591 11.0499 2.23006 10.9867 2.24543 10.8302L2.28769 10.4002C2.29793 10.2959 2.39449 10.2223 2.49774 10.2401L3.88216 10.4785V10.4869L3.88896 10.4801C4.73599 10.6229 6.26774 10.8318 7.98435 10.8127V10.81H8.01892V9.21903L0.0637207 8.77344Z" fill="url(#paint3_linear_2826_2722)"></path>
-  <path d="M8.01896 9.21922L0.0637569 8.77363C0.0628642 8.72897 0.0784679 8.68408 0.11053 8.64876L2.37823 6.15092C2.49506 6.02224 2.70853 6.11715 2.69152 6.29021L2.63269 6.88901C2.62295 6.98822 2.69546 7.07664 2.79467 7.08649L3.88127 7.19446L3.8813 7.19508C4.27345 7.2501 5.66229 7.3472 7.94952 7.45725C7.95296 7.45068 7.95673 7.44419 7.96081 7.43778V7.45121H8.01896V9.21922Z" fill="url(#paint4_linear_2826_2722)"></path>
-  <defs>
-    <lineargradient id="paint0_linear_2826_2722" x1="3.76992" y1="-1.50587" x2="13.212" y2="19.2702" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1EA0FF"></stop>
-      <stop offset="1" stop-color="#004EEB"></stop>
-    </lineargradient>
-    <lineargradient id="paint1_linear_2826_2722" x1="3.76992" y1="-1.50587" x2="13.212" y2="19.2702" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1EA0FF"></stop>
-      <stop offset="1" stop-color="#004EEB"></stop>
-    </lineargradient>
-    <lineargradient id="paint2_linear_2826_2722" x1="3.76992" y1="-1.50587" x2="13.212" y2="19.2702" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1EA0FF"></stop>
-      <stop offset="1" stop-color="#004EEB"></stop>
-    </lineargradient>
-    <lineargradient id="paint3_linear_2826_2722" x1="11.8972" y1="9.83355" x2="5.27078" y2="8.10349" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1EA0FF"></stop>
-      <stop offset="1" stop-color="#004EEB"></stop>
-    </lineargradient>
-    <lineargradient id="paint4_linear_2826_2722" x1="2.63345" y1="4.98671" x2="14.7158" y2="6.53243" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1EA0FF"></stop>
-      <stop offset="1" stop-color="#004EEB"></stop>
-    </lineargradient>
-  </defs>
-</svg></span>
-                <span id="logo-text">requestly</span>
-            </div>
-            <div id="actions-container">
-                <button id="settings-button" class="" data-tooltip="Hide widget in app settings"><svg width="16" height="13" viewBox="0 0 16 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10.6167 6.91667L9.58333 5.88333C9.62778 5.46111 9.5 5.1 9.2 4.8C8.9 4.48889 8.53889 4.35556 8.11667 4.4L7.08333 3.36667C7.22778 3.31111 7.37778 3.27222 7.53333 3.25C7.68889 3.21667 7.84444 3.2 8 3.2C8.77778 3.2 9.43889 3.47222 9.98333 4.01667C10.5278 4.56111 10.8 5.22222 10.8 6C10.8 6.15556 10.7833 6.31111 10.75 6.46667C10.7278 6.62222 10.6833 6.77222 10.6167 6.91667ZM12.8333 9.13333L11.9667 8.26667C12.3667 7.95556 12.7278 7.61667 13.05 7.25C13.3833 6.87222 13.6611 6.45556 13.8833 6C13.3389 4.87778 12.5333 4 11.4667 3.36667C10.4111 2.72222 9.25556 2.4 8 2.4C7.71111 2.4 7.42778 2.41667 7.15 2.45C6.87222 2.48333 6.6 2.53889 6.33333 2.61667L5.36667 1.65C5.78889 1.48333 6.21667 1.36667 6.65 1.3C7.09444 1.23333 7.54444 1.2 8 1.2C9.58889 1.2 11.0389 1.63333 12.35 2.5C13.6722 3.35556 14.6222 4.52222 15.2 6C14.9556 6.63333 14.6278 7.21111 14.2167 7.73333C13.8167 8.24444 13.3556 8.71111 12.8333 9.13333ZM12.8 12.5L10.6333 10.3333C10.2111 10.4889 9.77778 10.6056 9.33333 10.6833C8.9 10.7611 8.45556 10.8 8 10.8C6.41111 10.8 4.95556 10.3722 3.63333 9.51667C2.32222 8.65 1.37778 7.47778 0.800001 6C1.04444 5.36667 1.36667 4.78889 1.76667 4.26667C2.16667 3.74444 2.63333 3.27222 3.16667 2.85L1.5 1.18333L2.35 0.333334L13.65 11.65L12.8 12.5ZM4.01667 3.71667C3.62778 4.02778 3.26667 4.37222 2.93333 4.75C2.6 5.11667 2.32778 5.53333 2.11667 6C2.66111 7.12222 3.46111 8.00556 4.51667 8.65C5.58333 9.28333 6.74444 9.6 8 9.6C8.28889 9.6 8.57222 9.58333 8.85 9.55C9.12778 9.50556 9.40556 9.45 9.68333 9.38333L8.93333 8.63333C8.77778 8.68889 8.62222 8.73333 8.46667 8.76667C8.31111 8.78889 8.15556 8.8 8 8.8C7.22222 8.8 6.56111 8.52778 6.01667 7.98333C5.47222 7.43889 5.2 6.77778 5.2 6C5.2 5.84444 5.21667 5.68889 5.25 5.53333C5.29445 5.37778 5.33333 5.22222 5.36667 5.06667L4.01667 3.71667Z" fill="white"></path>
-</svg></button>
-                <button id="minimize-button" class="hidden"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<mask id="mask0_2826_2732" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-<rect width="16" height="16" fill="#D9D9D9"></rect>
-</mask>
-<g mask="url(#mask0_2826_2732)">
-<path d="M6.27083 4.75L8.5 6.95833V5.27083H10V9.5H5.75V8H7.4375L5.22917 5.79167L6.27083 4.75ZM13.75 14C13.125 14 12.5903 13.7847 12.1458 13.3542C11.7153 12.9097 11.5 12.375 11.5 11.75C11.5 11.125 11.7153 10.5972 12.1458 10.1667C12.5903 9.72222 13.125 9.5 13.75 9.5C14.375 9.5 14.9028 9.72222 15.3333 10.1667C15.7778 10.5972 16 11.125 16 11.75C16 12.375 15.7778 12.9097 15.3333 13.3542C14.9028 13.7847 14.375 14 13.75 14ZM1.5 14C1.08333 14 0.729167 13.8542 0.4375 13.5625C0.145833 13.2708 1.78814e-07 12.9167 1.78814e-07 12.5V3.5C1.78814e-07 3.08333 0.145833 2.72917 0.4375 2.4375C0.729167 2.14583 1.08333 2 1.5 2H14.5C14.9167 2 15.2708 2.14583 15.5625 2.4375C15.8542 2.72917 16 3.08333 16 3.5V8H14.5V3.5H1.5V12.5H10V14H1.5Z" fill="white"></path>
-</g>
-</svg>
-                </button><button id="close-button" class=""><svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M0.167368 0.167368C0.390524 -0.0557892 0.752333 -0.0557892 0.97549 0.167368L4 3.19188L7.02451 0.167368C7.24767 -0.0557892 7.60948 -0.0557892 7.83263 0.167368C8.05579 0.390524 8.05579 0.752333 7.83263 0.97549L4.80812 4L7.83263 7.02451C8.05579 7.24767 8.05579 7.60948 7.83263 7.83263C7.60948 8.05579 7.24767 8.05579 7.02451 7.83263L4 4.80812L0.97549 7.83263C0.752333 8.05579 0.390524 8.05579 0.167368 7.83263C-0.0557892 7.60948 -0.0557892 7.24767 0.167368 7.02451L3.19188 4L0.167368 0.97549C-0.0557892 0.752333 -0.0557892 0.390524 0.167368 0.167368Z" fill="#E3E3E3"></path>
-</svg>
-            </button></div>
-        </div>
-        <div id="test-rule-container">
-    <div id="implicit-widget-container">
-    <div id="applied-rules-list-header">Rules applied on this page</div>
-    <div id="applied-rules-list"></div>
-    <div class="test-rule-widget-progress-bar">
-    </div></div></div>
-         <div id="info-container" class="hidden">
-          <div id="info-icon"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none">
-  <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path>
-</svg></div>
-          <div id="info-text"></div>
-        </div>
-    </div>
-    </template></rq-implicit-test-rule-widget></html>
+</body>
+</html>
