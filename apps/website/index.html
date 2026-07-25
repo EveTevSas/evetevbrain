@@ -2,7 +2,8 @@
 <!-- Evetev — sitio corporativo / marketing.
      Marca según packages/brand/assets/evetev_brand_styles.md (v1.0):
      tokens oficiales, logos SIEMPRE desde el CDN de marca (regla T1),
-     coral #EE3D22 exclusivo de acción y un solo CTA coral por vista (C2). -->
+     coral #EE3D22 exclusivo de acción (C2): CTA del nav + botón de
+     suscripción del footer (spec §6 footer). Resto de acciones: azul. -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -225,7 +226,6 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
 .sus-row input{flex:1;padding:11px 16px;border-radius:999px;border:1px solid #2C4A6B;background:#0F2D4A;color:#fff;font-size:.85rem;font-family:'Inter',sans-serif}
 .sus-row input::placeholder{color:#6C87A6}
 .sus-row input:focus{outline:2px solid var(--eve-cian);border-color:transparent}
-.sus-row .btn-sec{border:1px solid #2C4A6B}
 .foot-base{border-top:1px solid #1A3A5C;padding:20px 0;display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:#6C87A6;flex-wrap:wrap;gap:12px}
 .redes{display:flex;gap:14px}
 .redes a{display:flex;width:34px;height:34px;border:1px solid #2C4A6B;border-radius:50%;align-items:center;justify-content:center;transition:.15s}
@@ -299,7 +299,7 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
       <button class="link" onclick="mostrarToast('Inicio de sesión: demo visual')">Entrar</button>
     </div>
     <div class="nav-acciones">
-      <!-- ÚNICO botón coral de la vista (regla C2) -->
+      <!-- CTA coral principal (regla C2); el otro coral es la suscripción del footer (spec §6) -->
       <button class="btn btn-cta" onclick="abrirModal()">Crear cuenta</button>
       <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
     </div>
@@ -313,7 +313,7 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
   <h1>Pagos e inteligencia artificial, sin complicaciones</h1>
   <p>Tarifas transparentes. Tecnología propia. Cero letra menuda.</p>
   <div class="hero-cta">
-    <button class="btn btn-sec" onclick="abrirModal()">Crear cuenta</button>
+    <a class="btn btn-sec" href="#precios">Calcular mi costo</a>
     <a class="link" href="#servicios">Ver cómo funciona →</a>
   </div>
 </header>
@@ -535,7 +535,7 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
       <p>Novedades de producto, una vez al mes. Sin spam.</p>
       <div class="sus-row">
         <input type="email" id="susEmail" placeholder="tu@empresa.co" aria-label="Correo para novedades">
-        <button class="btn btn-sec" onclick="suscribir()">Suscribirme</button>
+        <button class="btn btn-cta" onclick="suscribir()">Suscribirme</button>
       </div>
     </div>
     <div class="foot-base">
