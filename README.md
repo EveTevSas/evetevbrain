@@ -9,6 +9,7 @@ vertical: la cuña con la que validamos la plataforma cobrando dinero real.
 > Estándares de la vertical: [`docs/ESTANDARES_EVEHABITAD.md`](docs/ESTANDARES_EVEHABITAD.md).
 > Servicios y cuentas del stack: [`docs/INFRAESTRUCTURA_Y_CUENTAS.md`](docs/INFRAESTRUCTURA_Y_CUENTAS.md).
 > Cómo desplegar (Vercel + DNS): [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md).
+> Plan de desarrollo de EvePay (SDD + Akua): [`docs/PLAN_DESARROLLO_EVEPAY.md`](docs/PLAN_DESARROLLO_EVEPAY.md).
 
 ## Estructura (arranque mínimo, §8)
 
