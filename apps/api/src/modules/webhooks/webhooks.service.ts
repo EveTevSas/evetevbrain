@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import type { EstadoCobro } from "@evetev/shared";
 import { PAGOS_REPOSITORY, type PagosRepository } from "../pagos/pagos.repository";
 import { puedeTransicionar } from "../pagos/payment-state";
+import { LedgerService } from "../ledger/ledger.service";
 
 /** Evento normalizado del proveedor. */
 export interface EventoWebhook {
@@ -25,7 +26,10 @@ function estadoDestino(type: string): EstadoCobro | null {
 
 @Injectable()
 export class WebhooksService {
-  constructor(@Inject(PAGOS_REPOSITORY) private readonly repo: PagosRepository) {}
+  constructor(
+    @Inject(PAGOS_REPOSITORY) private readonly repo: PagosRepository,
+    private readonly ledger: LedgerService
+  ) {}
 
   /**
    * Procesa un evento ya verificado (firma). Idempotente por `event_id`; normaliza
@@ -64,5 +68,10 @@ export class WebhooksService {
       hacia: destino,
       actor: "webhook:akua"
     });
+
+    // Al aprobar, asienta el movimiento en el ledger (idempotente por pago, §2).
+    if (destino === "aprobado") {
+      await this.ledger.registrarCobroAprobado(pago.tenantId, pago.paymentId);
+    }
   }
 }

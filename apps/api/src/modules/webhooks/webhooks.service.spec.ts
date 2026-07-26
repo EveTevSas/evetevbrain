@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryPagosRepository } from "../pagos/in-memory-pagos.repository";
+import { InMemoryLedgerRepository } from "../ledger/in-memory-ledger.repository";
+import { LedgerService } from "../ledger/ledger.service";
 import { WebhooksService } from "./webhooks.service";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
@@ -28,11 +30,13 @@ async function seedCobro(repo: InMemoryPagosRepository): Promise<string> {
 
 describe("WebhooksService — normalización de eventos", () => {
   let repo: InMemoryPagosRepository;
+  let ledgerRepo: InMemoryLedgerRepository;
   let service: WebhooksService;
 
   beforeEach(() => {
     repo = new InMemoryPagosRepository();
-    service = new WebhooksService(repo);
+    ledgerRepo = new InMemoryLedgerRepository();
+    service = new WebhooksService(repo, new LedgerService(ledgerRepo, repo));
   });
 
   it("EARS 1: payment.succeeded pasa el cobro pendiente → aprobado y lo audita", async () => {
@@ -43,6 +47,11 @@ describe("WebhooksService — normalización de eventos", () => {
     expect(cobro?.estado).toBe("aprobado");
     expect(repo.auditoria.some((a) => a.toStatus === "aprobado" && a.actor === "webhook:akua")).toBe(
       true
+    );
+    // Ledger (Fase 3): al aprobar se asienta el movimiento balanceado.
+    expect(await ledgerRepo.contarAsientosPorPago(TENANT, id)).toBe(1);
+    expect(ledgerRepo.lines.filter((l) => l.account === `merchant_payable:${MERCHANT}`)).toHaveLength(
+      1
     );
   });
 

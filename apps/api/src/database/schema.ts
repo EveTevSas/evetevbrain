@@ -69,11 +69,31 @@ export const webhookEvents = evepay.table("webhook_events", {
   at: timestamp("at", { withTimezone: true }).notNull().defaultNow()
 });
 
+export const ledgerEntries = evepay.table("ledger_entries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id").notNull(),
+  paymentId: uuid("payment_id"),
+  kind: text("kind").notNull(),
+  memo: text("memo").notNull().default(""),
+  postedAt: timestamp("posted_at", { withTimezone: true }).notNull().defaultNow()
+});
+
+export const ledgerLines = evepay.table("ledger_lines", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  entryId: uuid("entry_id").notNull(),
+  tenantId: uuid("tenant_id").notNull(),
+  account: text("account").notNull(),
+  direction: text("direction").notNull(),
+  amountMinor: bigint("amount_minor", { mode: "number" }).notNull()
+});
+
 export const schema = {
   tenants,
   merchants,
   payments,
   paymentIdempotency,
   paymentAudit,
-  webhookEvents
+  webhookEvents,
+  ledgerEntries,
+  ledgerLines
 };
