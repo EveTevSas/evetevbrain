@@ -3,15 +3,17 @@ import type { EstadoCobro } from "@evetev/shared";
 import { PAGOS_REPOSITORY, type PagosRepository } from "../pagos/pagos.repository";
 import { puedeTransicionar } from "../pagos/payment-state";
 import { LedgerService } from "../ledger/ledger.service";
+import { MerchantsService } from "../merchants/merchants.service";
 
 /** Evento normalizado del proveedor. */
 export interface EventoWebhook {
   id: string;
   type: string;
-  providerPaymentId: string;
+  providerPaymentId?: string;
+  providerMerchantId?: string;
 }
 
-/** Mapea el tipo de evento del proveedor a nuestro estado destino (Fase 2). */
+/** Mapea el tipo de evento del proveedor a nuestro estado destino (pagos). */
 function estadoDestino(type: string): EstadoCobro | null {
   switch (type) {
     case "payment.succeeded":
@@ -28,18 +30,28 @@ function estadoDestino(type: string): EstadoCobro | null {
 export class WebhooksService {
   constructor(
     @Inject(PAGOS_REPOSITORY) private readonly repo: PagosRepository,
-    private readonly ledger: LedgerService
+    private readonly ledger: LedgerService,
+    private readonly merchants: MerchantsService
   ) {}
 
   /**
-   * Procesa un evento ya verificado (firma). Idempotente por `event_id`; normaliza
-   * a la máquina de estados; audita la transición. Nunca lanza por eventos de ruido
-   * (pago inexistente, tipo desconocido): el llamante responde 2xx.
+   * Procesa un evento ya verificado (firma). Normaliza a nuestros eventos internos.
+   * Nunca lanza por eventos de ruido; el llamante responde 2xx.
    */
   async procesar(evento: EventoWebhook): Promise<void> {
+    if (evento.type === "merchant.approved") {
+      if (evento.providerMerchantId) {
+        await this.merchants.aprobarPorProvider(evento.providerMerchantId);
+      }
+      return;
+    }
+    await this.procesarPago(evento);
+  }
+
+  private async procesarPago(evento: EventoWebhook): Promise<void> {
     const destino = estadoDestino(evento.type);
-    if (!destino) {
-      return; // tipo no soportado en esta fase (EARS 6)
+    if (!destino || !evento.providerPaymentId) {
+      return; // tipo no soportado (EARS 6) o evento sin pago
     }
 
     const pago = await this.repo.resolverPagoPorProvider(evento.providerPaymentId);
@@ -58,7 +70,7 @@ export class WebhooksService {
     }
 
     if (!puedeTransicionar(pago.estado, destino)) {
-      return; // transición inválida (p. ej. ya estaba fallido); queda registrado el evento
+      return; // transición inválida; queda registrado el evento
     }
 
     await this.repo.aplicarTransicion({

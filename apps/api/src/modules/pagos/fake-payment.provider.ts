@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type {
   CrearCobroInput,
+  CrearMerchantInput,
   EstadoCobro,
   LiquidacionProvider,
   PaymentProvider,
   ProviderCobro,
+  ProviderMerchant,
   RangoFechas
 } from "@evetev/shared";
 
@@ -29,5 +31,9 @@ export class FakePaymentProvider implements PaymentProvider {
 
   async listarLiquidaciones(_rango: RangoFechas): Promise<LiquidacionProvider[]> {
     return [];
+  }
+
+  async crearMerchant(_input: CrearMerchantInput): Promise<ProviderMerchant> {
+    return { providerMerchantId: randomUUID(), estado: "en_revision" };
   }
 }

@@ -1,15 +1,16 @@
 import { Module } from "@nestjs/common";
 import { LedgerModule } from "../ledger/ledger.module";
+import { MerchantsModule } from "../merchants/merchants.module";
 import { WebhooksController } from "./webhooks.controller";
 import { WebhooksService } from "./webhooks.service";
 import { AkuaWebhookVerifier, WEBHOOK_VERIFIER } from "./webhook-verifier";
 
 /**
  * Módulo `webhooks`: normaliza los eventos del proveedor a eventos internos (§8).
- * El repositorio viene del módulo global; el ledger, de LedgerModule.
+ * El repositorio viene del módulo global; el ledger y merchants, de sus módulos.
  */
 @Module({
-  imports: [LedgerModule],
+  imports: [LedgerModule, MerchantsModule],
   controllers: [WebhooksController],
   providers: [
     WebhooksService,

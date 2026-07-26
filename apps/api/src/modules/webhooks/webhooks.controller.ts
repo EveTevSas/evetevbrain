@@ -45,21 +45,25 @@ export class WebhooksController {
   }
 }
 
-/** Extrae el evento del cuerpo crudo. Devuelve null si está malformado. */
+/** Extrae el evento del cuerpo crudo. Devuelve null si faltan id/type. */
 function parseEvento(raw: Buffer): EventoWebhook | null {
   try {
     const obj = JSON.parse(raw.toString("utf8")) as {
       id?: unknown;
       type?: unknown;
-      data?: { payment_id?: unknown };
+      data?: { payment_id?: unknown; merchant_id?: unknown };
     };
-    if (
-      typeof obj.id === "string" &&
-      typeof obj.type === "string" &&
-      typeof obj.data?.payment_id === "string"
-    ) {
-      return { id: obj.id, type: obj.type, providerPaymentId: obj.data.payment_id };
+    if (typeof obj.id !== "string" || typeof obj.type !== "string") {
+      return null;
     }
+    const evento: EventoWebhook = { id: obj.id, type: obj.type };
+    if (typeof obj.data?.payment_id === "string") {
+      evento.providerPaymentId = obj.data.payment_id;
+    }
+    if (typeof obj.data?.merchant_id === "string") {
+      evento.providerMerchantId = obj.data.merchant_id;
+    }
+    return evento;
   } catch {
     // cuerpo no-JSON o inesperado
   }

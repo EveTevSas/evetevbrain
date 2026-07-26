@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryPagosRepository } from "../pagos/in-memory-pagos.repository";
 import { InMemoryLedgerRepository } from "../ledger/in-memory-ledger.repository";
 import { LedgerService } from "../ledger/ledger.service";
+import { InMemoryMerchantsRepository } from "../merchants/in-memory-merchants.repository";
+import { MerchantsService } from "../merchants/merchants.service";
+import { FakePaymentProvider } from "../pagos/fake-payment.provider";
 import { WebhooksService } from "./webhooks.service";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
@@ -31,12 +34,16 @@ async function seedCobro(repo: InMemoryPagosRepository): Promise<string> {
 describe("WebhooksService — normalización de eventos", () => {
   let repo: InMemoryPagosRepository;
   let ledgerRepo: InMemoryLedgerRepository;
+  let merchantsRepo: InMemoryMerchantsRepository;
+  let merchants: MerchantsService;
   let service: WebhooksService;
 
   beforeEach(() => {
     repo = new InMemoryPagosRepository();
     ledgerRepo = new InMemoryLedgerRepository();
-    service = new WebhooksService(repo, new LedgerService(ledgerRepo, repo));
+    merchantsRepo = new InMemoryMerchantsRepository();
+    merchants = new MerchantsService(merchantsRepo, new FakePaymentProvider());
+    service = new WebhooksService(repo, new LedgerService(ledgerRepo, repo), merchants);
   });
 
   it("EARS 1: payment.succeeded pasa el cobro pendiente → aprobado y lo audita", async () => {
@@ -86,5 +93,17 @@ describe("WebhooksService — normalización de eventos", () => {
     await service.procesar({ id: "evt-3", type: "payment.refunded", providerPaymentId: PROV });
     const cobro = await repo.buscarCobro(TENANT, id);
     expect(cobro?.estado).toBe("pendiente");
+  });
+
+  it("merchant.approved aprueba el comercio (Fase 5)", async () => {
+    const m = await merchantsRepo.crear({
+      tenantId: TENANT,
+      legalName: "Comercio Demo",
+      provider: "fake",
+      providerMerchantId: "pm-1",
+      estado: "en_revision"
+    });
+    await service.procesar({ id: "evt-m", type: "merchant.approved", providerMerchantId: "pm-1" });
+    expect((await merchants.obtener(TENANT, m.id))?.estado).toBe("aprobado");
   });
 });

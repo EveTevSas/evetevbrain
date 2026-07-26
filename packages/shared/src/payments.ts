@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { CrearMerchantInput, ProviderMerchant } from "./merchants";
 
 /**
  * Contrato de EvePay para la adquirencia.
@@ -95,4 +96,6 @@ export interface PaymentProvider {
   verificarEstado(providerPaymentId: string): Promise<EstadoCobro>;
   /** Liquidaciones (settlements) del proveedor en un rango, para conciliar (Fase 4). */
   listarLiquidaciones(rango: RangoFechas): Promise<LiquidacionProvider[]>;
+  /** Alta del comercio en la adquirencia (Fase 5). */
+  crearMerchant(input: CrearMerchantInput): Promise<ProviderMerchant>;
 }

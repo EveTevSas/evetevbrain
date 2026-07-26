@@ -18,6 +18,7 @@ export const merchants = evepay.table("merchants", {
   tenantId: uuid("tenant_id").notNull(),
   legalName: text("legal_name").notNull(),
   provider: text("provider").notNull().default("akua"),
+  providerMerchantId: text("provider_merchant_id"),
   status: text("status").notNull().default("pendiente"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
 });

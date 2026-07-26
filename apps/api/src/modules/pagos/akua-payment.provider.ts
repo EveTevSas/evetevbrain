@@ -1,9 +1,12 @@
 import type {
   CrearCobroInput,
+  CrearMerchantInput,
   EstadoCobro,
+  EstadoMerchant,
   LiquidacionProvider,
   PaymentProvider,
   ProviderCobro,
+  ProviderMerchant,
   RangoFechas
 } from "@evetev/shared";
 
@@ -82,6 +85,19 @@ export class AkuaPaymentProvider implements PaymentProvider {
       montoMinor: s.amount
     }));
   }
+
+  async crearMerchant(input: CrearMerchantInput): Promise<ProviderMerchant> {
+    const res = await fetch(`${this.baseUrl}/merchants`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${this.apiKey}`, "content-type": "application/json" },
+      body: JSON.stringify({ legal_name: input.legalName })
+    });
+    if (!res.ok) {
+      throw new Error(`Akua respondió ${res.status} al crear el comercio`);
+    }
+    const data = (await res.json()) as { id: string; status?: string };
+    return { providerMerchantId: data.id, estado: mapEstadoMerchant(data.status) };
+  }
 }
 
 /** Mapea el estado del proveedor a nuestra máquina de estados. */
@@ -94,5 +110,16 @@ function mapEstado(providerStatus: string | undefined): EstadoCobro {
       return "fallido";
     default:
       return "pendiente";
+  }
+}
+
+function mapEstadoMerchant(providerStatus: string | undefined): EstadoMerchant {
+  switch (providerStatus) {
+    case "approved":
+      return "aprobado";
+    case "rejected":
+      return "rechazado";
+    default:
+      return "en_revision";
   }
 }
