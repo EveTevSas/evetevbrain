@@ -7,6 +7,8 @@ import { PagosModule } from "./modules/pagos/pagos.module";
 import { PagosController } from "./modules/pagos/pagos.controller";
 import { WebhooksModule } from "./modules/webhooks/webhooks.module";
 import { LedgerModule } from "./modules/ledger/ledger.module";
+import { ConciliacionModule } from "./modules/conciliacion/conciliacion.module";
+import { ConciliacionController } from "./modules/conciliacion/conciliacion.controller";
 import { HealthController } from "./health/health.controller";
 
 /**
@@ -21,13 +23,14 @@ import { HealthController } from "./health/health.controller";
     RepositoriesModule,
     PagosModule,
     WebhooksModule,
-    LedgerModule
+    LedgerModule,
+    ConciliacionModule
   ],
   controllers: [HealthController]
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    // Establece el contexto por request (tenant/actor/rol) en las rutas de pagos.
-    consumer.apply(TenantMiddleware).forRoutes(PagosController);
+    // Establece el contexto por request (tenant/actor/rol) en rutas con tenant.
+    consumer.apply(TenantMiddleware).forRoutes(PagosController, ConciliacionController);
   }
 }

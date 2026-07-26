@@ -1,9 +1,10 @@
-import { and, count, eq, sql } from "drizzle-orm";
-import type { Cobro, EstadoCobro } from "@evetev/shared";
+import { and, count, eq, gte, lte, sql } from "drizzle-orm";
+import type { Cobro, EstadoCobro, RangoFechas } from "@evetev/shared";
 import type { Db } from "../../database/drizzle";
 import { paymentAudit, paymentIdempotency, payments, webhookEvents } from "../../database/schema";
 import {
   type AplicarTransicionArgs,
+  type CobroAprobadoResumen,
   type CrearConIdempotenciaArgs,
   type CrearResultado,
   type IdempotencyHit,
@@ -182,6 +183,35 @@ export class DrizzlePagosRepository implements PagosRepository {
         actor: args.actor,
         data: null
       });
+    });
+  }
+
+  async listarCobrosAprobados(
+    tenantId: string,
+    rango: RangoFechas
+  ): Promise<CobroAprobadoResumen[]> {
+    return this.db.transaction(async (tx): Promise<CobroAprobadoResumen[]> => {
+      await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
+      const rows = await tx
+        .select({
+          paymentId: payments.id,
+          providerPaymentId: payments.providerPaymentId,
+          montoMinor: payments.amountMinor
+        })
+        .from(payments)
+        .where(
+          and(
+            eq(payments.tenantId, tenantId),
+            eq(payments.status, "aprobado"),
+            gte(payments.createdAt, new Date(rango.desde)),
+            lte(payments.createdAt, new Date(rango.hasta))
+          )
+        );
+      return rows.map((r) => ({
+        paymentId: r.paymentId,
+        providerPaymentId: r.providerPaymentId ?? "",
+        montoMinor: r.montoMinor
+      }));
     });
   }
 }

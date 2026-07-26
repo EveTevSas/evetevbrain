@@ -2,10 +2,10 @@ import { randomUUID } from "node:crypto";
 import type {
   CrearCobroInput,
   EstadoCobro,
+  LiquidacionProvider,
   PaymentProvider,
   ProviderCobro,
-  RangoFechas,
-  ResultadoConciliacion
+  RangoFechas
 } from "@evetev/shared";
 
 /**
@@ -27,7 +27,7 @@ export class FakePaymentProvider implements PaymentProvider {
     return "aprobado";
   }
 
-  async conciliar(rango: RangoFechas): Promise<ResultadoConciliacion> {
-    return { rango, cobrosConciliados: 0, diferencias: 0 };
+  async listarLiquidaciones(_rango: RangoFechas): Promise<LiquidacionProvider[]> {
+    return [];
   }
 }

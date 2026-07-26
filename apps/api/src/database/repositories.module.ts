@@ -6,6 +6,9 @@ import { InMemoryPagosRepository } from "../modules/pagos/in-memory-pagos.reposi
 import { LEDGER_REPOSITORY } from "../modules/ledger/ledger.repository";
 import { DrizzleLedgerRepository } from "../modules/ledger/drizzle-ledger.repository";
 import { InMemoryLedgerRepository } from "../modules/ledger/in-memory-ledger.repository";
+import { PAYMENT_PROVIDER } from "../modules/pagos/payment-provider.token";
+import { FakePaymentProvider } from "../modules/pagos/fake-payment.provider";
+import { AkuaPaymentProvider } from "../modules/pagos/akua-payment.provider";
 
 /**
  * Provee los repositorios como singletons globales, para que los módulos compartan
@@ -25,8 +28,15 @@ import { InMemoryLedgerRepository } from "../modules/ledger/in-memory-ledger.rep
       inject: [DB],
       useFactory: (db: Db | null) =>
         db ? new DrizzleLedgerRepository(db) : new InMemoryLedgerRepository()
+    },
+    {
+      provide: PAYMENT_PROVIDER,
+      useFactory: () =>
+        process.env.PAYMENT_PROVIDER === "akua"
+          ? new AkuaPaymentProvider(process.env.AKUA_API_KEY ?? "")
+          : new FakePaymentProvider()
     }
   ],
-  exports: [PAGOS_REPOSITORY, LEDGER_REPOSITORY]
+  exports: [PAGOS_REPOSITORY, LEDGER_REPOSITORY, PAYMENT_PROVIDER]
 })
 export class RepositoriesModule {}

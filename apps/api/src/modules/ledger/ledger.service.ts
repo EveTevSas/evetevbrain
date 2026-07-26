@@ -60,6 +60,30 @@ export class LedgerService {
     });
   }
 
+  /**
+   * Asiento de conciliación: cierra la compensación del proveedor y reconoce el
+   * ingreso en banco. Débito `banco` / crédito `akua_clearing`. Idempotente por pago.
+   */
+  async registrarCobroConciliado(
+    tenantId: string,
+    paymentId: string
+  ): Promise<{ posted: boolean; entryId?: string }> {
+    const cobro = await this.pagos.buscarCobro(tenantId, paymentId);
+    if (!cobro) {
+      return { posted: false };
+    }
+    return this.postAsiento({
+      tenantId,
+      paymentId,
+      kind: "cobro_conciliado",
+      memo: `Cobro conciliado ${cobro.referencia}`,
+      lines: [
+        { account: "banco", direction: "debit", amountMinor: cobro.montoMinor },
+        { account: "akua_clearing", direction: "credit", amountMinor: cobro.montoMinor }
+      ]
+    });
+  }
+
   /** Saldo reconstruido de una cuenta (créditos − débitos). */
   async saldo(tenantId: string, account: string): Promise<number> {
     return this.ledger.saldoCuenta(tenantId, account);

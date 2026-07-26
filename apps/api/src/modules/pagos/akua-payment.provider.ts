@@ -1,10 +1,10 @@
 import type {
   CrearCobroInput,
   EstadoCobro,
+  LiquidacionProvider,
   PaymentProvider,
   ProviderCobro,
-  RangoFechas,
-  ResultadoConciliacion
+  RangoFechas
 } from "@evetev/shared";
 
 /**
@@ -68,9 +68,19 @@ export class AkuaPaymentProvider implements PaymentProvider {
     return mapEstado(data.status);
   }
 
-  async conciliar(_rango: RangoFechas): Promise<ResultadoConciliacion> {
-    // Se implementa en Fase 4 contra /v1/settlements.
-    throw new Error("Conciliación con Akua: pendiente (Fase 4).");
+  async listarLiquidaciones(_rango: RangoFechas): Promise<LiquidacionProvider[]> {
+    // TODO(sandbox): GET /v1/settlements de Akua y mapear a LiquidacionProvider.
+    const res = await fetch(`${this.baseUrl}/settlements`, {
+      headers: { authorization: `Bearer ${this.apiKey}` }
+    });
+    if (!res.ok) {
+      throw new Error(`Akua respondió ${res.status} al listar liquidaciones`);
+    }
+    const data = (await res.json()) as { settlements?: Array<{ payment_id: string; amount: number }> };
+    return (data.settlements ?? []).map((s) => ({
+      providerPaymentId: s.payment_id,
+      montoMinor: s.amount
+    }));
   }
 }
 

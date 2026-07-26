@@ -48,10 +48,16 @@ export const RangoFechasSchema = z.object({
   hasta: z.string().datetime()
 });
 
-export const ResultadoConciliacionSchema = z.object({
+export const ReporteConciliacionSchema = z.object({
   rango: RangoFechasSchema,
-  cobrosConciliados: z.number().int().nonnegative(),
-  diferencias: z.number().int().nonnegative()
+  /** Cobros que cuadran con una liquidación del proveedor. */
+  conciliados: z.number().int().nonnegative(),
+  /** Cobros que cruzan pero con monto distinto. */
+  diferencias: z.number().int().nonnegative(),
+  /** Liquidaciones del proveedor sin cobro local. */
+  huerfanosProveedor: z.number().int().nonnegative(),
+  /** Cobros aprobados aún sin liquidación. */
+  noConciliados: z.number().int().nonnegative()
 });
 
 // --- Tipos derivados de los esquemas (fuente de verdad = el schema) ---
@@ -61,7 +67,13 @@ export type CrearCobroInput = z.infer<typeof CrearCobroInputSchema>;
 export type EstadoCobro = z.infer<typeof EstadoCobroSchema>;
 export type Cobro = z.infer<typeof CobroSchema>;
 export type RangoFechas = z.infer<typeof RangoFechasSchema>;
-export type ResultadoConciliacion = z.infer<typeof ResultadoConciliacionSchema>;
+export type ReporteConciliacion = z.infer<typeof ReporteConciliacionSchema>;
+
+/** Una liquidación (settlement) reportada por el proveedor. */
+export interface LiquidacionProvider {
+  providerPaymentId: string;
+  montoMinor: number;
+}
 
 /**
  * Resultado que devuelve el proveedor (Akua) al crear un cobro. EvePay le pone su
@@ -81,5 +93,6 @@ export interface ProviderCobro {
 export interface PaymentProvider {
   crearCobro(input: CrearCobroInput, idempotencyKey: string): Promise<ProviderCobro>;
   verificarEstado(providerPaymentId: string): Promise<EstadoCobro>;
-  conciliar(rango: RangoFechas): Promise<ResultadoConciliacion>;
+  /** Liquidaciones (settlements) del proveedor en un rango, para conciliar (Fase 4). */
+  listarLiquidaciones(rango: RangoFechas): Promise<LiquidacionProvider[]>;
 }

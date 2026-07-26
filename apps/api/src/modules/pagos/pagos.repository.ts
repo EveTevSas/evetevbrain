@@ -1,4 +1,4 @@
-import type { Cobro, EstadoCobro } from "@evetev/shared";
+import type { Cobro, EstadoCobro, RangoFechas } from "@evetev/shared";
 
 /** Datos para persistir un cobro nuevo (representación interna). */
 export interface NuevoCobro {
@@ -51,6 +51,13 @@ export interface AplicarTransicionArgs {
   actor: string;
 }
 
+/** Resumen de un cobro aprobado, para conciliar contra el proveedor (Fase 4). */
+export interface CobroAprobadoResumen {
+  paymentId: string;
+  providerPaymentId: string;
+  montoMinor: number;
+}
+
 /**
  * Puerto de persistencia de pagos. Dos adaptadores: in-memory (tests/local) y
  * Drizzle/Postgres (Supabase). Todas las operaciones están acotadas por tenant
@@ -75,6 +82,10 @@ export interface PagosRepository {
   registrarEventoIdempotente(args: RegistrarEventoArgs): Promise<boolean>;
   /** Aplica una transición de estado a un cobro y la audita (acotada al tenant). */
   aplicarTransicion(args: AplicarTransicionArgs): Promise<void>;
+
+  // --- Conciliación (Fase 4) ---
+  /** Cobros en estado `aprobado` creados dentro del rango (para conciliar). */
+  listarCobrosAprobados(tenantId: string, rango: RangoFechas): Promise<CobroAprobadoResumen[]>;
 }
 
 export const PAGOS_REPOSITORY = Symbol("PAGOS_REPOSITORY");

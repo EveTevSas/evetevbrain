@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
-import type { Cobro } from "@evetev/shared";
+import type { Cobro, RangoFechas } from "@evetev/shared";
 import {
   type AplicarTransicionArgs,
+  type CobroAprobadoResumen,
   type CrearConIdempotenciaArgs,
   type CrearResultado,
   type IdempotencyHit,
@@ -133,5 +134,27 @@ export class InMemoryPagosRepository implements PagosRepository {
       actor: args.actor,
       at: new Date().toISOString()
     });
+  }
+
+  async listarCobrosAprobados(
+    tenantId: string,
+    rango: RangoFechas
+  ): Promise<CobroAprobadoResumen[]> {
+    const out: CobroAprobadoResumen[] = [];
+    for (const fila of this.pagos.values()) {
+      if (
+        fila.tenantId === tenantId &&
+        fila.estado === "aprobado" &&
+        fila.creadoEn >= rango.desde &&
+        fila.creadoEn <= rango.hasta
+      ) {
+        out.push({
+          paymentId: fila.id,
+          providerPaymentId: fila.providerPaymentId,
+          montoMinor: fila.amountMinor
+        });
+      }
+    }
+    return out;
   }
 }
