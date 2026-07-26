@@ -25,259 +25,7 @@
      respaldo si el CDN no está disponible. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css">
 
-<style>
-:root{
-  /* Respaldo de los tokens oficiales — valores exactos, no aproximar (§2) */
-  --eve-azul-noche:#0A2540;
-  --eve-azul-noche-profundo:#081D33;
-  --eve-hielo:#EAF2FB;
-  --eve-tinte:#F4F9FD;
-  --eve-linea:#EDF3FA;
-  --eve-pizarra:#64748B;
-  --eve-muted:#94A3B8;
-  --eve-coral:#EE3D22;
-  --eve-coral-hover:#CF3016;
-  --eve-electrico:#1E6FEB;
-  --eve-mezclado:#144A96;
-  --eve-cian:#22D3EE;
-  --eve-teal:#3BAEC2;
-  --eve-violeta:#8B5CF6;
-  --eve-violeta-texto:#6D28D9;
-  --eve-violeta-tinte:#EDE9FE;
-  --eve-exito:#16A34A;
-  --eve-alerta:#D97706;
-  --eve-error:#B91C1C;
-  --eve-grad-corporativo:linear-gradient(90deg,#0A2540 0%,#1E6FEB 55%,#22D3EE 100%);
-  --eve-grad-ia:linear-gradient(90deg,#8B5CF6 0%,#6366F1 50%,#22D3EE 100%);
-}
-*{margin:0;padding:0;box-sizing:border-box}
-/* El color base vive en html para que el lienzo de partículas (z-index:-1,
-   fijo a pantalla completa) quede por encima del fondo y por debajo del
-   contenido. Si body pintara el fondo, taparía las partículas. */
-html{font-size:16px;background:#FDFEFF}
-body{font-family:'Inter',sans-serif;color:var(--eve-azul-noche);background:transparent;line-height:1.65}
-h1,h2,.brand{font-family:'Baloo 2',sans-serif;font-weight:600}
-.wrap{max-width:1040px;margin:0 auto;padding:0 clamp(24px,4.5vw,32px)}
-a{color:inherit;text-decoration:none}
-button{font-family:'Inter',sans-serif;cursor:pointer;border:none;background:none}
-:focus-visible{outline:2px solid var(--eve-electrico);outline-offset:2px;border-radius:4px}
-.link{color:var(--eve-electrico);font-weight:500;font-size:.85rem}
-.link:hover{text-decoration:underline}
-
-/* NAV (§6) */
-nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--eve-linea);z-index:50}
-.nav-in{display:flex;align-items:center;justify-content:space-between;height:60px}
-.logo{display:flex;align-items:center;gap:8px}
-.logo img{width:32px;height:23px;display:block}
-.brand{font-size:1.15rem}
-.menu{display:flex;gap:26px;align-items:center;font-size:.85rem;color:var(--eve-pizarra)}
-.menu>a:hover{color:var(--eve-azul-noche)}
-.nav-acciones{display:flex;align-items:center;gap:12px}
-.burger{display:none;flex-direction:column;gap:4px;padding:12px 8px}
-.burger span{width:20px;height:2px;background:var(--eve-azul-noche);border-radius:2px;transition:.2s}
-.drop{position:relative}
-.drop>button{font-size:.85rem;color:var(--eve-pizarra);display:flex;align-items:center;gap:4px}
-.drop>button:hover{color:var(--eve-azul-noche)}
-.drop-panel{position:absolute;top:30px;left:-10px;background:#fff;border:1px solid var(--eve-linea);border-radius:10px;box-shadow:0 6px 20px rgba(10,37,64,.06);padding:6px;min-width:215px;display:none}
-.drop.open .drop-panel{display:block}
-.drop-panel a{display:flex;gap:9px;align-items:center;padding:9px 11px;border-radius:7px;font-size:.82rem}
-.drop-panel a:hover{background:var(--eve-tinte)}
-.drop-panel img{width:19px;height:19px;flex:none}
-
-/* BOTONES (§6) — jerarquía: coral (1 por vista) → mezclado → ghost → enlace */
-.btn{border-radius:999px;font-weight:600;font-size:.85rem;padding:11px 24px;transition:.15s;display:inline-block;text-align:center}
-.btn-cta{background:var(--eve-coral);color:#fff}
-.btn-cta:hover{background:var(--eve-coral-hover)}
-.btn-sec{background:var(--eve-mezclado);color:#fff}
-.btn-sec:hover{background:#0E3568}
-.btn-ghost{border:1px solid #D7E3F0;color:var(--eve-azul-noche);font-weight:500}
-.btn-ghost:hover{border-color:var(--eve-pizarra)}
-
-/* HERO — degradado solo en pieza expresiva (C6) */
-.hero{padding:clamp(48px,8vw,84px) 0 56px;max-width:640px}
-.hero h1{font-size:clamp(1.9rem,4.6vw,2.6rem);line-height:1.16;margin-bottom:14px}
-.hero p{font-size:clamp(.9rem,1.6vw,.98rem);color:var(--eve-pizarra);margin-bottom:26px}
-.hero-cta{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.hero-marca{display:flex;align-items:center;gap:14px;margin-bottom:26px}
-.hero-marca img{width:46px;height:32px}
-
-/* SERVICIOS — variante minimalista hairline (§6 tarjetas) */
-.hr{border:none;border-top:1px solid var(--eve-linea)}
-.serv{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--eve-linea)}
-.serv>div{padding:30px 26px;border-right:1px solid var(--eve-linea);border-bottom:1px solid var(--eve-linea)}
-.serv>div:nth-child(3n){border-right:none}
-.serv img{width:33px;height:33px;display:block}
-/* Punto de línea de negocio (§12): eléctrico=EvePay · violeta=Eve Intelligence · teal=Tienda */
-.serv .punto{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
-.serv h3{font-size:.92rem;font-weight:600;margin:13px 0 4px}
-.serv p{font-size:.8rem;color:var(--eve-pizarra);margin-bottom:10px}
-
-/* TABS (§6) */
-.tabs{display:inline-flex;background:var(--eve-tinte);border-radius:999px;padding:4px;gap:2px;flex-wrap:wrap}
-.tab{border-radius:999px;padding:8px 20px;font-size:.82rem;font-weight:500;color:var(--eve-pizarra)}
-.tab.act{background:#fff;color:var(--eve-azul-noche);box-shadow:0 1px 4px rgba(10,37,64,.08)}
-.tab-body{display:none;padding-top:26px;max-width:640px}
-.tab-body.act{display:block}
-.tab-body p{font-size:.88rem;color:var(--eve-pizarra)}
-.tab-body code{background:var(--eve-tinte);border:1px solid var(--eve-linea);border-radius:6px;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--eve-azul-noche)}
-
-/* PRECIOS — cifras protagonistas en Baloo 2 700 (§3) */
-.precios{background:var(--eve-tinte);border-top:1px solid var(--eve-linea);border-bottom:1px solid var(--eve-linea);padding:64px 0}
-.pre-grid{display:flex;gap:44px;align-items:flex-start;flex-wrap:wrap}
-.pre-l{flex:1.2;min-width:290px}
-.pre-l h2{font-size:clamp(1.3rem,2.6vw,1.6rem);margin-bottom:8px}
-.pre-l>p{font-size:.88rem;color:var(--eve-pizarra);margin-bottom:26px}
-input[type=range]{width:100%;accent-color:var(--eve-mezclado)}
-.switch{display:flex;align-items:center;gap:12px;margin-top:24px;font-size:.85rem;color:var(--eve-pizarra);cursor:pointer}
-.sw{position:relative;width:42px;height:23px;background:#D7E3F0;border-radius:999px;transition:.2s;flex:none}
-.sw::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;background:#fff;border-radius:50%;transition:.2s}
-#anual:checked + .sw{background:var(--eve-mezclado)}
-#anual:checked + .sw::after{left:22px}
-#anual{position:absolute;opacity:0}
-.pre-card{flex:1;min-width:280px;background:#fff;border:1px solid var(--eve-linea);border-radius:14px;padding:28px}
-.pre-card .v{font-family:'Baloo 2',sans-serif;font-size:2.1rem;font-weight:700}
-.pre-card small{color:var(--eve-muted);font-size:.75rem}
-.pre-card ul{list-style:none;margin:18px 0 22px}
-.pre-card li{font-size:.82rem;color:var(--eve-pizarra);padding:5px 0;display:flex;gap:9px;align-items:center}
-.pre-card li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--eve-electrico);flex:none}
-.pre-card .btn{width:100%}
-.detalle-costos{margin-top:14px;border-top:1px solid var(--eve-linea);padding-top:10px}
-.detalle-costos div{display:flex;justify-content:space-between;font-size:.78rem;color:var(--eve-pizarra);padding:3px 0}
-
-/* TARJETAS con ilustración (§6) */
-.icards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
-.icard{border:1px solid var(--eve-linea);border-radius:14px;overflow:hidden;background:#fff;transition:.2s;display:flex;flex-direction:column}
-.icard:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(10,37,64,.09)}
-.icard .cover{display:block;width:100%;height:auto}
-.icard .cuerpo{padding:18px 22px 22px}
-.icard h3{font-size:.95rem;font-weight:600;margin-bottom:5px}
-.icard p{font-size:.82rem;color:var(--eve-pizarra);margin-bottom:12px}
-
-/* BANDA portada (§6): object-fit cover + velo + contenido en blanco */
-.banda{position:relative;min-height:clamp(240px,38vw,420px);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:36px}
-.banda video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:linear-gradient(120deg,#0A2540,#1E6FEB)}
-.banda::after{content:'';position:absolute;inset:0;background:rgba(10,37,64,.42)}
-.banda .contenido{position:relative;z-index:2;text-align:center;color:#fff;padding:48px clamp(24px,6vw,60px);max-width:760px;margin:0 auto}
-.banda h2{font-size:clamp(1.5rem,3.4vw,2.2rem);margin-bottom:10px;color:#fff}
-.banda p{font-size:clamp(.85rem,1.6vw,.95rem);color:#D6E6F7;margin-bottom:0}
-
-/* FORM contacto (§6) */
-.contacto{max-width:580px}
-.contacto h2{font-size:clamp(1.3rem,2.6vw,1.6rem);margin-bottom:8px}
-.contacto>p{font-size:.88rem;color:var(--eve-pizarra);margin-bottom:26px}
-.campo{margin-bottom:18px}
-.campo>label{display:block;font-size:.82rem;font-weight:500;margin-bottom:6px}
-.campo input[type=text],.campo input[type=email],.campo select{width:100%;padding:11px 14px;border:1px solid #DCE7F2;border-radius:9px;font-size:.88rem;font-family:'Inter',sans-serif;background:#fff;color:var(--eve-azul-noche)}
-.campo input:focus,.campo select:focus{outline:2px solid var(--eve-electrico);border-color:transparent}
-/* Error: SIEMPRE ícono + texto, nunca solo color (C5) */
-.err{display:none;align-items:center;gap:7px;margin-top:7px;font-size:.78rem;color:var(--eve-error)}
-.err svg{width:15px;height:15px;flex:none}
-.err.show{display:flex}
-.checks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.chk{display:flex;gap:14px;align-items:center;font-size:.85rem;color:var(--eve-pizarra);padding:13px 16px;border:1px solid #DCE7F2;border-radius:9px;cursor:pointer;transition:.15s;line-height:1.3}
-.chk:hover{border-color:var(--eve-pizarra)}
-.chk input{accent-color:var(--eve-electrico);width:17px;height:17px;flex:none;margin:0}
-.chk input:checked ~ span{color:var(--eve-azul-noche);font-weight:500}
-
-/* FAQ (§6) */
-details{border-bottom:1px solid var(--eve-linea)}
-summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:18px 2px;font-weight:500;font-size:.9rem;cursor:pointer;gap:14px}
-summary::-webkit-details-marker{display:none}
-summary::after{content:'+';font-family:'Baloo 2',sans-serif;font-size:1.25rem;color:var(--eve-electrico);flex:none}
-details[open] summary::after{content:'–'}
-details p{padding:0 2px 18px;color:var(--eve-pizarra);font-size:.85rem;max-width:640px}
-
-/* MODAL (§6) */
-.overlay{position:fixed;inset:0;background:rgba(10,37,64,.35);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
-.overlay.open{display:flex}
-.modal{background:#fff;border-radius:16px;padding:34px;max-width:400px;width:100%;text-align:center}
-.modal img{width:52px;height:37px;margin-bottom:14px}
-.modal h3{font-family:'Baloo 2',sans-serif;font-size:1.25rem;margin-bottom:8px}
-.modal p{font-size:.85rem;color:var(--eve-pizarra);margin-bottom:22px}
-
-section{padding:64px 0}
-.sec-h{margin-bottom:34px}
-.sec-h h2{font-size:clamp(1.3rem,2.6vw,1.6rem);margin-bottom:6px}
-.sec-h p{font-size:.88rem;color:var(--eve-pizarra)}
-
-/* TOAST (§6) — ícono + texto (C5) */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--eve-azul-noche);color:#fff;font-size:.85rem;padding:12px 24px;border-radius:999px;transition:.3s;opacity:0;z-index:110;max-width:90vw;display:flex;align-items:center;gap:10px}
-.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-.toast svg{width:17px;height:17px;flex:none}
-
-/* Mascota Eve (§4) */
-.eve-fab{position:fixed;right:22px;bottom:22px;z-index:90;width:64px;height:64px;border-radius:50%;background:#fff;border:2px solid #DCE7F2;box-shadow:0 8px 24px rgba(10,37,64,.18);padding:5px;transition:.2s;cursor:pointer}
-.eve-fab img{width:100%;height:100%;object-fit:contain;display:block}
-.eve-fab:hover{transform:scale(1.07)}
-.eve-burbuja{position:fixed;right:22px;bottom:96px;z-index:90;background:#fff;border:1px solid var(--eve-linea);border-radius:16px 16px 4px 16px;box-shadow:0 12px 32px rgba(10,37,64,.16);padding:16px 18px;max-width:262px;display:none}
-.eve-burbuja.open{display:block}
-.eve-burbuja p{font-size:.83rem;color:var(--eve-pizarra);margin:0 0 12px;line-height:1.5}
-.eve-burbuja b{color:var(--eve-azul-noche)}
-
-/* FOOTER (§6) */
-footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
-.foot-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px;padding:56px 0 40px}
-.foot-marca img{width:40px;height:28px}
-.foot-marca .brand{color:#fff;font-size:1.15rem;display:block;margin:10px 0 8px}
-.foot-marca p{font-size:.8rem;line-height:1.6;max-width:250px;color:#8FA8C4}
-.foot-col h4{color:#fff;font-size:.8rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px}
-.foot-col a{display:block;font-size:.83rem;color:#B9CCE0;padding:5px 0}
-.foot-col a:hover{color:var(--eve-cian)}
-.suscribe{padding:0 0 36px}
-.suscribe p{font-size:.83rem;color:#8FA8C4;margin-bottom:10px}
-.sus-row{display:flex;gap:10px;max-width:420px}
-.sus-row input{flex:1;padding:11px 16px;border-radius:999px;border:1px solid #2C4A6B;background:#0F2D4A;color:#fff;font-size:.85rem;font-family:'Inter',sans-serif}
-.sus-row input::placeholder{color:#6C87A6}
-.sus-row input:focus{outline:2px solid var(--eve-cian);border-color:transparent}
-.foot-base{border-top:1px solid #1A3A5C;padding:20px 0;display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:#6C87A6;flex-wrap:wrap;gap:12px}
-.redes{display:flex;gap:14px}
-.redes a{display:flex;width:34px;height:34px;border:1px solid #2C4A6B;border-radius:50%;align-items:center;justify-content:center;transition:.15s}
-.redes a:hover{border-color:var(--eve-cian)}
-.redes svg{width:16px;height:16px;fill:#B9CCE0}
-.redes a:hover svg{fill:var(--eve-cian)}
-
-/* ============ RESPONSIVE (§7) ============ */
-/* Tablet */
-@media(max-width:1024px){
-  .serv{grid-template-columns:1fr 1fr}
-  .serv>div:nth-child(3n){border-right:1px solid var(--eve-linea)}
-  .serv>div:nth-child(2n){border-right:none}
-  .foot-top{grid-template-columns:1fr 1fr}
-}
-/* Móvil */
-@media(max-width:760px){
-  .wrap{padding:0 26px}
-  .hero{padding-top:60px}
-  section{padding:52px 0}
-  .burger{display:flex}
-  .nav-acciones .btn-cta{padding:9px 18px;font-size:.8rem}
-  .menu{display:none;position:absolute;top:60px;left:0;right:0;background:#fff;border-bottom:1px solid var(--eve-linea);flex-direction:column;align-items:stretch;gap:0;padding:8px 0;box-shadow:0 10px 24px rgba(10,37,64,.07)}
-  .menu.open{display:flex}
-  .menu>a,.menu>button{padding:13px 24px;text-align:left}
-  .drop{width:100%}
-  .drop>button{padding:13px 24px;width:100%;justify-content:space-between}
-  .drop-panel{position:static;border:none;box-shadow:none;background:var(--eve-tinte);border-radius:0;padding:4px 12px}
-  .serv{grid-template-columns:1fr}
-  .serv>div{border-right:none !important}
-  .checks{grid-template-columns:1fr}
-  .hero-cta .btn{width:100%}
-  .pre-grid{gap:28px}
-  .tabs{width:100%;justify-content:center}
-  .foot-top{grid-template-columns:1fr}
-  .foot-base{flex-direction:column;align-items:flex-start}
-}
-/* Escritorio amplio */
-@media(min-width:1440px){
-  .wrap{max-width:1160px}
-}
-/* Ultra-wide: el contenido no se estira, respira */
-@media(min-width:1900px){
-  html{font-size:17.5px}
-  .wrap{max-width:1280px}
-  .hero{max-width:700px}
-}
-@media(prefers-reduced-motion:reduce){*{transition:none !important}}
-</style>
+<link rel="stylesheet" href="estilos.css">
 </head>
 <body>
 
@@ -291,13 +39,15 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
       <div class="drop" id="drop1">
         <button aria-haspopup="true" aria-expanded="false">Productos <span style="font-size:9px" aria-hidden="true">▾</span></button>
         <div class="drop-panel">
-          <a href="#servicios"><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-degradado.svg" alt="" width="19" height="19"> EvePay</a>
-          <a href="#servicios"><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-degradado.svg" alt="" width="19" height="19"> Eve Intelligence</a>
-          <a href="#servicios"><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-degradado.svg" alt="" width="19" height="19"> Tienda</a>
+          <a href="#servicios"><span class="p-ico sm" style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span> EvePay</a>
+          <a href="#servicios"><span class="p-ico sm" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span> EveConecta</a>
+          <a href="#servicios"><span class="p-ico sm" style="--p:var(--eve-violeta);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span> Eve Intelligence</a>
+          <a href="#servicios"><span class="p-ico sm" style="--p:var(--eve-teal);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span> Tienda</a>
         </div>
       </div>
       <a href="#precios">Precios</a>
       <a href="#desarrolladores">Desarrolladores</a>
+      <a href="nosotros.html">Nosotros</a>
       <a href="#contacto">Contacto</a>
       <button class="link" onclick="mostrarToast('Inicio de sesión: demo visual')">Entrar</button>
     </div>
@@ -309,31 +59,87 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
   </div>
 </nav>
 
-<header class="wrap hero">
-  <div class="hero-marca">
-    <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-gradiente-corporativo.svg" alt="" width="46" height="32">
+<!-- La banda es el marco del fondo de partículas: al vivir en el flujo normal
+     (y no fija a la ventana) la red sube con el scroll y se queda en el hero. -->
+<div class="hero-banda">
+  <div id="eve-particulas" aria-hidden="true"></div>
+  <header class="wrap hero">
+    <div class="hero-marca">
+      <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-gradiente-corporativo.svg" alt="" width="46" height="32">
+    </div>
+    <h1>Pagos e inteligencia artificial, sin complicaciones</h1>
+    <p>Tarifas transparentes. Tecnología propia. Cero letra menuda.</p>
+    <div class="hero-cta">
+      <a class="btn btn-sec" href="#precios">Calcular mi costo</a>
+      <a class="link" href="#servicios">Ver cómo funciona →</a>
+    </div>
+  </header>
+</div>
+
+<section class="banda" aria-label="La red de Evetev">
+  <video autoplay muted loop playsinline preload="metadata" poster="./files/portada-red.jpg" aria-hidden="true">
+    <source src="./files/evepay-background.mp4" type="video/mp4">
+  </video>
+  <div class="contenido">
+    <h2>Una red que conecta tu negocio con su dinero</h2>
+    <p>Infraestructura propia, monitoreada las 24 horas, diseñada para no fallar en tu mejor día de ventas.</p>
   </div>
-  <h1>Pagos e inteligencia artificial, sin complicaciones</h1>
-  <p>Tarifas transparentes. Tecnología propia. Cero letra menuda.</p>
-  <div class="hero-cta">
-    <a class="btn btn-sec" href="#precios">Calcular mi costo</a>
-    <a class="link" href="#servicios">Ver cómo funciona →</a>
-  </div>
-</header>
+</section>
 
 <hr class="hr">
 
 <section id="servicios" class="wrap" style="padding-top:56px">
-  <div class="sec-h"><h2>Servicios</h2><p>Seis capacidades, una sola casa de ingeniería.</p></div>
-  <!-- Unidades oficiales del CDN, sin modificar; la línea de negocio se identifica
-       con el punto de color (tokens exactos, §12) -->
-  <div class="serv">
-    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-electrico)"></span>EvePay</h3><p>Pasarela de pagos con tarifas transparentes; tu dinero va directo a tu banco.</p><a class="link" href="#precios">Conocer →</a></div>
-    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-violeta)"></span>Eve Intelligence</h3><p>RAG y asistentes de IA entrenados en el conocimiento de tu empresa.</p><a class="link" href="#contacto">Conocer →</a></div>
-    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-teal)"></span>Tienda</h3><p>Productos seleccionados con logística y plataforma propias.</p><a class="link" href="#contacto">Conocer →</a></div>
-    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-electrico)"></span>Aplicaciones a la medida</h3><p>Apps móviles y de escritorio con nuestra misma ingeniería.</p><a class="link" href="#contacto">Conocer →</a></div>
-    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-violeta)"></span>Adopción de IA</h3><p>Casos de uso concretos, retorno medible, sin humo.</p><a class="link" href="#contacto">Conocer →</a></div>
-    <div><img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-degradado.svg" alt="" width="33" height="33"><h3><span class="punto" style="background:var(--eve-electrico)"></span>Analítica financiera</h3><p>Pregúntale a tus datos en lenguaje natural.</p><a class="link" href="#contacto">Conocer →</a></div>
+  <div class="sec-h">
+    <h2>Productos</h2>
+    <p>Lo que estamos construyendo hoy, y lo que viene después. Sin adornos.</p>
+  </div>
+
+  <!-- Cada producto lleva el color de su línea (§12). El ícono NO se redibuja:
+       es la unidad oficial del CDN usada como máscara y teñida con --p (T1). -->
+  <div class="prod">
+    <article style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')">
+      <span class="p-ico" role="img" aria-label="Ícono de EvePay"></span>
+      <h3><span class="punto" style="background:var(--p)"></span>EvePay
+        <span class="chip build"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="9"></circle></svg>En construcción</span>
+      </h3>
+      <span class="sub">Plataforma de pagos</span>
+      <p>Nuestra pasarela de pagos. Arquitectura de gateway puro: el dinero va directo del cliente al banco del comercio, sin pasar por nuestra tesorería.</p>
+      <ul>
+        <li>Cobros idempotentes: reintentar nunca cobra dos veces.</li>
+        <li>Libro de movimientos inmutable, en doble partida.</li>
+        <li>Conciliación de lo cobrado contra lo liquidado.</li>
+        <li>Nunca tocamos el número de tarjeta: checkout embebido del proveedor.</li>
+      </ul>
+      <a class="link" href="#desarrolladores">Ver cómo se integra →</a>
+    </article>
+
+    <article style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')">
+      <span class="p-ico" role="img" aria-label="Ícono de EveConecta"></span>
+      <h3><span class="punto" style="background:var(--p)"></span>EveConecta
+        <span class="chip build"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="9"></circle></svg>En construcción</span>
+      </h3>
+      <span class="sub">Gestión y recaudo para conjuntos</span>
+      <p>Administración y recaudo para propiedad horizontal. Es además nuestro primer cliente: la prueba, cobrando dinero real, de que EvePay funciona.</p>
+      <ul>
+        <li>Cuotas por coeficiente, estado de cuenta y paz y salvo.</li>
+        <li>Pago en línea del residente y panel de cartera del administrador.</li>
+        <li>Recordatorios con tope de frecuencia y horario respetuoso.</li>
+        <li>Cada movimiento queda auditado: quién, cuándo y por qué.</li>
+      </ul>
+      <a class="link" href="#contacto">Hablar de un piloto →</a>
+    </article>
+  </div>
+
+  <div class="sec-h" style="margin:44px 0 18px">
+    <h3 style="font-family:'Baloo 2',sans-serif;font-size:1.05rem;font-weight:600">En el roadmap</h3>
+    <p>Líneas que ya tienen ingeniería detrás, pero todavía no están abiertas al público.</p>
+  </div>
+  <div class="roadmap">
+    <div><h4><span class="punto" style="background:var(--eve-violeta)"></span>Eve Intelligence</h4><p>RAG sobre el conocimiento interno de tu empresa y asistentes entrenados en tu negocio.</p></div>
+    <div><h4><span class="punto" style="background:var(--eve-violeta-texto)"></span>Adopción de IA</h4><p>Acompañamiento con casos de uso concretos y retorno medible.</p></div>
+    <div><h4><span class="punto" style="background:var(--eve-cian)"></span>Analítica financiera</h4><p>Preguntarle a tus datos en lenguaje natural, sobre la misma arquitectura RAG.</p></div>
+    <div><h4><span class="punto" style="background:var(--eve-teal)"></span>Tienda</h4><p>Canal de comercio electrónico propio, hoy operando en Mercado Libre.</p></div>
+    <div><h4><span class="punto" style="background:var(--eve-azul-noche)"></span>Aplicaciones a la medida</h4><p>Apps móviles y de escritorio. La primera propia, DressMeUp, está en pruebas cerradas.</p></div>
   </div>
 </section>
 
@@ -344,15 +150,17 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
     <button class="tab" role="tab" id="tab-t2" aria-controls="t2" aria-selected="false" data-t="t2">Para desarrolladores</button>
   </div>
   <div class="tab-body act" id="t1" role="tabpanel" aria-labelledby="tab-t1">
-    <p>Enlace de pago listo para compartir por WhatsApp o correo, panel con tus ventas del día y conciliación automática. Sin saber de código, cobrando en minutos.</p>
+    <p>Gateway puro: el dinero va directo del cliente a tu banco, sin pasar por nuestra tesorería. Eso reduce intermediarios y riesgo regulatorio. Cada cobro queda con su historial completo de estados, y la conciliación cuadra lo cobrado contra lo que efectivamente se liquidó — para que “yo sí pagué” se resuelva mirando datos y no discutiendo.</p>
+    <p style="margin-top:12px">Estamos abriendo cupos de piloto con comercios que quieran entrar temprano y ayudarnos a moldear el producto.</p>
   </div>
   <div class="tab-body" id="t2" role="tabpanel" aria-labelledby="tab-t2">
-    <p>API REST documentada, sandbox desde el día uno y SDKs oficiales. Crear un cobro es una línea: <code>evepay.checkout.create(monto, referencia)</code>. Webhooks firmados para confirmación.</p>
+    <p>API REST sobre HTTP, con validación de esquema en cada frontera y tipos compartidos entre la plataforma y quien la consume. Crear un cobro es un <code>POST /pagos</code> con una <code>Idempotency-Key</code>: si reintentas con la misma clave, te devolvemos el cobro que ya existía en vez de cobrar otra vez.</p>
+    <p style="margin-top:12px">El estado lo mueve la realidad, no un <em>polling</em> frágil: los webhooks del proveedor llegan firmados, se verifican y se normalizan a nuestros propios eventos. La máquina de estados es explícita — <code>creado → pendiente → aprobado | fallido → conciliado</code> — y toda transición queda auditada, sin edición ni borrado.</p>
   </div>
 </section>
 
 <section class="wrap" id="soluciones" style="padding-top:84px;padding-bottom:92px">
-  <div class="sec-h"><h2>Soluciones en acción</h2><p>Así se ven nuestros productos trabajando para empresas como la tuya.</p></div>
+  <div class="sec-h"><h2>Cómo se ve en la práctica</h2><p>Todavía no tenemos casos de clientes que mostrar: estamos en fundación. Esto es lo que la ingeniería ya resuelve.</p></div>
   <div class="icards">
     <article class="icard">
       <svg class="cover" viewBox="0 0 400 220" role="img" aria-label="Ilustración del checkout de EvePay">
@@ -369,9 +177,9 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
         <path d="M279 165 l8 8 l15 -16" stroke="#0A2540" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
       </svg>
       <div class="cuerpo">
-        <h3>Checkout que convierte</h3>
-        <p>Una tienda de moda redujo su abandono de carrito con un pago de una sola pantalla.</p>
-        <a class="link" href="#precios">Ver EvePay →</a>
+        <h3>Un cobro que no se cobra dos veces</h3>
+        <p>Cada cobro lleva clave de idempotencia y una máquina de estados explícita. El reintento devuelve el cobro que ya existía.</p>
+        <a class="link" href="#desarrolladores">Ver la integración →</a>
       </div>
     </article>
     <article class="icard">
@@ -388,9 +196,9 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
         <circle cx="86" cy="176" r="5" fill="#FFFFFF"></circle><circle cx="104" cy="176" r="5" fill="#FFFFFF" opacity="0.7"></circle><circle cx="122" cy="176" r="5" fill="#FFFFFF" opacity="0.4"></circle>
       </svg>
       <div class="cuerpo">
-        <h3>Soporte que nunca duerme</h3>
-        <p>Un asistente de Eve Intelligence responde el 80% de las consultas frecuentes al instante.</p>
-        <a class="link" href="#contacto">Ver Eve Intelligence →</a>
+        <h3>IA que se apoya en tus datos</h3>
+        <p>La apuesta de Eve Intelligence es RAG sobre el conocimiento interno de cada empresa: respuestas con fuente, no invenciones.</p>
+        <a class="link" href="#contacto">Conversemos →</a>
       </div>
     </article>
     <article class="icard">
@@ -405,9 +213,9 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
         <text x="258" y="78" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="15" fill="#FFFFFF">-20%</text>
       </svg>
       <div class="cuerpo">
-        <h3>Tienda con logística propia</h3>
-        <p>Productos seleccionados entregados a tiempo, con la trazabilidad de nuestra plataforma.</p>
-        <a class="link" href="#contacto">Ver Tienda →</a>
+        <h3>La plata cuadra o se nota</h3>
+        <p>Un libro de movimientos inmutable en doble partida, y una conciliación que cruza lo cobrado contra lo liquidado y reporta cada diferencia.</p>
+        <a class="link" href="#contacto">Conversemos →</a>
       </div>
     </article>
   </div>
@@ -448,16 +256,6 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
   </div>
 </section>
 
-<section class="banda" aria-label="La red de Evetev">
-  <video autoplay muted loop playsinline preload="metadata" poster="./files/portada-red.jpg" aria-hidden="true">
-    <source src="./files/evepay-background.mp4" type="video/mp4">
-  </video>
-  <div class="contenido">
-    <h2>Una red que conecta tu negocio con su dinero</h2>
-    <p>Infraestructura propia, monitoreada las 24 horas, diseñada para no fallar en tu mejor día de ventas.</p>
-  </div>
-</section>
-
 <section id="contacto" class="wrap" style="padding-top:84px">
   <div class="contacto">
     <h2>Hablemos de tu proyecto</h2>
@@ -472,7 +270,11 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
     </div>
     <div class="campo">
       <label for="fEmail">Correo empresarial</label>
-      <input type="email" id="fEmail" placeholder="maria@tuempresa.co">
+      <input type="email" id="fEmail" placeholder="maria@tuempresa.co" aria-describedby="errEmail">
+      <p class="err" id="errEmail">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+        <span>Necesitamos un correo válido para responderte.</span>
+      </p>
     </div>
     <div class="campo">
       <label for="fTam">Tamaño de tu empresa</label>
@@ -487,21 +289,47 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
       <label>Me interesa</label>
       <div class="checks">
         <label class="chk"><input type="checkbox" checked=""><span>EvePay</span></label>
+        <label class="chk"><input type="checkbox"><span>EveConecta</span></label>
         <label class="chk"><input type="checkbox"><span>Eve Intelligence</span></label>
         <label class="chk"><input type="checkbox"><span>Apps a la medida</span></label>
-        <label class="chk"><input type="checkbox"><span>Adopción de IA</span></label>
       </div>
     </div>
-    <button class="btn btn-sec" onclick="enviarForm()">Enviar mensaje</button>
+    <div class="campo">
+      <label for="fMensaje">Cuéntanos qué necesitas</label>
+      <textarea id="fMensaje" placeholder="Qué problema quieres resolver, en qué punto estás y cómo podemos ayudarte."></textarea>
+    </div>
+    <!-- Trampa antibots: oculta y fuera del orden de foco, invisible para
+         lectores de pantalla. Si llega llena, el envío se descarta. -->
+    <div class="trampa" aria-hidden="true">
+      <label for="fSitio">No llenar</label>
+      <input type="text" id="fSitio" tabindex="-1" autocomplete="off">
+    </div>
+    <button class="btn btn-sec" id="btnContacto" onclick="enviarForm()">Enviar mensaje</button>
+    <p class="ayuda" style="margin-top:14px">Usamos tus datos solo para responder a esta consulta. Nada de listas ni terceros.</p>
   </div>
 </section>
 
-<section class="wrap" style="max-width:700px;padding-top:0">
+<section id="faq" class="wrap" style="max-width:700px;padding-top:0">
   <div class="sec-h"><h2>Preguntas frecuentes</h2></div>
-  <details><summary>¿Cómo cobran exactamente?</summary><p>Un porcentaje por transacción aprobada más un componente fijo, y una suscripción mensual por el software. Todo publicado, sin escalas escondidas ni costos sorpresa: puedes calcular tu costo antes de firmar.</p></details>
-  <details><summary>¿Dónde queda mi dinero mientras tanto?</summary><p>En ningún lado nuestro. Somos gateway puro: el dinero fluye directo del banco de tu cliente a tu cuenta.</p></details>
-  <details><summary>¿Puedo cancelar cuando quiera?</summary><p>Sí. Sin permanencia, sin penalidades.</p></details>
-  <details><summary>¿Qué hace Eve Intelligence?</summary><p>Conecta IA a tu operación: búsqueda inteligente sobre tus documentos, asistentes entrenados en tu negocio y analítica en lenguaje natural.</p></details>
+  <details><summary>¿Ya puedo usar EvePay?</summary><p>Todavía no en producción. Estamos en etapa de fundación: el núcleo de pagos ya está construido —cobros idempotentes, libro de movimientos, webhooks y conciliación— y en paralelo corre la habilitación con la adquirencia, que no es un trámite automático y toma semanas. Si quieres entrar como piloto, escríbenos y te contamos en qué punto vamos, sin adornos.</p></details>
+  <details><summary>¿Cómo cobran exactamente?</summary><p>Un porcentaje por transacción aprobada más un componente fijo, y una suscripción mensual por el software. Todo publicado, sin escalas escondidas. La calculadora de esta página usa tarifas <b>de referencia</b> para que dimensiones el costo; las definitivas se cierran contigo antes de firmar.</p></details>
+  <details><summary>¿Dónde queda mi dinero mientras tanto?</summary><p>En ningún lado nuestro. Somos gateway puro: el dinero fluye directo del banco de tu cliente a tu cuenta. Nosotros no somos tesorería, y esa decisión de arquitectura es también la que nos quita riesgo regulatorio de encima.</p></details>
+  <details><summary>¿Qué es EveConecta?</summary><p>Nuestra solución de gestión y recaudo para conjuntos residenciales: cuotas por coeficiente, estado de cuenta, pago en línea del residente y paz y salvo. Es también nuestro primer cliente — la usamos para probar EvePay cobrando dinero real antes de pedirle a nadie más que confíe en él.</p></details>
+  <details><summary>¿Qué hacen con los datos de las personas?</summary><p>Pedimos lo mínimo para prestar el servicio y nada más. Los datos de cada cliente están aislados a nivel de base de datos, no solo por una condición en el código. No guardamos números de tarjeta en ningún momento: el dato sensible lo captura el checkout embebido del proveedor. Y no publicamos listados de deudores.</p></details>
+  <details><summary>¿Qué hace Eve Intelligence?</summary><p>Conecta IA a tu operación: búsqueda sobre tus propios documentos con respuesta trazable a la fuente, asistentes entrenados en tu negocio y analítica en lenguaje natural. Está en el roadmap, no abierta al público todavía.</p></details>
+  <details><summary>¿Puedo cancelar cuando quiera?</summary><p>Sí. Sin permanencia y sin penalidades: preferimos que te quedes por el producto y no por un contrato.</p></details>
+</section>
+
+<!-- Adelanto de Nosotros: la página completa vive en nosotros.html para no
+     alargar la portada, que tiene que seguir enfocada en el producto. -->
+<section class="precios" style="padding:56px 0">
+  <div class="wrap">
+    <div class="sec-h" style="margin-bottom:18px">
+      <h2>Construido por ingenieros</h2>
+      <p style="max-width:60ch">Somos una compañía colombiana de tecnología, constituida en Bogotá en 2026. Un equipo pequeño que cubre el ciclo completo: ingeniería, operaciones y comercial. Creemos que la tecnología avanzada solo vale si resuelve un problema común de forma simple y a un costo justo.</p>
+    </div>
+    <a class="btn btn-sec" href="nosotros.html">Conocer al equipo</a>
+  </div>
 </section>
 
 <footer>
@@ -515,23 +343,23 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
       <div class="foot-col">
         <h4>Productos</h4>
         <a href="#servicios">EvePay</a>
+        <a href="#servicios">EveConecta</a>
         <a href="#servicios">Eve Intelligence</a>
         <a href="#servicios">Tienda</a>
-        <a href="#servicios">Apps a la medida</a>
       </div>
       <div class="foot-col">
         <h4>Empresa</h4>
-        <a href="#">Nosotros</a>
-        <a href="#">Equipo</a>
+        <a href="nosotros.html">Nosotros</a>
+        <a href="nosotros.html#equipo">Equipo</a>
         <a href="#contacto">Contacto</a>
-        <a href="#">Trabaja con nosotros</a>
+        <a href="nosotros.html#trabaja">Trabaja con nosotros</a>
       </div>
       <div class="foot-col">
         <h4>Recursos</h4>
         <a href="#desarrolladores">Documentación API</a>
-        <a href="#">Estado del servicio</a>
-        <a href="#">Preguntas frecuentes</a>
-        <a href="#">Blog</a>
+        <a href="#precios">Precios</a>
+        <a href="#faq">Preguntas frecuentes</a>
+        <a href="mailto:contacto@evetev.com">contacto@evetev.com</a>
       </div>
     </div>
     <div class="suscribe">
@@ -575,6 +403,7 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
   <span id="toastTxt">Mensaje enviado.</span>
 </div>
 
+<script src="formularios.js"></script>
 <script>
 const burger = document.getElementById('burger'), menu = document.getElementById('menu');
 burger.addEventListener('click', () => {
@@ -633,20 +462,42 @@ function mostrarToast(msj, tipo){
   setTimeout(() => t.classList.remove('show'), 2600);
 }
 function enviarForm(){
-  const n = document.getElementById('fNombre'), err = document.getElementById('errNombre');
-  if(!n.value.trim()){
-    err.classList.add('show');
-    n.setAttribute('aria-invalid','true');
-    n.focus();
-    return;
-  }
-  err.classList.remove('show');
-  n.removeAttribute('aria-invalid');
-  mostrarToast('Gracias, ' + n.value.trim() + '. Te respondemos en un día hábil.');
+  const n = document.getElementById('fNombre'), errN = document.getElementById('errNombre');
+  const c = document.getElementById('fEmail'), errC = document.getElementById('errEmail');
+
+  const faltaNombre = marcarCampo(n, errN, !n.value.trim());
+  const correoMal   = marcarCampo(c, errC, !correoPlausible(c.value.trim()));
+  if(faltaNombre){ n.focus(); return; }
+  if(correoMal){ c.focus(); return; }
+
+  const interes = [...document.querySelectorAll('.checks input:checked')]
+    .map(i => i.nextElementSibling.textContent.trim()).join(', ');
+
+  enviarAlServidor({
+    tipo: 'contacto',
+    nombre: n.value.trim(),
+    correo: c.value.trim(),
+    empresa: document.getElementById('fTam').value,
+    interes,
+    mensaje: document.getElementById('fMensaje').value.trim(),
+    origen: 'evetev.com — formulario de contacto',
+    sitio: document.getElementById('fSitio').value
+  }, document.getElementById('btnContacto'), res => {
+    if(res.ok){
+      const nombre = n.value.trim();
+      ['fNombre','fEmail','fMensaje'].forEach(id => { document.getElementById(id).value = ''; });
+      mostrarToast('Gracias, ' + nombre + '. Te respondemos en un día hábil.');
+    } else {
+      mostrarToast(mensajeDeError(res.error), 'error');
+    }
+  });
 }
-document.getElementById('fNombre').addEventListener('input', () => {
-  document.getElementById('errNombre').classList.remove('show');
-  document.getElementById('fNombre').removeAttribute('aria-invalid');
+['fNombre','fEmail'].forEach(id => {
+  const campo = document.getElementById(id);
+  campo.addEventListener('input', () => {
+    document.getElementById(id === 'fNombre' ? 'errNombre' : 'errEmail').classList.remove('show');
+    campo.removeAttribute('aria-invalid');
+  });
 });
 function toggleEve(){
   const b = document.getElementById('eveBurbuja');
@@ -695,20 +546,25 @@ window.addEventListener('load', async () => {
       await loadExternalParticleInteraction(tsParticles);
     }
     await tsParticles.load({
-      id: 'eve-particulas',
+      id: 'eve-particulas',   // el div de la banda; sin fullScreen el lienzo lo rellena
       options: {
-        fullScreen: { enable: true, zIndex: -1 },
+        fullScreen: { enable: false },
         detectRetina: true,
         fpsLimit: 60,
         particles: {
-          number: { value: 80, density: { enable: true } },
+          // La densidad se mide contra un área de referencia. La de fábrica es
+          // 1920x1080 (una pantalla entera) y aquí el lienzo es solo la banda
+          // del hero, así que con ella la red saldría casi vacía.
+          number: { value: 45, density: { enable: true, width: 1200, height: 500 } },
           color: { value: '#1E6FEB' },
           shape: { type: 'circle' },
           opacity: { value: 0.8 },
           size: { value: 2 },
-          // El #f0f0f0 del ejemplo era para fondo negro. En azul de marca sobre
-          // blanco hace falta ~0.45: por debajo la línea de 1px se desvanece.
-          links: { enable: true, distance: 200, color: '#1E6FEB', opacity: 0.45, width: 1 },
+          // Dos desvíos del ejemplo: su #f0f0f0 era para fondo negro y sobre
+          // blanco es invisible (en azul, por debajo de ~0.4 la línea de 1px se
+          // desvanece); y su radio de 200 era para una pantalla entera — en una
+          // banda baja conecta casi todo con todo y tapa el titular.
+          links: { enable: true, distance: 150, color: '#1E6FEB', opacity: 0.4, width: 1 },
           // El 6 del ejemplo es para un lienzo de escaparate; detrás de texto
           // corrido esa velocidad se lleva la mirada. Sube el número si la
           // quieres más viva.

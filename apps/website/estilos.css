@@ -1,0 +1,331 @@
+/* Estilos compartidos de evetev.com — index.html y nosotros.html.
+   Se extrajeron del <style> embebido al aparecer la segunda página:
+   mantener dos copias del mismo CSS era el error más caro a futuro.
+   Marca: packages/brand/assets/evetev_brand_styles.md (v1.0). */
+:root{
+  /* Respaldo de los tokens oficiales — valores exactos, no aproximar (§2) */
+  --eve-azul-noche:#0A2540;
+  --eve-azul-noche-profundo:#081D33;
+  --eve-hielo:#EAF2FB;
+  --eve-tinte:#F4F9FD;
+  --eve-linea:#EDF3FA;
+  --eve-pizarra:#64748B;
+  --eve-muted:#94A3B8;
+  --eve-coral:#EE3D22;
+  --eve-coral-hover:#CF3016;
+  --eve-electrico:#1E6FEB;
+  --eve-mezclado:#144A96;
+  --eve-cian:#22D3EE;
+  --eve-teal:#3BAEC2;
+  --eve-violeta:#8B5CF6;
+  --eve-violeta-texto:#6D28D9;
+  --eve-violeta-tinte:#EDE9FE;
+  --eve-exito:#16A34A;
+  --eve-alerta:#D97706;
+  --eve-error:#B91C1C;
+  --eve-grad-corporativo:linear-gradient(90deg,#0A2540 0%,#1E6FEB 55%,#22D3EE 100%);
+  --eve-grad-ia:linear-gradient(90deg,#8B5CF6 0%,#6366F1 50%,#22D3EE 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px}
+body{font-family:'Inter',sans-serif;color:var(--eve-azul-noche);background:#FDFEFF;line-height:1.65}
+h1,h2,.brand{font-family:'Baloo 2',sans-serif;font-weight:600}
+.wrap{max-width:1040px;margin:0 auto;padding:0 clamp(24px,4.5vw,32px)}
+a{color:inherit;text-decoration:none}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none;background:none}
+:focus-visible{outline:2px solid var(--eve-electrico);outline-offset:2px;border-radius:4px}
+.link{color:var(--eve-electrico);font-weight:500;font-size:.85rem}
+.link:hover{text-decoration:underline}
+
+/* NAV (§6) */
+nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--eve-linea);z-index:50}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{display:flex;align-items:center;gap:8px}
+.logo img{width:32px;height:23px;display:block}
+.brand{font-size:1.15rem}
+.menu{display:flex;gap:26px;align-items:center;font-size:.85rem;color:var(--eve-pizarra)}
+.menu>a:hover{color:var(--eve-azul-noche)}
+.nav-acciones{display:flex;align-items:center;gap:12px}
+.burger{display:none;flex-direction:column;gap:4px;padding:12px 8px}
+.burger span{width:20px;height:2px;background:var(--eve-azul-noche);border-radius:2px;transition:.2s}
+.drop{position:relative}
+.drop>button{font-size:.85rem;color:var(--eve-pizarra);display:flex;align-items:center;gap:4px}
+.drop>button:hover{color:var(--eve-azul-noche)}
+.drop-panel{position:absolute;top:30px;left:-10px;background:#fff;border:1px solid var(--eve-linea);border-radius:10px;box-shadow:0 6px 20px rgba(10,37,64,.06);padding:6px;min-width:215px;display:none}
+.drop.open .drop-panel{display:block}
+.drop-panel a{display:flex;gap:9px;align-items:center;padding:9px 11px;border-radius:7px;font-size:.82rem}
+.drop-panel a:hover{background:var(--eve-tinte)}
+.drop-panel img{width:19px;height:19px;flex:none}
+
+/* BOTONES (§6) — jerarquía: coral (1 por vista) → mezclado → ghost → enlace */
+.btn{border-radius:999px;font-weight:600;font-size:.85rem;padding:11px 24px;transition:.15s;display:inline-block;text-align:center}
+.btn-cta{background:var(--eve-coral);color:#fff}
+.btn-cta:hover{background:var(--eve-coral-hover)}
+.btn-sec{background:var(--eve-mezclado);color:#fff}
+.btn-sec:hover{background:#0E3568}
+.btn-ghost{border:1px solid #D7E3F0;color:var(--eve-azul-noche);font-weight:500}
+.btn-ghost:hover{border-color:var(--eve-pizarra)}
+
+/* HERO — degradado solo en pieza expresiva (C6) */
+/* Banda del hero: contiene el lienzo de partículas a sangre completa. El
+   lienzo es absoluto dentro de ella, así que se desplaza con la página en
+   lugar de quedarse pegado a la ventana, y no invade el resto de secciones. */
+.hero-banda{position:relative;overflow:hidden}
+#eve-particulas{position:absolute;inset:0;z-index:0;pointer-events:none}
+#eve-particulas canvas{display:block}
+.hero-banda>.hero{position:relative;z-index:1}
+.hero{padding:clamp(48px,8vw,84px) 0 56px;max-width:640px}
+.hero h1{font-size:clamp(1.9rem,4.6vw,2.6rem);line-height:1.16;margin-bottom:14px}
+.hero p{font-size:clamp(.9rem,1.6vw,.98rem);color:var(--eve-pizarra);margin-bottom:26px}
+.hero-cta{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.hero-marca{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.hero-marca img{width:46px;height:32px}
+
+/* PRODUCTOS — variante minimalista hairline (§6 tarjetas) */
+.hr{border:none;border-top:1px solid var(--eve-linea)}
+.serv{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--eve-linea)}
+.serv>div{padding:30px 26px;border-right:1px solid var(--eve-linea);border-bottom:1px solid var(--eve-linea)}
+.serv>div:nth-child(3n){border-right:none}
+.serv img{width:33px;height:33px;display:block}
+/* Punto de línea de negocio (§12) — el color lo pone --p de cada tarjeta */
+.serv .punto{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
+.serv h3{font-size:.92rem;font-weight:600;margin:13px 0 4px}
+.serv p{font-size:.8rem;color:var(--eve-pizarra);margin-bottom:10px}
+
+/* Ícono de producto en el color de su línea.
+   La regla T1 prohíbe redibujar o aproximar la marca, así que NO se copia el
+   trazo: se usa la unidad oficial del CDN como máscara y el color se pinta
+   por debajo. El activo sigue siendo el del CDN; solo cambia el tinte. */
+.p-ico{width:34px;height:34px;display:block;background-color:var(--p);
+  -webkit-mask:var(--u) center/contain no-repeat;mask:var(--u) center/contain no-repeat}
+.p-ico.sm{width:19px;height:19px;flex:none}
+.prod{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--eve-linea)}
+.prod>article{padding:32px 28px;border-right:1px solid var(--eve-linea);border-bottom:1px solid var(--eve-linea)}
+.prod>article:nth-child(2n){border-right:none}
+.prod h3{font-size:1.05rem;font-weight:600;margin:14px 0 6px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.prod .sub{font-size:.74rem;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--p)}
+.prod p{font-size:.85rem;color:var(--eve-pizarra);margin-bottom:14px;max-width:44ch}
+.prod ul{list-style:none;margin:0 0 16px}
+.prod li{font-size:.8rem;color:var(--eve-pizarra);padding:4px 0;display:flex;gap:9px;align-items:flex-start}
+.prod li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--p);flex:none;margin-top:8px}
+
+/* Estado del producto: ícono + texto, nunca solo color (C5) */
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-weight:600;
+  padding:3px 11px;border-radius:999px;border:1px solid var(--eve-linea);
+  background:var(--eve-tinte);color:var(--eve-pizarra);white-space:nowrap}
+.chip svg{width:11px;height:11px;flex:none}
+.chip.build{background:#EAF2FB;border-color:#CFE0F5;color:var(--eve-mezclado)}
+
+/* Roadmap — tratamiento ligero: son futuros, no productos de hoy */
+.roadmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:2px;
+  background:var(--eve-linea);border:1px solid var(--eve-linea);border-radius:12px;overflow:hidden}
+.roadmap>div{background:#fff;padding:18px 20px}
+.roadmap h4{font-size:.86rem;font-weight:600;margin-bottom:3px;display:flex;align-items:center}
+.roadmap p{font-size:.78rem;color:var(--eve-pizarra);margin:0}
+
+/* TABS (§6) */
+.tabs{display:inline-flex;background:var(--eve-tinte);border-radius:999px;padding:4px;gap:2px;flex-wrap:wrap}
+.tab{border-radius:999px;padding:8px 20px;font-size:.82rem;font-weight:500;color:var(--eve-pizarra)}
+.tab.act{background:#fff;color:var(--eve-azul-noche);box-shadow:0 1px 4px rgba(10,37,64,.08)}
+.tab-body{display:none;padding-top:26px;max-width:640px}
+.tab-body.act{display:block}
+.tab-body p{font-size:.88rem;color:var(--eve-pizarra)}
+.tab-body code{background:var(--eve-tinte);border:1px solid var(--eve-linea);border-radius:6px;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--eve-azul-noche)}
+
+/* PRECIOS — cifras protagonistas en Baloo 2 700 (§3) */
+.precios{background:var(--eve-tinte);border-top:1px solid var(--eve-linea);border-bottom:1px solid var(--eve-linea);padding:64px 0}
+.pre-grid{display:flex;gap:44px;align-items:flex-start;flex-wrap:wrap}
+.pre-l{flex:1.2;min-width:290px}
+.pre-l h2{font-size:clamp(1.3rem,2.6vw,1.6rem);margin-bottom:8px}
+.pre-l>p{font-size:.88rem;color:var(--eve-pizarra);margin-bottom:26px}
+input[type=range]{width:100%;accent-color:var(--eve-mezclado)}
+.switch{display:flex;align-items:center;gap:12px;margin-top:24px;font-size:.85rem;color:var(--eve-pizarra);cursor:pointer}
+.sw{position:relative;width:42px;height:23px;background:#D7E3F0;border-radius:999px;transition:.2s;flex:none}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;background:#fff;border-radius:50%;transition:.2s}
+#anual:checked + .sw{background:var(--eve-mezclado)}
+#anual:checked + .sw::after{left:22px}
+#anual{position:absolute;opacity:0}
+.pre-card{flex:1;min-width:280px;background:#fff;border:1px solid var(--eve-linea);border-radius:14px;padding:28px}
+.pre-card .v{font-family:'Baloo 2',sans-serif;font-size:2.1rem;font-weight:700}
+.pre-card small{color:var(--eve-muted);font-size:.75rem}
+.pre-card ul{list-style:none;margin:18px 0 22px}
+.pre-card li{font-size:.82rem;color:var(--eve-pizarra);padding:5px 0;display:flex;gap:9px;align-items:center}
+.pre-card li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--eve-electrico);flex:none}
+.pre-card .btn{width:100%}
+.detalle-costos{margin-top:14px;border-top:1px solid var(--eve-linea);padding-top:10px}
+.detalle-costos div{display:flex;justify-content:space-between;font-size:.78rem;color:var(--eve-pizarra);padding:3px 0}
+
+/* TARJETAS con ilustración (§6) */
+.icards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.icard{border:1px solid var(--eve-linea);border-radius:14px;overflow:hidden;background:#fff;transition:.2s;display:flex;flex-direction:column}
+.icard:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(10,37,64,.09)}
+.icard .cover{display:block;width:100%;height:auto}
+.icard .cuerpo{padding:18px 22px 22px}
+.icard h3{font-size:.95rem;font-weight:600;margin-bottom:5px}
+.icard p{font-size:.82rem;color:var(--eve-pizarra);margin-bottom:12px}
+
+/* BANDA portada (§6): object-fit cover + velo + contenido en blanco */
+.banda{position:relative;min-height:clamp(240px,38vw,420px);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:36px}
+.banda video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:linear-gradient(120deg,#0A2540,#1E6FEB)}
+.banda::after{content:'';position:absolute;inset:0;background:rgba(10,37,64,.42)}
+.banda .contenido{position:relative;z-index:2;text-align:center;color:#fff;padding:48px clamp(24px,6vw,60px);max-width:760px;margin:0 auto}
+.banda h2{font-size:clamp(1.5rem,3.4vw,2.2rem);margin-bottom:10px;color:#fff}
+.banda p{font-size:clamp(.85rem,1.6vw,.95rem);color:#D6E6F7;margin-bottom:0}
+
+/* FORM contacto (§6) */
+.contacto{max-width:580px}
+.contacto h2{font-size:clamp(1.3rem,2.6vw,1.6rem);margin-bottom:8px}
+.contacto>p{font-size:.88rem;color:var(--eve-pizarra);margin-bottom:26px}
+.campo{margin-bottom:18px}
+.campo>label{display:block;font-size:.82rem;font-weight:500;margin-bottom:6px}
+.campo input[type=text],.campo input[type=email],.campo select{width:100%;padding:11px 14px;border:1px solid #DCE7F2;border-radius:9px;font-size:.88rem;font-family:'Inter',sans-serif;background:#fff;color:var(--eve-azul-noche)}
+.campo input:focus,.campo select:focus{outline:2px solid var(--eve-electrico);border-color:transparent}
+/* Error: SIEMPRE ícono + texto, nunca solo color (C5) */
+.err{display:none;align-items:center;gap:7px;margin-top:7px;font-size:.78rem;color:var(--eve-error)}
+.err svg{width:15px;height:15px;flex:none}
+.err.show{display:flex}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chk{display:flex;gap:14px;align-items:center;font-size:.85rem;color:var(--eve-pizarra);padding:13px 16px;border:1px solid #DCE7F2;border-radius:9px;cursor:pointer;transition:.15s;line-height:1.3}
+.chk:hover{border-color:var(--eve-pizarra)}
+.chk input{accent-color:var(--eve-electrico);width:17px;height:17px;flex:none;margin:0}
+.chk input:checked ~ span{color:var(--eve-azul-noche);font-weight:500}
+
+/* FAQ (§6) */
+details{border-bottom:1px solid var(--eve-linea)}
+summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:18px 2px;font-weight:500;font-size:.9rem;cursor:pointer;gap:14px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';font-family:'Baloo 2',sans-serif;font-size:1.25rem;color:var(--eve-electrico);flex:none}
+details[open] summary::after{content:'–'}
+details p{padding:0 2px 18px;color:var(--eve-pizarra);font-size:.85rem;max-width:640px}
+
+/* MODAL (§6) */
+.overlay{position:fixed;inset:0;background:rgba(10,37,64,.35);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:34px;max-width:400px;width:100%;text-align:center}
+.modal img{width:52px;height:37px;margin-bottom:14px}
+.modal h3{font-family:'Baloo 2',sans-serif;font-size:1.25rem;margin-bottom:8px}
+.modal p{font-size:.85rem;color:var(--eve-pizarra);margin-bottom:22px}
+
+section{padding:64px 0}
+.sec-h{margin-bottom:34px}
+.sec-h h2{font-size:clamp(1.3rem,2.6vw,1.6rem);margin-bottom:6px}
+.sec-h p{font-size:.88rem;color:var(--eve-pizarra)}
+
+/* TOAST (§6) — ícono + texto (C5) */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--eve-azul-noche);color:#fff;font-size:.85rem;padding:12px 24px;border-radius:999px;transition:.3s;opacity:0;z-index:110;max-width:90vw;display:flex;align-items:center;gap:10px}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast svg{width:17px;height:17px;flex:none}
+
+/* Mascota Eve (§4) */
+.eve-fab{position:fixed;right:22px;bottom:22px;z-index:90;width:64px;height:64px;border-radius:50%;background:#fff;border:2px solid #DCE7F2;box-shadow:0 8px 24px rgba(10,37,64,.18);padding:5px;transition:.2s;cursor:pointer}
+.eve-fab img{width:100%;height:100%;object-fit:contain;display:block}
+.eve-fab:hover{transform:scale(1.07)}
+.eve-burbuja{position:fixed;right:22px;bottom:96px;z-index:90;background:#fff;border:1px solid var(--eve-linea);border-radius:16px 16px 4px 16px;box-shadow:0 12px 32px rgba(10,37,64,.16);padding:16px 18px;max-width:262px;display:none}
+.eve-burbuja.open{display:block}
+.eve-burbuja p{font-size:.83rem;color:var(--eve-pizarra);margin:0 0 12px;line-height:1.5}
+.eve-burbuja b{color:var(--eve-azul-noche)}
+
+/* FOOTER (§6) */
+footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
+.foot-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px;padding:56px 0 40px}
+.foot-marca img{width:40px;height:28px}
+.foot-marca .brand{color:#fff;font-size:1.15rem;display:block;margin:10px 0 8px}
+.foot-marca p{font-size:.8rem;line-height:1.6;max-width:250px;color:#8FA8C4}
+.foot-col h4{color:#fff;font-size:.8rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px}
+.foot-col a{display:block;font-size:.83rem;color:#B9CCE0;padding:5px 0}
+.foot-col a:hover{color:var(--eve-cian)}
+.suscribe{padding:0 0 36px}
+.suscribe p{font-size:.83rem;color:#8FA8C4;margin-bottom:10px}
+.sus-row{display:flex;gap:10px;max-width:420px}
+.sus-row input{flex:1;padding:11px 16px;border-radius:999px;border:1px solid #2C4A6B;background:#0F2D4A;color:#fff;font-size:.85rem;font-family:'Inter',sans-serif}
+.sus-row input::placeholder{color:#6C87A6}
+.sus-row input:focus{outline:2px solid var(--eve-cian);border-color:transparent}
+.foot-base{border-top:1px solid #1A3A5C;padding:20px 0;display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:#6C87A6;flex-wrap:wrap;gap:12px}
+.redes{display:flex;gap:14px}
+.redes a{display:flex;width:34px;height:34px;border:1px solid #2C4A6B;border-radius:50%;align-items:center;justify-content:center;transition:.15s}
+.redes a:hover{border-color:var(--eve-cian)}
+.redes svg{width:16px;height:16px;fill:#B9CCE0}
+.redes a:hover svg{fill:var(--eve-cian)}
+
+/* ============ RESPONSIVE (§7) ============ */
+/* Tablet */
+@media(max-width:1024px){
+  .serv{grid-template-columns:1fr 1fr}
+  .serv>div:nth-child(3n){border-right:1px solid var(--eve-linea)}
+  .serv>div:nth-child(2n){border-right:none}
+  .foot-top{grid-template-columns:1fr 1fr}
+}
+/* Móvil */
+@media(max-width:760px){
+  .wrap{padding:0 26px}
+  .hero{padding-top:60px}
+  section{padding:52px 0}
+  .burger{display:flex}
+  .nav-acciones .btn-cta{padding:9px 18px;font-size:.8rem}
+  .menu{display:none;position:absolute;top:60px;left:0;right:0;background:#fff;border-bottom:1px solid var(--eve-linea);flex-direction:column;align-items:stretch;gap:0;padding:8px 0;box-shadow:0 10px 24px rgba(10,37,64,.07)}
+  .menu.open{display:flex}
+  .menu>a,.menu>button{padding:13px 24px;text-align:left}
+  .drop{width:100%}
+  .drop>button{padding:13px 24px;width:100%;justify-content:space-between}
+  .drop-panel{position:static;border:none;box-shadow:none;background:var(--eve-tinte);border-radius:0;padding:4px 12px}
+  .serv{grid-template-columns:1fr}
+  .serv>div{border-right:none !important}
+  .checks{grid-template-columns:1fr}
+  .hero-cta .btn{width:100%}
+  .pre-grid{gap:28px}
+  .tabs{width:100%;justify-content:center}
+  .foot-top{grid-template-columns:1fr}
+  .foot-base{flex-direction:column;align-items:flex-start}
+}
+/* Escritorio amplio */
+@media(min-width:1440px){
+  .wrap{max-width:1160px}
+}
+/* Ultra-wide: el contenido no se estira, respira */
+@media(min-width:1900px){
+  html{font-size:17.5px}
+  .wrap{max-width:1280px}
+  .hero{max-width:700px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none !important}}
+
+/* ============ NOSOTROS / EQUIPO / TRABAJA (nosotros.html) ============ */
+.valores{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:18px}
+.valor{border:1px solid var(--eve-linea);border-radius:14px;padding:20px 22px;background:#fff}
+.valor h3{font-size:.92rem;font-weight:600;margin-bottom:5px}
+.valor p{font-size:.82rem;color:var(--eve-pizarra)}
+
+/* Hoja de ruta: el hito cumplido se marca con punto lleno + la palabra
+   "Hecho", nunca solo con color (C5). */
+.ruta{list-style:none;border-left:2px solid var(--eve-linea);margin:0 0 0 6px}
+.ruta li{position:relative;padding:0 0 24px 26px}
+.ruta li::before{content:'';position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--eve-electrico)}
+.ruta li.hecho::before{background:var(--eve-electrico)}
+.ruta b{display:block;font-size:.88rem;margin-bottom:3px}
+.ruta p{font-size:.82rem;color:var(--eve-pizarra);margin:0;max-width:62ch}
+
+.equipo{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:20px}
+.persona{border:1px solid var(--eve-linea);border-radius:14px;padding:22px;background:#fff}
+.persona .ini{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+  font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.05rem;color:#fff;background:var(--p);margin-bottom:13px}
+.persona h3{font-size:1rem;font-weight:600;margin-bottom:1px}
+.persona .rol{font-size:.77rem;font-weight:600;color:var(--p);display:block;margin-bottom:9px}
+.persona p{font-size:.82rem;color:var(--eve-pizarra);margin-bottom:12px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.7rem;font-weight:500;padding:3px 10px;border-radius:999px;
+  background:var(--eve-tinte);border:1px solid var(--eve-linea);color:var(--eve-pizarra)}
+
+.campo textarea{width:100%;padding:11px 14px;border:1px solid #DCE7F2;border-radius:9px;
+  font-size:.88rem;font-family:'Inter',sans-serif;background:#fff;color:var(--eve-azul-noche);
+  min-height:130px;resize:vertical}
+.campo textarea:focus{outline:2px solid var(--eve-electrico);border-color:transparent}
+.ayuda{font-size:.76rem;color:var(--eve-muted);margin-top:6px}
+
+@media(max-width:760px){.valores,.equipo{grid-template-columns:1fr}}
+
+/* Trampa antibots: fuera de pantalla, sin display:none (algunos bots lo
+   detectan) y fuera del árbol de accesibilidad vía aria-hidden en el HTML. */
+.trampa{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+/* Botón ocupado mientras se envía el formulario */
+.btn[disabled]{opacity:.65;cursor:progress}
