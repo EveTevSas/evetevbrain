@@ -389,10 +389,10 @@
   </div>
 </div>
 
-<button class="eve-fab" onclick="toggleEve()" aria-label="Abrir asistente Eve" aria-expanded="true" aria-controls="eveBurbuja">
+<button class="eve-fab" onclick="toggleEve()" aria-label="Abrir asistente Eve" aria-expanded="false" aria-controls="eveBurbuja">
   <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/mascota/mascota.webp" alt="">
 </button>
-<div class="eve-burbuja open" id="eveBurbuja" role="dialog" aria-label="Mensaje de Eve">
+<div class="eve-burbuja" id="eveBurbuja" role="dialog" aria-label="Mensaje de Eve">
   <p><b>¡Hola! Soy Eve.</b> Cuido que tus pagos lleguen y tus preguntas no se queden sin respuesta. ¿Hablamos?</p>
   <a class="btn btn-sec" href="#contacto" onclick="toggleEve()" style="display:block;font-size:.8rem;padding:9px 16px">Ir al formulario</a>
 </div>
@@ -499,11 +499,51 @@ function enviarForm(){
     campo.removeAttribute('aria-invalid');
   });
 });
-function toggleEve(){
-  const b = document.getElementById('eveBurbuja');
-  b.classList.toggle('open');
-  document.querySelector('.eve-fab').setAttribute('aria-expanded', b.classList.contains('open'));
+/* Mascota Eve.
+   La burbuja ya no arranca abierta: en móvil se comía la banda de video, que
+   ahora va justo debajo del hero. Saluda una sola vez, cuando la persona
+   empieza a bajar —ahí ya está mirando la página, no recién aterrizando— y se
+   retira sola a los 3 s. Después queda a un toque de la mascota. */
+const eveBurbuja = document.getElementById('eveBurbuja');
+const eveFab = document.querySelector('.eve-fab');
+let eveTemporizador = null;
+
+function eveMostrar(abierta){
+  eveBurbuja.classList.toggle('open', abierta);
+  eveFab.setAttribute('aria-expanded', String(abierta));
 }
+
+function toggleEve(){
+  clearTimeout(eveTemporizador);   // un toque manda sobre el cierre automático
+  eveTemporizador = null;
+  eveMostrar(!eveBurbuja.classList.contains('open'));
+}
+
+(function saludoUnico(){
+  let ultimaY = window.scrollY;
+  let yaSaludo = false;
+
+  function alHacerScroll(){
+    if(yaSaludo) return;
+    const y = window.scrollY;
+    // Solo bajando, y con recorrido real: evita dispararlo por el rebote del
+    // scroll o por un salto de anclaje.
+    if(y > ultimaY && y > 140){
+      yaSaludo = true;
+      window.removeEventListener('scroll', alHacerScroll);
+      eveMostrar(true);
+      eveTemporizador = setTimeout(() => {
+        // Si la persona está usando la burbuja, no se la cerramos en la cara.
+        if(eveBurbuja.contains(document.activeElement)) return;
+        eveMostrar(false);
+        eveTemporizador = null;
+      }, 3000);
+    }
+    ultimaY = y;
+  }
+
+  window.addEventListener('scroll', alHacerScroll, { passive: true });
+})();
 function suscribir(){
   const e = document.getElementById('susEmail').value.trim();
   if(!e || !e.includes('@')){ mostrarToast('Escribe un correo válido para suscribirte.', 'error'); return; }
