@@ -51,11 +51,8 @@
   --eve-grad-ia:linear-gradient(90deg,#8B5CF6 0%,#6366F1 50%,#22D3EE 100%);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-/* El color base vive en html para que el lienzo de partículas (z-index:-1,
-   fijo a pantalla completa) quede por encima del fondo y por debajo del
-   contenido. Si body pintara el fondo, taparía las partículas. */
-html{font-size:16px;background:#FDFEFF}
-body{font-family:'Inter',sans-serif;color:var(--eve-azul-noche);background:transparent;line-height:1.65}
+html{font-size:16px}
+body{font-family:'Inter',sans-serif;color:var(--eve-azul-noche);background:#FDFEFF;line-height:1.65}
 h1,h2,.brand{font-family:'Baloo 2',sans-serif;font-weight:600}
 .wrap{max-width:1040px;margin:0 auto;padding:0 clamp(24px,4.5vw,32px)}
 a{color:inherit;text-decoration:none}
@@ -94,6 +91,13 @@ nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(
 .btn-ghost:hover{border-color:var(--eve-pizarra)}
 
 /* HERO — degradado solo en pieza expresiva (C6) */
+/* Banda del hero: contiene el lienzo de partículas a sangre completa. El
+   lienzo es absoluto dentro de ella, así que se desplaza con la página en
+   lugar de quedarse pegado a la ventana, y no invade el resto de secciones. */
+.hero-banda{position:relative;overflow:hidden}
+#eve-particulas{position:absolute;inset:0;z-index:0;pointer-events:none}
+#eve-particulas canvas{display:block}
+.hero-banda>.hero{position:relative;z-index:1}
 .hero{padding:clamp(48px,8vw,84px) 0 56px;max-width:640px}
 .hero h1{font-size:clamp(1.9rem,4.6vw,2.6rem);line-height:1.16;margin-bottom:14px}
 .hero p{font-size:clamp(.9rem,1.6vw,.98rem);color:var(--eve-pizarra);margin-bottom:26px}
@@ -309,17 +313,22 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
   </div>
 </nav>
 
-<header class="wrap hero">
-  <div class="hero-marca">
-    <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-gradiente-corporativo.svg" alt="" width="46" height="32">
-  </div>
-  <h1>Pagos e inteligencia artificial, sin complicaciones</h1>
-  <p>Tarifas transparentes. Tecnología propia. Cero letra menuda.</p>
-  <div class="hero-cta">
-    <a class="btn btn-sec" href="#precios">Calcular mi costo</a>
-    <a class="link" href="#servicios">Ver cómo funciona →</a>
-  </div>
-</header>
+<!-- La banda es el marco del fondo de partículas: al vivir en el flujo normal
+     (y no fija a la ventana) la red sube con el scroll y se queda en el hero. -->
+<div class="hero-banda">
+  <div id="eve-particulas" aria-hidden="true"></div>
+  <header class="wrap hero">
+    <div class="hero-marca">
+      <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-gradiente-corporativo.svg" alt="" width="46" height="32">
+    </div>
+    <h1>Pagos e inteligencia artificial, sin complicaciones</h1>
+    <p>Tarifas transparentes. Tecnología propia. Cero letra menuda.</p>
+    <div class="hero-cta">
+      <a class="btn btn-sec" href="#precios">Calcular mi costo</a>
+      <a class="link" href="#servicios">Ver cómo funciona →</a>
+    </div>
+  </header>
+</div>
 
 <hr class="hr">
 
@@ -695,20 +704,25 @@ window.addEventListener('load', async () => {
       await loadExternalParticleInteraction(tsParticles);
     }
     await tsParticles.load({
-      id: 'eve-particulas',
+      id: 'eve-particulas',   // el div de la banda; sin fullScreen el lienzo lo rellena
       options: {
-        fullScreen: { enable: true, zIndex: -1 },
+        fullScreen: { enable: false },
         detectRetina: true,
         fpsLimit: 60,
         particles: {
-          number: { value: 80, density: { enable: true } },
+          // La densidad se mide contra un área de referencia. La de fábrica es
+          // 1920x1080 (una pantalla entera) y aquí el lienzo es solo la banda
+          // del hero, así que con ella la red saldría casi vacía.
+          number: { value: 45, density: { enable: true, width: 1200, height: 500 } },
           color: { value: '#1E6FEB' },
           shape: { type: 'circle' },
           opacity: { value: 0.8 },
           size: { value: 2 },
-          // El #f0f0f0 del ejemplo era para fondo negro. En azul de marca sobre
-          // blanco hace falta ~0.45: por debajo la línea de 1px se desvanece.
-          links: { enable: true, distance: 200, color: '#1E6FEB', opacity: 0.45, width: 1 },
+          // Dos desvíos del ejemplo: su #f0f0f0 era para fondo negro y sobre
+          // blanco es invisible (en azul, por debajo de ~0.4 la línea de 1px se
+          // desvanece); y su radio de 200 era para una pantalla entera — en una
+          // banda baja conecta casi todo con todo y tapa el titular.
+          links: { enable: true, distance: 150, color: '#1E6FEB', opacity: 0.4, width: 1 },
           // El 6 del ejemplo es para un lienzo de escaparate; detrás de texto
           // corrido esa velocidad se lleva la mirada. Sube el número si la
           // quieres más viva.
