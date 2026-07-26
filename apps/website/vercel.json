@@ -3,5 +3,10 @@
   "framework": null,
   "buildCommand": null,
   "installCommand": null,
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "functions": {
+    "api/contacto.js": {
+      "maxDuration": 10
+    }
+  }
 }
