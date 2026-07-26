@@ -1,12 +1,15 @@
 import { and, count, eq, sql } from "drizzle-orm";
-import type { Cobro } from "@evetev/shared";
+import type { Cobro, EstadoCobro } from "@evetev/shared";
 import type { Db } from "../../database/drizzle";
-import { paymentAudit, paymentIdempotency, payments } from "../../database/schema";
+import { paymentAudit, paymentIdempotency, payments, webhookEvents } from "../../database/schema";
 import {
+  type AplicarTransicionArgs,
   type CrearConIdempotenciaArgs,
   type CrearResultado,
   type IdempotencyHit,
-  type PagosRepository
+  type PagosRepository,
+  type RegistrarEventoArgs,
+  type ResolucionPago
 } from "./pagos.repository";
 
 type FilaPago = typeof payments.$inferSelect;
@@ -127,6 +130,58 @@ export class DrizzlePagosRepository implements PagosRepository {
       await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
       const rows = await tx.select({ n: count() }).from(payments);
       return Number(rows[0]?.n ?? 0);
+    });
+  }
+
+  async resolverPagoPorProvider(providerPaymentId: string): Promise<ResolucionPago | null> {
+    // Función SECURITY DEFINER: resuelve el cobro sin necesidad de tenant (cross-tenant).
+    const result = await this.db.execute(
+      sql`select payment_id, tenant_id, status from evepay.tenant_of_payment(${providerPaymentId})`
+    );
+    const rows = result as unknown as Array<{
+      payment_id: string;
+      tenant_id: string;
+      status: string;
+    }>;
+    const row = rows[0];
+    if (!row) {
+      return null;
+    }
+    return { paymentId: row.payment_id, tenantId: row.tenant_id, estado: row.status as EstadoCobro };
+  }
+
+  async registrarEventoIdempotente(args: RegistrarEventoArgs): Promise<boolean> {
+    return this.db.transaction(async (tx): Promise<boolean> => {
+      await tx.execute(sql`select set_config('app.tenant_id', ${args.tenantId}, true)`);
+      const inserted = await tx
+        .insert(webhookEvents)
+        .values({
+          eventId: args.eventId,
+          tenantId: args.tenantId,
+          provider: args.provider,
+          type: args.type
+        })
+        .onConflictDoNothing()
+        .returning({ eventId: webhookEvents.eventId });
+      return inserted.length > 0;
+    });
+  }
+
+  async aplicarTransicion(args: AplicarTransicionArgs): Promise<void> {
+    await this.db.transaction(async (tx): Promise<void> => {
+      await tx.execute(sql`select set_config('app.tenant_id', ${args.tenantId}, true)`);
+      await tx
+        .update(payments)
+        .set({ status: args.hacia, updatedAt: new Date() })
+        .where(and(eq(payments.id, args.paymentId), eq(payments.tenantId, args.tenantId)));
+      await tx.insert(paymentAudit).values({
+        tenantId: args.tenantId,
+        paymentId: args.paymentId,
+        fromStatus: args.desde,
+        toStatus: args.hacia,
+        actor: args.actor,
+        data: null
+      });
     });
   }
 }

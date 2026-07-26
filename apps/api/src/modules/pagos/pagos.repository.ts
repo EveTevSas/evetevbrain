@@ -29,6 +29,28 @@ export interface CrearConIdempotenciaArgs {
 /** `creado:false` → otra transacción ganó la carrera con la misma clave. */
 export type CrearResultado = { creado: true; cobro: Cobro } | { creado: false };
 
+/** Resolución de un cobro por el id del proveedor (para webhooks, cross-tenant). */
+export interface ResolucionPago {
+  paymentId: string;
+  tenantId: string;
+  estado: EstadoCobro;
+}
+
+export interface RegistrarEventoArgs {
+  tenantId: string;
+  eventId: string;
+  provider: string;
+  type: string;
+}
+
+export interface AplicarTransicionArgs {
+  tenantId: string;
+  paymentId: string;
+  desde: EstadoCobro;
+  hacia: EstadoCobro;
+  actor: string;
+}
+
 /**
  * Puerto de persistencia de pagos. Dos adaptadores: in-memory (tests/local) y
  * Drizzle/Postgres (Supabase). Todas las operaciones están acotadas por tenant
@@ -45,6 +67,14 @@ export interface PagosRepository {
   crearConIdempotencia(args: CrearConIdempotenciaArgs): Promise<CrearResultado>;
   /** Solo para verificación de aislamiento por tenant. */
   contarPorTenant(tenantId: string): Promise<number>;
+
+  // --- Webhooks (Fase 2) ---
+  /** Ubica un cobro por el id del proveedor (operación de sistema, cross-tenant). */
+  resolverPagoPorProvider(providerPaymentId: string): Promise<ResolucionPago | null>;
+  /** Registra un evento; devuelve true si es nuevo, false si ya se había visto. */
+  registrarEventoIdempotente(args: RegistrarEventoArgs): Promise<boolean>;
+  /** Aplica una transición de estado a un cobro y la audita (acotada al tenant). */
+  aplicarTransicion(args: AplicarTransicionArgs): Promise<void>;
 }
 
 export const PAGOS_REPOSITORY = Symbol("PAGOS_REPOSITORY");

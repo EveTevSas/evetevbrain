@@ -61,10 +61,19 @@ export const paymentAudit = evepay.table("payment_audit", {
   at: timestamp("at", { withTimezone: true }).notNull().defaultNow()
 });
 
+export const webhookEvents = evepay.table("webhook_events", {
+  eventId: text("event_id").primaryKey(),
+  tenantId: uuid("tenant_id").notNull(),
+  provider: text("provider").notNull().default("akua"),
+  type: text("type").notNull(),
+  at: timestamp("at", { withTimezone: true }).notNull().defaultNow()
+});
+
 export const schema = {
   tenants,
   merchants,
   payments,
   paymentIdempotency,
-  paymentAudit
+  paymentAudit,
+  webhookEvents
 };

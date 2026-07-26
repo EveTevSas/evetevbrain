@@ -1,11 +1,14 @@
 import { randomUUID } from "node:crypto";
 import type { Cobro } from "@evetev/shared";
 import {
+  type AplicarTransicionArgs,
   type CrearConIdempotenciaArgs,
   type CrearResultado,
   type IdempotencyHit,
   type NuevoCobro,
-  type PagosRepository
+  type PagosRepository,
+  type RegistrarEventoArgs,
+  type ResolucionPago
 } from "./pagos.repository";
 
 interface FilaCobro extends NuevoCobro {
@@ -30,6 +33,7 @@ interface AuditRow {
 export class InMemoryPagosRepository implements PagosRepository {
   private readonly pagos = new Map<string, FilaCobro>(); // id -> fila
   private readonly idempotencia = new Map<string, IdempotencyHit>(); // `${tenant}:${key}`
+  private readonly eventos = new Set<string>(); // event_id vistos
   readonly auditoria: AuditRow[] = [];
 
   private key(tenantId: string, idempotencyKey: string): string {
@@ -96,5 +100,38 @@ export class InMemoryPagosRepository implements PagosRepository {
       if (fila.tenantId === tenantId) n++;
     }
     return n;
+  }
+
+  async resolverPagoPorProvider(providerPaymentId: string): Promise<ResolucionPago | null> {
+    for (const fila of this.pagos.values()) {
+      if (fila.providerPaymentId === providerPaymentId) {
+        return { paymentId: fila.id, tenantId: fila.tenantId, estado: fila.estado };
+      }
+    }
+    return null;
+  }
+
+  async registrarEventoIdempotente(args: RegistrarEventoArgs): Promise<boolean> {
+    if (this.eventos.has(args.eventId)) {
+      return false;
+    }
+    this.eventos.add(args.eventId);
+    return true;
+  }
+
+  async aplicarTransicion(args: AplicarTransicionArgs): Promise<void> {
+    const fila = this.pagos.get(args.paymentId);
+    if (!fila || fila.tenantId !== args.tenantId) {
+      return;
+    }
+    fila.estado = args.hacia;
+    this.auditoria.push({
+      tenantId: args.tenantId,
+      paymentId: args.paymentId,
+      fromStatus: args.desde,
+      toStatus: args.hacia,
+      actor: args.actor,
+      at: new Date().toISOString()
+    });
   }
 }
