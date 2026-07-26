@@ -64,11 +64,22 @@ export type RangoFechas = z.infer<typeof RangoFechasSchema>;
 export type ResultadoConciliacion = z.infer<typeof ResultadoConciliacionSchema>;
 
 /**
+ * Resultado que devuelve el proveedor (Akua) al crear un cobro. EvePay le pone su
+ * propio `id` al cobro y guarda aparte el `providerPaymentId`.
+ */
+export interface ProviderCobro {
+  providerPaymentId: string;
+  estado: EstadoCobro;
+  checkoutUrl?: string;
+}
+
+/**
  * Interfaz de adquirencia. Akua es el backbone detrás de ella (§7).
  * Los webhooks del proveedor se normalizan a nuestros eventos internos.
+ * Ningún módulo importa el SDK del proveedor: solo la implementación de esta interfaz.
  */
 export interface PaymentProvider {
-  crearCobro(input: CrearCobroInput, idempotencyKey: string): Promise<Cobro>;
-  verificarEstado(cobroId: string): Promise<EstadoCobro>;
+  crearCobro(input: CrearCobroInput, idempotencyKey: string): Promise<ProviderCobro>;
+  verificarEstado(providerPaymentId: string): Promise<EstadoCobro>;
   conciliar(rango: RangoFechas): Promise<ResultadoConciliacion>;
 }

@@ -1,27 +1,30 @@
 # Tareas — Crear cobro idempotente
 
 Unidades implementables (mapean a ramas cortas, §3). Cada una con sus tests.
+Estado tras Fase 0+1 (validado con typecheck · lint · test · nest build en verde):
 
-- [ ] **T1 — Esquema de datos.** Migración Drizzle: tablas `payments`,
-  `payment_idempotency` (UNIQUE `tenant_id,idempotency_key`) y `payment_audit`
-  (append-only) en schema `evepay`, con `tenant_id` y RLS.
-- [ ] **T2 — Máquina de estados.** Tipo y transiciones válidas
-  `creado→pendiente→aprobado|fallido→conciliado`; rechazar transiciones inválidas.
-- [ ] **T3 — Auditoría.** Registrar cada transición (inmutable) en `payment_audit`.
-- [ ] **T4 — `PagosService.crearCobro`.** Lógica de idempotencia (lookup por clave,
-  hash de request, `409` en conflicto, insert transaccional) + llamada al provider.
-- [ ] **T5 — `PagosController`.** `POST /v1/pagos`, header `Idempotency-Key`
-  obligatorio, validación Zod, mapeo de errores (400/409).
-- [ ] **T6 — `AkuaPaymentProvider` (sandbox).** Implementa `crearCobro` contra
-  `POST /v1/payments` con `ak_test_` y reenvío de `Idempotency-Key`. (Fake ya existe.)
-- [ ] **T7 — Tests (derivados de EARS).** Idempotencia (mismo/distinto body),
-  falta de header, body inválido, concurrencia (unicidad DB), aislamiento por tenant.
+- [x] **T1 — Esquema de datos.** Tablas `payments`, `payment_idempotency`
+  (UNIQUE `tenant_id,idempotency_key`) y `payment_audit` (append-only, trigger de
+  inmutabilidad) en schema `evepay`, con `tenant_id` y RLS. En Drizzle
+  (`apps/api/src/database/schema.ts`) y SQL (`supabase/migrations/0001_init_evepay.sql`).
+- [x] **T2 — Máquina de estados.** `payment-state.ts`: transiciones válidas
+  `creado→pendiente→aprobado|fallido→conciliado`.
+- [x] **T3 — Auditoría.** Registro inmutable de la transición inicial en cada creación.
+- [x] **T4 — `PagosService.crearCobro`.** Idempotencia (lookup por clave, hash de
+  request, `409` en conflicto, resolución de carrera) + llamada al provider.
+- [x] **T5 — `PagosController`.** `POST /v1/pagos`, header `Idempotency-Key`
+  obligatorio, validación Zod, RBAC (`@Roles`), mapeo de errores 400/409.
+- [~] **T6 — `AkuaPaymentProvider`.** Esqueleto implementado (`akua-payment.provider.ts`)
+  con reenvío de `Idempotency-Key`. **Pendiente:** correr contra el sandbox real y
+  fijar los nombres de campos al obtener las `ak_test_` keys.
+- [x] **T7 — Tests (derivados de EARS).** 7 criterios EARS + aislamiento por tenant
+  + RBAC. `apps/api`: 12 tests en verde (service 6, controller 3, guard 3).
 - [ ] **T8 — Dogfooding.** `server/evepay-client.ts` de Eve-Habitat crea un cobro
-  y guarda `cuota.evepay_cobro_id` (sin FK entre schemas).
+  real y guarda `cuota.evepay_cobro_id`. Pendiente (necesita la API desplegada).
 
 ## Definition of Done (además de §6 y del plan)
 
-- [ ] Los 7 criterios EARS del `spec.md` tienen test y pasan.
-- [ ] `lint`, `typecheck`, `test` en verde.
-- [ ] Sin PAN en servidor/logs; secretos de Akua en el entorno, no en el repo.
-- [ ] Cobro creado exitosamente en el sandbox de Akua.
+- [x] Los 7 criterios EARS del `spec.md` tienen test y pasan.
+- [x] `lint`, `typecheck`, `test` en verde.
+- [x] Sin PAN en servidor/logs; secretos de Akua fuera del repo.
+- [ ] Cobro creado exitosamente en el sandbox de Akua. (Pendiente de `ak_test_` keys.)

@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import type {
-  Cobro,
   CrearCobroInput,
   EstadoCobro,
   PaymentProvider,
+  ProviderCobro,
   RangoFechas,
   ResultadoConciliacion
 } from "@evetev/shared";
@@ -14,20 +14,16 @@ import type {
  * certificada. El núcleo NUNCA importa el SDK del proveedor directamente (§4).
  */
 export class FakePaymentProvider implements PaymentProvider {
-  async crearCobro(input: CrearCobroInput, _idempotencyKey: string): Promise<Cobro> {
+  async crearCobro(_input: CrearCobroInput, _idempotencyKey: string): Promise<ProviderCobro> {
+    const providerPaymentId = randomUUID();
     return {
-      id: randomUUID(),
-      merchantId: input.merchantId,
-      montoMinor: input.montoMinor,
-      moneda: input.moneda,
-      referencia: input.referencia,
+      providerPaymentId,
       estado: "pendiente",
-      checkoutUrl: `https://checkout.fake.evetev.local/${randomUUID()}`,
-      creadoEn: new Date().toISOString()
+      checkoutUrl: `https://checkout.fake.evetev.local/${providerPaymentId}`
     };
   }
 
-  async verificarEstado(_cobroId: string): Promise<EstadoCobro> {
+  async verificarEstado(_providerPaymentId: string): Promise<EstadoCobro> {
     return "aprobado";
   }
 

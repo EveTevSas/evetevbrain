@@ -9,7 +9,9 @@
     "start": "node dist/main.js",
     "lint": "eslint src --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"(api) sin tests todavía\" && exit 0"
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@evetev/shared": "workspace:*",
@@ -17,6 +19,8 @@
     "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
+    "drizzle-orm": "^0.44.2",
+    "postgres": "^3.4.5",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "^3.24.1"
@@ -25,6 +29,8 @@
     "@evetev/config": "workspace:*",
     "@nestjs/cli": "^11.0.0",
     "@types/node": "^22.10.5",
-    "typescript": "^5.7.3"
+    "drizzle-kit": "^0.31.1",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.10"
   }
 }

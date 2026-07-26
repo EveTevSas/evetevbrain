@@ -1,17 +1,24 @@
-import { Module } from "@nestjs/common";
+import { type MiddlewareConsumer, Module, type NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { DatabaseModule } from "./database/database.module";
+import { TenantMiddleware } from "./common/tenant.middleware";
 import { PagosModule } from "./modules/pagos/pagos.module";
+import { PagosController } from "./modules/pagos/pagos.controller";
 import { LedgerModule } from "./modules/ledger/ledger.module";
 import { HealthController } from "./health/health.controller";
 
 /**
  * EvePay — núcleo de la plataforma de pagos.
  * Solo módulos de pagos. NO conoce el dominio de ninguna vertical (§8).
- * Arranque mínimo: `pagos` + `ledger` (los demás módulos se agregan cuando la
- * validación los pida, no antes).
+ * Arranque: `pagos` + `ledger`, sobre cimientos multi-tenant (RLS) e identidad/RBAC.
  */
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PagosModule, LedgerModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), DatabaseModule, PagosModule, LedgerModule],
   controllers: [HealthController]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Establece el contexto por request (tenant/actor/rol) en las rutas de pagos.
+    consumer.apply(TenantMiddleware).forRoutes(PagosController);
+  }
+}
