@@ -1,6 +1,6 @@
 # Identidad y RBAC
 
-> Fase 0 del [plan de EvePay](../../docs/PLAN_DESARROLLO_EVEPAY.md). Cimiento (§4).
+> Fase 0 del [plan de EvePay](../../../docs/PLAN_DESARROLLO_EVEPAY.md). Cimiento (§4).
 
 ## Problema
 

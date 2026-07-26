@@ -1,6 +1,6 @@
 # Crear cobro idempotente
 
-> Fase 1 del [plan de EvePay](../../docs/PLAN_DESARROLLO_EVEPAY.md). Cimiento
+> Fase 1 del [plan de EvePay](../../../docs/PLAN_DESARROLLO_EVEPAY.md). Cimiento
 > no-reescribible (§1): idempotencia y auditoría de pagos.
 
 ## Problema
@@ -39,8 +39,8 @@ cobro**, sin crear otro ni llamar de nuevo a Akua.
 ## No-objetivos
 
 - Confirmación del pago (llega por webhook `payment.succeeded` → ver
-  `specs/provider-webhooks`).
-- Asientos de ledger detallados (→ `specs/ledger-posting`).
+  `specs/evepay/provider-webhooks`).
+- Asientos de ledger detallados (→ `specs/evepay/ledger-posting`).
 - Refunds, disputas, split payments.
 
 ## Casos borde

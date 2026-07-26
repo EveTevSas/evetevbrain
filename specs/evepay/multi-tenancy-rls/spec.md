@@ -1,6 +1,6 @@
 # Aislamiento multi-tenant con RLS
 
-> Fase 0 del [plan de EvePay](../../docs/PLAN_DESARROLLO_EVEPAY.md). Cimiento
+> Fase 0 del [plan de EvePay](../../../docs/PLAN_DESARROLLO_EVEPAY.md). Cimiento
 > no-reescribible (§1, §4).
 
 ## Problema

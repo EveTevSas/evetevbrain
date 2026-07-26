@@ -3,7 +3,7 @@
 Plan de construcción de **EvePay**, la plataforma de pagos (PSP/gateway) de Evetev,
 sobre **Akua** como backbone de adquirencia. Se ejecuta con **Spec-Driven
 Development** (constitución §9). Este documento es el mapa; cada feature real vive
-en `specs/<feature>/`.
+en `specs/evepay/<feature>/`.
 
 > Fuente de verdad: [`ESTANDARES_INGENIERIA.md`](./ESTANDARES_INGENIERIA.md) (§4 seguridad,
 > §7 decisiones, §8 repositorio, §9 SDD, §10 despliegue). Decisión de proveedor:
@@ -52,7 +52,7 @@ intención; el código y los tests son la verdad ejecutable).
 
 - **Spec obligatoria** para todo lo de EvePay: pagos, ledger, conciliación,
   multi-tenancy y RBAC. Aquí no hay "arreglo rápido": la precisión es el producto.
-- Cada feature vive en `specs/<feature>/` con `spec.md` (qué + criterios EARS),
+- Cada feature vive en `specs/evepay/<feature>/` con `spec.md` (qué + criterios EARS),
   `plan.md` (arquitectura) y `tasks.md` (unidades implementables). Entran en el
   **mismo PR** que implementan.
 - Criterios en **EARS** (`CUANDO … EL sistema DEBERÁ …`), y cada criterio se
@@ -104,14 +104,14 @@ sólidos desde el inicio; lo demás puede ser provisional.
 
 ### Fase 0 — Cimientos (antes del primer cobro)
 **Objetivo:** que todo lo que se construya encima nazca aislado y auditable.
-- `specs/multi-tenancy-rls/` — RLS en schema `evepay`, `tenant_id` + `SET LOCAL app.tenant_id`. **Test obligatorio:** tenant A jamás ve datos de B.
-- `specs/identidad-rbac/` — auth Supabase, roles (`super_admin`, `admin_comercio`), cada endpoint declara su rol.
+- `specs/evepay/multi-tenancy-rls/` — RLS en schema `evepay`, `tenant_id` + `SET LOCAL app.tenant_id`. **Test obligatorio:** tenant A jamás ve datos de B.
+- `specs/evepay/identidad-rbac/` — auth Supabase, roles (`super_admin`, `admin_comercio`), cada endpoint declara su rol.
 - Contrato `PaymentProvider` (ya en `@evetev/shared`) + `FakePaymentProvider` (ya) + esqueleto `AkuaPaymentProvider`.
 **Validación:** typecheck/lint/test verdes; test de aislamiento pasa.
 
 ### Fase 1 — Cobro idempotente + máquina de estados (MVP núcleo)
 **Objetivo:** crear cobros de verdad y no cobrar dos veces nunca.
-- `specs/create-payment-idempotency/` — crear cobro, `Idempotency-Key`, estados `creado → pendiente → aprobado/fallido → conciliado`. **(spec exemplar ya escrita).**
+- `specs/evepay/create-payment-idempotency/` — crear cobro, `Idempotency-Key`, estados `creado → pendiente → aprobado/fallido → conciliado`. **(spec exemplar ya escrita).**
 - Persistencia (`evepay.payments`, Drizzle), máquina de estados, auditoría inmutable de transiciones.
 - `AkuaPaymentProvider.crearCobro` contra sandbox `ak_test_`.
 - **Dogfooding:** Eve-Habitat crea un cobro vía HTTP y guarda `cuota.evepay_cobro_id`.
@@ -119,24 +119,24 @@ sólidos desde el inicio; lo demás puede ser provisional.
 
 ### Fase 2 — Webhooks normalizados
 **Objetivo:** que el estado del cobro lo mueva la realidad, no un polling frágil.
-- `specs/provider-webhooks/` — verificar **firma**, procesar **idempotente** (un webhook repetido no duplica efecto), mapear `payment.succeeded→aprobado`, `payment.failed→fallido`, `payment.refunded→reverso`.
+- `specs/evepay/provider-webhooks/` — verificar **firma**, procesar **idempotente** (un webhook repetido no duplica efecto), mapear `payment.succeeded→aprobado`, `payment.failed→fallido`, `payment.refunded→reverso`.
 - Ingesta con Inngest (reintentos), normalización a eventos EvePay.
 **Validación:** replay de webhook no duplica; firma inválida se rechaza.
 
 ### Fase 3 — Ledger inmutable + estado de cuenta
 **Objetivo:** la verdad contable de cada peso.
-- `specs/ledger-posting/` — doble partida, asientos **inmutables** (sin edición/borrado), ligados a cada transición. Saldo **reconstruible** desde movimientos, no un campo suelto.
+- `specs/evepay/ledger-posting/` — doble partida, asientos **inmutables** (sin edición/borrado), ligados a cada transición. Saldo **reconstruible** desde movimientos, no un campo suelto.
 **Validación:** débitos = créditos siempre; el saldo se reconstruye.
 
 ### Fase 4 — Conciliación
 **Objetivo:** lo cobrado cuadra con lo liquidado por Akua.
-- `specs/reconciliation/` — cruzar ledger de EvePay contra `/v1/settlements` y `payout.completed`; reportar diferencias y pagos huérfanos.
+- `specs/evepay/reconciliation/` — cruzar ledger de EvePay contra `/v1/settlements` y `payout.completed`; reportar diferencias y pagos huérfanos.
 - Job periódico en Inngest.
 **Validación:** con datos sembrados, 0 diferencias; una diferencia inyectada se detecta.
 
 ### Fase 5 — Onboarding de comercios (merchants)
 **Objetivo:** dar de alta comercios (incluida la vertical como primer comercio).
-- `specs/merchant-onboarding/` — `POST /v1/merchants`, estados de KYC/KYB, webhook `merchant.approved`.
+- `specs/evepay/merchant-onboarding/` — `POST /v1/merchants`, estados de KYC/KYB, webhook `merchant.approved`.
 **Validación:** alta de comercio de prueba aprobado en sandbox.
 
 ### Fase 6+ — Cuando el negocio lo pida (no antes, §1)

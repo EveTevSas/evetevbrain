@@ -1,20 +1,26 @@
 # specs/
 
-Especificaciones de EvePay y sus verticales, versionadas junto al código
-(Spec-Driven Development, constitución §9). Cada feature vive en su carpeta y
-entra en el **mismo PR** que la implementa.
+Especificaciones versionadas junto al código (Spec-Driven Development, §9). Cada
+feature vive en su carpeta y entra en el **mismo PR** que la implementa.
+
+Organizadas **por dominio**, para dejar claro qué es del núcleo y qué de cada vertical:
 
 ```
 specs/
-└── <feature>/
-    ├── spec.md      # qué y por qué + criterios de aceptación (EARS)
-    ├── plan.md      # arquitectura y restricciones
-    └── tasks.md     # unidades implementables (mapean a ramas cortas)
+├── evepay/          # núcleo — plataforma de pagos
+│   └── <feature>/
+│       ├── spec.md      # qué y por qué + criterios de aceptación (EARS)
+│       ├── plan.md      # arquitectura y restricciones
+│       └── tasks.md     # unidades implementables
+└── eve-conecta/      # primera vertical — conjuntos residenciales
+    └── <feature>/ …
 ```
 
-**Spec obligatoria** para pagos, ledger, conciliación, multi-tenancy y RBAC.
-Lo presentacional o desechable va con prompt directo (ver el gatillo en §9).
+**Spec obligatoria** para pagos, ledger, conciliación, multi-tenancy y RBAC (núcleo),
+y para cuotas, aplicación de pagos, mora y visibilidad entre roles (vertical). Lo
+presentacional o desechable va con prompt directo (ver el gatillo en §9).
 
-Los criterios se escriben en **EARS**: `CUANDO … EL sistema DEBERÁ …`, y cada uno
-debería poder convertirse en un test. El roadmap completo está en
-[`docs/PLAN_DESARROLLO_EVEPAY.md`](../docs/PLAN_DESARROLLO_EVEPAY.md).
+Los criterios se escriben en **EARS** (`CUANDO … EL sistema DEBERÁ …`), y cada uno
+debería poder convertirse en un test. El roadmap del núcleo está en
+[`docs/PLAN_DESARROLLO_EVEPAY.md`](../docs/PLAN_DESARROLLO_EVEPAY.md); las reglas de
+la vertical en [`docs/ESTANDARES_EVEHABITAD.md`](../docs/ESTANDARES_EVEHABITAD.md).
