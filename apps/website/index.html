@@ -51,8 +51,11 @@
   --eve-grad-ia:linear-gradient(90deg,#8B5CF6 0%,#6366F1 50%,#22D3EE 100%);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{font-size:16px}
-body{font-family:'Inter',sans-serif;color:var(--eve-azul-noche);background:#FDFEFF;line-height:1.65}
+/* El color base vive en html para que el lienzo de partículas (z-index:-1,
+   fijo a pantalla completa) quede por encima del fondo y por debajo del
+   contenido. Si body pintara el fondo, taparía las partículas. */
+html{font-size:16px;background:#FDFEFF}
+body{font-family:'Inter',sans-serif;color:var(--eve-azul-noche);background:transparent;line-height:1.65}
 h1,h2,.brand{font-family:'Baloo 2',sans-serif;font-weight:600}
 .wrap{max-width:1040px;margin:0 auto;padding:0 clamp(24px,4.5vw,32px)}
 a{color:inherit;text-decoration:none}
@@ -656,6 +659,74 @@ function suscribir(){
   document.getElementById('susEmail').value = '';
   mostrarToast('¡Listo! Te llegará una novedad al mes.');
 }
+</script>
+
+<!-- ====== FONDO DE PARTÍCULAS — red conectada (tsParticles v3) ======
+     Constelación a pantalla completa: los nodos derivan y se unen con líneas
+     cuando se acercan; el puntero entra como un nodo más y teje enlaces.
+
+     OJO CON LA VERSIÓN: está fijada a la v3 a propósito. En la v4 (probada
+     hasta la 4.3.2, tanto con "slim" + interaction-particles-links como con
+     el bundle completo) los enlaces no llegan a dibujarse nunca: salen los
+     puntos y ninguna línea. En v3 funcionan. No subir a @4 sin comprobar
+     antes que las líneas siguen apareciendo.
+     Consecuencia: aquí el color va en particles.color (el "paint" del
+     ejemplo del playground es sintaxis de v4 y en v3 se ignora).
+
+     · El modo hover "particle" no viene en "slim": es un paquete aparte.
+     · Se descartó la animación de tono del ejemplo: recorre todo el espectro
+       y sacaría el fondo de la paleta (incluido el coral, C2).
+     · Enlaces en azul de marca: el #f0f0f0 del ejemplo era para fondo negro
+       y sobre nuestro fondo claro sería invisible. -->
+<script src="https://cdn.jsdelivr.net/npm/@tsparticles/slim@3/tsparticles.slim.bundle.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@tsparticles/interaction-external-particle@3/tsparticles.interaction.external.particle.min.js" defer></script>
+<script>
+window.addEventListener('load', async () => {
+  if (typeof tsParticles === 'undefined') return;   // CDN caído: la página sigue igual
+
+  // Aquí el movimiento es continuo, así que con "reduced motion" la red se
+  // congela por completo y se queda como grafo estático.
+  const animar = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  try {
+    await loadSlim(tsParticles);
+    // Si falla, se pierde el nodo del cursor pero la red sigue dibujándose.
+    if (typeof loadExternalParticleInteraction === 'function') {
+      await loadExternalParticleInteraction(tsParticles);
+    }
+    await tsParticles.load({
+      id: 'eve-particulas',
+      options: {
+        fullScreen: { enable: true, zIndex: -1 },
+        detectRetina: true,
+        fpsLimit: 60,
+        particles: {
+          number: { value: 80, density: { enable: true } },
+          color: { value: '#1E6FEB' },
+          shape: { type: 'circle' },
+          opacity: { value: 0.8 },
+          size: { value: 2 },
+          // El #f0f0f0 del ejemplo era para fondo negro. En azul de marca sobre
+          // blanco hace falta ~0.45: por debajo la línea de 1px se desvanece.
+          links: { enable: true, distance: 200, color: '#1E6FEB', opacity: 0.45, width: 1 },
+          // El 6 del ejemplo es para un lienzo de escaparate; detrás de texto
+          // corrido esa velocidad se lleva la mirada. Sube el número si la
+          // quieres más viva.
+          move: { enable: animar, speed: 1.6 }
+        },
+        interactivity: {
+          // "window": el lienzo va detrás del contenido y no recibe eventos,
+          // así que el puntero se rastrea a nivel de ventana.
+          detectsOn: 'window',
+          events: { onHover: { enable: animar, mode: 'particle' } },
+          modes: { particle: { replaceCursor: false, pauseOnStop: false } }
+        }
+      }
+    });
+  } catch (e) {
+    console.warn('No se pudo iniciar el fondo de partículas:', e);
+  }
+});
 </script>
 
 </body>
