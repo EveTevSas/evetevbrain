@@ -16,7 +16,7 @@ Unidades implementables (mapean a ramas cortas, §3). Cada una con sus tests.
   `POST /v1/payments` con `ak_test_` y reenvío de `Idempotency-Key`. (Fake ya existe.)
 - [ ] **T7 — Tests (derivados de EARS).** Idempotencia (mismo/distinto body),
   falta de header, body inválido, concurrencia (unicidad DB), aislamiento por tenant.
-- [ ] **T8 — Dogfooding.** `server/evepay-client.ts` de Eve-Habitat crea un cobro
+- [ ] **T8 — Dogfooding.** `server/evepay-client.ts` de EveConecta crea un cobro
   y guarda `cuota.evepay_cobro_id` (sin FK entre schemas).
 
 ## Definition of Done (además de §6 y del plan)

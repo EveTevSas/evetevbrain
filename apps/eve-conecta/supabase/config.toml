@@ -1,0 +1,64 @@
+project_id = "eve-conecta"
+
+[api]
+enabled = true
+port = 55321
+schemas = ["public", "graphql_public", "conjuntos"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 55322
+shadow_port = 55320
+major_version = 17
+
+[db.migrations]
+enabled = true
+schema_paths = []
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[studio]
+enabled = true
+port = 55323
+api_url = "http://127.0.0.1"
+
+[local_smtp]
+enabled = true
+port = 55324
+
+[analytics]
+enabled = false
+port = 55327
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://127.0.0.1:3000", "http://localhost:3000/**"]
+jwt_expiry = 3600
+enable_signup = false
+enable_anonymous_sign_ins = false
+minimum_password_length = 12
+password_requirements = "lower_upper_letters_digits_symbols"
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+secure_password_change = false
+max_frequency = "1m"
+otp_length = 8
+otp_expiry = 3600
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+[remotes.production]
+project_id = "jmwiydbyngqbaieheeeh"
+
+[remotes.production.auth]
+site_url = "https://habitat.evetev.com"
+additional_redirect_urls = ["https://habitat.evetev.com/**"]

@@ -14,7 +14,7 @@ la topología de despliegue de `ESTANDARES_INGENIERIA.md` (§10).
 |---|---|---|
 | **GitHub** | Código, monorepo, CI (Actions), fuente de verdad. Org `EveTevSas`, repo `evetevbrain`. | Cuenta GitHub del equipo |
 | **Supabase** | Postgres + Auth + RLS. Schemas `evepay` y `conjuntos`. | **Con GitHub** (SSO) |
-| **Vercel** | Hosting de los frontends: `website` (evetev.com) y `eve-habitat` (habitat.evetev.com). | **Con GitHub** (SSO) |
+| **Vercel** | Hosting de los frontends: `website` (evetev.com) y `eve-conecta` (habitat.evetev.com). | **Con GitHub** (SSO) |
 | **Railway** | Hosting de la API de EvePay (NestJS, proceso de larga vida). | *Cuenta aún no creada — se crea cuando se requiera desplegar la API* |
 | **name.com** | Registrador del dominio **evetev.com** y su DNS. | **Con email `contacto@evetev.com`** |
 
@@ -26,6 +26,6 @@ la topología de despliegue de `ESTANDARES_INGENIERIA.md` (§10).
   por GitHub. Ahí se configuran los registros DNS que apuntan los dominios a Vercel.
 - **Correspondencia dominio → app:**
   - `evetev.com` → proyecto Vercel de `apps/website`
-  - `habitat.evetev.com` → proyecto Vercel de `apps/eve-habitat`
+  - `habitat.evetev.com` → proyecto Vercel de `apps/eve-conecta`
   - `api.evetev.com` → API en Railway (cuando se despliegue)
 - **Railway:** la cuenta **todavía no existe**; se crea cuando haya que desplegar la API de EvePay. Al crearla, anotar aquí el método de inicio de sesión.

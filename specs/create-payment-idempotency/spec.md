@@ -13,7 +13,7 @@ La idempotencia no es una optimización: es lo que hace confiable a la plataform
 ## Usuarios / actores
 
 - **Comercio** (tenant de EvePay) que solicita el cobro — hoy, vía la vertical
-  Eve-Habitat consumiendo la API por HTTP (dogfooding).
+  EveConecta consumiendo la API por HTTP (dogfooding).
 - **Sistema EvePay** que orquesta el cobro y lleva el estado.
 - **Akua** (a través de `PaymentProvider`) que procesa el pago real.
 

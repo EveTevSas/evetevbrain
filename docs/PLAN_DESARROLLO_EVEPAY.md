@@ -66,7 +66,7 @@ intención; el código y los tests son la verdad ejecutable).
 ## 2. Arquitectura de la integración
 
 ```
- Vertical (Eve-Habitat)                    EvePay (apps/api)                 Akua
+ Vertical (EveConecta)                    EvePay (apps/api)                 Akua
         │                                        │                            │
         │  POST /v1/pagos (HTTP, evepay-sdk)     │                            │
         │  Idempotency-Key ─────────────────────►│  pagos.service             │
@@ -114,7 +114,7 @@ sólidos desde el inicio; lo demás puede ser provisional.
 - `specs/create-payment-idempotency/` — crear cobro, `Idempotency-Key`, estados `creado → pendiente → aprobado/fallido → conciliado`. **(spec exemplar ya escrita).**
 - Persistencia (`evepay.payments`, Drizzle), máquina de estados, auditoría inmutable de transiciones.
 - `AkuaPaymentProvider.crearCobro` contra sandbox `ak_test_`.
-- **Dogfooding:** Eve-Habitat crea un cobro vía HTTP y guarda `cuota.evepay_cobro_id`.
+- **Dogfooding:** EveConecta crea un cobro vía HTTP y guarda `cuota.evepay_cobro_id`.
 **Validación:** EARS de idempotencia en test; cobro real en sandbox de Akua.
 
 ### Fase 2 — Webhooks normalizados

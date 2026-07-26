@@ -14,7 +14,7 @@ Root Directory y el dominio.
 | App | Root Directory | Dominio | Hosting |
 |---|---|---|---|
 | `website` | `apps/website` | `evetev.com` (+ `www`) | Vercel (estático) |
-| `eve-habitat` | `apps/eve-habitat` | `habitat.evetev.com` | Vercel (Next.js) |
+| `eve-conecta` | `apps/eve-conecta` | `habitat.evetev.com` | Vercel (Next.js) |
 | `api` (EvePay) | `apps/api` | `api.evetev.com` | Railway *(cuando se requiera)* |
 
 ---
@@ -29,10 +29,10 @@ Root Directory y el dominio.
 5. **Settings → Domains** → agrega `evetev.com` y `www.evetev.com`
    (Vercel redirige `www` → apex automáticamente).
 
-## 2. Eve-Habitat → `habitat.evetev.com`
+## 2. EveConecta → `habitat.evetev.com`
 
 1. Vercel → **Add New → Project** → el **mismo** repo otra vez.
-2. **Root Directory:** `apps/eve-habitat`. Framework Next.js (lo detecta;
+2. **Root Directory:** `apps/eve-conecta`. Framework Next.js (lo detecta;
    `vercel.json` lo confirma). Vercel entiende el pnpm workspace solo.
 3. **Environment Variables** (Settings → Environment Variables):
    ```
