@@ -65,4 +65,6 @@ pnpm lint && pnpm typecheck && pnpm test
 ## Contribuir
 
 Trunk-based, ramas cortas, PR pequeño con **1 aprobación** y **CI en verde**.
-Conventional Commits. Todo el detalle en la constitución (§3, §8, §9).
+Conventional Commits. Guía en [`CONTRIBUTING.md`](CONTRIBUTING.md) (incluye la
+identidad de commits: `./scripts/setup-git.sh`). Todo el detalle en la
+constitución (§3, §8, §9).
