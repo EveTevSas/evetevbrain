@@ -1,0 +1,119 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+@import "../../../packages/brand/assets/tokens/colores.css";
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --ink: var(--eve-azul-noche);
+  --muted: var(--eve-pizarra);
+  --accent: var(--eve-electrico);
+  --accent-strong: var(--eve-mezclado);
+  --accent-soft: var(--eve-hielo);
+  --warm: var(--eve-alerta);
+  --warm-soft: #fff7ed;
+  --surface: #ffffff;
+  --canvas: #fdfeff;
+  --wash: var(--eve-tinte);
+  --line: var(--eve-linea);
+  --shadow-card: 0 8px 24px rgba(10, 37, 64, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--canvas);
+  color: var(--ink);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--canvas);
+  font-family: var(--eve-font-ui);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+.font-brand {
+  font-family: var(--eve-font-marca);
+}
+
+code,
+kbd,
+.font-mono {
+  font-family: var(--eve-font-mono);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--eve-font-ui);
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.focus-ring:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--eve-electrico);
+  outline-offset: 2px;
+}
+
+.page-enter {
+  animation: page-enter 320ms ease-out both;
+}
+
+.scrollbar-subtle {
+  scrollbar-color: #b9cce0 transparent;
+  scrollbar-width: thin;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (min-width: 1900px) {
+  html {
+    font-size: 17.5px;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+}
