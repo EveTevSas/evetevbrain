@@ -51,7 +51,7 @@ input:focus{outline:2px solid var(--eve-electrico);border-color:transparent}
 .section .desc{font-size:.82rem;color:var(--eve-pizarra);margin-bottom:22px}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .field{display:flex;flex-direction:column}
-.btn-sec{background:var(--eve-mezclado);color:#fff;margin-top:24px}
+.btn-sec{background:var(--eve-mezclado);color:#fff;margin-top:24px;border-radius:999px}
 .btn-sec:hover{background:#0F3C7F}
 .btn-sec:disabled{opacity:.55;cursor:not-allowed}
 
