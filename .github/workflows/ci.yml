@@ -7,34 +7,96 @@ on:
 
 # Sin verde no se mergea (§3).
 jobs:
-  quality:
+  # ── Paso 1: shared (bloquea todo lo demás) ─────────────────────────────────
+  shared:
+    name: Shared package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
 
-      - name: Install
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --filter @evetev/shared lint
+
+      - name: Typecheck
+        run: pnpm --filter @evetev/shared typecheck
+
+      - name: Build
+        run: pnpm --filter @evetev/shared build
+
+  # ── Paso 2a: EvePay API (depende de shared) ────────────────────────────────
+  api:
+    name: EvePay API
+    runs-on: ubuntu-latest
+    needs: shared
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
 
       - name: Build shared
         run: pnpm --filter @evetev/shared build
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm --filter @evetev/api lint
 
       - name: Typecheck
-        run: pnpm typecheck
+        run: pnpm --filter @evetev/api typecheck
 
       - name: Test
-        run: pnpm test
+        run: pnpm --filter @evetev/api test
 
-      - name: Build API
+      - name: Build
         run: pnpm --filter @evetev/api build
+
+  # ── Paso 2b: EveConecta (depende de shared, corre en paralelo con api) ─────
+  eveconecta:
+    name: EveConecta
+    runs-on: ubuntu-latest
+    needs: shared
+    env:
+      # NEXT_PUBLIC_* se hornean en el bundle en build time; valores de CI son
+      # placeholders válidos (no tocan la red en build).
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build shared
+        run: pnpm --filter @evetev/shared build
+
+      - name: Lint
+        run: pnpm --filter @evetev/eveconecta lint
+
+      - name: Typecheck
+        run: pnpm --filter @evetev/eveconecta typecheck
+
+      - name: Test
+        run: pnpm --filter @evetev/eveconecta test
+
+      - name: Build
+        run: pnpm --filter @evetev/eveconecta build
