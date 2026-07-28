@@ -8,9 +8,11 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { rawBody: true });
   app.setGlobalPrefix("v1");
 
-  const port = Number(process.env.API_PORT ?? 3001);
-  await app.listen(port);
-  Logger.log(`EvePay API escuchando en http://localhost:${port}`, "Bootstrap");
+  // Railway/hosts inyectan PORT; en local usamos API_PORT. 0.0.0.0 para aceptar
+  // tráfico externo dentro del contenedor (no solo loopback).
+  const port = Number(process.env.PORT ?? process.env.API_PORT ?? 3001);
+  await app.listen(port, "0.0.0.0");
+  Logger.log(`EvePay API escuchando en el puerto ${port}`, "Bootstrap");
 }
 
 void bootstrap();

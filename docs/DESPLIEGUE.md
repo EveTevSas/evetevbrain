@@ -24,9 +24,21 @@ Root Directory y el dominio.
 1. Vercel → **Add New → Project** → importa `EveTevSas/evetevbrain`.
 2. **Root Directory:** `apps/website` (botón *Edit*).
 3. Framework/build: los deja como están — `apps/website/vercel.json` ya define
-   que es estático (sin build, sirve la carpeta).
-4. **Deploy.**
-5. **Settings → Domains** → agrega `evetev.com` y `www.evetev.com`
+   que es estático (sin build, sirve la carpeta) más la función serverless del
+   formulario (`api/contacto.js`).
+4. **Variables de entorno** (Settings → Environment Variables):
+   ```
+   RESEND_API_KEY       # API key de resend.com (obligatoria para que funcione el formulario)
+   # Opcionales — si no se fijan, usan los valores de abajo:
+   # CONTACTO_DESTINO=contacto@evetev.com
+   # CONTACTO_REMITENTE=Web Evetev <web@send.evetev.com>
+   ```
+   > El formulario envía desde `web@send.evetev.com`. Para que Resend pueda usar
+   > ese subdominio hay que verificarlo: en Resend → Domains → agregar
+   > `send.evetev.com` → copiar los registros TXT/CNAME que da → ponerlos en
+   > name.com **antes** de activar el formulario en producción.
+5. **Deploy.**
+6. **Settings → Domains** → agrega `evetev.com` y `www.evetev.com`
    (Vercel redirige `www` → apex automáticamente).
 
 ## 2. EveConecta → `conecta.evetev.com`
@@ -65,8 +77,36 @@ que muestre Vercel**, por si cambian.
 - Merge a `main` → **deploy automático** a producción.
 - `main` siempre desplegable; si CI está en rojo, arreglarla es prioridad (§3).
 
-## 5. API de EvePay (a futuro)
+## 5. API de EvePay → `api.evetev.com` (Railway)
 
-Cuando haya que desplegar `apps/api` (NestJS), va en **Railway** con dominio
-`api.evetev.com`. La cuenta de Railway se crea en ese momento (ver doc de cuentas).
-Secretos (Akua, DB, etc.) en las variables de entorno de Railway, nunca en el repo (§4).
+`apps/api` (NestJS) va en **Railway**. Trae un **`Dockerfile`** (en `apps/api/`) que
+compila todo el workspace pnpm de forma determinista (build de `@evetev/shared` +
+`@evetev/api`), así el despliegue no depende de la autodetección del builder.
+
+### Pasos en el panel de Railway
+
+1. Railway → **New Project → Deploy from GitHub repo** → `EveTevSas/evetevbrain`.
+2. En el servicio → **Settings**:
+   - **Root Directory:** *(vacío / raíz)* — el contexto de build debe ser la raíz
+     del monorepo para resolver el workspace.
+   - **Build → Dockerfile Path:** `apps/api/Dockerfile`.
+   - Railway detecta el `Dockerfile` y lo usa (ignora Nixpacks).
+3. **Variables** (Settings → Variables) — nunca en el repo (§4):
+   ```
+   DATABASE_URL          # rol evepay_api del proyecto Supabase de EvePay (pooler :6543)
+   PAYMENT_PROVIDER=fake # 'akua' cuando lleguen las llaves ak_test_
+   # AKUA_API_KEY        # al integrar Akua
+   # AKUA_WEBHOOK_SECRET # al integrar webhooks de Akua
+   ```
+   > `PORT` lo inyecta Railway automáticamente; `main.ts` lo lee (fallback `API_PORT`, luego 3001).
+4. **Deploy.** Cuando esté verde: **Settings → Networking → Generate Domain** (URL
+   `*.up.railway.app`) para probar, y luego **Custom Domain** → `api.evetev.com`
+   (agrega el CNAME que muestre Railway en **name.com**).
+5. **Health check:** `GET /v1/health` → `{"status":"ok","service":"evepay-api"}`.
+   Opcional: fijarlo como *Healthcheck Path* en Railway.
+
+### Notas
+- La DB de EvePay vive en su **propio** proyecto Supabase (separada de la vertical
+  EveConecta, §8). El `DATABASE_URL` usa el rol `evepay_api` (respeta RLS; NO owner
+  ni BYPASSRLS).
+- El pipeline es igual que Vercel: push a `main` → deploy automático.

@@ -1,0 +1,18 @@
+# Build de imágenes (api en Railway). El contexto es la raíz del monorepo.
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+**/*.log
+
+# Nunca meter secretos ni entornos locales en la imagen (§4)
+**/.env
+**/.env.*
+
+# Ruido local
+.git
+.agents
+videos
+skills-lock.json
+**/.DS_Store
