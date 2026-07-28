@@ -74,21 +74,27 @@
       <a class="link" href="#servicios">Ver cómo funciona →</a>
     </div>
   </header>
+  <span class="hero-scroll" aria-hidden="true">
+    Desliza
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+  </span>
 </div>
 
 <section class="banda" aria-label="La red de Evetev">
-  <video autoplay muted loop playsinline preload="metadata" poster="./files/portada-red.jpg" aria-hidden="true">
-    <source src="./files/evepay-background.mp4" type="video/mp4">
-  </video>
+  <div class="banda-media">
+    <video autoplay muted loop playsinline preload="metadata" poster="./files/portada-red.jpg" aria-hidden="true">
+      <source src="./files/evepay-background.mp4" type="video/mp4">
+    </video>
+  </div>
   <div class="contenido">
     <h2>Una red que conecta tu negocio con su dinero</h2>
     <p>Infraestructura propia, monitoreada las 24 horas, diseñada para no fallar en tu mejor día de ventas.</p>
   </div>
 </section>
 
-<hr class="hr">
-
-<section id="servicios" class="wrap" style="padding-top:56px">
+<!-- Sin <hr> aquí a propósito: el borde oscuro del video ya separa con fuerza,
+     y una línea encima de tanto aire sobraba. -->
+<section id="servicios" class="wrap" style="padding-top:76px">
   <div class="sec-h">
     <h2>Productos</h2>
     <p>Lo que estamos construyendo hoy, y lo que viene después. Sin adornos.</p>
@@ -99,7 +105,7 @@
   <div class="prod">
     <article style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')">
       <span class="p-ico" role="img" aria-label="Ícono de EvePay"></span>
-      <h3><span class="punto" style="background:var(--p)"></span>EvePay
+      <h3>EvePay
         <span class="chip build"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="9"></circle></svg>En construcción</span>
       </h3>
       <span class="sub">Plataforma de pagos</span>
@@ -115,7 +121,7 @@
 
     <article style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')">
       <span class="p-ico" role="img" aria-label="Ícono de EveConecta"></span>
-      <h3><span class="punto" style="background:var(--p)"></span>EveConecta
+      <h3>EveConecta
         <span class="chip build"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="9"></circle></svg>En construcción</span>
       </h3>
       <span class="sub">Gestión y recaudo para conjuntos</span>
@@ -592,10 +598,13 @@ window.addEventListener('load', async () => {
         detectRetina: true,
         fpsLimit: 60,
         particles: {
-          // La densidad se mide contra un área de referencia. La de fábrica es
-          // 1920x1080 (una pantalla entera) y aquí el lienzo es solo la banda
-          // del hero, así que con ella la red saldría casi vacía.
-          number: { value: 45, density: { enable: true, width: 1200, height: 500 } },
+          // La densidad se mide contra un área de referencia, no en absoluto:
+          // el número real sale de escalar este valor por el área del lienzo.
+          // Ojo al tocar el alto del hero: al pasarlo a pantalla completa el
+          // área casi se duplicó y las partículas subieron solas de 38 a 71,
+          // que era demasiado. 30 sobre 1200x500 deja unas 47 en escritorio:
+          // se lee como red conectada sin tapar el titular.
+          number: { value: 30, density: { enable: true, width: 1200, height: 500 } },
           color: { value: '#1E6FEB' },
           shape: { type: 'circle' },
           opacity: { value: 0.8 },
