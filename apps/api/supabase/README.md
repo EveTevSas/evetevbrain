@@ -1,4 +1,4 @@
-# supabase/
+# apps/api/supabase/
 
 Base de datos de EvePay (Postgres administrado en Supabase, §7/§10). Schemas
 `identity`, `evepay` y `audit`. El aislamiento por tenant se hace con **RLS**
@@ -11,8 +11,9 @@ Con la **Supabase CLI** (recomendado), enlazando al proyecto de la cuenta:
 
 ```bash
 # instalar CLI (una vez): brew install supabase/tap/supabase
+cd apps/api                              # la CLI se corre desde aquí
 supabase link --project-ref <TU_PROJECT_REF>
-supabase db push        # aplica supabase/migrations/*.sql
+supabase db push        # aplica apps/api/supabase/migrations/*.sql
 ```
 
 O corriendo el SQL de `migrations/0001_init_evepay.sql` en el **SQL Editor** de
