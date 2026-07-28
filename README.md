@@ -6,7 +6,7 @@ vertical: la cuña con la que validamos la plataforma cobrando dinero real.
 
 > La fuente de verdad de cómo trabajamos es la constitución:
 > [`docs/ESTANDARES_INGENIERIA.md`](docs/ESTANDARES_INGENIERIA.md).
-> Estándares de la vertical: [`docs/ESTANDARES_EVEHABITAD.md`](docs/ESTANDARES_EVEHABITAD.md).
+> Estándares de la vertical: [`docs/ESTANDARES_EVECONECTA.md`](docs/ESTANDARES_EVECONECTA.md).
 > Servicios y cuentas del stack: [`docs/INFRAESTRUCTURA_Y_CUENTAS.md`](docs/INFRAESTRUCTURA_Y_CUENTAS.md).
 > Cómo desplegar (Vercel + DNS): [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md).
 > Plan de desarrollo de EvePay (SDD + Akua): [`docs/PLAN_DESARROLLO_EVEPAY.md`](docs/PLAN_DESARROLLO_EVEPAY.md).
@@ -16,7 +16,6 @@ vertical: la cuña con la que validamos la plataforma cobrando dinero real.
 ```
 apps/
 ├── api/            # EvePay — el núcleo de pagos (NestJS). No conoce el dominio de la vertical.
-├── eve-habitat/    # Vertical existente; se conserva sin cambios.
 ├── eveconecta/     # EveConecta (Next.js): aplicación de propiedad horizontal.
 └── website/        # evetev.com — sitio corporativo / marketing (estático, Vercel).
 packages/
@@ -43,7 +42,6 @@ pnpm install
 cp .env.example .env        # completa valores; en local PAYMENT_PROVIDER=fake
 
 pnpm --filter @evetev/api dev          # EvePay API  → http://localhost:3001
-pnpm --filter @evetev/eve-habitat dev  # Eve-Habitat → http://localhost:3000
 pnpm --filter @evetev/eveconecta dev   # EveConecta  → http://localhost:3002
 ```
 

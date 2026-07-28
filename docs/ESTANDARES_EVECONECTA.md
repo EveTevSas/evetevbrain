@@ -1,27 +1,27 @@
-# Estándares de Ingeniería — EveHabitad
+# Estándares de ingeniería — EveConecta
 
-*Estándares de la vertical **EveHabitad** (`apps/eve-habitat`): gestión y recaudo para conjuntos residenciales en propiedad horizontal. Es la primera vertical de **EvePay**, la plataforma de pagos de **Evetev SAS**.*
+*Estándares de la vertical **EveConecta** (`apps/eveconecta`): gestión y recaudo para conjuntos residenciales en propiedad horizontal. Es la primera vertical de **EvePay**, la plataforma de pagos de **Evetev SAS**.*
 
-> **Este documento es subordinado.** La constitución del equipo es [`ESTANDARES_INGENIERIA.md`](./ESTANDARES_INGENIERIA.md) y aplica **completa** a EveHabitad: stack (§2), código y Git (§3), seguridad (§4), accesibilidad (§5), Definition of Done (§6), repositorio (§8), SDD (§9) y despliegue (§10).
+> **Este documento es subordinado.** La constitución del equipo es [`ESTANDARES_INGENIERIA.md`](./ESTANDARES_INGENIERIA.md) y aplica **completa** a EveConecta: stack (§2), código y Git (§3), seguridad (§4), accesibilidad (§5), Definition of Done (§6), repositorio (§8), SDD (§9) y despliegue (§10).
 >
 > Aquí solo va **lo que es específico de esta vertical**. Si algo ya está en la constitución, no se repite: se cita. Ante conflicto, manda la constitución.
 
 ---
 
-## 1. Qué es EveHabitad y qué NO es
+## 1. Qué es EveConecta y qué NO es
 
-**EveHabitad tiene dos trabajos, y el segundo es el importante:**
+**EveConecta tiene dos trabajos, y el segundo es el importante:**
 
 1. Resolverle la vida al administrador de un conjunto residencial: cobrar la administración sin perseguir a nadie a mano.
 2. **Ser la prueba viviente de que EvePay funciona** — cobrando dinero real, a clientes reales, con nosotros como primer comercio (dogfooding).
 
-Si alguna vez esos dos trabajos entran en conflicto, gana el segundo. EveHabitad existe para validar la plataforma; una feature que le sirve al conjunto pero ensucia EvePay **no se hace así**.
+Si alguna vez esos dos trabajos entran en conflicto, gana el segundo. EveConecta existe para validar la plataforma; una feature que le sirve al conjunto pero ensucia EvePay **no se hace así**.
 
-**Lo que EveHabitad NO es:**
+**Lo que EveConecta NO es:**
 
 - **No es un ERP contable de propiedad horizontal.** No reemplazamos al contador ni al software contable del conjunto. Nos concentramos en el ciclo de cobro y recaudo.
 - **No es una red social del conjunto.** Reservas de salón, chat de vecinos, minutas de vigilancia: fuera del MVP. Se evalúan cuando el recaudo esté validado.
-- **No es dueña de la lógica de pagos.** Todo lo que sea cobrar, conciliar o llevar el ledger es de EvePay. EveHabitad **pide** cobros, no los procesa.
+- **No es dueña de la lógica de pagos.** Todo lo que sea cobrar, conciliar o llevar el ledger es de EvePay. EveConecta **pide** cobros, no los procesa.
 
 ### Alcance del MVP
 
@@ -41,15 +41,15 @@ Si alguna vez esos dos trabajos entran en conflicto, gana el segundo. EveHabitad
 
 Esto es lo que hace vendible a EvePay. **No es negociable y no se "optimiza" por conveniencia.**
 
-- **EveHabitad NO importa módulos de EvePay.** Aunque vivan en el mismo monorepo, la comunicación es **por HTTP** (vía `evepay-sdk` cuando exista). Importar `apps/api/src/modules/pagos` directamente destruye el dogfooding: si nuestra vertical no consume la plataforma como un cliente externo, nunca sabremos si sirve para clientes externos.
-- **EveHabitad NO lee ni escribe el schema `evepay`.** Su dominio vive en el schema `conjuntos`. Para saber si un cobro se aprobó, se le pregunta a la API o se escucha su evento.
+- **EveConecta NO importa módulos de EvePay.** Aunque vivan en el mismo monorepo, la comunicación es **por HTTP** (vía `evepay-sdk` cuando exista). Importar `apps/api/src/modules/pagos` directamente destruye el dogfooding: si nuestra vertical no consume la plataforma como un cliente externo, nunca sabremos si sirve para clientes externos.
+- **EveConecta NO lee ni escribe el schema `evepay`.** Su dominio vive en el schema `conjuntos`. Para saber si un cobro se aprobó, se le pregunta a la API o se escucha su evento.
 - **Sin llaves foráneas entre schemas.** `cuota.evepay_cobro_id` es un `uuid` sin FK. Los contextos se enlazan por ID.
-- **EvePay no sabe qué es una cuota.** Cuando EveHabitad pide un cobro, manda un monto, una referencia externa y una descripción. El concepto "cuota de administración de marzo, torre 3 apto 502" es **texto** para EvePay.
+- **EvePay no sabe qué es una cuota.** Cuando EveConecta pide un cobro, manda un monto, una referencia externa y una descripción. El concepto "cuota de administración de marzo, torre 3 apto 502" es **texto** para EvePay.
 
 ### El contrato, en concreto
 
 ```
-EveHabitad                                  EvePay
+EveConecta                                  EvePay
     │
     ├── POST /cobros ───────────────────────►  crea cobro (idempotencyKey)
     │     { monto, referencia_externa: cuota_id,
@@ -64,9 +64,9 @@ EveHabitad                                  EvePay
     └── marca la cuota como pagada (en SU schema)
 ```
 
-**Quién es el tenant:** el **conjunto** es un tenant de EveHabitad. En EvePay, el tenant es el **comercio** — y hoy ese comercio somos nosotros (Evetev), o el conjunto si se le da su propia cuenta de comercio. Son dos conceptos distintos con nombres parecidos: **no los mezclen en el código**. `conjunto_id` ≠ `comercio_id`.
+**Quién es el tenant:** el **conjunto** es un tenant de EveConecta. En EvePay, el tenant es el **comercio** — y hoy ese comercio somos nosotros (Evetev), o el conjunto si se le da su propia cuenta de comercio. Son dos conceptos distintos con nombres parecidos: **no los mezclen en el código**. `conjunto_id` ≠ `comercio_id`.
 
-**Regla de decisión:** ante cualquier duda sobre dónde va algo, aplica el test de la constitución (§8): *¿le entregaría esto tal cual a un ecommerce que compre EvePay?* Si menciona "cuota", "torre", "coeficiente" o "administrador" → es de EveHabitad.
+**Regla de decisión:** ante cualquier duda sobre dónde va algo, aplica el test de la constitución (§8): *¿le entregaría esto tal cual a un ecommerce que compre EvePay?* Si menciona "cuota", "torre", "coeficiente" o "administrador" → es de EveConecta.
 
 ---
 
@@ -156,7 +156,7 @@ Sobre el RBAC de la constitución (§4), esta vertical concreta así:
 
 ## 6. Datos personales (esta vertical es la que más PII toca)
 
-EveHabitad maneja datos de personas naturales que **no son nuestros clientes directos** (los residentes). Sobre lo que ya dice la constitución (§4, Ley 1581):
+EveConecta maneja datos de personas naturales que **no son nuestros clientes directos** (los residentes). Sobre lo que ya dice la constitución (§4, Ley 1581):
 
 - **Minimización real.** Para cobrar una cuota necesitamos: unidad, nombre y un canal de contacto. **No pedimos** cédula, fecha de nacimiento, datos del vehículo, composición familiar ni fotos, salvo que una feature concreta lo exija y esté justificada.
 - **El conjunto es responsable, nosotros somos encargados.** El conjunto recolecta los datos de sus residentes; nosotros los tratamos por cuenta suya. Eso implica un **contrato de tratamiento de datos** con cada conjunto. Confirmar redacción con asesoría legal antes del primer cliente.
@@ -192,7 +192,7 @@ Aplica todo el §5 de la constitución (WCAG 2.2 AA), con estos énfasis propios
 
 ---
 
-## 9. Qué lleva spec obligatoria en EveHabitad
+## 9. Qué lleva spec obligatoria en EveConecta
 
 Sobre el gatillo de la constitución (§9), en esta vertical **siempre** llevan spec con criterios EARS:
 
@@ -214,7 +214,7 @@ Lo demás (pantallas presentacionales, ajustes de copy, reportes simples) va con
 
 ## 10. Definition of Done adicional
 
-Además del checklist de la constitución (§6), un PR de EveHabitad no está listo si no cumple:
+Además del checklist de la constitución (§6), un PR de EveConecta no está listo si no cumple:
 
 **Frontera**
 - [ ] No importa código de `apps/api` (EvePay); la comunicación es por HTTP/SDK.

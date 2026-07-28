@@ -19,7 +19,7 @@ Estado tras Fase 0+1 (validado con typecheck · lint · test · nest build en ve
   fijar los nombres de campos al obtener las `ak_test_` keys.
 - [x] **T7 — Tests (derivados de EARS).** 7 criterios EARS + aislamiento por tenant
   + RBAC. `apps/api`: 12 tests en verde (service 6, controller 3, guard 3).
-- [ ] **T8 — Dogfooding.** `server/evepay-client.ts` de Eve-Habitat crea un cobro
+- [ ] **T8 — Dogfooding.** `server/evepay-client.ts` de EveConecta crea un cobro
   real y guarda `cuota.evepay_cobro_id`. Pendiente (necesita la API desplegada).
 
 ## Definition of Done (además de §6 y del plan)

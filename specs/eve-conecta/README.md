@@ -1,7 +1,7 @@
 # specs/eve-conecta/
 
-Especificaciones de la vertical **Eve-Conecta** (conjuntos residenciales). Reglas de
-dominio en [`docs/ESTANDARES_EVEHABITAD.md`](../../docs/ESTANDARES_EVEHABITAD.md).
+Especificaciones de la vertical **EveConecta** (conjuntos residenciales). Reglas de
+dominio en [`docs/ESTANDARES_EVECONECTA.md`](../../docs/ESTANDARES_EVECONECTA.md).
 
 Llevan spec obligatoria (§9 de la vertical) — aún **por escribir**:
 

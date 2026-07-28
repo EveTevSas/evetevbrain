@@ -23,4 +23,4 @@ presentacional o desechable va con prompt directo (ver el gatillo en §9).
 Los criterios se escriben en **EARS** (`CUANDO … EL sistema DEBERÁ …`), y cada uno
 debería poder convertirse en un test. El roadmap del núcleo está en
 [`docs/PLAN_DESARROLLO_EVEPAY.md`](../docs/PLAN_DESARROLLO_EVEPAY.md); las reglas de
-la vertical en [`docs/ESTANDARES_EVEHABITAD.md`](../docs/ESTANDARES_EVEHABITAD.md).
+la vertical en [`docs/ESTANDARES_EVECONECTA.md`](../docs/ESTANDARES_EVECONECTA.md).

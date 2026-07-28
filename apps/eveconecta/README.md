@@ -76,7 +76,7 @@ pnpm db:test:linked
 La configuración remota vigente es:
 
 - Data API: `public`, `graphql_public` y `conjuntos`; máximo 1.000 filas.
-- Auth Site URL: `https://habitat.evetev.com`.
+- Auth Site URL: `https://conecta.evetev.com`.
 - Registro público y usuarios anónimos deshabilitados. Los usuarios se
   aprovisionan mediante invitación.
 - Contraseñas de mínimo 12 caracteres con mayúscula, minúscula, número y símbolo.
@@ -129,7 +129,7 @@ la copropiedad:
 ```bash
 SUPABASE_URL="https://<project-ref>.supabase.co" \
 SUPABASE_SECRET_KEY="<sb_secret_...>" \
-SUPABASE_INVITE_REDIRECT_URL="https://habitat.evetev.com/auth/callback?next=/actualizar-contrasena" \
+SUPABASE_INVITE_REDIRECT_URL="https://conecta.evetev.com/auth/callback?next=/actualizar-contrasena" \
 pnpm auth:provision-user \
   --email usuario@dominio.com \
   --name "Nombre Apellido" \

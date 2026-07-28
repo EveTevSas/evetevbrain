@@ -14,7 +14,7 @@ Root Directory y el dominio.
 | App | Root Directory | Dominio | Hosting |
 |---|---|---|---|
 | `website` | `apps/website` | `evetev.com` (+ `www`) | Vercel (estático) |
-| `eve-habitat` | `apps/eve-habitat` | `habitat.evetev.com` | Vercel (Next.js) |
+| `eveconecta` | `apps/eveconecta` | `conecta.evetev.com` | Vercel (Next.js) |
 | `api` (EvePay) | `apps/api` | `api.evetev.com` | Railway *(cuando se requiera)* |
 
 ---
@@ -29,20 +29,21 @@ Root Directory y el dominio.
 5. **Settings → Domains** → agrega `evetev.com` y `www.evetev.com`
    (Vercel redirige `www` → apex automáticamente).
 
-## 2. Eve-Habitat → `habitat.evetev.com`
+## 2. EveConecta → `conecta.evetev.com`
 
 1. Vercel → **Add New → Project** → el **mismo** repo otra vez.
-2. **Root Directory:** `apps/eve-habitat`. Framework Next.js (lo detecta;
+2. **Root Directory:** `apps/eveconecta`. Framework Next.js (lo detecta;
    `vercel.json` lo confirma). Vercel entiende el pnpm workspace solo.
 3. **Environment Variables** (Settings → Environment Variables):
    ```
-   NEXT_PUBLIC_EVEPAY_API_URL   # URL de la API EvePay cuando exista
-   SUPABASE_URL
-   SUPABASE_ANON_KEY
+   NEXT_PUBLIC_SUPABASE_URL
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+   DATABASE_URL
+   NEXT_PUBLIC_API_URL
    ```
-   > Sin estas, despliega igual con datos demo; el login/Supabase no funcionará
-   > hasta que se configuren. Para ver el sitio inicial está bien sin ellas.
-4. **Deploy** → **Settings → Domains** → agrega `habitat.evetev.com`.
+   > Usa los valores del proyecto Supabase de EveConecta. `DATABASE_URL` es
+   > exclusiva del servidor y `NEXT_PUBLIC_API_URL` apunta a EvePay por HTTP.
+4. **Deploy** → **Settings → Domains** → agrega `conecta.evetev.com`.
 
 ## 3. DNS (en name.com)
 
@@ -52,7 +53,7 @@ Al agregar cada dominio, **Vercel muestra los registros exactos**. Los típicos:
 |---|---|---|
 | `A` | `@` | `76.76.21.21` |
 | `CNAME` | `www` | `cname.vercel-dns.com` |
-| `CNAME` | `habitat` | `cname.vercel-dns.com` |
+| `CNAME` | `conecta` | `cname.vercel-dns.com` |
 
 Se ponen en el panel DNS de **name.com** (login `contacto@evetev.com`). Propaga en
 minutos–horas; Vercel emite el certificado HTTPS solo. **Usa siempre los valores

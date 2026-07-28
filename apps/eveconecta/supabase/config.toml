@@ -60,5 +60,5 @@ verify_enabled = true
 project_id = "jmwiydbyngqbaieheeeh"
 
 [remotes.production.auth]
-site_url = "https://habitat.evetev.com"
-additional_redirect_urls = ["https://habitat.evetev.com/**"]
+site_url = "https://conecta.evetev.com"
+additional_redirect_urls = ["https://conecta.evetev.com/**"]

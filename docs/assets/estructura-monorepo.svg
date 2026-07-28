@@ -25,9 +25,9 @@
   <text x="44" y="176" class="sub mono">src/modules/ pagos · ledger</text>
   <text x="44" y="192" class="cap">(+ conciliacion · merchants · webhooks… cuando se pidan)</text>
 
-  <!-- web-conjuntos (today) -->
+  <!-- eveconecta (today) -->
   <rect x="384" y="84" width="352" height="118" class="box today"/>
-  <text x="404" y="110" class="lbl mono" font-weight="700">web-conjuntos/ — 1.ª vertical</text>
+  <text x="404" y="110" class="lbl mono" font-weight="700">eveconecta/ — EveConecta — 1.ª vertical</text>
   <text x="404" y="130" class="sub">Front + su propio backend de dominio.</text>
   <text x="404" y="150" class="sub">Consume EvePay por HTTP (dogfooding).</text>
   <text x="404" y="176" class="sub mono">app/ · app/api/ · server/</text>
