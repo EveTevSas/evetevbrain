@@ -1,4 +1,4 @@
-import { bigint, jsonb, pgSchema, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { bigint, boolean, jsonb, pgSchema, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 // Schemas (espejo de supabase/migrations/0001_init_evepay.sql).
 export const identity = pgSchema("identity");
@@ -88,8 +88,20 @@ export const ledgerLines = evepay.table("ledger_lines", {
   amountMinor: bigint("amount_minor", { mode: "number" }).notNull()
 });
 
+export const merchantApiKeys = identity.table("merchant_api_keys", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id").notNull(),
+  keyHash: text("key_hash").notNull().unique(),
+  keyPrefix: text("key_prefix").notNull(),
+  environment: text("environment").notNull().default("live"),
+  label: text("label"),
+  activa: boolean("activa").notNull().default(true),
+  creadaEn: timestamp("creada_en", { withTimezone: true }).notNull().defaultNow()
+});
+
 export const schema = {
   tenants,
+  merchantApiKeys,
   merchants,
   payments,
   paymentIdempotency,

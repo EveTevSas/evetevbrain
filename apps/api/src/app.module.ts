@@ -11,6 +11,7 @@ import { ConciliacionModule } from "./modules/conciliacion/conciliacion.module";
 import { ConciliacionController } from "./modules/conciliacion/conciliacion.controller";
 import { MerchantsModule } from "./modules/merchants/merchants.module";
 import { MerchantsController } from "./modules/merchants/merchants.controller";
+import { AdminModule } from "./modules/admin/admin.module";
 import { HealthController } from "./health/health.controller";
 
 /**
@@ -27,13 +28,14 @@ import { HealthController } from "./health/health.controller";
     WebhooksModule,
     LedgerModule,
     ConciliacionModule,
-    MerchantsModule
+    MerchantsModule,
+    AdminModule
   ],
   controllers: [HealthController]
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    // Establece el contexto por request (tenant/actor/rol) en rutas con tenant.
+    // TenantMiddleware resuelve API keys reales (Bearer evpk_*) o headers internos.
     consumer
       .apply(TenantMiddleware)
       .forRoutes(PagosController, ConciliacionController, MerchantsController);
