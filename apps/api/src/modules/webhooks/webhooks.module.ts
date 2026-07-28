@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { LedgerModule } from "../ledger/ledger.module";
 import { MerchantsModule } from "../merchants/merchants.module";
+import { OutboundWebhooksModule } from "../outbound-webhooks/outbound-webhooks.module";
 import { WebhooksController } from "./webhooks.controller";
 import { WebhooksService } from "./webhooks.service";
 import { AkuaWebhookVerifier, WEBHOOK_VERIFIER } from "./webhook-verifier";
@@ -10,7 +11,7 @@ import { AkuaWebhookVerifier, WEBHOOK_VERIFIER } from "./webhook-verifier";
  * El repositorio viene del módulo global; el ledger y merchants, de sus módulos.
  */
 @Module({
-  imports: [LedgerModule, MerchantsModule],
+  imports: [LedgerModule, MerchantsModule, OutboundWebhooksModule],
   controllers: [WebhooksController],
   providers: [
     WebhooksService,

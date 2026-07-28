@@ -99,6 +99,16 @@ export const merchantApiKeys = identity.table("merchant_api_keys", {
   creadaEn: timestamp("creada_en", { withTimezone: true }).notNull().defaultNow()
 });
 
+export const merchantWebhooks = evepay.table("merchant_webhooks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id").notNull(),
+  url: text("url").notNull(),
+  secret: text("secret").notNull(),
+  events: text("events").array().notNull().default(["payment.completed", "payment.failed"]),
+  activa: boolean("activa").notNull().default(true),
+  creadaEn: timestamp("creada_en", { withTimezone: true }).notNull().defaultNow()
+});
+
 export const schema = {
   tenants,
   merchantApiKeys,
@@ -108,5 +118,6 @@ export const schema = {
   paymentAudit,
   webhookEvents,
   ledgerEntries,
-  ledgerLines
+  ledgerLines,
+  merchantWebhooks
 };

@@ -5,7 +5,16 @@ import { LedgerService } from "../ledger/ledger.service";
 import { InMemoryMerchantsRepository } from "../merchants/in-memory-merchants.repository";
 import { MerchantsService } from "../merchants/merchants.service";
 import { FakePaymentProvider } from "../pagos/fake-payment.provider";
+import { OutboundWebhookDeliveryService } from "../outbound-webhooks/outbound-webhook-delivery.service";
+import type { OutboundWebhooksRepository } from "../outbound-webhooks/outbound-webhooks.repository";
 import { WebhooksService } from "./webhooks.service";
+
+const noopDelivery = { entregar: async () => {} } as unknown as OutboundWebhookDeliveryService;
+const noopWebhookRepo: OutboundWebhooksRepository = {
+  buscarPorTenant: async () => null,
+  registrar: async () => { throw new Error("not used"); },
+  actualizar: async () => null
+};
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
 const MERCHANT = "33333333-3333-4333-8333-333333333333";
@@ -43,7 +52,7 @@ describe("WebhooksService — normalización de eventos", () => {
     ledgerRepo = new InMemoryLedgerRepository();
     merchantsRepo = new InMemoryMerchantsRepository();
     merchants = new MerchantsService(merchantsRepo, new FakePaymentProvider());
-    service = new WebhooksService(repo, new LedgerService(ledgerRepo, repo), merchants);
+    service = new WebhooksService(repo, new LedgerService(ledgerRepo, repo), merchants, noopDelivery, noopWebhookRepo);
   });
 
   it("EARS 1: payment.succeeded pasa el cobro pendiente → aprobado y lo audita", async () => {

@@ -4,6 +4,8 @@ import { PAGOS_REPOSITORY, type PagosRepository } from "../pagos/pagos.repositor
 import { puedeTransicionar } from "../pagos/payment-state";
 import { LedgerService } from "../ledger/ledger.service";
 import { MerchantsService } from "../merchants/merchants.service";
+import { OutboundWebhookDeliveryService } from "../outbound-webhooks/outbound-webhook-delivery.service";
+import { OUTBOUND_WEBHOOKS_REPOSITORY, type OutboundWebhooksRepository } from "../outbound-webhooks/outbound-webhooks.repository";
 
 /** Evento normalizado del proveedor. */
 export interface EventoWebhook {
@@ -32,7 +34,10 @@ export class WebhooksService {
   constructor(
     @Inject(PAGOS_REPOSITORY) private readonly repo: PagosRepository,
     private readonly ledger: LedgerService,
-    private readonly merchants: MerchantsService
+    private readonly merchants: MerchantsService,
+    private readonly delivery: OutboundWebhookDeliveryService,
+    @Inject(OUTBOUND_WEBHOOKS_REPOSITORY)
+    private readonly webhookRepo: OutboundWebhooksRepository
   ) {}
 
   /**
@@ -83,9 +88,37 @@ export class WebhooksService {
       actor: "webhook:akua"
     });
 
-    // Al aprobar, asienta el movimiento en el ledger (idempotente por pago, §2).
     if (destino === "aprobado") {
       await this.ledger.registrarCobroAprobado(pago.tenantId, pago.paymentId);
     }
+
+    void this.enviarWebhookSaliente(pago.tenantId, pago.paymentId, destino);
+  }
+
+  private async enviarWebhookSaliente(
+    tenantId: string,
+    paymentId: string,
+    estado: EstadoCobro
+  ): Promise<void> {
+    const config = await this.webhookRepo.buscarPorTenant(tenantId);
+    if (!config?.activa) return;
+
+    const tipo = estado === "aprobado" ? "payment.completed" : "payment.failed";
+    if (!config.events.includes(tipo)) return;
+
+    const cobro = await this.repo.buscarCobro(tenantId, paymentId);
+    if (!cobro) return;
+
+    void this.delivery.entregar(config.url, config.secret, {
+      tenantId,
+      type: tipo,
+      data: {
+        paymentId: cobro.id,
+        reference: cobro.referencia,
+        amountMinor: cobro.montoMinor,
+        currency: cobro.moneda,
+        estado: cobro.estado
+      }
+    });
   }
 }

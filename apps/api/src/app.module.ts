@@ -12,6 +12,8 @@ import { ConciliacionController } from "./modules/conciliacion/conciliacion.cont
 import { MerchantsModule } from "./modules/merchants/merchants.module";
 import { MerchantsController } from "./modules/merchants/merchants.controller";
 import { AdminModule } from "./modules/admin/admin.module";
+import { OutboundWebhooksModule } from "./modules/outbound-webhooks/outbound-webhooks.module";
+import { OutboundWebhooksController } from "./modules/outbound-webhooks/outbound-webhooks.controller";
 import { HealthController } from "./health/health.controller";
 
 /**
@@ -29,7 +31,8 @@ import { HealthController } from "./health/health.controller";
     LedgerModule,
     ConciliacionModule,
     MerchantsModule,
-    AdminModule
+    AdminModule,
+    OutboundWebhooksModule
   ],
   controllers: [HealthController]
 })
@@ -38,6 +41,6 @@ export class AppModule implements NestModule {
     // TenantMiddleware resuelve API keys reales (Bearer evpk_*) o headers internos.
     consumer
       .apply(TenantMiddleware)
-      .forRoutes(PagosController, ConciliacionController, MerchantsController);
+      .forRoutes(PagosController, ConciliacionController, MerchantsController, OutboundWebhooksController);
   }
 }
