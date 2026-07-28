@@ -61,10 +61,13 @@ export class AdminService {
     const live = generateApiKey("live");
     const test = generateApiKey("test");
 
-    await this.db.insert(merchantApiKeys).values([
-      { tenantId, keyHash: live.hash, keyPrefix: live.prefix, environment: "live", label: "Producción" },
-      { tenantId, keyHash: test.hash, keyPrefix: test.prefix, environment: "test", label: "Sandbox" }
-    ]);
+    await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
+      await tx.insert(merchantApiKeys).values([
+        { tenantId, keyHash: live.hash, keyPrefix: live.prefix, environment: "live", label: "Producción" },
+        { tenantId, keyHash: test.hash, keyPrefix: test.prefix, environment: "test", label: "Sandbox" }
+      ]);
+    });
 
     return { tenantId, merchantId: merchant.id, apiKey: live.key, testApiKey: test.key };
   }
