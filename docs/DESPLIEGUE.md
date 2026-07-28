@@ -94,11 +94,15 @@ compila todo el workspace pnpm de forma determinista (build de `@evetev/shared` 
 3. **Variables** (Settings → Variables) — nunca en el repo (§4):
    ```
    DATABASE_URL          # rol evepay_api del proyecto Supabase de EvePay (pooler :6543)
-   PAYMENT_PROVIDER=fake # 'akua' cuando lleguen las llaves ak_test_
-   # AKUA_API_KEY        # al integrar Akua
-   # AKUA_WEBHOOK_SECRET # al integrar webhooks de Akua
+   PAYMENT_PROVIDER=fake # 'akua' cuando lleguen las llaves
+   # ── Variables de Akua (agregar cuando lleguen las llaves del dashboard) ──
+   # AKUA_API_KEY        # Bearer token de Akua (ak_test_… en sandbox)
+   # AKUA_CLIENT_ID      # Client-Id header que exige Akua en cada request
+   # AKUA_WEBHOOK_SECRET # Secreto del webhook; formato: whsec_<base64>
+   # AKUA_BASE_URL       # Omitir en producción; sandbox: https://sandbox.prod.akua.la
    ```
    > `PORT` lo inyecta Railway automáticamente; `main.ts` lo lee (fallback `API_PORT`, luego 3001).
+   > Cuando lleguen las llaves: cambia `PAYMENT_PROVIDER=akua` y agrega las 3 vars de Akua.
 4. **Deploy.** Cuando esté verde: **Settings → Networking → Generate Domain** (URL
    `*.up.railway.app`) para probar, y luego **Custom Domain** → `api.evetev.com`
    (agrega el CNAME que muestre Railway en **name.com**).

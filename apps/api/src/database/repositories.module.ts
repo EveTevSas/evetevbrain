@@ -42,7 +42,11 @@ import { InMemoryMerchantsRepository } from "../modules/merchants/in-memory-merc
       provide: PAYMENT_PROVIDER,
       useFactory: () =>
         process.env.PAYMENT_PROVIDER === "akua"
-          ? new AkuaPaymentProvider(process.env.AKUA_API_KEY ?? "")
+          ? new AkuaPaymentProvider(
+              process.env.AKUA_API_KEY ?? "",
+              process.env.AKUA_CLIENT_ID ?? "",
+              process.env.AKUA_BASE_URL // undefined → usa producción
+            )
           : new FakePaymentProvider()
     }
   ],

@@ -23,17 +23,26 @@ export class WebhooksController {
   ) {}
 
   /**
-   * POST /v1/webhooks/akua — recibe eventos de Akua. La auth es la FIRMA (§4),
-   * no el tenant. Responde 200 salvo firma inválida (401) para que Akua no reintente.
+   * POST /v1/webhooks/akua — recibe eventos de Akua (Svix). La auth es la FIRMA
+   * (§4), no el tenant. Responde 200 salvo firma inválida (401).
    */
   @Post("akua")
   @HttpCode(200)
   async akua(
     @Req() req: RawBodyReq,
-    @Headers("x-akua-signature") signature?: string
+    @Headers("akua-wh-id") whId?: string,
+    @Headers("akua-wh-timestamp") whTimestamp?: string,
+    @Headers("akua-wh-signature") whSignature?: string
   ): Promise<{ received: boolean }> {
     const raw = req.rawBody;
-    if (!raw || !this.verifier.verificar(raw, signature)) {
+    if (
+      !raw ||
+      !this.verifier.verificar(raw, {
+        id: whId,
+        timestamp: whTimestamp,
+        signature: whSignature
+      })
+    ) {
       throw new UnauthorizedException("Firma de webhook inválida.");
     }
 
@@ -45,24 +54,47 @@ export class WebhooksController {
   }
 }
 
-/** Extrae el evento del cuerpo crudo. Devuelve null si faltan id/type. */
+/**
+ * Extrae el evento del cuerpo crudo usando la estructura real de Akua:
+ * { id, type, data: { payment: { id, link?: { id }, merchant?: { id } } } }
+ */
 function parseEvento(raw: Buffer): EventoWebhook | null {
   try {
     const obj = JSON.parse(raw.toString("utf8")) as {
       id?: unknown;
       type?: unknown;
-      data?: { payment_id?: unknown; merchant_id?: unknown };
+      data?: {
+        payment?: {
+          id?: unknown;
+          link?: { id?: unknown };
+          merchant?: { id?: unknown };
+        };
+        merchant?: { id?: unknown };
+      };
     };
     if (typeof obj.id !== "string" || typeof obj.type !== "string") {
       return null;
     }
     const evento: EventoWebhook = { id: obj.id, type: obj.type };
-    if (typeof obj.data?.payment_id === "string") {
-      evento.providerPaymentId = obj.data.payment_id;
+
+    const payment = obj.data?.payment;
+    if (payment) {
+      // Prefer link.id (matches providerPaymentId we stored on cobro creation).
+      // TODO(sandbox): confirm that data.payment.link.id === the link id we stored.
+      const paymentRef = payment.link?.id ?? payment.id;
+      if (typeof paymentRef === "string") {
+        evento.providerPaymentId = paymentRef;
+      }
+      if (typeof payment.merchant?.id === "string") {
+        evento.providerMerchantId = payment.merchant.id;
+      }
     }
-    if (typeof obj.data?.merchant_id === "string") {
-      evento.providerMerchantId = obj.data.merchant_id;
+
+    // merchant.created event carries data.merchant.id
+    if (!evento.providerMerchantId && typeof obj.data?.merchant?.id === "string") {
+      evento.providerMerchantId = obj.data.merchant.id;
     }
+
     return evento;
   } catch {
     // cuerpo no-JSON o inesperado

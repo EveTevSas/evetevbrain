@@ -14,72 +14,94 @@ import type {
  * Implementación real sobre Akua (REST + JSON). ESTE es el único punto que habla
  * con Akua; el resto del núcleo solo conoce la interfaz PaymentProvider (§4).
  *
- * Estado: esqueleto. Los contratos exactos de campos (`POST /v1/payments`, mapeo
- * de estados, firma de webhooks) se fijan al obtener las sandbox keys `ak_test_`.
- * Ver docs/PLAN_DESARROLLO_EVEPAY.md §4.
+ * Flujo de pagos: Payment Links (POST /v1/links) — Akua hostea el checkout; nunca
+ * tocamos el PAN (§4). Auth: Bearer token + Client-Id header en cada request.
+ * Sandbox: AKUA_BASE_URL=https://sandbox.prod.akua.la; producción sin esa var.
  */
 export class AkuaPaymentProvider implements PaymentProvider {
   constructor(
     private readonly apiKey: string,
-    private readonly baseUrl = "https://api.akua.la/v1"
-  ) {}
+    private readonly clientId: string,
+    baseUrl?: string
+  ) {
+    this.baseUrl = baseUrl ?? "https://api.akua.la";
+  }
+
+  private readonly baseUrl: string;
+
+  private authHeaders(): Record<string, string> {
+    return {
+      authorization: `Bearer ${this.apiKey}`,
+      "client-id": this.clientId,
+      "content-type": "application/json"
+    };
+  }
 
   async crearCobro(input: CrearCobroInput, idempotencyKey: string): Promise<ProviderCobro> {
-    const res = await fetch(`${this.baseUrl}/payments`, {
+    const res = await fetch(`${this.baseUrl}/v1/links`, {
       method: "POST",
       headers: {
-        authorization: `Bearer ${this.apiKey}`,
-        "content-type": "application/json",
-        // Idempotencia nativa de Akua: reenviamos la clave del cliente.
+        ...this.authHeaders(),
         "idempotency-key": idempotencyKey
       },
       body: JSON.stringify({
-        amount: input.montoMinor,
-        currency: input.moneda,
-        reference: input.referencia,
-        description: input.descripcion,
-        merchant_id: input.merchantId
+        type: "payment",
+        expires_in: 3600,
+        data: {
+          amount: {
+            // montoMinor es en la unidad mínima: para COP (sin centavos) es el
+            // valor face; para USD dividir por 100. TODO(sandbox): confirmar.
+            value: input.montoMinor,
+            currency: input.moneda
+          },
+          description: input.descripcion ?? input.referencia,
+          reference: input.referencia,
+          merchant_id: input.merchantId
+        },
+        metadata: { "3ds": true }
       })
     });
 
     if (!res.ok) {
-      throw new Error(`Akua respondió ${res.status} al crear el cobro`);
+      throw new Error(`Akua respondió ${res.status} al crear el link de cobro`);
     }
 
-    // TODO(sandbox): confirmar nombres de campos reales de la respuesta de Akua.
+    // TODO(sandbox): confirmar campos exactos de la respuesta.
     const data = (await res.json()) as {
       id: string;
+      url?: string;
       status?: string;
-      checkout_url?: string;
     };
 
     return {
       providerPaymentId: data.id,
-      estado: mapEstado(data.status),
-      checkoutUrl: data.checkout_url
+      estado: mapEstadoLink(data.status),
+      checkoutUrl: data.url
     };
   }
 
   async verificarEstado(providerPaymentId: string): Promise<EstadoCobro> {
-    const res = await fetch(`${this.baseUrl}/payments/${providerPaymentId}`, {
-      headers: { authorization: `Bearer ${this.apiKey}` }
+    const res = await fetch(`${this.baseUrl}/v1/links/${providerPaymentId}`, {
+      headers: this.authHeaders()
     });
     if (!res.ok) {
-      throw new Error(`Akua respondió ${res.status} al verificar el cobro`);
+      throw new Error(`Akua respondió ${res.status} al verificar el link`);
     }
     const data = (await res.json()) as { status?: string };
-    return mapEstado(data.status);
+    return mapEstadoLink(data.status);
   }
 
   async listarLiquidaciones(_rango: RangoFechas): Promise<LiquidacionProvider[]> {
-    // TODO(sandbox): GET /v1/settlements de Akua y mapear a LiquidacionProvider.
-    const res = await fetch(`${this.baseUrl}/settlements`, {
-      headers: { authorization: `Bearer ${this.apiKey}` }
+    // TODO(sandbox): confirmar endpoint y campos de settlements en Akua.
+    const res = await fetch(`${this.baseUrl}/v1/settlements`, {
+      headers: this.authHeaders()
     });
     if (!res.ok) {
       throw new Error(`Akua respondió ${res.status} al listar liquidaciones`);
     }
-    const data = (await res.json()) as { settlements?: Array<{ payment_id: string; amount: number }> };
+    const data = (await res.json()) as {
+      settlements?: Array<{ payment_id: string; amount: number }>;
+    };
     return (data.settlements ?? []).map((s) => ({
       providerPaymentId: s.payment_id,
       montoMinor: s.amount
@@ -87,9 +109,9 @@ export class AkuaPaymentProvider implements PaymentProvider {
   }
 
   async crearMerchant(input: CrearMerchantInput): Promise<ProviderMerchant> {
-    const res = await fetch(`${this.baseUrl}/merchants`, {
+    const res = await fetch(`${this.baseUrl}/v1/merchants`, {
       method: "POST",
-      headers: { authorization: `Bearer ${this.apiKey}`, "content-type": "application/json" },
+      headers: this.authHeaders(),
       body: JSON.stringify({ legal_name: input.legalName })
     });
     if (!res.ok) {
@@ -100,13 +122,15 @@ export class AkuaPaymentProvider implements PaymentProvider {
   }
 }
 
-/** Mapea el estado del proveedor a nuestra máquina de estados. */
-function mapEstado(providerStatus: string | undefined): EstadoCobro {
+/**
+ * Mapea el estado del link de Akua a nuestra máquina de estados.
+ * "active" = link creado pero aún no pagado; "used" = pago exitoso; "expired" = venció.
+ */
+function mapEstadoLink(providerStatus: string | undefined): EstadoCobro {
   switch (providerStatus) {
-    case "succeeded":
-    case "approved":
+    case "used":
       return "aprobado";
-    case "failed":
+    case "expired":
       return "fallido";
     default:
       return "pendiente";

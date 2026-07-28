@@ -13,14 +13,15 @@ export interface EventoWebhook {
   providerMerchantId?: string;
 }
 
-/** Mapea el tipo de evento del proveedor a nuestro estado destino (pagos). */
+/** Mapea el tipo de evento de Akua a nuestro estado destino (pagos). */
 function estadoDestino(type: string): EstadoCobro | null {
   switch (type) {
-    case "payment.succeeded":
+    case "payment.purchase.succeeded":
       return "aprobado";
-    case "payment.failed":
+    case "payment.purchase.rejected":
+    case "payment.purchase.failed":
       return "fallido";
-    // payment.refunded, dispute.created, etc.: Fase 6 — no se procesan aún.
+    // payment.purchase.pending, payment.refunded, dispute.created, etc.: Fase 6.
     default:
       return null;
   }
@@ -39,7 +40,8 @@ export class WebhooksService {
    * Nunca lanza por eventos de ruido; el llamante responde 2xx.
    */
   async procesar(evento: EventoWebhook): Promise<void> {
-    if (evento.type === "merchant.approved") {
+    // Akua fires "merchant.created" once the merchant passes KYC in the platform.
+    if (evento.type === "merchant.created" || evento.type === "merchant.approved") {
       if (evento.providerMerchantId) {
         await this.merchants.aprobarPorProvider(evento.providerMerchantId);
       }
