@@ -96,10 +96,10 @@ compila todo el workspace pnpm de forma determinista (build de `@evetev/shared` 
    DATABASE_URL          # rol evepay_api del proyecto Supabase de EvePay (pooler :6543)
    PAYMENT_PROVIDER=fake # 'akua' cuando lleguen las llaves
    # ── Variables de Akua (agregar cuando lleguen las llaves del dashboard) ──
-   # AKUA_API_KEY        # Bearer token de Akua (ak_test_… en sandbox)
-   # AKUA_CLIENT_ID      # Client-Id header que exige Akua en cada request
+   # AKUA_CLIENT_ID      # client_id para OAuth2 (del dashboard de Akua)
+   # AKUA_CLIENT_SECRET  # client_secret para OAuth2 (del dashboard de Akua)
    # AKUA_WEBHOOK_SECRET # Secreto del webhook; formato: whsec_<base64>
-   # AKUA_BASE_URL       # Omitir en producción; sandbox: https://sandbox.prod.akua.la
+   # AKUA_BASE_URL       # Omitir en producción; sandbox: https://sandbox.akua.la
    ```
    > `PORT` lo inyecta Railway automáticamente; `main.ts` lo lee (fallback `API_PORT`, luego 3001).
    > Cuando lleguen las llaves: cambia `PAYMENT_PROVIDER=akua` y agrega las 3 vars de Akua.
