@@ -70,27 +70,54 @@ nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(
 /* Banda del hero: contiene el lienzo de partículas a sangre completa. El
    lienzo es absoluto dentro de ella, así que se desplaza con la página en
    lugar de quedarse pegado a la ventana, y no invade el resto de secciones. */
-.hero-banda{position:relative;overflow:hidden}
+/* La banda ocupa la primera pantalla completa. Se descuentan los 60px del nav
+   sticky para que hero + nav den exactamente un alto de ventana y no quede una
+   franja huérfana asomando. svh (no vh) porque en móvil vh cuenta la barra del
+   navegador y el bloque se pasa de largo. */
+.hero-banda{position:relative;overflow:hidden;display:flex;align-items:center;
+  min-height:calc(100vh - 60px);min-height:calc(100svh - 60px)}
 #eve-particulas{position:absolute;inset:0;z-index:0;pointer-events:none}
 #eve-particulas canvas{display:block}
 .hero-banda>.hero{position:relative;z-index:1}
-.hero{padding:clamp(48px,8vw,84px) 0 56px;max-width:640px}
-.hero h1{font-size:clamp(1.9rem,4.6vw,2.6rem);line-height:1.16;margin-bottom:14px}
-.hero p{font-size:clamp(.9rem,1.6vw,.98rem);color:var(--eve-pizarra);margin-bottom:26px}
-.hero-cta{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.hero-marca{display:flex;align-items:center;gap:14px;margin-bottom:26px}
-.hero-marca img{width:46px;height:32px}
+.hero{padding:clamp(40px,7vh,72px) 0;max-width:780px;margin-inline:auto;text-align:center}
+.hero h1{font-size:clamp(2.1rem,5.4vw,3.3rem);line-height:1.12;margin-bottom:18px}
+.hero p{font-size:clamp(.95rem,1.8vw,1.08rem);color:var(--eve-pizarra);margin:0 auto 30px;max-width:48ch}
+.hero-cta{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}
+.hero-marca{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:26px}
+.hero-marca img{width:56px;height:39px}
+
+/* Entrada del hero: desenfoque y ascenso, SOLO sobre el texto. El isotipo, los
+   botones y la señal de scroll quedan fijos a propósito: son los puntos de
+   referencia estables mientras el texto se compone, y así la animación no
+   retrasa el elemento con el que la persona va a interactuar.
+   El desenfoque, además, disimula el salto de la tipografía al cargar. */
+@media(prefers-reduced-motion:no-preference){
+  .hero-banda .hero h1,
+  .hero-banda .hero p{
+    animation:heroEntra 700ms cubic-bezier(.22,.61,.36,1) both;
+  }
+  .hero-banda .hero h1{animation-delay:80ms}
+  .hero-banda .hero p{animation-delay:210ms}
+}
+@keyframes heroEntra{
+  from{opacity:0;transform:translateY(14px);filter:blur(9px)}
+  to{opacity:1;transform:none;filter:blur(0)}
+}
+
+/* Señal de que hay más abajo: sin ella, una primera pantalla completa parece
+   el final de la página. */
+.hero-scroll{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:1;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  font-size:.72rem;letter-spacing:.5px;text-transform:uppercase;color:var(--eve-muted)}
+.hero-scroll svg{width:17px;height:17px;animation:bajar 1.8s ease-in-out infinite}
+@keyframes bajar{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+@media(prefers-reduced-motion:reduce){.hero-scroll svg{animation:none}}
 
 /* PRODUCTOS — variante minimalista hairline (§6 tarjetas) */
 .hr{border:none;border-top:1px solid var(--eve-linea)}
-.serv{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--eve-linea)}
-.serv>div{padding:30px 26px;border-right:1px solid var(--eve-linea);border-bottom:1px solid var(--eve-linea)}
-.serv>div:nth-child(3n){border-right:none}
-.serv img{width:33px;height:33px;display:block}
-/* Punto de línea de negocio (§12) — el color lo pone --p de cada tarjeta */
-.serv .punto{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
-.serv h3{font-size:.92rem;font-weight:600;margin:13px 0 4px}
-.serv p{font-size:.8rem;color:var(--eve-pizarra);margin-bottom:10px}
+/* Punto de línea de negocio (§12). Vive suelto y no anidado: antes colgaba de
+   .serv, una clase que dejó de existir en el HTML, y los puntos no se pintaban. */
+.punto{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:9px;flex:none}
 
 /* Ícono de producto en el color de su línea.
    La regla T1 prohíbe redibujar o aproximar la marca, así que NO se copia el
@@ -99,10 +126,12 @@ nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(
 .p-ico{width:34px;height:34px;display:block;background-color:var(--p);
   -webkit-mask:var(--u) center/contain no-repeat;mask:var(--u) center/contain no-repeat}
 .p-ico.sm{width:19px;height:19px;flex:none}
-.prod{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--eve-linea)}
-.prod>article{padding:32px 28px;border-right:1px solid var(--eve-linea);border-bottom:1px solid var(--eve-linea)}
-.prod>article:nth-child(2n){border-right:none}
-.prod h3{font-size:1.05rem;font-weight:600;margin:14px 0 6px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+/* Sin retícula de líneas: separa el aire, no los bordes. Es lo que pide el
+   manual —"la jerarquía se logra con espacio", nunca con adornos— y evita que
+   esta sección contradiga la amplitud del hero que tiene justo encima. */
+.prod{display:grid;grid-template-columns:1fr 1fr;gap:clamp(34px,6vw,84px)}
+.prod>article{padding:0}
+.prod h3{font-size:1.12rem;font-weight:600;margin:16px 0 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .prod .sub{font-size:.74rem;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--p)}
 .prod p{font-size:.85rem;color:var(--eve-pizarra);margin-bottom:14px;max-width:44ch}
 .prod ul{list-style:none;margin:0 0 16px}
@@ -117,11 +146,25 @@ nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(
 .chip.build{background:#EAF2FB;border-color:#CFE0F5;color:var(--eve-mezclado)}
 
 /* Roadmap — tratamiento ligero: son futuros, no productos de hoy */
-.roadmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:2px;
-  background:var(--eve-linea);border:1px solid var(--eve-linea);border-radius:12px;overflow:hidden}
-.roadmap>div{background:#fff;padding:18px 20px}
-.roadmap h4{font-size:.86rem;font-weight:600;margin-bottom:3px;display:flex;align-items:center}
-.roadmap p{font-size:.78rem;color:var(--eve-pizarra);margin:0}
+/* Tarjetas sutiles: fondo tinte y nada de borde. Agrupan sin dibujar la
+   retícula de líneas que sobrecargaba la sección. */
+.roadmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:clamp(14px,1.6vw,20px)}
+.roadmap>div{background:var(--eve-tinte);border-radius:14px;padding:20px 22px}
+.roadmap h4{font-size:.88rem;font-weight:600;margin-bottom:5px;display:flex;align-items:center}
+.roadmap p{font-size:.79rem;color:var(--eve-pizarra);margin:0}
+
+/* OJO con el espaciado vertical de las secciones: `.wrap` es un selector de
+   clase y `section` uno de etiqueta, así que `.wrap{padding:0 …}` gana por
+   especificidad y anula el `padding:64px 0` de `section`. Toda sección que
+   además sea .wrap se queda con padding vertical 0 — de ahí los padding-top
+   sueltos que hay por el HTML. Aquí se declara explícito en vez de confiar en
+   una regla que nunca llega a aplicarse. */
+/* Los dos paddings se suman, así que cada uno va a la mitad del hueco
+   buscado: 64+64 dan 128 px, algo más que los 112 que separan el video de
+   "Productos" y en la misma escala. Con 104 cada uno se iban a 208, el doble
+   que el resto de la página. */
+#servicios{padding-bottom:clamp(40px,5vw,64px)}
+#desarrolladores{padding-top:clamp(40px,5vw,64px)}
 
 /* TABS (§6) */
 .tabs{display:inline-flex;background:var(--eve-tinte);border-radius:999px;padding:4px;gap:2px;flex-wrap:wrap}
@@ -165,9 +208,47 @@ input[type=range]{width:100%;accent-color:var(--eve-mezclado)}
 .icard p{font-size:.82rem;color:var(--eve-pizarra);margin-bottom:12px}
 
 /* BANDA portada (§6): object-fit cover + velo + contenido en blanco */
-.banda{position:relative;min-height:clamp(240px,38vw,420px);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:36px}
-.banda video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:linear-gradient(120deg,#0A2540,#1E6FEB)}
-.banda::after{content:'';position:absolute;inset:0;background:rgba(10,37,64,.42)}
+/* Sin overflow:hidden a propósito: convertiría la sección en contenedor de
+   scroll y entonces view() mediría contra ella —que nunca se desplaza— en vez
+   de contra la página, dejando la animación congelada. El recorte del video lo
+   hace .banda-media, que sí puede recortarse sin romper la línea de tiempo. */
+.banda{position:relative;min-height:clamp(300px,46vw,520px);display:flex;align-items:center;justify-content:center;margin-bottom:36px}
+/* El video vive en su propia capa para poder crecer sin arrastrar al texto:
+   si escalara la sección entera, el titular crecería con ella y se vería mal. */
+.banda-media{position:absolute;inset:0;overflow:hidden;transform-origin:50% 50%;
+  background:linear-gradient(120deg,#0A2540,#1E6FEB)}
+.banda-media video{width:100%;height:100%;object-fit:cover;display:block}
+.banda-media::after{content:'';position:absolute;inset:0;background:rgba(10,37,64,.42)}
+
+/* Crecimiento ligado al scroll, sin JS. Donde no haya soporte (hoy Firefox),
+   el video simplemente se ve a tamaño completo desde el principio: se pierde
+   la animación, nunca el contenido. */
+@supports (animation-timeline: view()){
+  @media(prefers-reduced-motion:no-preference){
+    .banda-media{
+      animation:banda-crece linear both;
+      animation-timeline:view();
+      /* El recorrido se estira hasta cover 58% a propósito: con un tramo más
+         corto el video llegaba a tamaño completo cuando la banda apenas
+         asomaba, y el crecimiento pasaba fuera de la vista. */
+      animation-range:entry 0% cover 58%;
+    }
+    @keyframes banda-crece{
+      from{transform:scale(.76);border-radius:32px}
+      to{transform:scale(1);border-radius:0}
+    }
+    /* El texto entra algo después para no competir con el crecimiento. */
+    .banda .contenido{
+      animation:banda-texto linear both;
+      animation-timeline:view();
+      animation-range:entry 28% cover 66%;
+    }
+    @keyframes banda-texto{
+      from{opacity:0;transform:translateY(16px)}
+      to{opacity:1;transform:none}
+    }
+  }
+}
 .banda .contenido{position:relative;z-index:2;text-align:center;color:#fff;padding:48px clamp(24px,6vw,60px);max-width:760px;margin:0 auto}
 .banda h2{font-size:clamp(1.5rem,3.4vw,2.2rem);margin-bottom:10px;color:#fff}
 .banda p{font-size:clamp(.85rem,1.6vw,.95rem);color:#D6E6F7;margin-bottom:0}
@@ -268,8 +349,6 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
   .drop{width:100%}
   .drop>button{padding:13px 24px;width:100%;justify-content:space-between}
   .drop-panel{position:static;border:none;box-shadow:none;background:var(--eve-tinte);border-radius:0;padding:4px 12px}
-  .serv{grid-template-columns:1fr}
-  .serv>div{border-right:none !important}
   .checks{grid-template-columns:1fr}
   .hero-cta .btn{width:100%}
   .pre-grid{gap:28px}
@@ -322,6 +401,13 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
 .ayuda{font-size:.76rem;color:var(--eve-muted);margin-top:6px}
 
 @media(max-width:760px){.valores,.equipo{grid-template-columns:1fr}}
+
+/* Los dos productos a una columna antes de llegar al móvil: son tarjetas con
+   lista de viñetas, y a dos columnas por debajo de ~860px las líneas quedan de
+   tres o cuatro palabras y la sección se vuelve larguísima. */
+@media(max-width:860px){
+  .prod{grid-template-columns:1fr;gap:clamp(38px,7vw,52px)}
+}
 
 /* Trampa antibots: fuera de pantalla, sin display:none (algunos bots lo
    detectan) y fuera del árbol de accesibilidad vía aria-hidden en el HTML. */
