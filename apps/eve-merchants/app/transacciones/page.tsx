@@ -131,7 +131,7 @@ export default function TransaccionesPage() {
           <div style={{ padding: "3rem 2rem", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
             <div style={{ position: "relative", width: 140, height: 140, flexShrink: 0 }}>
               <Image
-                src="/mascota/mascota-curiosa.jpeg"
+                src="/mascota/mascota-curiosa.png"
                 alt="Sin transacciones"
                 fill
                 style={{ objectFit: "contain" }}

@@ -5,13 +5,47 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { getApiKey, getMerchant, logout } from "@/lib/auth";
 
-const NAV = [
-  { href: "/dashboard",     label: "Dashboard",     icon: "◈" },
-  { href: "/transacciones", label: "Transacciones", icon: "≡" },
-  { href: "/ajustes",       label: "Ajustes",       icon: "⊙" }
-];
-
 const CDN = "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1";
+
+function IconDashboard({ active }: { active: boolean }) {
+  const c = active ? "#FDFEFF" : "rgba(255,255,255,0.45)";
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  );
+}
+
+function IconTransacciones({ active }: { active: boolean }) {
+  const c = active ? "#FDFEFF" : "rgba(255,255,255,0.45)";
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+      <rect x="9" y="3" width="6" height="4" rx="1" />
+      <line x1="9" y1="12" x2="15" y2="12" />
+      <line x1="9" y1="16" x2="13" y2="16" />
+    </svg>
+  );
+}
+
+function IconAjustes({ active }: { active: boolean }) {
+  const c = active ? "#FDFEFF" : "rgba(255,255,255,0.45)";
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  );
+}
+
+const NAV = [
+  { href: "/dashboard",     label: "Dashboard",     Icon: IconDashboard },
+  { href: "/transacciones", label: "Transacciones", Icon: IconTransacciones },
+  { href: "/ajustes",       label: "Ajustes",       Icon: IconAjustes },
+];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router   = useRouter();
@@ -25,6 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
+
       {/* ── Sidebar ─────────────────────────────── */}
       <aside style={{
         width: 228,
@@ -36,6 +71,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         zIndex: 10,
         boxShadow: "2px 0 16px rgba(10,37,64,.15)"
       }}>
+
         {/* Logo */}
         <div style={{ padding: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
@@ -45,7 +81,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </span>
           </Link>
           {merchant && (
-            <p style={{ marginTop: "0.5rem", fontSize: "0.75rem", color: "var(--eve-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <p style={{ marginTop: "0.5rem", fontSize: "0.75rem", color: "rgba(255,255,255,0.4)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {merchant.legalName}
             </p>
           )}
@@ -53,30 +89,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Nav */}
         <nav style={{ flex: 1, padding: "0.75rem 0" }}>
-          {NAV.map(({ href, label, icon }) => {
+          {NAV.map(({ href, label, Icon }) => {
             const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
             return (
               <Link key={href} href={href} style={{
-                display: "flex", alignItems: "center", gap: "0.625rem",
-                padding: "0.625rem 1.5rem", textDecoration: "none",
+                display: "flex", alignItems: "center", gap: "0.875rem",
+                padding: "0.75rem 1.5rem", textDecoration: "none",
                 fontSize: "0.875rem", fontWeight: active ? 600 : 400,
                 color: active ? "#FDFEFF" : "rgba(255,255,255,0.5)",
                 background: active ? "rgba(30,111,235,0.18)" : "transparent",
                 borderLeft: active ? "3px solid var(--eve-electrico)" : "3px solid transparent",
                 transition: "all 0.15s"
               }}>
-                <span style={{ fontSize: "1rem", opacity: active ? 1 : 0.65 }}>{icon}</span>
+                <Icon active={active} />
                 {label}
               </Link>
             );
           })}
         </nav>
 
-        {/* Mascota decorativa */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "0.75rem 1.5rem 0", pointerEvents: "none" }}>
-          <div style={{ position: "relative", width: 80, height: 80 }}>
+        {/* Mascota PNG con fondo transparente */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "0 1rem 0", pointerEvents: "none" }}>
+          <div style={{ position: "relative", width: 110, height: 110 }}>
             <Image
-              src="/mascota/mascota.webp"
+              src="/mascota/mascota.png"
               alt=""
               fill
               style={{ objectFit: "contain", objectPosition: "bottom" }}
@@ -85,7 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Cerrar sesión */}
-        <div style={{ padding: "0.75rem 1.5rem 1rem", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+        <div style={{ padding: "0.75rem 1.5rem 1.25rem", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
           <button
             onClick={() => { logout(); router.push("/login"); }}
             style={{
