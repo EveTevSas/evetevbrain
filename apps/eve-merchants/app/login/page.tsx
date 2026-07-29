@@ -59,7 +59,8 @@ export default function LoginPage() {
         justifyContent: "center",
         padding: "2rem 2rem",
         minHeight: "100vh",
-      }} className="login-form-panel login-gradient-bg">
+        background: "#fff",
+      }} className="login-form-panel">
         <div style={{ width: "100%", maxWidth: 380 }}>
 
           {/* Isotipo + logotipo */}
