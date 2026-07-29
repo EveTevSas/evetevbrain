@@ -259,7 +259,7 @@ export function DashboardPage() {
       <PageHeader
         eyebrow="Resumen operacional"
         title={`Buenas tardes, ${user.name.split(" ")[0] ?? "Usuario"}`}
-        description="Todo lo importante de Bosques de Arrayán, con trazabilidad desde el recaudo hasta la operación diaria."
+        description={`Todo lo importante de ${snapshot.tenant.name}, con trazabilidad desde el recaudo hasta la operación diaria.`}
         secondaryAction={
           <Badge tone={connection === "online" ? "success" : "warning"}>
             {connection === "online" ? "Datos en vivo" : "Modo contingencia"}

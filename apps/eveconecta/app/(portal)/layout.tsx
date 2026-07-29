@@ -9,7 +9,12 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   const access = await requireCurrentAccess();
 
   return (
-    <AuthUserProvider conjuntoName={access.conjuntoName} user={access.user}>
+    <AuthUserProvider
+      availableConjuntos={access.availableConjuntos}
+      conjuntoId={access.conjuntoId}
+      conjuntoName={access.conjuntoName}
+      user={access.user}
+    >
       <AppShell>{children}</AppShell>
     </AuthUserProvider>
   );

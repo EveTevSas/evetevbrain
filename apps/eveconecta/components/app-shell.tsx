@@ -26,6 +26,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { canSeeNavigation } from "@/lib/auth/permissions";
+import { apiRequest } from "@/lib/api";
 import { useAuthUser } from "./auth-user-provider";
 import { BrandMark } from "./brand-mark";
 import { useData } from "./data-provider";
@@ -91,9 +92,24 @@ function ConnectionBadge() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { snapshot } = useData();
-  const { conjuntoName, user } = useAuthUser();
+  const { availableConjuntos, conjuntoId, conjuntoName, user } = useAuthUser();
   const [open, setOpen] = useState(false);
+  const [switchingTenant, setSwitchingTenant] = useState(false);
   const visibleNavigation = navigation.filter((item) => canSeeNavigation(user.role, item.href));
+
+  async function switchConjunto(nextConjuntoId: string) {
+    if (nextConjuntoId === conjuntoId) return;
+    setSwitchingTenant(true);
+    try {
+      await apiRequest("/v1/habitat/select-tenant", {
+        method: "POST",
+        body: JSON.stringify({ conjuntoId: nextConjuntoId })
+      });
+      window.location.assign("/");
+    } finally {
+      setSwitchingTenant(false);
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -135,16 +151,34 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mt-7 rounded-[var(--eve-radio-lg)] border border-[var(--line)] bg-[var(--wash)] p-3.5">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="truncate text-sm font-extrabold text-[var(--ink)]">{conjuntoName}</p>
+              {availableConjuntos.length > 1 ? (
+                <select
+                  aria-label="Copropiedad activa"
+                  className="focus-ring -ml-1 max-w-[12rem] cursor-pointer rounded-lg bg-transparent px-1 py-0.5 text-sm font-extrabold text-[var(--ink)]"
+                  disabled={switchingTenant}
+                  onChange={(event) => void switchConjunto(event.target.value)}
+                  value={conjuntoId}
+                >
+                  {availableConjuntos.map((conjunto) => (
+                    <option key={conjunto.id} value={conjunto.id}>
+                      {conjunto.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="truncate text-sm font-extrabold text-[var(--ink)]">{conjuntoName}</p>
+              )}
               <p className="mt-0.5 truncate text-xs text-[var(--muted)]">
                 {snapshot.tenant.units} unidades · {snapshot.tenant.city}
               </p>
             </div>
-            <ChevronDown
-              aria-hidden="true"
-              className="mt-0.5 shrink-0 text-[var(--muted)]"
-              size={15}
-            />
+            {availableConjuntos.length > 1 ? (
+              <ChevronDown
+                aria-hidden="true"
+                className="mt-0.5 shrink-0 text-[var(--muted)]"
+                size={15}
+              />
+            ) : null}
           </div>
           <div className="mt-3 border-t border-[var(--line)] pt-2.5">
             <ConnectionBadge />

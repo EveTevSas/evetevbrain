@@ -147,6 +147,27 @@ Antes de enviar invitaciones reales se debe configurar SMTP propio. El servicio
 de correo predeterminado de Supabase es únicamente para pruebas y tiene límites
 restrictivos.
 
+### Restaurar el escenario comercial
+
+El seed comercial crea o restaura tres copropiedades ficticias, cuatro residentes
+por copropiedad y actividad en finanzas, presupuesto, comunidad, comunicaciones,
+PQRS, reservas, portería, mantenimiento, asambleas, documentos y auditoría.
+También asigna un usuario exclusivo de demostración a los tres conjuntos para
+habilitar el selector de copropiedad.
+
+```bash
+SUPABASE_URL="https://<project-ref>.supabase.co" \
+SUPABASE_SECRET_KEY="<sb_secret_...>" \
+DEMO_ADMIN_EMAIL="demo.comercial@evetev.com" \
+DEMO_ADMIN_NAME="Equipo Comercial Evetev" \
+DEMO_ADMIN_PASSWORD="<contraseña-segura-exclusiva-del-demo>" \
+pnpm demo:seed
+```
+
+La ejecución es idempotente y restaura el escenario base sin duplicar
+residentes, unidades o movimientos. Esa cuenta no debe reutilizar credenciales
+personales ni emplearse para administrar información real.
+
 ## Variables de entorno
 
 | Variable                               | Alcance              | Descripción                                      |
