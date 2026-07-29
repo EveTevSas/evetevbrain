@@ -36,21 +36,23 @@ export default function LoginPage() {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
 
-      {/* ── Panel izquierdo: imagen completa, sin texto ───────── */}
+      {/* ── Panel izquierdo: imagen completa sin texto ────────── */}
       <div
         className="login-brand-panel"
         style={{
-          display: "none",   /* mobile oculto; desktop: flex via CSS */
+          display: "none",          /* mobile: oculto; desktop: flex via CSS */
           flex: 1,
           position: "relative",
           overflow: "hidden",
+          /* Fondo que coincide con el degradado de la imagen */
+          background: "linear-gradient(160deg, #dce8f8 0%, #e8f0fb 50%, #d4e4f7 100%)",
         }}
       >
         <Image
-          src="/mascota/arriba.jpeg"
+          src="/mascota/fondoeve-merchans.png"
           alt=""
           fill
-          style={{ objectFit: "cover", objectPosition: "center" }}
+          style={{ objectFit: "contain", objectPosition: "center bottom" }}
           priority
         />
       </div>
@@ -61,12 +63,12 @@ export default function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "var(--eve-tinte)",
+        background: "#fff",
         padding: "2rem 1.5rem"
       }}>
         <div style={{ width: "100%", maxWidth: 400 }}>
 
-          {/* Logo + isotipo — siempre visible en este panel */}
+          {/* Isotipo + logotipo */}
           <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
             <Link href="/" style={{
               display: "inline-flex", alignItems: "center",
@@ -75,13 +77,13 @@ export default function LoginPage() {
               <img
                 src={`${CDN}/isotipos/isotipo-azul-noche.svg`}
                 alt="Evetev"
-                width={40}
-                height={29}
+                width={42}
+                height={30}
               />
               <span style={{
                 fontFamily: "'Baloo 2', sans-serif",
                 fontWeight: 700,
-                fontSize: "1.6rem",
+                fontSize: "1.75rem",
                 color: "var(--eve-azul-noche)",
                 letterSpacing: "-0.01em"
               }}>
@@ -91,13 +93,13 @@ export default function LoginPage() {
             <p style={{
               marginTop: "0.5rem",
               color: "var(--eve-pizarra)",
-              fontSize: "0.85rem"
+              fontSize: "0.875rem"
             }}>
               Portal del comercio
             </p>
           </div>
 
-          {/* Formulario */}
+          {/* Card del formulario */}
           <div className="card">
             <h1 style={{ marginBottom: "0.25rem", fontSize: "1.25rem" }}>
               Iniciar sesión
