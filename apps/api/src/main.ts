@@ -7,10 +7,23 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
   // CORS: permite al portal del comercio y al panel admin llamar al API.
-  const origins = (process.env.CORS_ORIGINS ?? "http://localhost:3003")
+  // Siempre incluye los orígenes de producción conocidos más lo que venga en CORS_ORIGINS.
+  const extraOrigins = (process.env.CORS_ORIGINS ?? "")
     .split(",")
-    .map((o) => o.trim());
-  app.enableCors({ origin: origins, credentials: true });
+    .map((o) => o.trim())
+    .filter(Boolean);
+  const origins = [
+    "http://localhost:3003",
+    "https://merchants.evetev.com",
+    "https://eve-merchants.vercel.app",
+    ...extraOrigins,
+  ];
+  app.enableCors({
+    origin: origins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  });
 
   app.setGlobalPrefix("v1", { exclude: ["admin"] });
 
