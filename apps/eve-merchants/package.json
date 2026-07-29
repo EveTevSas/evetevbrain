@@ -1,8 +1,8 @@
 {
-  "name": "@evetev/portal",
+  "name": "@evetev/eve-merchants",
   "version": "0.1.0",
   "private": true,
-  "description": "Portal del comercio — dashboard de pagos, transacciones y configuración.",
+  "description": "Eve Merchants — portal del comercio: dashboard de pagos, transacciones y configuración.",
   "scripts": {
     "build": "next build",
     "dev": "next dev --port 3003",
