@@ -17,6 +17,7 @@ export interface ResolucionMerchant {
 export interface MerchantsRepository {
   crear(nuevo: NuevoMerchant): Promise<Merchant>;
   buscar(tenantId: string, merchantId: string): Promise<Merchant | null>;
+  buscarPorTenant(tenantId: string): Promise<Merchant | null>;
   /** Resuelve un comercio por su id de proveedor (cross-tenant, para webhook). */
   resolverPorProvider(providerMerchantId: string): Promise<ResolucionMerchant | null>;
   aplicarEstado(tenantId: string, merchantId: string, estado: EstadoMerchant): Promise<void>;

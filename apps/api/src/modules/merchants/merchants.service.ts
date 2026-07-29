@@ -29,6 +29,10 @@ export class MerchantsService {
     return this.repo.buscar(tenantId, merchantId);
   }
 
+  async obtenerPorTenant(tenantId: string): Promise<Merchant | null> {
+    return this.repo.buscarPorTenant(tenantId);
+  }
+
   /** Aprueba un comercio a partir del evento del proveedor (webhook merchant.approved). */
   async aprobarPorProvider(providerMerchantId: string): Promise<void> {
     const m = await this.repo.resolverPorProvider(providerMerchantId);

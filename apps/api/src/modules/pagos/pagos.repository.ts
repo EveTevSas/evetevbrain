@@ -58,6 +58,29 @@ export interface CobroAprobadoResumen {
   montoMinor: number;
 }
 
+export interface FiltrosCobros {
+  desde?: string;
+  hasta?: string;
+  estado?: EstadoCobro;
+  page: number;
+  limit: number;
+}
+
+export interface PaginaCobros {
+  items: Cobro[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface StatsCobros {
+  total: number;
+  aprobados: number;
+  fallidos: number;
+  pendientes: number;
+  montoAprobadoMinor: number;
+}
+
 /**
  * Puerto de persistencia de pagos. Dos adaptadores: in-memory (tests/local) y
  * Drizzle/Postgres (Supabase). Todas las operaciones están acotadas por tenant
@@ -82,6 +105,10 @@ export interface PagosRepository {
   registrarEventoIdempotente(args: RegistrarEventoArgs): Promise<boolean>;
   /** Aplica una transición de estado a un cobro y la audita (acotada al tenant). */
   aplicarTransicion(args: AplicarTransicionArgs): Promise<void>;
+
+  // --- Portal del comercio (Fase 6f) ---
+  listar(tenantId: string, filtros: FiltrosCobros): Promise<PaginaCobros>;
+  stats(tenantId: string, desde?: string, hasta?: string): Promise<StatsCobros>;
 
   // --- Conciliación (Fase 4) ---
   /** Cobros en estado `aprobado` creados dentro del rango (para conciliar). */

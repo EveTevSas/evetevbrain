@@ -1,4 +1,4 @@
-import { and, count, eq, gte, lte, sql } from "drizzle-orm";
+import { and, count, eq, gte, lte, sql, sum, desc } from "drizzle-orm";
 import type { Cobro, EstadoCobro, RangoFechas } from "@evetev/shared";
 import type { Db } from "../../database/drizzle";
 import { paymentAudit, paymentIdempotency, payments, webhookEvents } from "../../database/schema";
@@ -7,10 +7,13 @@ import {
   type CobroAprobadoResumen,
   type CrearConIdempotenciaArgs,
   type CrearResultado,
+  type FiltrosCobros,
   type IdempotencyHit,
+  type PaginaCobros,
   type PagosRepository,
   type RegistrarEventoArgs,
-  type ResolucionPago
+  type ResolucionPago,
+  type StatsCobros
 } from "./pagos.repository";
 
 type FilaPago = typeof payments.$inferSelect;
@@ -183,6 +186,56 @@ export class DrizzlePagosRepository implements PagosRepository {
         actor: args.actor,
         data: null
       });
+    });
+  }
+
+  async listar(tenantId: string, filtros: FiltrosCobros): Promise<PaginaCobros> {
+    return this.db.transaction(async (tx): Promise<PaginaCobros> => {
+      await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
+
+      const conditions = [eq(payments.tenantId, tenantId)];
+      if (filtros.estado) conditions.push(eq(payments.status, filtros.estado));
+      if (filtros.desde) conditions.push(gte(payments.createdAt, new Date(filtros.desde)));
+      if (filtros.hasta) conditions.push(lte(payments.createdAt, new Date(filtros.hasta)));
+
+      const totales = await tx.select({ total: count() }).from(payments).where(and(...conditions));
+      const total = totales[0]?.total ?? 0;
+      const offset = (filtros.page - 1) * filtros.limit;
+      const rows = await tx
+        .select()
+        .from(payments)
+        .where(and(...conditions))
+        .orderBy(desc(payments.createdAt))
+        .limit(filtros.limit)
+        .offset(offset);
+
+      return { items: rows.map((r) => this.aCobro(r)), total: Number(total ?? 0), page: filtros.page, limit: filtros.limit };
+    });
+  }
+
+  async stats(tenantId: string, desde?: string, hasta?: string): Promise<StatsCobros> {
+    return this.db.transaction(async (tx): Promise<StatsCobros> => {
+      await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
+
+      const conditions = [eq(payments.tenantId, tenantId)];
+      if (desde) conditions.push(gte(payments.createdAt, new Date(desde)));
+      if (hasta) conditions.push(lte(payments.createdAt, new Date(hasta)));
+
+      const rows = await tx
+        .select({ status: payments.status, monto: sum(payments.amountMinor), cantidad: count() })
+        .from(payments)
+        .where(and(...conditions))
+        .groupBy(payments.status);
+
+      let aprobados = 0, fallidos = 0, pendientes = 0, montoAprobadoMinor = 0, total = 0;
+      for (const r of rows) {
+        const n = Number(r.cantidad);
+        total += n;
+        if (r.status === "aprobado") { aprobados = n; montoAprobadoMinor = Number(r.monto ?? 0); }
+        else if (r.status === "fallido") { fallidos = n; }
+        else { pendientes += n; }
+      }
+      return { total, aprobados, fallidos, pendientes, montoAprobadoMinor };
     });
   }
 

@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+:root {
+  --coral: #FF6550;
+  --coral-dark: #e55540;
+  --navy: #1a1a2e;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-400: #9ca3af;
+  --gray-600: #4b5563;
+  --gray-900: #111827;
+  --green: #16a34a;
+  --red: #dc2626;
+  --yellow: #ca8a04;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.btn-primary {
+  background: var(--coral);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.625rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--coral-dark); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-ghost:hover { border-color: var(--coral); color: var(--coral); }
+
+.input {
+  width: 100%;
+  border: 1px solid var(--gray-200);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+  background: #fff;
+}
+.input:focus { border-color: var(--coral); }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.pill-green { background: #dcfce7; color: var(--green); }
+.pill-red   { background: #fee2e2; color: var(--red); }
+.pill-yellow{ background: #fef9c3; color: var(--yellow); }
+.pill-gray  { background: var(--gray-100); color: var(--gray-600); }
+
+.mono { font-family: "JetBrains Mono", monospace; font-size: 0.8rem; }
+
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gray-400);
+  padding: 0 1rem 0.75rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+td {
+  padding: 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--gray-600);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--gray-50); }

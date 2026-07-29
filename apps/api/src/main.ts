@@ -4,9 +4,14 @@ import { Logger } from "@nestjs/common";
 import { AppModule } from "./app.module";
 
 async function bootstrap(): Promise<void> {
-  // rawBody: true expone req.rawBody para verificar la firma de los webhooks (§4).
   const app = await NestFactory.create(AppModule, { rawBody: true });
-  // /admin sirve el panel HTML sin prefijo (el resto va bajo /v1).
+
+  // CORS: permite al portal del comercio y al panel admin llamar al API.
+  const origins = (process.env.CORS_ORIGINS ?? "http://localhost:3003")
+    .split(",")
+    .map((o) => o.trim());
+  app.enableCors({ origin: origins, credentials: true });
+
   app.setGlobalPrefix("v1", { exclude: ["admin"] });
 
   // Railway/hosts inyectan PORT; en local usamos API_PORT. 0.0.0.0 para aceptar

@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, NotFoundException, Post, UseGuards } from "@nestjs/common";
 import { CrearMerchantInputSchema, type Merchant } from "@evetev/shared";
 import { currentContext } from "../../common/request-context";
 import { Role } from "../identidad/roles";
@@ -10,6 +10,16 @@ import { MerchantsService } from "./merchants.service";
 @UseGuards(RolesGuard)
 export class MerchantsController {
   constructor(private readonly merchants: MerchantsService) {}
+
+  /** GET /v1/merchants/me — perfil del comercio autenticado (para el portal). */
+  @Get("me")
+  @Roles(Role.ADMIN_COMERCIO, Role.SUPER_ADMIN)
+  async mio(): Promise<Merchant> {
+    const { tenantId } = currentContext();
+    const merchant = await this.merchants.obtenerPorTenant(tenantId);
+    if (!merchant) throw new NotFoundException("Comercio no encontrado.");
+    return merchant;
+  }
 
   /** POST /v1/merchants — da de alta un comercio para el tenant del contexto. */
   @Post()

@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { ConflictException, Inject, Injectable } from "@nestjs/common";
 import type { Cobro, CrearCobroInput, PaymentProvider } from "@evetev/shared";
 import { PAYMENT_PROVIDER } from "./payment-provider.token";
-import { PAGOS_REPOSITORY, type PagosRepository } from "./pagos.repository";
+import { PAGOS_REPOSITORY, type FiltrosCobros, type PaginaCobros, type PagosRepository, type StatsCobros } from "./pagos.repository";
 
 /** Contexto del cobro: tenant (comercio) y actor para auditoría. */
 export interface CobroContext {
@@ -66,6 +66,18 @@ export class PagosService {
       return this.recuperarExistente(ctx.tenantId, hit.paymentId, hit.requestHash, requestHash);
     }
     throw new Error("No se pudo resolver la creación idempotente del cobro.");
+  }
+
+  async listar(tenantId: string, filtros: FiltrosCobros): Promise<PaginaCobros> {
+    return this.repo.listar(tenantId, filtros);
+  }
+
+  async stats(tenantId: string, desde?: string, hasta?: string): Promise<StatsCobros> {
+    return this.repo.stats(tenantId, desde, hasta);
+  }
+
+  async obtener(tenantId: string, cobroId: string): Promise<Cobro | null> {
+    return this.repo.buscarCobro(tenantId, cobroId);
   }
 
   private async recuperarExistente(

@@ -25,6 +25,13 @@ export class InMemoryMerchantsRepository implements MerchantsRepository {
     return this.aMerchant(row);
   }
 
+  async buscarPorTenant(tenantId: string): Promise<Merchant | null> {
+    for (const row of this.merchants.values()) {
+      if (row.tenantId === tenantId) return this.aMerchant(row);
+    }
+    return null;
+  }
+
   async buscar(tenantId: string, merchantId: string): Promise<Merchant | null> {
     const row = this.merchants.get(merchantId);
     if (!row || row.tenantId !== tenantId) {

@@ -5,11 +5,14 @@ import {
   type CobroAprobadoResumen,
   type CrearConIdempotenciaArgs,
   type CrearResultado,
+  type FiltrosCobros,
   type IdempotencyHit,
   type NuevoCobro,
+  type PaginaCobros,
   type PagosRepository,
   type RegistrarEventoArgs,
-  type ResolucionPago
+  type ResolucionPago,
+  type StatsCobros
 } from "./pagos.repository";
 
 interface FilaCobro extends NuevoCobro {
@@ -134,6 +137,31 @@ export class InMemoryPagosRepository implements PagosRepository {
       actor: args.actor,
       at: new Date().toISOString()
     });
+  }
+
+  async listar(tenantId: string, filtros: FiltrosCobros): Promise<PaginaCobros> {
+    let items = Array.from(this.pagos.values()).filter((f) => f.tenantId === tenantId);
+    if (filtros.estado) items = items.filter((f) => f.estado === filtros.estado);
+    if (filtros.desde) items = items.filter((f) => f.creadoEn >= filtros.desde!);
+    if (filtros.hasta) items = items.filter((f) => f.creadoEn <= filtros.hasta!);
+    items.sort((a, b) => b.creadoEn.localeCompare(a.creadoEn));
+    const total = items.length;
+    const offset = (filtros.page - 1) * filtros.limit;
+    return { items: items.slice(offset, offset + filtros.limit).map((f) => this.aCobro(f)), total, page: filtros.page, limit: filtros.limit };
+  }
+
+  async stats(tenantId: string, desde?: string, hasta?: string): Promise<StatsCobros> {
+    let items = Array.from(this.pagos.values()).filter((f) => f.tenantId === tenantId);
+    if (desde) items = items.filter((f) => f.creadoEn >= desde);
+    if (hasta) items = items.filter((f) => f.creadoEn <= hasta);
+    const aprobados = items.filter((f) => f.estado === "aprobado");
+    return {
+      total: items.length,
+      aprobados: aprobados.length,
+      fallidos: items.filter((f) => f.estado === "fallido").length,
+      pendientes: items.filter((f) => f.estado === "pendiente" || f.estado === "creado").length,
+      montoAprobadoMinor: aprobados.reduce((s, f) => s + f.amountMinor, 0)
+    };
   }
 
   async listarCobrosAprobados(
