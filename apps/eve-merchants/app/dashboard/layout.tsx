@@ -108,18 +108,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        {/* Mascota PNG con fondo transparente */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "0 1rem 0", pointerEvents: "none" }}>
-          <div style={{ position: "relative", width: 110, height: 110 }}>
-            <Image
-              src="/mascota/mascota.png"
-              alt=""
-              fill
-              style={{ objectFit: "contain", objectPosition: "bottom" }}
-            />
-          </div>
-        </div>
-
         {/* Cerrar sesión */}
         <div style={{ padding: "0.75rem 1.5rem 1.25rem", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
           <button
