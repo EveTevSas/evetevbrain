@@ -4,6 +4,8 @@ import { createContext, useContext, type ReactNode } from "react";
 import type { AuthenticatedUserView } from "@/lib/auth/permissions";
 
 interface AuthUserContextValue {
+  availableConjuntos: Array<{ id: string; name: string }>;
+  conjuntoId: string;
   conjuntoName: string;
   user: AuthenticatedUserView;
 }
@@ -11,12 +13,16 @@ interface AuthUserContextValue {
 const AuthUserContext = createContext<AuthUserContextValue | null>(null);
 
 export function AuthUserProvider({
+  availableConjuntos,
   children,
+  conjuntoId,
   conjuntoName,
   user
 }: AuthUserContextValue & { children: ReactNode }) {
   return (
-    <AuthUserContext.Provider value={{ conjuntoName, user }}>{children}</AuthUserContext.Provider>
+    <AuthUserContext.Provider value={{ availableConjuntos, conjuntoId, conjuntoName, user }}>
+      {children}
+    </AuthUserContext.Provider>
   );
 }
 

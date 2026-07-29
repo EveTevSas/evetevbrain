@@ -61,6 +61,7 @@ export async function refreshSessionAndAuthorize(request: NextRequest): Promise<
 
   if (
     isAuthRoute ||
+    pathname.startsWith("/api/") ||
     pathname === "/actualizar-contrasena" ||
     pathname === "/sin-acceso" ||
     pathname === "/sin-permiso"

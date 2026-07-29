@@ -1,7 +1,7 @@
 "use client";
 
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import {
-  DEMO_MERCHANT_ID,
   DEMO_TENANT_ID,
   DEMO_USER_ID,
   type CaseItem,
@@ -139,9 +139,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
     void refresh();
     const onOnline = () => void refresh();
     const onOffline = () => setConnection((current) => (current === "online" ? "cached" : current));
+    const {
+      data: { subscription }
+    } = getSupabaseBrowserClient().auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        if (event === "SIGNED_OUT" || !session) {
+          setSnapshot(emptySnapshot());
+          setConnection("offline");
+          return;
+        }
+        if (event === "SIGNED_IN") {
+          window.setTimeout(() => void refresh(), 0);
+        }
+      }
+    );
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     return () => {
+      subscription.unsubscribe();
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
@@ -229,30 +244,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
       payFee: (fee) =>
         mutate(
           `fee-${fee.id}`,
-          async () => {
-            const payment = await apiRequest<Payment>("/v1/payments", {
-              method: "POST",
-              headers: { "idempotency-key": `web-${fee.id}-${crypto.randomUUID()}` },
-              body: JSON.stringify({
-                tenantId: DEMO_TENANT_ID,
-                merchantId: DEMO_MERCHANT_ID,
-                reference: fee.id,
-                amountMinor: fee.balanceMinor,
-                currency: "COP",
-                description: fee.concept,
-                returnUrl: "http://localhost:3002/finanzas"
-              })
-            });
-            return apiRequest<Payment>(`/v1/payments/${payment.id}/sandbox/complete`, {
+          () =>
+            apiRequest<Payment>(`/v1/habitat/fees/${fee.id}/pay-demo`, {
               method: "POST"
-            });
-          },
+            }),
           "Pago aprobado y aplicado"
         ),
       reconcile: () =>
         mutate(
           "reconcile",
-          () => apiRequest<ReconciliationResult>("/v1/reconciliation", { method: "POST" }),
+          () => apiRequest<ReconciliationResult>("/v1/habitat/reconciliation", { method: "POST" }),
           "Conciliación completada"
         ),
       syncGatehouse: () =>

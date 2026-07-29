@@ -77,6 +77,14 @@ export const conjuntos = conjuntosSchema.table(
   ]
 );
 
+export const escenariosDemo = conjuntosSchema.table("escenarios_demo", {
+  conjuntoId: uuid("conjunto_id")
+    .primaryKey()
+    .references(() => conjuntos.id, { onDelete: "cascade" }),
+  snapshot: jsonb("snapshot").notNull(),
+  actualizadoEn: timestamp("actualizado_en", { withTimezone: true }).defaultNow().notNull()
+});
+
 export const miembrosConjunto = conjuntosSchema.table(
   "miembros_conjunto",
   {

@@ -22,7 +22,8 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   const headers = new Headers(init.headers);
   headers.set("content-type", "application/json");
   headers.set("authorization", `Bearer ${session.access_token}`);
-  const response = await fetch(`${API_URL}${path}`, { ...init, headers });
+  const url = path.startsWith("/v1/habitat/") ? `/api${path}` : `${API_URL}${path}`;
+  const response = await fetch(url, { ...init, headers });
   if (!response.ok) {
     const problem = (await response.json().catch(() => null)) as { title?: string } | null;
     throw new ApiError(problem?.title ?? "No fue posible completar la operación", response.status);

@@ -6,6 +6,7 @@
   "scripts": {
     "auth:provision-user": "node scripts/provision-user.mjs",
     "build": "next build",
+    "demo:seed": "node scripts/seed-commercial-demo.mjs",
     "db:deploy": "supabase db push --linked",
     "db:lint": "supabase db lint --local --schema conjuntos --level error",
     "db:lint:linked": "supabase db lint --linked --schema conjuntos --level error",
