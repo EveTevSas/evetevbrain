@@ -5,6 +5,7 @@ const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
 const demoAdminEmail = process.env.DEMO_ADMIN_EMAIL ?? "demo.comercial@evetev.com";
 const demoAdminName = process.env.DEMO_ADMIN_NAME ?? "Equipo Comercial Evetev";
 const demoAdminPassword = process.env.DEMO_ADMIN_PASSWORD;
+const demoResidentPassword = process.env.DEMO_RESIDENT_PASSWORD;
 
 if (!supabaseUrl || !supabaseSecretKey) {
   throw new Error("Define SUPABASE_URL y SUPABASE_SECRET_KEY.");
@@ -22,6 +23,7 @@ const conjuntos = [
     name: "Conjunto Senderos del Parque",
     nit: "900731245-1",
     city: "Bogotá",
+    residentEmail: "demo.residente.senderos@evetev.com",
     units: 168,
     occupancy: 96,
     residents: [
@@ -39,6 +41,7 @@ const conjuntos = [
     name: "Unidad Mirador de los Alpes",
     nit: "901184632-2",
     city: "Medellín",
+    residentEmail: "demo.residente.mirador@evetev.com",
     units: 124,
     occupancy: 94,
     residents: [
@@ -56,6 +59,7 @@ const conjuntos = [
     name: "Conjunto Bahía Verde",
     nit: "901526807-3",
     city: "Cali",
+    residentEmail: "demo.residente.bahia@evetev.com",
     units: 96,
     occupancy: 98,
     residents: [
@@ -531,8 +535,56 @@ async function ensureDemoAdmin() {
   return user;
 }
 
+async function ensureDemoResidents() {
+  const { data, error } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  if (error) throw error;
+
+  const accounts = new Map();
+  for (const conjunto of conjuntos) {
+    const [name, unit] = conjunto.residents[0];
+    let user = data.users.find(
+      (candidate) => candidate.email?.toLowerCase() === conjunto.residentEmail.toLowerCase()
+    );
+    const metadata = {
+      full_name: name,
+      purpose: "commercial_resident_demo",
+      eveconecta_conjunto_id: conjunto.id,
+      eveconecta_resident_name: name,
+      eveconecta_unit: unit
+    };
+
+    if (!user) {
+      if (!demoResidentPassword) {
+        throw new Error(
+          `DEMO_RESIDENT_PASSWORD es obligatorio al crear ${conjunto.residentEmail}.`
+        );
+      }
+      const created = await supabase.auth.admin.createUser({
+        email: conjunto.residentEmail,
+        password: demoResidentPassword,
+        email_confirm: true,
+        user_metadata: metadata
+      });
+      if (created.error) throw created.error;
+      user = created.data.user;
+    } else {
+      const attributes = {
+        email_confirm: true,
+        user_metadata: { ...user.user_metadata, ...metadata }
+      };
+      if (demoResidentPassword) attributes.password = demoResidentPassword;
+      const updated = await supabase.auth.admin.updateUserById(user.id, attributes);
+      if (updated.error) throw updated.error;
+      user = updated.data.user;
+    }
+    accounts.set(conjunto.id, user);
+  }
+  return accounts;
+}
+
 async function main() {
   const admin = await ensureDemoAdmin();
+  const residentAccounts = await ensureDemoResidents();
 
   await upsert(
     "conjuntos",
@@ -546,12 +598,20 @@ async function main() {
   );
   await upsert(
     "miembros_conjunto",
-    conjuntos.map((item) => ({
-      conjunto_id: item.id,
-      usuario_id: admin.id,
-      rol: "super_admin",
-      activo: true
-    })),
+    conjuntos.flatMap((item) => [
+      {
+        conjunto_id: item.id,
+        usuario_id: admin.id,
+        rol: "super_admin",
+        activo: true
+      },
+      {
+        conjunto_id: item.id,
+        usuario_id: residentAccounts.get(item.id).id,
+        rol: "residente",
+        activo: true
+      }
+    ]),
     { onConflict: "conjunto_id,usuario_id" }
   );
 
@@ -564,15 +624,19 @@ async function main() {
       coeficiente: 25,
       activa: true
     }));
-    const people = conjunto.residents.map((resident, index) => ({
-      id: stableId(conjunto.digit, 2, index + 1),
-      conjunto_id: conjunto.id,
-      nombre: resident[0],
-      email: `${resident[2]}@demo.evetev.invalid`,
-      telefono: resident[3],
-      autorizacion_tratamiento_en: iso(10 + index, "09:00:00"),
-      finalidad_autorizada: "Operación y comunicaciones de la copropiedad"
-    }));
+    const people = conjunto.residents.map((resident, index) => {
+      const residentAccount = residentAccounts.get(conjunto.id);
+      return {
+        id: stableId(conjunto.digit, 2, index + 1),
+        conjunto_id: conjunto.id,
+        auth_usuario_id: index === 0 ? residentAccount.id : null,
+        nombre: resident[0],
+        email: index === 0 ? residentAccount.email : `${resident[2]}@demo.evetev.invalid`,
+        telefono: resident[3],
+        autorizacion_tratamiento_en: iso(10 + index, "09:00:00"),
+        finalidad_autorizada: "Operación y comunicaciones de la copropiedad"
+      };
+    });
     const links = conjunto.residents.map((_resident, index) => ({
       id: stableId(conjunto.digit, 3, index + 1),
       conjunto_id: conjunto.id,
@@ -664,6 +728,11 @@ async function main() {
   console.log(
     JSON.stringify({
       adminEmail: demoAdminEmail,
+      residentAccounts: conjuntos.map((item) => ({
+        conjunto: item.name,
+        email: item.residentEmail,
+        unit: item.residents[0][1]
+      })),
       conjuntos: conjuntos.length,
       residentes: conjuntos.reduce((total, item) => total + item.residents.length, 0),
       escenarios: conjuntos.map((item) => item.name)
