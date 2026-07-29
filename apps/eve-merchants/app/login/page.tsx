@@ -1,10 +1,11 @@
 "use client";
+
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { setSession } from "@/lib/auth";
+import ParticlesBackground from "@/components/ui/particles-bg";
 
 const CDN = "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1";
 
@@ -36,37 +37,31 @@ export default function LoginPage() {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
 
-      {/* ── Panel izquierdo: imagen completa sin texto ────────── */}
+      {/* ── Panel izquierdo 60% — solo partículas ────────────── */}
       <div
         className="login-brand-panel"
         style={{
-          display: "none",          /* mobile: oculto; desktop: flex via CSS */
-          flex: 1,
+          display: "none",      /* mobile: oculto; desktop: block via CSS */
+          flex: "0 0 60%",
           position: "relative",
           overflow: "hidden",
-          /* Fondo que coincide con el degradado de la imagen */
-          background: "linear-gradient(160deg, #dce8f8 0%, #e8f0fb 50%, #d4e4f7 100%)",
         }}
       >
-        <Image
-          src="/mascota/fondoeve-merchans.png"
-          alt=""
-          fill
-          style={{ objectFit: "contain", objectPosition: "center bottom" }}
-          priority
-        />
+        <ParticlesBackground />
       </div>
 
-      {/* ── Panel derecho: logo + formulario ─────────────────── */}
+      {/* ── Panel derecho 40% — logo + formulario ────────────── */}
       <div style={{
-        flex: 1,
+        flex: "0 0 100%",       /* mobile: 100% */
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "#fff",
-        padding: "2rem 1.5rem"
-      }}>
-        <div style={{ width: "100%", maxWidth: 400 }}>
+        background: "#ffffff",
+        padding: "2rem 2rem",
+        minHeight: "100vh",
+      }} className="login-form-panel">
+        <div style={{ width: "100%", maxWidth: 380 }}>
 
           {/* Isotipo + logotipo */}
           <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
@@ -77,15 +72,15 @@ export default function LoginPage() {
               <img
                 src={`${CDN}/isotipos/isotipo-azul-noche.svg`}
                 alt="Evetev"
-                width={42}
-                height={30}
+                width={44}
+                height={32}
               />
               <span style={{
                 fontFamily: "'Baloo 2', sans-serif",
                 fontWeight: 700,
-                fontSize: "1.75rem",
+                fontSize: "1.8rem",
                 color: "var(--eve-azul-noche)",
-                letterSpacing: "-0.01em"
+                letterSpacing: "-0.01em",
               }}>
                 EvePay
               </span>
@@ -93,14 +88,14 @@ export default function LoginPage() {
             <p style={{
               marginTop: "0.5rem",
               color: "var(--eve-pizarra)",
-              fontSize: "0.875rem"
+              fontSize: "0.875rem",
             }}>
               Portal del comercio
             </p>
           </div>
 
-          {/* Card del formulario */}
-          <div className="card">
+          {/* Card formulario */}
+          <div className="card" style={{ boxShadow: "0 4px 24px rgba(10,37,64,.08)" }}>
             <h1 style={{ marginBottom: "0.25rem", fontSize: "1.25rem" }}>
               Iniciar sesión
             </h1>
@@ -112,7 +107,7 @@ export default function LoginPage() {
               <div>
                 <label style={{
                   display: "block", fontSize: "0.8rem", fontWeight: 500,
-                  color: "var(--eve-azul-noche)", marginBottom: "6px"
+                  color: "var(--eve-azul-noche)", marginBottom: "6px",
                 }}>
                   API Key
                 </label>
@@ -131,13 +126,17 @@ export default function LoginPage() {
                 <div style={{
                   display: "flex", alignItems: "flex-start", gap: "0.5rem",
                   background: "#fee2e2", color: "var(--eve-error)",
-                  borderRadius: "var(--eve-radio-sm)", padding: "0.75rem", fontSize: "0.85rem"
+                  borderRadius: "var(--eve-radio-sm)", padding: "0.75rem", fontSize: "0.85rem",
                 }}>
                   <span aria-hidden>⚠</span> {error}
                 </div>
               )}
 
-              <button className="btn btn-cta" type="submit" disabled={loading || !key.trim()}>
+              <button
+                className="btn btn-cta"
+                type="submit"
+                disabled={loading || !key.trim()}
+              >
                 {loading ? "Verificando..." : "Entrar"}
               </button>
             </form>
@@ -145,11 +144,11 @@ export default function LoginPage() {
 
           <p style={{
             textAlign: "center", marginTop: "1.5rem",
-            fontSize: "0.8rem", color: "var(--eve-muted)"
+            fontSize: "0.8rem", color: "var(--eve-muted)",
           }}>
             ¿Sin credenciales?{" "}
             <a href="mailto:hola@evetev.com" style={{
-              color: "var(--eve-electrico)", textDecoration: "none", fontWeight: 500
+              color: "var(--eve-electrico)", textDecoration: "none", fontWeight: 500,
             }}>
               Escríbenos
             </a>
