@@ -154,6 +154,24 @@ td {
 tr:last-child td { border-bottom: none; }
 tbody tr:hover td { background: var(--eve-tinte); }
 
+/* ── Gradiente animado login ────────────────────────────── */
+@keyframes gradientMove {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.login-gradient-bg {
+  background: linear-gradient(145deg,
+    rgb(255,255,255),
+    rgb(200,244,233),
+    rgb(240,222,184),
+    rgb(200,244,233),
+    rgb(255,255,255)
+  );
+  background-size: 400% 400%;
+  animation: gradientMove 8s ease infinite;
+}
+
 /* ── Login split layout 60/40 ───────────────────────────── */
 @media (min-width: 760px) {
   .login-brand-panel { display: block !important; }

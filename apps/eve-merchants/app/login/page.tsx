@@ -57,10 +57,9 @@ export default function LoginPage() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(145deg, rgb(255,255,255) 0%, rgb(200,244,233) 40%, rgb(240,222,184) 100%)",
         padding: "2rem 2rem",
         minHeight: "100vh",
-      }} className="login-form-panel">
+      }} className="login-form-panel login-gradient-bg">
         <div style={{ width: "100%", maxWidth: 380 }}>
 
           {/* Isotipo + logotipo */}
@@ -95,7 +94,7 @@ export default function LoginPage() {
           </div>
 
           {/* Card formulario */}
-          <div className="card" style={{ boxShadow: "0 4px 24px rgba(10,37,64,.08)" }}>
+          <div className="card" style={{ background: "#fff", boxShadow: "0 4px 24px rgba(10,37,64,.10)" }}>
             <h1 style={{ marginBottom: "0.25rem", fontSize: "1.25rem" }}>
               Iniciar sesión
             </h1>
