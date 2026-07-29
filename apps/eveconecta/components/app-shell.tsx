@@ -206,7 +206,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {item.label}
                 {item.href === "/pqrs" ? (
                   <Badge className="ml-auto" tone="warning">
-                    3
+                    {snapshot.cases.filter((caseItem) => caseItem.status !== "resolved").length}
                   </Badge>
                 ) : null}
               </Link>

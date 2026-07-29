@@ -541,23 +541,32 @@ function TimelineItem({ date, title, detail }: { date: string; title: string; de
 
 export function FinancesPage() {
   const { snapshot, payFee, reconcile, busy } = useData();
+  const { user } = useAuthUser();
   const [tab, setTab] = useState<"portfolio" | "payments" | "reconciliation">("portfolio");
   const outstanding = snapshot.fees.reduce((sum, fee) => sum + fee.balanceMinor, 0);
+  const isResident = user.role === "residente";
+  const paidFees = snapshot.fees.filter((fee) => fee.status === "paid").length;
   return (
     <div className="page-enter">
       <PageHeader
         eyebrow="EvePay integrado"
         title="Finanzas y cartera"
-        description="Liquida, recauda, aplica y concilia cada peso con una historia verificable."
+        description={
+          isResident
+            ? "Consulta tus obligaciones, pagos aplicados y saldos de forma segura."
+            : "Liquida, recauda, aplica y concilia cada peso con una historia verificable."
+        }
         secondaryAction={
-          <Button
-            variant="secondary"
-            onClick={() => void reconcile()}
-            disabled={busy === "reconcile"}
-          >
-            <RefreshCw className={cn(busy === "reconcile" && "animate-spin")} size={16} /> Conciliar
-            ahora
-          </Button>
+          isResident ? undefined : (
+            <Button
+              variant="secondary"
+              onClick={() => void reconcile()}
+              disabled={busy === "reconcile"}
+            >
+              <RefreshCw className={cn(busy === "reconcile" && "animate-spin")} size={16} />{" "}
+              Conciliar ahora
+            </Button>
+          )
         }
       />
       <div className="mb-5 grid gap-4 sm:grid-cols-3">
@@ -569,16 +578,16 @@ export function FinancesPage() {
         />
         <SummaryCard
           icon={BadgeCheck}
-          label="Recaudo identificado"
-          value="99,2%"
-          detail="Sin pagos huérfanos"
+          label={isResident ? "Estado de cuenta" : "Recaudo identificado"}
+          value={isResident ? (outstanding > 0 ? "Saldo pendiente" : "Al día") : "99,2%"}
+          detail={isResident ? "Información exclusiva de tu unidad" : "Sin pagos huérfanos"}
           tone="teal"
         />
         <SummaryCard
           icon={Landmark}
-          label="Última conciliación"
-          value="Sin diferencias"
-          detail="Hoy, 11:34 a. m."
+          label={isResident ? "Pagos aplicados" : "Última conciliación"}
+          value={isResident ? String(paidFees) : "Sin diferencias"}
+          detail={isResident ? "Confirmados en tu estado de cuenta" : "Hoy, 11:34 a. m."}
           tone="teal"
         />
       </div>
@@ -591,9 +600,11 @@ export function FinancesPage() {
             <TabButton active={tab === "payments"} onClick={() => setTab("payments")}>
               Pagos
             </TabButton>
-            <TabButton active={tab === "reconciliation"} onClick={() => setTab("reconciliation")}>
-              Conciliación
-            </TabButton>
+            {isResident ? null : (
+              <TabButton active={tab === "reconciliation"} onClick={() => setTab("reconciliation")}>
+                Conciliación
+              </TabButton>
+            )}
           </div>
           <div className="flex gap-2">
             <SearchBox placeholder="Buscar unidad o residente" />
