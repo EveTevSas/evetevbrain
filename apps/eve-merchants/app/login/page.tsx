@@ -57,7 +57,7 @@ export default function LoginPage() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "#ffffff",
+        background: "linear-gradient(145deg, rgb(255,255,255) 0%, rgb(200,244,233) 40%, rgb(240,222,184) 100%)",
         padding: "2rem 2rem",
         minHeight: "100vh",
       }} className="login-form-panel">
