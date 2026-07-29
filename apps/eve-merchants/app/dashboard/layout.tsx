@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { getApiKey, getMerchant, logout } from "@/lib/auth";
 
@@ -71,8 +72,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
+        {/* Mascota decorativa */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "0.75rem 1.5rem 0", pointerEvents: "none" }}>
+          <div style={{ position: "relative", width: 80, height: 80 }}>
+            <Image
+              src="/mascota/mascota.webp"
+              alt=""
+              fill
+              style={{ objectFit: "contain", objectPosition: "bottom" }}
+            />
+          </div>
+        </div>
+
         {/* Cerrar sesión */}
-        <div style={{ padding: "1rem 1.5rem", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+        <div style={{ padding: "0.75rem 1.5rem 1rem", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
           <button
             onClick={() => { logout(); router.push("/login"); }}
             style={{

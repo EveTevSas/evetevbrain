@@ -119,5 +119,10 @@ td {
 tr:last-child td { border-bottom: none; }
 tbody tr:hover td { background: var(--eve-tinte); }
 
+/* ── Login split layout ─────────────────────────────────── */
+@media (min-width: 760px) {
+  .login-brand-panel { display: flex !important; }
+}
+
 @media (max-width: 760px) { .btn { width: 100%; justify-content: center; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }

@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { api, type Cobro, type PaginaCobros } from "@/lib/api";
 import { getApiKey } from "@/lib/auth";
 
@@ -127,13 +128,23 @@ export default function TransaccionesPage() {
             Cargando...
           </div>
         ) : !data?.items.length ? (
-          <div style={{ padding: "3rem", textAlign: "center", color: "var(--eve-pizarra)" }}>
-            <p style={{ margin: "0 0 0.5rem", fontSize: "1.1rem", color: "var(--eve-azul-noche)" }}>
-              Sin transacciones
-            </p>
-            <p style={{ margin: 0, fontSize: "0.85rem" }}>
-              No hay cobros que coincidan con los filtros seleccionados.
-            </p>
+          <div style={{ padding: "3rem 2rem", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+            <div style={{ position: "relative", width: 140, height: 140, flexShrink: 0 }}>
+              <Image
+                src="/mascota/mascota-curiosa.jpeg"
+                alt="Sin transacciones"
+                fill
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+            <div>
+              <p style={{ margin: "0 0 0.25rem", fontSize: "1.05rem", fontWeight: 600, color: "var(--eve-azul-noche)" }}>
+                Sin transacciones
+              </p>
+              <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--eve-pizarra)" }}>
+                No hay cobros que coincidan con los filtros seleccionados.
+              </p>
+            </div>
           </div>
         ) : (
           <>
