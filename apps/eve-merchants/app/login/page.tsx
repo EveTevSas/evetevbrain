@@ -36,50 +36,78 @@ export default function LoginPage() {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
 
-      {/* ── Panel izquierdo: brand + mascota ─────────────────── */}
-      <div style={{
-        display: "none",
-        flex: 1,
-        background: "var(--eve-azul-noche)",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "3rem 2.5rem",
-        position: "relative",
-        overflow: "hidden"
-      }} className="login-brand-panel">
-
+      {/* ── Panel izquierdo ───────────────────────────────────── */}
+      <div
+        className="login-brand-panel"
+        style={{
+          display: "none",           /* mobile: oculto; desktop: flex vía CSS */
+          flex: 1,
+          position: "relative",
+          overflow: "hidden",
+          background: "var(--eve-azul-noche)",
+          flexDirection: "column",
+        }}
+      >
         {/* Logo arriba */}
-        <div style={{ position: "absolute", top: "2rem", left: "2.5rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
-          <img src={`${CDN}/isotipos/isotipo-blanco.svg`} alt="" width={28} height={20} />
-          <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 600, fontSize: "1.1rem", color: "#FDFEFF" }}>
+        <div style={{
+          position: "relative", zIndex: 3,
+          padding: "2.25rem 2.5rem",
+          display: "flex", alignItems: "center", gap: "0.625rem"
+        }}>
+          <img src={`${CDN}/isotipos/isotipo-blanco.svg`} alt="" width={26} height={19} />
+          <span style={{
+            fontFamily: "'Baloo 2',sans-serif", fontWeight: 600,
+            fontSize: "1.05rem", color: "#FDFEFF"
+          }}>
             EvePay
           </span>
         </div>
 
-        {/* Mascota */}
-        <div style={{ position: "relative", width: "clamp(220px,30vw,340px)", aspectRatio: "1/1" }}>
+        {/* Copy centrado verticalmente en la mitad superior */}
+        <div style={{
+          position: "relative", zIndex: 3,
+          padding: "0 2.5rem",
+          flex: "0 0 auto"
+        }}>
+          <p style={{
+            fontFamily: "'Baloo 2',sans-serif", fontWeight: 700,
+            fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
+            color: "#FDFEFF", margin: "0 0 0.75rem", lineHeight: 1.2
+          }}>
+            Tu portal de pagos
+          </p>
+          <p style={{
+            fontSize: "0.9rem", color: "rgba(255,255,255,0.5)",
+            margin: 0, lineHeight: 1.7, maxWidth: 300
+          }}>
+            Revisa transacciones, cobros y configuración de EvePay en un solo lugar.
+          </p>
+        </div>
+
+        {/* Mascota al fondo — sin caja visible */}
+        <div style={{
+          position: "absolute",
+          bottom: 0, left: "50%",
+          transform: "translateX(-50%)",
+          width: "100%",
+          height: "70%",
+          zIndex: 1
+        }}>
+          {/* Gradiente que funde el top del JPEG blanco con el panel azul */}
+          <div style={{
+            position: "absolute",
+            top: 0, left: 0, right: 0, height: "55%",
+            background: "linear-gradient(to bottom, #0A2540 0%, transparent 100%)",
+            zIndex: 2,
+            pointerEvents: "none"
+          }} />
           <Image
             src="/mascota/mascota-saludando.jpeg"
             alt="Mascota Evetev"
             fill
-            style={{ objectFit: "contain", objectPosition: "bottom" }}
+            style={{ objectFit: "contain", objectPosition: "bottom center" }}
             priority
           />
-        </div>
-
-        {/* Copy */}
-        <div style={{ marginTop: "1.5rem", textAlign: "center", maxWidth: 320 }}>
-          <p style={{
-            fontFamily: "'Baloo 2',sans-serif", fontWeight: 700,
-            fontSize: "clamp(1.4rem,2.2vw,1.8rem)", color: "#FDFEFF",
-            margin: "0 0 0.625rem", lineHeight: 1.2
-          }}>
-            Tu portal de pagos
-          </p>
-          <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.55)", margin: 0, lineHeight: 1.65 }}>
-            Revisa tus transacciones, cobros y configuración de EvePay en un solo lugar.
-          </p>
         </div>
       </div>
 
@@ -94,11 +122,17 @@ export default function LoginPage() {
       }}>
         <div style={{ width: "100%", maxWidth: 400 }}>
 
-          {/* Logo (visible solo en mobile cuando el panel izq está oculto) */}
-          <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-            <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
-              <img src={`${CDN}/isotipos/isotipo-azul-noche.svg`} alt="Evetev" width={36} height={26} />
-              <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 600, fontSize: "1.4rem", color: "var(--eve-azul-noche)" }}>
+          {/* Logo — visible solo en mobile */}
+          <div style={{ textAlign: "center", marginBottom: "2rem" }} className="login-logo-mobile">
+            <Link href="/" style={{
+              display: "inline-flex", alignItems: "center",
+              gap: "0.625rem", textDecoration: "none"
+            }}>
+              <img src={`${CDN}/isotipos/isotipo-azul-noche.svg`} alt="Evetev" width={34} height={24} />
+              <span style={{
+                fontFamily: "'Baloo 2',sans-serif", fontWeight: 600,
+                fontSize: "1.3rem", color: "var(--eve-azul-noche)"
+              }}>
                 EvePay
               </span>
             </Link>
@@ -151,15 +185,19 @@ export default function LoginPage() {
             </form>
           </div>
 
-          <p style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.8rem", color: "var(--eve-muted)" }}>
+          <p style={{
+            textAlign: "center", marginTop: "1.5rem",
+            fontSize: "0.8rem", color: "var(--eve-muted)"
+          }}>
             ¿Sin credenciales?{" "}
-            <a href="mailto:hola@evetev.com" style={{ color: "var(--eve-electrico)", textDecoration: "none", fontWeight: 500 }}>
+            <a href="mailto:hola@evetev.com" style={{
+              color: "var(--eve-electrico)", textDecoration: "none", fontWeight: 500
+            }}>
               Escríbenos
             </a>
           </p>
         </div>
       </div>
-
     </div>
   );
 }

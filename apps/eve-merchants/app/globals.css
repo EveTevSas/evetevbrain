@@ -157,6 +157,7 @@ tbody tr:hover td { background: var(--eve-tinte); }
 /* ── Login split layout ─────────────────────────────────── */
 @media (min-width: 760px) {
   .login-brand-panel { display: flex !important; }
+  .login-logo-mobile { display: none; }
 }
 
 @media (max-width: 760px) { .btn { width: 100%; justify-content: center; } }
