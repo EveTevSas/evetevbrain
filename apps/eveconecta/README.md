@@ -161,12 +161,15 @@ SUPABASE_SECRET_KEY="<sb_secret_...>" \
 DEMO_ADMIN_EMAIL="demo.comercial@evetev.com" \
 DEMO_ADMIN_NAME="Equipo Comercial Evetev" \
 DEMO_ADMIN_PASSWORD="<contraseña-segura-exclusiva-del-demo>" \
+DEMO_RESIDENT_PASSWORD="<contraseña-segura-para-residentes-demo>" \
 pnpm demo:seed
 ```
 
 La ejecución es idempotente y restaura el escenario base sin duplicar
-residentes, unidades o movimientos. Esa cuenta no debe reutilizar credenciales
-personales ni emplearse para administrar información real.
+residentes, unidades o movimientos. El seed crea una cuenta residente por
+copropiedad y la vincula a la primera unidad del escenario. Estas cuentas no
+deben reutilizar credenciales personales ni emplearse para administrar
+información real.
 
 ## Variables de entorno
 

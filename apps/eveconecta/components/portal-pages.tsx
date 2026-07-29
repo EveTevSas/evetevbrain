@@ -565,7 +565,7 @@ export function FinancesPage() {
           icon={WalletCards}
           label="Cartera total"
           value={formatCop(outstanding)}
-          detail="5 obligaciones visibles"
+          detail={`${snapshot.fees.length} obligaciones visibles`}
         />
         <SummaryCard
           icon={BadgeCheck}

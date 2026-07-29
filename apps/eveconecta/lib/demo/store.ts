@@ -6,6 +6,7 @@ import type { DashboardSnapshot } from "@/lib/contracts";
 import { appRoleSchema, initialsFor, roleLabels, type AppRole } from "@/lib/auth/permissions";
 import { ACTIVE_CONJUNTO_COOKIE } from "@/lib/auth/tenant-cookie";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { createResidentSnapshot } from "./resident-view";
 
 export class DemoApiError extends Error {
   constructor(
@@ -92,19 +93,30 @@ export async function getDemoSnapshot(access?: DemoAccess): Promise<DashboardSna
   const currentAccess = access ?? (await getDemoAccess());
   const { data, error } = await currentAccess.supabase
     .schema("conjuntos")
-    .from("escenarios_demo")
-    .select("snapshot")
-    .eq("conjunto_id", currentAccess.conjuntoId)
-    .maybeSingle();
+    .rpc("obtener_escenario_demo", { p_conjunto_id: currentAccess.conjuntoId });
 
   if (error) {
     throw new DemoApiError("No fue posible consultar el escenario de demostración.", 500);
   }
-  if (!data || !isDashboardSnapshot(data.snapshot)) {
+  if (!isDashboardSnapshot(data)) {
     throw new DemoApiError("Esta copropiedad todavía no tiene datos de demostración.", 404);
   }
 
-  const snapshot = structuredClone(data.snapshot);
+  const metadataUnit =
+    typeof currentAccess.user.user_metadata.eveconecta_unit === "string"
+      ? currentAccess.user.user_metadata.eveconecta_unit
+      : "";
+  const metadataResidentName =
+    typeof currentAccess.user.user_metadata.eveconecta_resident_name === "string"
+      ? currentAccess.user.user_metadata.eveconecta_resident_name
+      : currentAccess.userName;
+  const snapshot =
+    currentAccess.role === "residente"
+      ? createResidentSnapshot(data, {
+          name: metadataResidentName,
+          unit: metadataUnit
+        })
+      : structuredClone(data);
   snapshot.currentUser = {
     id: currentAccess.user.id,
     name: currentAccess.userName,
