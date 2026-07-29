@@ -1,13 +1,16 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { setSession } from "@/lib/auth";
 
+const CDN = "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1";
+
 export default function LoginPage() {
-  const router = useRouter();
-  const [key, setKey] = useState("");
-  const [error, setError] = useState("");
+  const router  = useRouter();
+  const [key, setKey]         = useState("");
+  const [error, setError]     = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -19,42 +22,52 @@ export default function LoginPage() {
       setSession(key.trim(), merchant);
       router.push("/dashboard");
     } catch (err) {
-      if (err instanceof ApiError && err.status === 403) {
-        setError("API key inválida. Verifica que sea correcta.");
-      } else {
-        setError("No se pudo conectar con el servidor. Intenta de nuevo.");
-      }
+      setError(
+        err instanceof ApiError && err.status === 403
+          ? "API key inválida. Verifica que sea correcta."
+          : "No se pudo conectar con el servidor. Intenta de nuevo."
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--gray-50)" }}>
-      <div style={{ width: "100%", maxWidth: 420, padding: "0 1rem" }}>
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "var(--eve-tinte)",
+      padding: "1.5rem"
+    }}>
+      <div style={{ width: "100%", maxWidth: 420 }}>
+
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-            <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-              <rect width="40" height="40" rx="10" fill="var(--coral)" />
-              <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="20" fontWeight="700">E</text>
-            </svg>
-            <span style={{ fontSize: "1.4rem", fontWeight: "700", color: "var(--navy)" }}>EvePay</span>
-          </div>
-          <p style={{ color: "var(--gray-400)", fontSize: "0.875rem", margin: 0 }}>Portal del Comercio</p>
+          <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
+            <img src={`${CDN}/isotipos/isotipo-azul-noche.svg`} alt="Evetev" width={36} height={26} />
+            <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 600, fontSize: "1.4rem", color: "var(--eve-azul-noche)" }}>
+              EvePay
+            </span>
+          </Link>
+          <p style={{ marginTop: "0.375rem", color: "var(--eve-pizarra)", fontSize: "0.85rem" }}>
+            Portal del comercio
+          </p>
         </div>
 
+        {/* Formulario */}
         <div className="card">
-          <h1 style={{ margin: "0 0 0.25rem", fontSize: "1.25rem", fontWeight: "700", color: "var(--navy)" }}>
+          <h1 style={{ marginBottom: "0.25rem", color: "var(--eve-azul-noche)", fontSize: "1.25rem" }}>
             Iniciar sesión
           </h1>
-          <p style={{ margin: "0 0 1.5rem", color: "var(--gray-400)", fontSize: "0.875rem" }}>
+          <p style={{ marginBottom: "1.5rem", color: "var(--eve-pizarra)", fontSize: "0.875rem" }}>
             Ingresa tu API key de producción o sandbox.
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div>
-              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: "600", color: "var(--gray-600)", marginBottom: "0.375rem" }}>
+              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 500, color: "var(--eve-azul-noche)", marginBottom: "6px" }}>
                 API Key
               </label>
               <input
@@ -69,20 +82,26 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div style={{ background: "#fee2e2", color: "var(--red)", borderRadius: "0.5rem", padding: "0.75rem", fontSize: "0.85rem" }}>
-                {error}
+              <div style={{
+                display: "flex", alignItems: "flex-start", gap: "0.5rem",
+                background: "#fee2e2", color: "var(--eve-error)",
+                borderRadius: "var(--eve-radio-sm)", padding: "0.75rem", fontSize: "0.85rem"
+              }}>
+                <span aria-hidden>⚠</span> {error}
               </div>
             )}
 
-            <button className="btn-primary" type="submit" disabled={loading || !key.trim()}>
+            <button className="btn btn-cta" type="submit" disabled={loading || !key.trim()}>
               {loading ? "Verificando..." : "Entrar"}
             </button>
           </form>
         </div>
 
-        <p style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.8rem", color: "var(--gray-400)" }}>
-          ¿No tienes credenciales? Contacta a{" "}
-          <a href="mailto:hola@evetev.com" style={{ color: "var(--coral)", textDecoration: "none" }}>hola@evetev.com</a>
+        <p style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.8rem", color: "var(--eve-muted)" }}>
+          ¿Sin credenciales?{" "}
+          <a href="mailto:hola@evetev.com" style={{ color: "var(--eve-electrico)", textDecoration: "none", fontWeight: 500 }}>
+            Escríbenos
+          </a>
         </p>
       </div>
     </div>
