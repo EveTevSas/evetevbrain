@@ -36,82 +36,26 @@ export default function LoginPage() {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
 
-      {/* ── Panel izquierdo ───────────────────────────────────── */}
+      {/* ── Panel izquierdo: imagen completa, sin texto ───────── */}
       <div
         className="login-brand-panel"
         style={{
-          display: "none",           /* mobile: oculto; desktop: flex vía CSS */
+          display: "none",   /* mobile oculto; desktop: flex via CSS */
           flex: 1,
           position: "relative",
           overflow: "hidden",
-          background: "var(--eve-azul-noche)",
-          flexDirection: "column",
         }}
       >
-        {/* Logo arriba */}
-        <div style={{
-          position: "relative", zIndex: 3,
-          padding: "2.25rem 2.5rem",
-          display: "flex", alignItems: "center", gap: "0.625rem"
-        }}>
-          <img src={`${CDN}/isotipos/isotipo-blanco.svg`} alt="" width={26} height={19} />
-          <span style={{
-            fontFamily: "'Baloo 2',sans-serif", fontWeight: 600,
-            fontSize: "1.05rem", color: "#FDFEFF"
-          }}>
-            EvePay
-          </span>
-        </div>
-
-        {/* Copy centrado verticalmente en la mitad superior */}
-        <div style={{
-          position: "relative", zIndex: 3,
-          padding: "0 2.5rem",
-          flex: "0 0 auto"
-        }}>
-          <p style={{
-            fontFamily: "'Baloo 2',sans-serif", fontWeight: 700,
-            fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
-            color: "#FDFEFF", margin: "0 0 0.75rem", lineHeight: 1.2
-          }}>
-            Tu portal de pagos
-          </p>
-          <p style={{
-            fontSize: "0.9rem", color: "rgba(255,255,255,0.5)",
-            margin: 0, lineHeight: 1.7, maxWidth: 300
-          }}>
-            Revisa transacciones, cobros y configuración de EvePay en un solo lugar.
-          </p>
-        </div>
-
-        {/* Mascota al fondo — sin caja visible */}
-        <div style={{
-          position: "absolute",
-          bottom: 0, left: "50%",
-          transform: "translateX(-50%)",
-          width: "100%",
-          height: "70%",
-          zIndex: 1
-        }}>
-          {/* Gradiente que funde el top del JPEG blanco con el panel azul */}
-          <div style={{
-            position: "absolute",
-            top: 0, left: 0, right: 0, height: "55%",
-            background: "linear-gradient(to bottom, #0A2540 0%, transparent 100%)",
-            zIndex: 2,
-            pointerEvents: "none"
-          }} />
-          <Image
-            src="/mascota/mascota-saludando.jpeg"
-            alt="Mascota Evetev"
-            fill
-            style={{ objectFit: "contain", objectPosition: "bottom center" }}
-            priority
-          />
-        </div>
+        <Image
+          src="/mascota/arriba.jpeg"
+          alt=""
+          fill
+          style={{ objectFit: "cover", objectPosition: "center" }}
+          priority
+        />
       </div>
 
-      {/* ── Panel derecho: formulario ─────────────────────────── */}
+      {/* ── Panel derecho: logo + formulario ─────────────────── */}
       <div style={{
         flex: 1,
         display: "flex",
@@ -122,21 +66,33 @@ export default function LoginPage() {
       }}>
         <div style={{ width: "100%", maxWidth: 400 }}>
 
-          {/* Logo — visible solo en mobile */}
-          <div style={{ textAlign: "center", marginBottom: "2rem" }} className="login-logo-mobile">
+          {/* Logo + isotipo — siempre visible en este panel */}
+          <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
             <Link href="/" style={{
               display: "inline-flex", alignItems: "center",
-              gap: "0.625rem", textDecoration: "none"
+              gap: "0.75rem", textDecoration: "none"
             }}>
-              <img src={`${CDN}/isotipos/isotipo-azul-noche.svg`} alt="Evetev" width={34} height={24} />
+              <img
+                src={`${CDN}/isotipos/isotipo-azul-noche.svg`}
+                alt="Evetev"
+                width={40}
+                height={29}
+              />
               <span style={{
-                fontFamily: "'Baloo 2',sans-serif", fontWeight: 600,
-                fontSize: "1.3rem", color: "var(--eve-azul-noche)"
+                fontFamily: "'Baloo 2', sans-serif",
+                fontWeight: 700,
+                fontSize: "1.6rem",
+                color: "var(--eve-azul-noche)",
+                letterSpacing: "-0.01em"
               }}>
                 EvePay
               </span>
             </Link>
-            <p style={{ marginTop: "0.375rem", color: "var(--eve-pizarra)", fontSize: "0.85rem" }}>
+            <p style={{
+              marginTop: "0.5rem",
+              color: "var(--eve-pizarra)",
+              fontSize: "0.85rem"
+            }}>
               Portal del comercio
             </p>
           </div>
