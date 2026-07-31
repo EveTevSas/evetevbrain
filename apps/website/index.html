@@ -45,7 +45,6 @@
           <a href="#servicios"><span class="p-ico sm" style="--p:var(--eve-teal);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span> Tienda</a>
         </div>
       </div>
-      <a href="#precios">Precios</a>
       <a href="#desarrolladores">Desarrolladores</a>
       <a href="nosotros.html">Nosotros</a>
       <a href="#contacto">Contacto</a>
@@ -70,7 +69,7 @@
     <h1>Pagos e inteligencia artificial, sin complicaciones</h1>
     <p>Tarifas transparentes. Tecnología propia. Cero letra menuda.</p>
     <div class="hero-cta">
-      <a class="btn btn-sec" href="#precios">Calcular mi costo</a>
+      <a class="btn btn-sec" href="#contacto">Habla con nosotros</a>
       <a class="link" href="#servicios">Ver cómo funciona →</a>
     </div>
   </header>
@@ -227,6 +226,10 @@
   </div>
 </section>
 
+<!-- COTIZADOR OCULTO POR AHORA (jul-2026): se muestra cuando haya tarifas
+     reales que enseñar. Para reactivarlo: descomentar esta sección Y el bloque
+     JS del calculador (marcado igual más abajo), y restaurar los enlaces
+     "Precios" del nav y el footer y el CTA "Calcular mi costo" del hero.
 <section id="precios" class="precios">
   <div class="wrap pre-grid">
     <div class="pre-l">
@@ -261,8 +264,11 @@
     </div>
   </div>
 </section>
+-->
+
 
 <section id="contacto" class="wrap" style="padding-top:84px">
+  <div class="contacto-grid">
   <div class="contacto">
     <h2>Hablemos de tu proyecto</h2>
     <p>Cuéntanos qué necesitas y te respondemos en un día hábil.</p>
@@ -313,12 +319,30 @@
     <button class="btn btn-sec" id="btnContacto" onclick="enviarForm()">Enviar mensaje</button>
     <p class="ayuda" style="margin-top:14px">Usamos tus datos solo para responder a esta consulta. Nada de listas ni terceros.</p>
   </div>
+
+  <!-- Antes había medio ancho vacío a la derecha del formulario. Aquí van los
+       motivos para elegir Evetev, todos verdaderos (perfil corporativo + marca).
+       Mascota decorativa servida por jsDelivr fijada a un commit. -->
+  <aside class="por-que" aria-label="Por qué elegir Evetev">
+    <video class="por-que-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+      <source src="./files/mascota_saludando.mp4" type="video/mp4">
+    </video>
+    <h3>¿Por qué elegir Evetev?</h3>
+    <ul>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span><b>Tarifas transparentes.</b> Publicadas y predecibles, sin letra menuda.</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span><b>Tu dinero, directo a tu banco.</b> Somos gateway puro: no pasa por nuestra tesorería.</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span><b>Seguridad de nivel bancario.</b> Nunca tocamos el número de tu tarjeta.</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span><b>Construido por ingenieros,</b> no por vendedores de humo.</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span><b>Sin permanencia.</b> Preferimos que te quedes por el producto.</span></li>
+    </ul>
+  </aside>
+  </div>
 </section>
 
 <section id="faq" class="wrap" style="max-width:700px;padding-top:0">
   <div class="sec-h"><h2>Preguntas frecuentes</h2></div>
   <details><summary>¿Ya puedo usar EvePay?</summary><p>Todavía no en producción. Estamos en etapa de fundación: el núcleo de pagos ya está construido —cobros idempotentes, libro de movimientos, webhooks y conciliación— y en paralelo corre la habilitación con la adquirencia, que no es un trámite automático y toma semanas. Si quieres entrar como piloto, escríbenos y te contamos en qué punto vamos, sin adornos.</p></details>
-  <details><summary>¿Cómo cobran exactamente?</summary><p>Un porcentaje por transacción aprobada más un componente fijo, y una suscripción mensual por el software. Todo publicado, sin escalas escondidas. La calculadora de esta página usa tarifas <b>de referencia</b> para que dimensiones el costo; las definitivas se cierran contigo antes de firmar.</p></details>
+  <details><summary>¿Cómo cobran exactamente?</summary><p>Un porcentaje por transacción aprobada más un componente fijo, y una suscripción mensual por el software. Todo publicado, sin escalas escondidas. Las cifras que manejamos hoy son <b>de referencia</b>; las definitivas se cierran contigo antes de firmar.</p></details>
   <details><summary>¿Dónde queda mi dinero mientras tanto?</summary><p>En ningún lado nuestro. Somos gateway puro: el dinero fluye directo del banco de tu cliente a tu cuenta. Nosotros no somos tesorería, y esa decisión de arquitectura es también la que nos quita riesgo regulatorio de encima.</p></details>
   <details><summary>¿Qué es EveConecta?</summary><p>Nuestra solución de gestión y recaudo para conjuntos residenciales: cuotas por coeficiente, estado de cuenta, pago en línea del residente y paz y salvo. Es también nuestro primer cliente — la usamos para probar EvePay cobrando dinero real antes de pedirle a nadie más que confíe en él.</p></details>
   <details><summary>¿Qué hacen con los datos de las personas?</summary><p>Pedimos lo mínimo para prestar el servicio y nada más. Los datos de cada cliente están aislados a nivel de base de datos, no solo por una condición en el código. No guardamos números de tarjeta en ningún momento: el dato sensible lo captura el checkout embebido del proveedor. Y no publicamos listados de deudores.</p></details>
@@ -363,7 +387,6 @@
       <div class="foot-col">
         <h4>Recursos</h4>
         <a href="#desarrolladores">Documentación API</a>
-        <a href="#precios">Precios</a>
         <a href="#faq">Preguntas frecuentes</a>
         <a href="mailto:contacto@evetev.com">contacto@evetev.com</a>
       </div>
@@ -437,6 +460,9 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
   document.getElementById(t.dataset.t).classList.add('act');
 }));
 
+/* CALCULADOR DEL COTIZADOR — desactivado junto con su sección (jul-2026).
+   Sin la sección, estos getElementById devuelven null y romperían el resto del
+   script. Reactivar junto con la sección #precios de arriba.
 const txs = document.getElementById('txs'), anual = document.getElementById('anual');
 const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
 const TICKET = 80000, PCT = 0.028, FIJO = 700, SUB = 72000;
@@ -452,6 +478,7 @@ function precio(){
   document.getElementById('planTotal').textContent = fmt(com + fij + sub);
 }
 txs.addEventListener('input', precio); anual.addEventListener('change', precio); precio();
+*/
 
 const overlay = document.getElementById('overlay');
 function abrirModal(){ overlay.classList.add('open'); }
