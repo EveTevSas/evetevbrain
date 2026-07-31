@@ -308,6 +308,10 @@ section{padding:64px 0}
 
 /* FOOTER (§6) */
 footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
+/* Si el footer va pegado a una banda tintada, ese margen deja una franja
+   blanca entre dos fondos de color y se lee como un hueco. Solo se anula en
+   ese caso: cuando lo precede una sección blanca, el aire sí hace falta. */
+.precios + footer{margin-top:0}
 .foot-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px;padding:56px 0 40px}
 .foot-marca img{width:40px;height:28px}
 .foot-marca .brand{color:#fff;font-size:1.15rem;display:block;margin:10px 0 8px}
@@ -415,3 +419,54 @@ footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}
 
 /* Botón ocupado mientras se envía el formulario */
 .btn[disabled]{opacity:.65;cursor:progress}
+
+/* ============ Cambios sugeridos por el equipo ============ */
+
+/* "Quiénes somos": el texto convive con la mascota a la derecha en vez de
+   dejar medio ancho vacío. La mascota es decorativa (aria-hidden) y desaparece
+   en pantallas estrechas para no robar espacio al texto. */
+.nosotros-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:clamp(28px,5vw,60px);align-items:center}
+.nosotros-grid .texto{max-width:60ch}
+/* El sprite es un .jpeg con fondo gris claro: una máscara que lo difumine
+   también recortaría al personaje. En su lugar se presenta como un tile
+   redondeado con fondo tinte, que lee como pieza intencional y no como recorte
+   pegado sobre la página. */
+.mascota-flux{width:100%;max-width:340px;display:block;margin-inline:auto;
+  border-radius:20px;background:var(--eve-tinte)}
+.mini-mascota{border-radius:14px;background:var(--eve-tinte)}
+@media(max-width:820px){
+  .nosotros-grid{grid-template-columns:1fr}
+  .nosotros-grid .mascota-flux{display:none}
+}
+
+/* "En qué creemos": 5 tarjetas en 3 + 2 centradas, no 4 + 1 huérfana. Flexbox
+   con base fija y centrado: la fila incompleta queda centrada sola, y todas
+   las tarjetas conservan el mismo ancho. Baja a 2 y luego a 1 por sí solo. */
+.creencias{display:flex;flex-wrap:wrap;justify-content:center;gap:18px}
+.creencias .valor{flex:0 1 300px}
+@media(max-width:660px){.creencias .valor{flex-basis:100%}}
+
+/* Contacto: el formulario comparte fila con una tarjeta de "por qué elegir
+   Evetev", que antes era espacio vacío a la derecha. */
+.contacto-grid{display:grid;grid-template-columns:1.25fr .82fr;gap:clamp(30px,4.5vw,60px);align-items:start}
+.contacto-grid .contacto{max-width:none}
+/* Sin fondo ni caja: el bloque respira sobre el blanco de la página. Sin caja
+   ya no hay que igualar alturas (por eso el grid vuelve a align-items:start). */
+.por-que{background:none;border:none;padding:0;display:flex;flex-direction:column}
+/* Video de la mascota (Eve saludando). Va en files/ como los demás recursos
+   del sitio. object-fit:cover porque la fuente es cuadrada; fondo tinte por si
+   el primer fotograma tarda. autoplay+muted+loop+playsinline = se reproduce
+   solo, sin sonido, sin ir a pantalla completa en iOS. */
+/* Cap de tamaño para que no se dispare en pantallas anchas (antes al 100% del
+   ancho crecía tanto que empujaba el bloque más abajo que el formulario). */
+.por-que .por-que-video{width:100%;max-width:300px;aspect-ratio:1;object-fit:cover;
+  border-radius:18px;background:#EDF3FA;display:block;margin:0 auto 20px}
+.por-que h3{font-size:1.05rem;font-weight:600;margin-bottom:14px}
+.por-que ul{list-style:none;margin:0}
+.por-que li{display:flex;gap:11px;align-items:flex-start;font-size:.85rem;color:var(--eve-pizarra);padding:7px 0}
+.por-que li svg{width:17px;height:17px;flex:none;margin-top:2px;color:var(--eve-electrico)}
+.por-que li b{color:var(--eve-azul-noche);font-weight:600}
+@media(max-width:820px){
+  .contacto-grid{grid-template-columns:1fr}
+  .por-que{position:static}
+}
