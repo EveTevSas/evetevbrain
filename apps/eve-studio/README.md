@@ -1,14 +1,18 @@
-# @evetev/ai
+# @evetev/eve-studio
 
 Agente que genera interfaces de usuario a partir del manual de marca. Python +
 LangGraph, con **Kimi (Moonshot)** como motor y una herramienta que lee los
 activos de marca directamente del repositorio `Evetev-Dev/brand` en GitHub.
 
-Ubicación decidida por la constitución (§8): *"Servicio de IA en Python: cuando
-aparezca, entra como `apps/ai` en el mismo monorepo."*
+La constitución (§8) dice: *"Servicio de IA en Python: cuando aparezca, entra
+como `apps/ai` en el mismo monorepo."* Se respeta el fondo —vive en el monorepo,
+como una app más— pero se usa el nombre del producto en lugar de `ai`, que es
+genérico y quedaría ocupado por un solo agente si mañana hay más. La estructura
+sigue plana, igual que el resto de apps. **Conviene actualizar esa línea de la
+constitución por PR** para que el documento y el repo no divergan.
 
 ```
-apps/ai/
+apps/eve-studio/
 ├── api/index.py        # backend HTTP (FastAPI + LangGraph) — lo que despliega Vercel
 ├── agente_cli.py       # el REPL original, para usarlo en local
 ├── requirements.txt    # en la raíz: Vercel detecta dependencias desde aquí
@@ -20,7 +24,7 @@ apps/ai/
 ## Correr en local
 
 ```bash
-cd apps/ai
+cd apps/eve-studio
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env        # y completa las tres llaves
@@ -44,7 +48,7 @@ uvicorn api.index:app --reload --port 3003
 Es un **proyecto de Vercel aparte**, apuntando al mismo repositorio. En
 *Settings → General*:
 
-- **Root Directory:** `apps/ai`
+- **Root Directory:** `apps/eve-studio`
 
 En *Settings → Environment Variables* (nunca en el repo, §4):
 
