@@ -1,0 +1,12 @@
+{
+  "name": "@evetev/ai",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Agente de generación de interfaces (Python + LangGraph). Se despliega en Vercel con Root Directory apps/ai.",
+  "scripts": {
+    "dev": "uvicorn api.index:app --reload --port 3003",
+    "lint": "echo \"(ai) app en Python, sin lint de Node\" && exit 0",
+    "typecheck": "echo \"(ai) app en Python, sin typecheck de Node\" && exit 0",
+    "test": "echo \"(ai) app en Python, sin tests de Node\" && exit 0"
+  }
+}
