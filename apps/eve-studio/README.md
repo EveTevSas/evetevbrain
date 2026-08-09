@@ -1,8 +1,9 @@
 # @evetev/eve-studio
 
 Agente que genera interfaces de usuario a partir del manual de marca. Python +
-LangGraph, con **Kimi (Moonshot)** como motor y una herramienta que lee los
-activos de marca directamente del repositorio `Evetev-Dev/brand` en GitHub.
+LangGraph, con **Kimi (Moonshot)** como motor. Lee los activos de marca del
+repositorio `Evetev-Dev/brand` y el código de este monorepo, ambos en GitHub y
+en solo lectura, para partir de lo que ya existe en vez de reescribirlo.
 
 La constitución (§8) dice: *"Servicio de IA en Python: cuando aparezca, entra
 como `apps/ai` en el mismo monorepo."* Se respeta el fondo —vive en el monorepo,
@@ -44,7 +45,7 @@ misma app expone `/api/chat`. Es el mismo patrón que ya usa `apps/website`
 cd apps/eve-studio
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env        # y completa las tres llaves
+cp .env.example .env        # y completa las llaves
 ```
 
 El REPL de siempre (guarda memoria en `contexto/` y la salida en `salida/`):
@@ -73,6 +74,7 @@ En *Settings → Environment Variables* (nunca en el repo, §4):
 |---|---|
 | `MOONSHOT_API_KEY` | motor del agente |
 | `GITHUB_TOKEN` | leer los activos de marca (solo lectura) |
+| `GITHUB_TOKEN_CODIGO` | leer el monorepo — **opcional hoy**, ver abajo |
 | `AGENTE_API_TOKEN` | protege el endpoint — `openssl rand -hex 32` |
 
 ### Verificar el primer despliegue
@@ -98,6 +100,32 @@ rutas del router ASGI le pertenecen. Por eso `vercel.json` lleva
 que conserva el path original, que es lo que FastAPI necesita para casar
 `/api/health` y `/api/chat`. **No lo quites** pensando que sobra: sin él el
 endpoint no existe desde fuera.
+
+## Qué puede leer el agente
+
+Dos repositorios, ambos de solo lectura:
+
+| Repositorio | Para qué | Herramientas |
+|---|---|---|
+| `Evetev-Dev/brand` | manual, tokens, logos, mascota | `obtener_activo_github` |
+| `EveTevSas/evetevbrain` | el código tal como está hoy | `leer_archivo_del_repo`, `listar_carpeta_del_repo` |
+
+Lo segundo es lo que permite pedirle *"cámbiale el titular a la portada de
+EvePay"*: lee `apps/evepay/index.html` y parte de ahí, en vez de generar una
+página nueva desde cero. Puede listar carpetas antes de leer, para no adivinar
+rutas.
+
+**Hoy `GITHUB_TOKEN_CODIGO` puede quedar vacía.** El monorepo es público y un
+token de alcance fino lee cualquier repositorio público. Hará falta el día que
+`evetevbrain` pase a privado —que es lo que dice su documentación que debería
+ser— porque los tokens de alcance fino pertenecen a **una sola organización**, y
+`brand` y `evetevbrain` están en dos distintas. Por eso son dos variables y no
+una: ese día es un cambio de configuración, no de código.
+
+Los archivos que lee entran como **material de referencia, no como
+instrucciones**; está dicho explícitamente en el prompt del sistema. Y las
+lecturas se cortan a 60 000 caracteres avisando, para que un archivo grande no
+deje al agente sin contexto para escribir.
 
 ## Usar la API
 
