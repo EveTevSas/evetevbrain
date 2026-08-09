@@ -84,16 +84,20 @@ así que **compruébalo antes de dar por bueno el deploy**:
 curl https://<tu-deploy>.vercel.app/api/health
 ```
 
-Debe devolver un JSON con `"ok": true` y los tres flags de configuración. Si
-devuelve **404**, el path no está llegando a FastAPI: añade en `vercel.json`
+Debe devolver un JSON con `"ok": true` y los tres flags de configuración.
+
+En el primer despliegue devolvió el **404 de la plataforma** (con `Code:
+NOT_FOUND`, distinto del 404 de FastAPI): la petición no llegaba a la función.
+Vercel publica la función Python en `/api/index` y no dedujo que el resto de
+rutas del router ASGI le pertenecen. Por eso `vercel.json` lleva
 
 ```json
 "rewrites": [{ "source": "/api/(.*)", "destination": "/api/index" }]
 ```
 
-y vuelve a probar. No se incluye por defecto porque Vercel detecta el
-entrypoint ASGI automáticamente y un rewrite mal puesto cambia el path que ve
-FastAPI, que es la causa habitual del 404.
+que conserva el path original, que es lo que FastAPI necesita para casar
+`/api/health` y `/api/chat`. **No lo quites** pensando que sobra: sin él el
+endpoint no existe desde fuera.
 
 ## Usar la API
 
