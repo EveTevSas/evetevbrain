@@ -7,6 +7,26 @@ on:
 
 # Sin verde no se mergea (§3).
 jobs:
+  # ── Landings: una sola base de CSS ─────────────────────────────────────────
+  # Las landings de producto son estáticas y cada una lleva su copia de
+  # base.css, generada desde packages/brand/landing/base.css. Este job es lo que
+  # impide que esas copias se desvíen. No depende de shared: son minutos de
+  # espera para comprobar un archivo de texto.
+  landings:
+    name: CSS de las landings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      # Sin dependencias a propósito: el script usa solo node:fs y node:path,
+      # así que no hace falta instalar el workspace para comprobarlo.
+      - name: Copias al día
+        run: node scripts/css-landings.mjs --check
+
   # ── Paso 1: shared (bloquea todo lo demás) ─────────────────────────────────
   shared:
     name: Shared package

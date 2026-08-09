@@ -15,7 +15,9 @@
     "test": "pnpm -r test",
     "build": "pnpm -r build",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "css:sync": "node scripts/css-landings.mjs",
+    "css:check": "node scripts/css-landings.mjs --check"
   },
   "devDependencies": {
     "@evetev/config": "workspace:*",

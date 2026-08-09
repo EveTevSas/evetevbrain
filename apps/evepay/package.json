@@ -8,5 +8,8 @@
     "lint": "echo \"(evepay) sitio estático, sin lint\" && exit 0",
     "typecheck": "echo \"(evepay) sitio estático, sin typecheck\" && exit 0",
     "test": "echo \"(evepay) sitio estático, sin tests\" && exit 0"
+  },
+  "evetev": {
+    "landing": true
   }
 }

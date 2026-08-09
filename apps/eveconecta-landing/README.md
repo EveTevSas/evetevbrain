@@ -10,7 +10,8 @@ planos, sin compilación, igual que `apps/website` y `apps/evepay`.
 ```
 apps/eveconecta-landing/
 ├── index.html    # la landing
-├── estilos.css   # tokens de respaldo + estilos
+├── base.css      # GENERADO desde packages/brand/landing/base.css — no editar
+├── estilos.css   # lo propio de esta landing
 ├── vercel.json   # estático puro: outputDirectory "."
 └── package.json  # scripts no-op: formaliza la app en el workspace de pnpm
 ```
@@ -55,13 +56,18 @@ mismo importa más que sonar mejor aquí.
 Lleva **`<meta name="robots" content="noindex">`** a propósito. **Hay que
 quitarlo cuando la landing esté terminada.**
 
-## Deuda conocida: el CSS está duplicado
+## El CSS no se edita aquí
 
-`estilos.css` es una copia del de `apps/evepay`. Con dos landings se tolera; el
-README de `apps/website` ya deja escrito que mantener copias del mismo CSS fue
-"el error más caro a futuro", y aquí solo se acepta porque son estáticos y no
-hay paso de compilación que permita compartir un archivo entre apps.
+`base.css` es una **copia generada** de `packages/brand/landing/base.css`, la
+fuente única del armazón de todas las landings. Se edita allí y se replica:
 
-**Con una tercera landing hay que extraerlo**, probablemente a `packages/brand`
-con un pequeño script de copia en el build. Lo que de verdad no puede divergir
-—tokens de color y tipografías— ya viene del CDN de marca en las tres.
+```bash
+pnpm css:sync
+```
+
+El CI corre `pnpm css:check` y falla si alguna copia se desvió, así que la
+duplicación no puede volver a colarse. Lo exclusivo de EveConecta va en
+`estilos.css`, que se carga después y gana.
+
+La regla que conserva «Entrar al portal» en móvil vive en `base.css`, apoyada
+en la clase `.portal`: cualquier landing con portal la necesitará igual.
