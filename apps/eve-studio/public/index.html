@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<!-- Eve Studio — interfaz del agente de generación de interfaces.
+     Estática y sin dependencias: la sirve Vercel desde public/ y habla con la
+     función Python de api/. Marca según packages/brand/assets/evetev_brand_styles.md.
+     El historial vive AQUÍ, en el estado del cliente: la función es efímera y no
+     puede guardarlo (ver README). -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eve Studio — Evetev</title>
+<meta name="robots" content="noindex">
+
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0A2540">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css">
+
+<style>
+:root{
+  /* Respaldo de los tokens oficiales por si el CDN no responde (§2) */
+  --eve-azul-noche:#0A2540; --eve-hielo:#EAF2FB; --eve-tinte:#F4F9FD;
+  --eve-linea:#EDF3FA; --eve-pizarra:#64748B; --eve-muted:#94A3B8;
+  --eve-coral:#EE3D22; --eve-coral-hover:#CF3016;
+  --eve-electrico:#1E6FEB; --eve-mezclado:#144A96; --eve-error:#B91C1C;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;color:var(--eve-azul-noche);background:#FDFEFF;
+  line-height:1.6;display:flex;flex-direction:column;overflow:hidden}
+h1,h2{font-family:'Baloo 2',sans-serif;font-weight:600}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none;background:none}
+:focus-visible{outline:2px solid var(--eve-electrico);outline-offset:2px;border-radius:6px}
+
+/* ── Cabecera ── */
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  height:58px;padding:0 20px;border-bottom:1px solid var(--eve-linea);flex:none;
+  background:rgba(253,254,255,.96);backdrop-filter:blur(8px)}
+.marca{display:flex;align-items:center;gap:10px;min-width:0}
+.marca img{width:30px;height:21px;display:block;flex:none}
+.marca b{font-family:'Baloo 2',sans-serif;font-size:1.05rem;font-weight:600}
+.marca span{font-size:.75rem;color:var(--eve-muted);white-space:nowrap}
+.cab-acciones{display:flex;align-items:center;gap:10px}
+
+.btn{border-radius:999px;font-weight:600;font-size:.83rem;padding:9px 20px;transition:.15s}
+.btn-cta{background:var(--eve-coral);color:#fff}
+.btn-cta:hover:not(:disabled){background:var(--eve-coral-hover)}
+.btn-ghost{border:1px solid #D7E3F0;color:var(--eve-azul-noche);font-weight:500;background:#fff}
+.btn-ghost:hover{border-color:var(--eve-pizarra)}
+.btn:disabled{opacity:.6;cursor:progress}
+
+/* ── Cuerpo: chat + previsualización ── */
+main{flex:1;display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-height:0}
+.chat{display:flex;flex-direction:column;border-right:1px solid var(--eve-linea);min-height:0}
+.mensajes{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+
+.vacio{margin:auto;text-align:center;max-width:30ch;color:var(--eve-pizarra)}
+.vacio h2{font-size:1.05rem;margin-bottom:6px;color:var(--eve-azul-noche)}
+.vacio p{font-size:.85rem}
+.ejemplos{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.ejemplo{border:1px solid var(--eve-linea);background:#fff;border-radius:10px;
+  padding:10px 13px;font-size:.8rem;color:var(--eve-azul-noche);text-align:left;transition:.15s}
+.ejemplo:hover{border-color:var(--eve-electrico);background:var(--eve-tinte)}
+
+.burbuja{max-width:92%;padding:11px 14px;border-radius:14px;font-size:.86rem;white-space:pre-wrap;word-break:break-word}
+.burbuja.yo{align-self:flex-end;background:var(--eve-mezclado);color:#fff;border-bottom-right-radius:4px}
+.burbuja.eve{align-self:flex-start;background:var(--eve-tinte);border:1px solid var(--eve-linea);border-bottom-left-radius:4px}
+.burbuja.eve b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;
+  color:var(--eve-electrico);margin-bottom:3px}
+/* Error: ícono + texto, nunca solo color (C5) */
+.burbuja.err{align-self:flex-start;background:#FEF2F2;border:1px solid #FCA5A5;color:var(--eve-error);
+  display:flex;gap:9px;align-items:flex-start}
+.burbuja.err svg{width:16px;height:16px;flex:none;margin-top:2px}
+
+.pensando{align-self:flex-start;display:flex;gap:5px;padding:12px 14px}
+.pensando i{width:7px;height:7px;border-radius:50%;background:var(--eve-electrico);
+  animation:latir 1.2s ease-in-out infinite}
+.pensando i:nth-child(2){animation-delay:.15s}
+.pensando i:nth-child(3){animation-delay:.3s}
+@keyframes latir{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+.escribir{border-top:1px solid var(--eve-linea);padding:14px;flex:none;background:#fff}
+.escribir textarea{width:100%;border:1px solid #DCE7F2;border-radius:10px;padding:11px 13px;
+  font-family:'Inter',sans-serif;font-size:.86rem;resize:none;min-height:76px;max-height:180px;
+  color:var(--eve-azul-noche);background:#fff}
+.escribir textarea:focus{outline:2px solid var(--eve-electrico);border-color:transparent}
+.fila-enviar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.pista{font-size:.72rem;color:var(--eve-muted)}
+
+/* ── Panel de previsualización ── */
+.vista{display:flex;flex-direction:column;min-width:0;background:var(--eve-tinte)}
+.pestanas{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 16px;border-bottom:1px solid var(--eve-linea);background:#fff;flex:none}
+.grupo-pestanas{display:inline-flex;background:var(--eve-tinte);border-radius:999px;padding:3px;gap:2px}
+.pestana{border-radius:999px;padding:6px 16px;font-size:.79rem;font-weight:500;color:var(--eve-pizarra)}
+.pestana.act{background:#fff;color:var(--eve-azul-noche);box-shadow:0 1px 4px rgba(10,37,64,.08)}
+.mini{font-size:.75rem;font-weight:500;color:var(--eve-electrico);padding:6px 12px;border-radius:999px}
+.mini:hover{background:var(--eve-hielo)}
+.mini:disabled{color:var(--eve-muted);cursor:default;background:none}
+
+.lienzo{flex:1;min-height:0;position:relative}
+.lienzo iframe{width:100%;height:100%;border:none;background:#fff;display:block}
+.lienzo pre{width:100%;height:100%;overflow:auto;margin:0;padding:18px;background:var(--eve-azul-noche);
+  color:#D6E6F7;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.65}
+.oculto{display:none !important}
+.sin-nada{position:absolute;inset:0;display:grid;place-items:center;text-align:center;
+  color:var(--eve-muted);font-size:.85rem;padding:24px}
+
+/* ── Aviso del token ── */
+.aviso-token{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:11px 20px;background:#FEF8EC;border-bottom:1px solid #F3D9A6;font-size:.82rem;color:#7A5A1E}
+.aviso-token svg{width:16px;height:16px;flex:none}
+.aviso-token input{flex:1;min-width:200px;padding:7px 11px;border:1px solid #E4CFA0;border-radius:8px;
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;background:#fff;color:var(--eve-azul-noche)}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--eve-azul-noche);color:#fff;font-size:.83rem;padding:11px 22px;border-radius:999px;
+  transition:.3s;opacity:0;z-index:100;pointer-events:none}
+.toast.ver{transform:translateX(-50%) translateY(0);opacity:1}
+
+@media(max-width:860px){
+  body{overflow:auto}
+  main{grid-template-columns:1fr;height:auto}
+  .chat{border-right:none;border-bottom:1px solid var(--eve-linea);height:70vh}
+  .vista{height:80vh}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">
+    <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg" alt="" width="30" height="21">
+    <b>Eve Studio</b>
+    <span>· generador de interfaces</span>
+  </div>
+  <div class="cab-acciones">
+    <button class="btn btn-ghost" id="btnLimpiar" title="Empieza una conversación nueva">Nueva sesión</button>
+  </div>
+</header>
+
+<!-- Solo aparece si falta el token. La API responde 401 sin él. -->
+<div class="aviso-token oculto" id="avisoToken">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+  <label for="campoToken">Pega el token del agente para poder generar:</label>
+  <input type="password" id="campoToken" placeholder="AGENTE_API_TOKEN" autocomplete="off" spellcheck="false">
+  <button class="btn btn-ghost" id="btnGuardarToken">Guardar</button>
+</div>
+
+<main>
+  <section class="chat" aria-label="Conversación con el agente">
+    <div class="mensajes" id="mensajes">
+      <div class="vacio" id="vacio">
+        <h2>¿Qué interfaz construimos?</h2>
+        <p>Describe lo que necesitas. Eve lee el manual de marca antes de escribir el código.</p>
+        <div class="ejemplos">
+          <button class="ejemplo">Una tarjeta de precios con los colores de la marca</button>
+          <button class="ejemplo">Un formulario de contacto accesible</button>
+          <button class="ejemplo">Un encabezado con el isotipo y menú de navegación</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="escribir">
+      <label for="peticion" class="oculto">Tu petición</label>
+      <textarea id="peticion" placeholder="Describe la interfaz que necesitas…"></textarea>
+      <div class="fila-enviar">
+        <span class="pista">⌘/Ctrl + Enter para enviar</span>
+        <button class="btn btn-cta" id="btnGenerar">Generar</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="vista" aria-label="Resultado">
+    <div class="pestanas">
+      <div class="grupo-pestanas" role="tablist" aria-label="Ver como">
+        <button class="pestana act" role="tab" aria-selected="true" data-panel="previa">Vista previa</button>
+        <button class="pestana" role="tab" aria-selected="false" data-panel="codigo">Código</button>
+      </div>
+      <div>
+        <button class="mini" id="btnCopiar" disabled>Copiar código</button>
+        <button class="mini" id="btnDescargar" disabled>Descargar .html</button>
+      </div>
+    </div>
+    <div class="lienzo">
+      <iframe id="previa" title="Vista previa de la interfaz generada" sandbox="allow-scripts"></iframe>
+      <pre id="codigo" class="oculto"><code></code></pre>
+      <div class="sin-nada" id="sinNada">La interfaz generada aparecerá aquí.</div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const CLAVE_TOKEN = 'eve-studio-token';
+const $ = s => document.querySelector(s);
+
+/* El historial vive en el cliente y se reenvía completo en cada petición:
+   la función de Vercel es efímera y no puede guardarlo. */
+let historial = [];
+let enviando = false;
+let ultimoCodigo = '';
+
+// ── Token ────────────────────────────────────────────────────────────────
+function token(){ return localStorage.getItem(CLAVE_TOKEN) || ''; }
+function pintarAvisoToken(){ $('#avisoToken').classList.toggle('oculto', !!token()); }
+
+$('#btnGuardarToken').addEventListener('click', () => {
+  const v = $('#campoToken').value.trim();
+  if(!v){ avisar('Pega el token primero.'); return; }
+  localStorage.setItem(CLAVE_TOKEN, v);
+  $('#campoToken').value = '';
+  pintarAvisoToken();
+  avisar('Token guardado en este navegador.');
+});
+
+// ── Utilidades ───────────────────────────────────────────────────────────
+function avisar(texto){
+  const t = $('#toast');
+  t.textContent = texto;
+  t.classList.add('ver');
+  clearTimeout(avisar._t);
+  avisar._t = setTimeout(() => t.classList.remove('ver'), 2600);
+}
+
+function burbuja(clase, contenido, etiqueta){
+  $('#vacio')?.remove();
+  const d = document.createElement('div');
+  d.className = 'burbuja ' + clase;
+  if(clase === 'err'){
+    d.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span></span>';
+    d.querySelector('span').textContent = contenido;
+  } else {
+    if(etiqueta){ const b = document.createElement('b'); b.textContent = etiqueta; d.appendChild(b); }
+    d.appendChild(document.createTextNode(contenido));
+  }
+  $('#mensajes').appendChild(d);
+  $('#mensajes').scrollTop = $('#mensajes').scrollHeight;
+  return d;
+}
+
+function mostrarResultado(codigo){
+  ultimoCodigo = codigo;
+  $('#sinNada').classList.add('oculto');
+  $('#previa').srcdoc = codigo;              // srcdoc + sandbox: se renderiza aislado
+  $('#codigo').querySelector('code').textContent = codigo;
+  $('#btnCopiar').disabled = false;
+  $('#btnDescargar').disabled = false;
+}
+
+// ── Envío ────────────────────────────────────────────────────────────────
+async function generar(){
+  if(enviando) return;                        // candado: evita duplicar la petición
+  const texto = $('#peticion').value.trim();
+  if(!texto){ $('#peticion').focus(); return; }
+  if(!token()){ pintarAvisoToken(); $('#campoToken').focus(); avisar('Falta el token del agente.'); return; }
+
+  enviando = true;
+  const btn = $('#btnGenerar');
+  btn.disabled = true; btn.textContent = 'Generando…';
+  burbuja('yo', texto);
+  $('#peticion').value = '';
+
+  const cargando = document.createElement('div');
+  cargando.className = 'pensando';
+  cargando.innerHTML = '<i></i><i></i><i></i>';
+  $('#mensajes').appendChild(cargando);
+  $('#mensajes').scrollTop = $('#mensajes').scrollHeight;
+
+  try{
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'X-Agente-Token': token() },
+      body: JSON.stringify({ historial, mensaje_nuevo: texto })
+    });
+    let cuerpo = {};
+    try { cuerpo = await r.json(); } catch { /* respuesta sin JSON */ }
+    cargando.remove();
+
+    if(!r.ok){
+      // El turno fallido no entra al historial: los push ocurren más abajo,
+      // solo tras una respuesta correcta. (Un pop() aquí borraría la respuesta
+      // del intercambio ANTERIOR y corrompería el contexto del agente.)
+      burbuja('err', mensajeDeError(r.status, cuerpo.detail));
+      return;
+    }
+
+    // En el chat va un resumen: volcar todo el HTML lo haría ilegible.
+    // El historial sí guarda el mensaje crudo, que es el contexto del agente.
+    burbuja('eve', 'Interfaz generada — la ves a la derecha.', 'Eve');
+    historial.push({ rol:'user', contenido: texto });
+    historial.push({ rol:'assistant', contenido: cuerpo.mensaje_crudo || cuerpo.codigo_html || '' });
+    mostrarResultado(cuerpo.codigo_html || '');
+  } catch {
+    cargando.remove();
+    burbuja('err', 'Sin conexión con el agente. Revisa tu red e inténtalo de nuevo.');
+  } finally {
+    enviando = false;
+    btn.disabled = false; btn.textContent = 'Generar';
+  }
+}
+
+function mensajeDeError(estado, detalle){
+  if(estado === 401) return 'Token inválido. Revísalo en «Nueva sesión» o vuelve a pegarlo.';
+  if(detalle === 'agente_sin_token_configurado') return 'El servidor no tiene AGENTE_API_TOKEN configurado en Vercel.';
+  if(detalle === 'falta_moonshot_api_key') return 'Al servidor le falta la MOONSHOT_API_KEY.';
+  if(estado === 502) return 'El agente falló al generar. Prueba a reformular la petición.';
+  if(estado === 504) return 'El agente tardó demasiado. Prueba con una petición más concreta.';
+  return 'No se pudo generar (error ' + estado + ').';
+}
+
+// ── Eventos ──────────────────────────────────────────────────────────────
+$('#btnGenerar').addEventListener('click', generar);
+$('#peticion').addEventListener('keydown', e => {
+  if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){ e.preventDefault(); generar(); }
+});
+document.addEventListener('click', e => {
+  const ej = e.target.closest('.ejemplo');
+  if(ej){ $('#peticion').value = ej.textContent.trim(); $('#peticion').focus(); }
+});
+
+document.querySelectorAll('.pestana').forEach(p => p.addEventListener('click', () => {
+  document.querySelectorAll('.pestana').forEach(x => { x.classList.remove('act'); x.setAttribute('aria-selected','false'); });
+  p.classList.add('act'); p.setAttribute('aria-selected','true');
+  const verCodigo = p.dataset.panel === 'codigo';
+  $('#previa').classList.toggle('oculto', verCodigo);
+  $('#codigo').classList.toggle('oculto', !verCodigo);
+}));
+
+$('#btnCopiar').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(ultimoCodigo); avisar('Código copiado.'); }
+  catch { avisar('No se pudo copiar.'); }
+});
+
+$('#btnDescargar').addEventListener('click', () => {
+  const url = URL.createObjectURL(new Blob([ultimoCodigo], {type:'text/html'}));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'eve-studio.html'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+$('#btnLimpiar').addEventListener('click', () => {
+  if(historial.length && !confirm('¿Borrar la conversación actual?')) return;
+  historial = []; ultimoCodigo = '';
+  $('#mensajes').innerHTML = '';
+  $('#previa').srcdoc = '';
+  $('#codigo').querySelector('code').textContent = '';
+  $('#sinNada').classList.remove('oculto');
+  $('#btnCopiar').disabled = true; $('#btnDescargar').disabled = true;
+  location.reload();
+});
+
+pintarAvisoToken();
+</script>
+</body>
+</html>
