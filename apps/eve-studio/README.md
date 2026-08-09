@@ -115,12 +115,28 @@ EvePay"*: lee `apps/evepay/index.html` y parte de ahí, en vez de generar una
 página nueva desde cero. Puede listar carpetas antes de leer, para no adivinar
 rutas.
 
-**Hoy `GITHUB_TOKEN_CODIGO` puede quedar vacía.** El monorepo es público y un
-token de alcance fino lee cualquier repositorio público. Hará falta el día que
-`evetevbrain` pase a privado —que es lo que dice su documentación que debería
-ser— porque los tokens de alcance fino pertenecen a **una sola organización**, y
-`brand` y `evetevbrain` están en dos distintas. Por eso son dos variables y no
-una: ese día es un cambio de configuración, no de código.
+### El token del código: no reutilices el de marca
+
+Un token de alcance fino está **limitado a los recursos de una sola
+organización**. El de marca pertenece a `Evetev-Dev` y el monorepo es de
+`EveTevSas`, así que mandarlo no es neutro: **empeora las cosas**. Sin cabecera
+de autorización GitHub sirve el repositorio público; con una credencial de otra
+organización responde **403**. Pasó en producción.
+
+Por eso `GITHUB_TOKEN_CODIGO` no tiene respaldo en `GITHUB_TOKEN`. Y por si
+alguien la configura mal, una lectura que devuelva 401 o 403 se reintenta una
+vez **sin credencial**. Si el repositorio fuera privado ese reintento da 404,
+que sigue siendo un error visible: la red de seguridad no esconde un problema
+de permisos.
+
+**Puede quedar vacía, pero conviene ponerla.** Sin autenticar, GitHub permite
+**60 peticiones por hora y por IP**, y las IP de salida de Vercel son
+compartidas: el agente puede quedarse sin cuota por tráfico ajeno. Con un token
+propio son 5 000 por hora.
+
+El token correcto es uno de alcance fino con **dueño `EveTevSas`**, repositorio
+`evetevbrain`, permiso *Contents: Read-only*. Se crea aparte del de marca —no se
+puede ampliar el existente, porque un token no cruza organizaciones.
 
 Los archivos que lee entran como **material de referencia, no como
 instrucciones**; está dicho explícitamente en el prompt del sistema. Y las
