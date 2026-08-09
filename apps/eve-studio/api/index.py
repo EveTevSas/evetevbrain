@@ -40,13 +40,12 @@ app = FastAPI(title="Agente Frontend Evetev", docs_url=None, redoc_url=None)
 REPO_MARCA = os.getenv("REPO_MARCA", "Evetev-Dev/brand")
 REPO_CODIGO = os.getenv("REPO_CODIGO", "EveTevSas/evetevbrain")
 
-# Hoy el monorepo es público y un token de alcance fino lee cualquier repo
-# público, así que el mismo GITHUB_TOKEN sirve para los dos. Pero los tokens de
-# alcance fino pertenecen a UNA organización, y estos repos están en dos
-# distintas: el día que evetevbrain pase a privado hará falta un segundo token.
-# Se lee de una variable aparte con respaldo para que ese día sea configuración
-# y no código.
-TOKEN_CODIGO = os.getenv("GITHUB_TOKEN_CODIGO") or os.getenv("GITHUB_TOKEN")
+# SIN respaldo en GITHUB_TOKEN, y no es un olvido. Un token de alcance fino
+# está limitado a los recursos de UNA organización: el de marca pertenece a
+# Evetev-Dev y este repo es de EveTevSas. Mandarlo no es neutro, empeora las
+# cosas — sin cabecera GitHub sirve el repositorio público, y con una credencial
+# de otra organización responde 403. Se comprobó en producción.
+TOKEN_CODIGO = os.getenv("GITHUB_TOKEN_CODIGO")
 
 # Un archivo enorme se come el contexto y deja al agente sin espacio para
 # escribir. Se corta avisando, que es mejor que fallar o que truncar en silencio.
@@ -71,13 +70,23 @@ def _pedir(repo: str, ruta: str, token: str | None, crudo: bool):
     cabeceras = {
         "Accept": "application/vnd.github.v3.raw" if crudo else "application/vnd.github+json",
     }
-    if token:
-        cabeceras["Authorization"] = f"Bearer {token}"
-    return requests.get(
-        f"https://api.github.com/repos/{repo}/contents/{ruta.lstrip('/')}",
-        headers=cabeceras,
-        timeout=20,
+    url = f"https://api.github.com/repos/{repo}/contents/{ruta.lstrip('/')}"
+    if not token:
+        return requests.get(url, headers=cabeceras, timeout=20)
+
+    respuesta = requests.get(
+        url, headers={**cabeceras, "Authorization": f"Bearer {token}"}, timeout=20
     )
+    if respuesta.status_code in (401, 403):
+        # Red de seguridad para el error que ya nos costó una tarde: un token de
+        # la organización equivocada hace fallar la lectura de un repositorio
+        # que, sin credencial, se sirve sin problema. Se reintenta sin cabecera.
+        # Si el repositorio fuera privado el reintento da 404, que sigue siendo
+        # un error visible: esto no esconde un problema de permisos.
+        sin_credencial = requests.get(url, headers=cabeceras, timeout=20)
+        if sin_credencial.status_code == 200:
+            return sin_credencial
+    return respuesta
 
 
 def _leer_archivo(repo: str, ruta_archivo: str, token: str | None) -> str:
@@ -90,11 +99,20 @@ def _leer_archivo(repo: str, ruta_archivo: str, token: str | None) -> str:
     except requests.RequestException as e:
         return f"Error de red consultando GitHub: {e}"
 
-    if respuesta.status_code != 200:
+    if respuesta.status_code == 404:
         return (
-            f"No se pudo leer '{ruta_archivo}' en {repo} "
-            f"(código {respuesta.status_code}). Comprueba la ruta listando la carpeta."
+            f"No existe '{ruta_archivo}' en {repo}. "
+            "Lista la carpeta para ver las rutas reales antes de volver a intentarlo."
         )
+    if respuesta.status_code == 403:
+        return (
+            f"GitHub rechazó la lectura de '{ruta_archivo}' (403). Suele ser el límite "
+            "de peticiones sin autenticar (60 por hora). Continúa sin leer el archivo "
+            "y dilo en tu respuesta, en vez de inventarte el contenido."
+        )
+    return (
+        f"No se pudo leer '{ruta_archivo}' en {repo} (código {respuesta.status_code})."
+    )
     texto = respuesta.text
     if len(texto) > LIMITE_CARACTERES:
         return (
