@@ -133,10 +133,21 @@ resuelvan una versión compatible entre sí.
 de Vercel para Python es 500 MB descomprimido, así que debería entrar, pero si
 el build se queja, la palanca es `excludeFiles` en `vercel.json`.
 
-## Pendiente
+**La página es pública y se decidió que siga así, de momento.** En
+`studio.evetev.com` cualquiera con la URL ve la interfaz. Se estudió cerrarla y
+las opciones eran:
 
-**Proteger el acceso a la interfaz.** El token cuida el endpoint, pero la página
-en sí queda pública si alguien da con la URL. Para una herramienta interna, lo
-razonable es activar **Deployment Protection** en el proyecto de Vercel
-(contraseña o SSO del equipo) y dejar el token como segunda capa para las
-llamadas directas a la API.
+- *Deployment Protection* de Vercel. La modalidad **Standard Protection deja
+  fuera los dominios personalizados de producción**, justo el que importa; para
+  cubrirlo hace falta *All Deployments*, que exige Pro con Advanced Deployment
+  Protection: **150 USD al mes**. Descartado por desproporcionado.
+- *Cloudflare Access*, gratis hasta 50 personas, pero obliga a mover el DNS de
+  `evetev.com` desde name.com, con los MX de Google Workspace y los registros de
+  Resend de por medio. Riesgo sobre el correo de la empresa, no compensa.
+- **Google Sign-In propio:** botón de Google en la página, y la función verifica
+  la firma del token y que el correo sea del dominio. Gratis y encaja bien
+  porque el backend ya autentica, solo cambiaría *qué* comprueba. **Es el camino
+  cuando el token compartido se vuelva incómodo de repartir.**
+
+Se mantiene el token porque protege lo único que cuesta dinero: sin él no se
+puede generar. Lo expuesto es un formulario vacío.
