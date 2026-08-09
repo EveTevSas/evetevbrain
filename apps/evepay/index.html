@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!-- evepay.evetev.com — landing del producto EvePay.
+     Mismo montaje que apps/website: HTML y CSS planos, sin compilación.
+     Marca según packages/brand/assets/evetev_brand_styles.md (v1.0):
+     logos SIEMPRE desde el CDN (T1) y coral exclusivo de acción (C2),
+     aquí el único botón del encabezado.
+     Este archivo es el esqueleto de partida: las secciones se irán
+     generando con Eve Studio y revisando por PR. -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EvePay — Pasarela de pagos para Colombia</title>
+<meta name="description" content="EvePay es la pasarela de pagos de Evetev: tarjetas, PSE y billeteras en una sola integración. En construcción — habilitación con la adquirencia en curso.">
+
+<!-- Mientras la landing no esté terminada no debe indexarse: una página a
+     medias posicionando por «EvePay» hace más daño que no aparecer. -->
+<meta name="robots" content="noindex">
+
+<!-- Favicon desde el CDN de marca (§4) -->
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png">
+<meta name="theme-color" content="#0A2540">
+
+<!-- Tipografía oficial (§3): Baloo 2 (titulares) + Inter (interfaz) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+
+<!-- Tokens de color oficiales (§2), con respaldo local en estilos.css -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css">
+
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="marca" href="/" aria-label="EvePay, inicio">
+      <span class="p-ico" style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span>
+      EvePay
+    </a>
+    <nav>
+      <a href="https://evetev.com">Evetev</a>
+      <a class="btn btn-cta" href="https://evetev.com/#contacto">Hablar con el equipo</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="portada">
+    <div class="wrap">
+      <span class="etiqueta">
+        <span class="p-ico sm" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span>
+        EvePay · Pasarela de pagos
+      </span>
+      <h1>Cobrar en Colombia sin pelearse con la pasarela.</h1>
+      <p class="entrada">
+        Tarjetas, PSE y billeteras en una sola integración, con conciliación
+        que cuadra y soporte de personas que responden.
+      </p>
+
+      <div class="estado">
+        <h2>Esta página está en construcción</h2>
+        <p>
+          El núcleo de pagos ya está construido —cobros idempotentes, libro de
+          movimientos, webhooks y conciliación— y en paralelo corre la
+          habilitación con la adquirencia, que toma semanas y no es un trámite
+          automático.
+        </p>
+        <p>
+          Si quieres entrar como piloto,
+          <a href="https://evetev.com/#contacto">escríbenos</a> y te contamos en
+          qué punto vamos, sin adornos.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pie">
+  <div class="wrap">
+    <span>© <span id="anio">2026</span> Evetev SAS · Bogotá, Colombia</span>
+    <a href="https://evetev.com">evetev.com</a>
+  </div>
+</footer>
+
+<script>document.getElementById('anio').textContent = new Date().getFullYear();</script>
+</body>
+</html>
