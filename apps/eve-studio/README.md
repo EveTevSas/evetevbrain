@@ -13,13 +13,30 @@ constitución por PR** para que el documento y el repo no divergan.
 
 ```
 apps/eve-studio/
-├── api/index.py        # backend HTTP (FastAPI + LangGraph) — lo que despliega Vercel
+├── public/index.html   # la interfaz: chat + previsualización en vivo
+├── api/index.py        # backend HTTP (FastAPI + LangGraph)
 ├── agente_cli.py       # el REPL original, para usarlo en local
 ├── requirements.txt    # en la raíz: Vercel detecta dependencias desde aquí
-├── vercel.json
+├── vercel.json         # outputDirectory: public + la función Python
 ├── package.json        # scripts no-op: formaliza la app en el workspace de pnpm
 └── .env.example
 ```
+
+## La interfaz
+
+Estática y sin dependencias ni paso de compilación: Vercel sirve `public/` y la
+misma app expone `/api/chat`. Es el mismo patrón que ya usa `apps/website`
+(estáticos + una función en `api/`), que está funcionando en producción.
+
+- Chat a la izquierda, previsualización en vivo a la derecha, con pestaña para
+  ver el código, copiarlo o descargarlo.
+- El HTML generado se inyecta en un `<iframe>` con `srcdoc` y **`sandbox`**: se
+  renderiza aislado y no puede tocar la página que lo contiene.
+- **El token se pide una vez** y se guarda en `localStorage` del navegador. Sin
+  él la API responde 401, así que la interfaz lo pide antes de dejar generar.
+- El historial vive en el estado del cliente y se reenvía completo en cada
+  petición. Un turno que falla **no entra al historial**, para no ensuciar el
+  contexto del agente.
 
 ## Correr en local
 
@@ -114,7 +131,8 @@ el build se queja, la palanca es `excludeFiles` en `vercel.json`.
 
 ## Pendiente
 
-La **interfaz gráfica** (chat + `<iframe>` de previsualización) todavía no está.
-Cuando se haga, decidir dónde: servir estáticos y una función Python en el mismo
-proyecto de Vercel no es el camino directo — la documentación apunta a
-*Services*, o a un segundo proyecto para la UI.
+**Proteger el acceso a la interfaz.** El token cuida el endpoint, pero la página
+en sí queda pública si alguien da con la URL. Para una herramienta interna, lo
+razonable es activar **Deployment Protection** en el proyecto de Vercel
+(contraseña o SSO del equipo) y dejar el token como segunda capa para las
+llamadas directas a la API.
