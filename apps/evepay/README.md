@@ -9,7 +9,8 @@ compilación, igual que `apps/website`.
 ```
 apps/evepay/
 ├── index.html    # la landing
-├── estilos.css   # tokens de respaldo + estilos
+├── base.css      # GENERADO desde packages/brand/landing/base.css — no editar
+├── estilos.css   # lo propio de esta landing
 ├── vercel.json   # estático puro: outputDirectory "."
 └── package.json  # scripts no-op: formaliza la app en el workspace de pnpm
 ```
@@ -27,9 +28,21 @@ corporativa, cada mes. Juntas, cada ajuste de un titular redespliega las dos.
 **Es el patrón que ya sigue el monorepo.** EveConecta y Merchants ya son app +
 subdominio + proyecto propio. Meter EvePay dentro de la web sería la excepción.
 
-El coste es no compartir `estilos.css` con el sitio corporativo. Se asume
-porque los tokens de color y las tipografías vienen del CDN de marca en las dos,
-que es lo que de verdad no puede divergir.
+El coste es no compartir estilos con el sitio corporativo. Se asume porque los
+tokens y las tipografías vienen del CDN de marca en las dos, que es lo que de
+verdad no puede divergir.
+
+## El CSS no se edita aquí
+
+`base.css` es una **copia generada** de `packages/brand/landing/base.css`, que
+es la fuente única del armazón de todas las landings. Se edita allí:
+
+```bash
+pnpm css:sync     # replica la fuente en cada landing
+```
+
+El CI corre `pnpm css:check` y falla si alguna copia se desvió. Lo exclusivo de
+EvePay va en `estilos.css`, que se carga después y gana.
 
 ## Correr en local
 
