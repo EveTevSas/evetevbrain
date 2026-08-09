@@ -137,6 +137,11 @@ nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(
 .prod ul{list-style:none;margin:0 0 16px}
 .prod li{font-size:.8rem;color:var(--eve-pizarra);padding:4px 0;display:flex;gap:9px;align-items:flex-start}
 .prod li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--p);flex:none;margin-top:8px}
+/* Dos salidas por card: la landing del producto primero, y debajo la acción
+   que ya estaba y sigue siendo útil (integración o piloto). El destacado toma
+   el color de la línea (--p), no el coral, que está reservado (C2). */
+.prod .enlaces{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.link.destacado{color:var(--p);font-weight:600}
 
 /* Estado del producto: ícono + texto, nunca solo color (C5) */
 .chip{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-weight:600;
