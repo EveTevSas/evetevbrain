@@ -75,7 +75,9 @@ main{flex:1;display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-heigh
   display:flex;gap:9px;align-items:flex-start}
 .burbuja.err svg{width:16px;height:16px;flex:none;margin-top:2px}
 
-.pensando{align-self:flex-start;display:flex;gap:5px;padding:12px 14px}
+.pensando{align-self:flex-start;display:flex;align-items:center;gap:5px;padding:12px 14px}
+.pensando .reloj{margin-left:6px;font-size:.78rem;color:var(--eve-pizarra);
+  font-variant-numeric:tabular-nums}
 .pensando i{width:7px;height:7px;border-radius:50%;background:var(--eve-electrico);
   animation:latir 1.2s ease-in-out infinite}
 .pensando i:nth-child(2){animation-delay:.15s}
@@ -268,9 +270,18 @@ async function generar(){
 
   const cargando = document.createElement('div');
   cargando.className = 'pensando';
-  cargando.innerHTML = '<i></i><i></i><i></i>';
+  cargando.innerHTML = '<i></i><i></i><i></i><span class="reloj" aria-hidden="true"></span>';
   $('#mensajes').appendChild(cargando);
   $('#mensajes').scrollTop = $('#mensajes').scrollHeight;
+
+  // El agente puede tardar minutos: lee el manual de marca en GitHub antes de
+  // escribir. Sin contador la espera parece un cuelgue y se recarga la página.
+  const reloj = cargando.querySelector('.reloj');
+  const arranque = Date.now();
+  const tic = setInterval(() => {
+    const s = Math.round((Date.now() - arranque) / 1000);
+    reloj.textContent = s < 60 ? s + ' s' : Math.floor(s / 60) + ' min ' + (s % 60) + ' s';
+  }, 1000);
 
   try{
     const r = await fetch('/api/chat', {
@@ -300,6 +311,7 @@ async function generar(){
     cargando.remove();
     burbuja('err', 'Sin conexión con el agente. Revisa tu red e inténtalo de nuevo.');
   } finally {
+    clearInterval(tic);
     enviando = false;
     btn.disabled = false; btn.textContent = 'Generar';
   }
