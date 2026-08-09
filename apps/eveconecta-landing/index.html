@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!-- eveconecta.evetev.com — landing del producto EveConecta.
+     Ojo: el portal de residentes vive en conecta.evetev.com y es otra app
+     (apps/eveconecta). Esta es solo la página pública de producto.
+     Mismo montaje que apps/website y apps/evepay: HTML y CSS planos.
+     Marca según packages/brand/assets/evetev_brand_styles.md (v1.0):
+     logos SIEMPRE desde el CDN (T1) y coral exclusivo de acción (C2). -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EveConecta — Gestión y recaudo para conjuntos residenciales</title>
+<meta name="description" content="EveConecta es la solución de Evetev para propiedad horizontal: cuotas por coeficiente, estado de cuenta, pago en línea del residente y paz y salvo.">
+
+<!-- Mientras la landing no esté terminada no debe indexarse: una página a
+     medias posicionando por «EveConecta» hace más daño que no aparecer. -->
+<meta name="robots" content="noindex">
+
+<!-- Favicon desde el CDN de marca (§4) -->
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png">
+<meta name="theme-color" content="#0A2540">
+
+<!-- Tipografía oficial (§3): Baloo 2 (titulares) + Inter (interfaz) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+
+<!-- Tokens de color oficiales (§2), con respaldo local en estilos.css -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css">
+
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="marca" href="/" aria-label="EveConecta, inicio">
+      <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
+      EveConecta
+    </a>
+    <nav>
+      <a href="https://evetev.com">Evetev</a>
+      <!-- El portal es otra app, en otro dominio: enlace absoluto a propósito. -->
+      <a class="portal" href="https://conecta.evetev.com">Entrar al portal</a>
+      <a class="btn btn-cta" href="https://evetev.com/#contacto">Hablar con el equipo</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="portada">
+    <div class="wrap">
+      <span class="etiqueta">
+        <span class="p-ico sm" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
+        EveConecta · Propiedad horizontal
+      </span>
+      <h1>La administración del conjunto, sin hojas de cálculo.</h1>
+      <p class="entrada">
+        Cuotas por coeficiente, estado de cuenta, pago en línea del residente y
+        paz y salvo. Todo en el mismo sitio, y cuadrado.
+      </p>
+
+      <div class="estado">
+        <h2>Esta página está en construcción</h2>
+        <p>
+          EveConecta está en marcha y es además nuestro primer cliente: la
+          usamos para probar EvePay cobrando dinero real, antes de pedirle a
+          nadie más que confíe en él.
+        </p>
+        <p>
+          Si administras un conjunto y quieres verla,
+          <a href="https://evetev.com/#contacto">escríbenos</a> y te la
+          mostramos en el estado en que está, sin adornos.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pie">
+  <div class="wrap">
+    <span>© <span id="anio">2026</span> Evetev SAS · Bogotá, Colombia</span>
+    <a href="https://evetev.com">evetev.com</a>
+  </div>
+</footer>
+
+<script>document.getElementById('anio').textContent = new Date().getFullYear();</script>
+</body>
+</html>
