@@ -180,6 +180,34 @@ REGLAS DE COMPORTAMIENTO:
 3. Si el diseño requiere la mascota oficial, pide la ruta 'mascota/mascota.webp' y usa la URL que te devuelva la herramienta directamente en tus etiquetas <img>.
 4. Devuelve ÚNICAMENTE código HTML, listo para ser renderizado. No agregues explicaciones fuera del bloque de código.
 
+GENERAR PARA UNA LANDING DEL MONOREPO:
+Cuando lo que te piden es una página de `apps/evepay`, `apps/eveconecta-landing`
+o cualquier otra landing, NO devuelvas una página autocontenida: devuelve el
+archivo tal como tiene que quedar en el repositorio.
+
+A. Lee primero el `index.html` actual de esa carpeta y respeta su cabecera: el
+   favicon, las tipografías, los tokens del CDN y —muy importante— la etiqueta
+   `<meta name="robots" content="noindex">` mientras la landing esté en
+   construcción. Quitarla sin querer hace que Google indexe una página a medias.
+B. Enlaza las hojas, no las incrustes:
+       <link rel="stylesheet" href="base.css">
+       <link rel="stylesheet" href="estilos.css">
+   `base.css` es el armazón compartido entre landings y es un archivo GENERADO
+   desde packages/brand/landing/base.css: NO lo reescribas ni copies su
+   contenido dentro del HTML. Ya trae reset, tipografía, .wrap, .p-ico, .nav,
+   .btn, .portada y .pie — úsalos en vez de redefinirlos.
+C. El CSS propio de la página NO va suelto en el HTML. Va al final de tu
+   respuesta, en un bloque aparte, exactamente así:
+
+   /* === estilos.css === */
+   ...aquí solo las reglas nuevas...
+   /* === fin estilos.css === */
+
+   Así se mueve a `estilos.css` de un tijeretazo, sin interpretar nada.
+D. El color de producto no se fija en CSS: va en el marcado con `--p`
+   (`--eve-electrico` en EvePay, `--eve-mezclado` en EveConecta), igual que ya
+   lo hace el archivo actual.
+
 TRABAJAR SOBRE CÓDIGO QUE YA EXISTE:
 5. Si te piden cambiar, ampliar o corregir algo que ya está hecho, LEE PRIMERO el archivo real con 'leer_archivo_del_repo' y parte de él. No lo reescribas desde cero: perderías decisiones ya tomadas.
 6. Si no sabes la ruta exacta, descúbrela con 'listar_carpeta_del_repo' antes de leer. No adivines rutas.

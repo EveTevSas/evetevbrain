@@ -31,6 +31,12 @@ misma app expone `/api/chat`. Es el mismo patrón que ya usa `apps/website`
 
 - Chat a la izquierda, previsualización en vivo a la derecha, con pestaña para
   ver el código, copiarlo o descargarlo.
+- **Selector de contexto** en la barra de la previsualización. El agente genera
+  páginas que *enlazan* `base.css` y `estilos.css` con ruta relativa, y un
+  iframe no puede resolver eso por su cuenta: se vería sin estilos. El selector
+  inyecta un `<base>` apuntando a la landing ya publicada, así que la vista
+  previa usa el CSS real. **No toca el código que se copia ni el que se
+  descarga** — eso sigue siendo el archivo tal cual va al repositorio.
 - El HTML generado se inyecta en un `<iframe>` con `srcdoc` y **`sandbox`**: se
   renderiza aislado y no puede tocar la página que lo contiene.
 - **El token se pide una vez** y se guarda en `localStorage` del navegador. Sin
@@ -124,6 +130,23 @@ Este hace **lecturas de verdad** contra los dos repositorios y reporta el códig
 que devuelve GitHub con credencial y sin ella. Es el que dice si el token
 *funciona*, no solo si está puesto. Va aparte del health porque gasta cuota, y
 pide token porque revela con qué credencial funciona cada repositorio.
+
+## Lo que genera encaja en el repositorio
+
+Cuando le pides una landing del monorepo, el agente **no** devuelve una página
+autocontenida: devuelve el `index.html` tal como tiene que quedar.
+
+- Lee primero el archivo real y respeta su cabecera: favicon, tipografías,
+  tokens del CDN y el `<meta name="robots" content="noindex">`.
+- **Enlaza** `base.css` y `estilos.css` en vez de incrustar el armazón. `base.css`
+  es generado desde `packages/brand/landing/base.css` y no debe reescribirse.
+- El CSS propio de la página llega **en un bloque aparte**, delimitado con
+  `/* === estilos.css === */`, para moverlo a ese archivo de un tijeretazo.
+- El color de producto va en el marcado con `--p`, no fijado en CSS.
+
+Sin esto, pegar la salida del agente sobre `index.html` dejaba huérfanos
+`base.css` y `estilos.css` —rompiendo el armazón compartido en esa landing— y se
+llevaba por delante el `noindex`.
 
 ## Qué puede leer el agente
 
