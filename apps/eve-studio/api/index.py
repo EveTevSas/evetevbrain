@@ -231,6 +231,26 @@ def limpiar_markdown(texto: str) -> str:
     )
 
 
+def describir_token(valor: str | None) -> dict:
+    """Describe un token SIN revelarlo, para saber cuál cargó el servidor.
+
+    El panel de Vercel no muestra el valor de una variable marcada Sensitive, así
+    que tras cambiarla no hay forma de confirmar desde ahí qué quedó guardado.
+    Esto responde a la única pregunta que importa —¿es el token que acabo de
+    poner?— con el prefijo, que identifica el tipo, y la longitud, que distingue
+    dos tokens del mismo tipo. Nunca con caracteres del secreto.
+    """
+    if not valor:
+        return {"presente": False}
+    if valor.startswith("github_pat_"):
+        tipo = "alcance-fino"
+    elif valor.startswith(("ghp_", "gho_", "ghu_", "ghs_", "ghr_")):
+        tipo = "clasico"
+    else:
+        tipo = "desconocido"
+    return {"presente": True, "tipo": tipo, "largo": len(valor)}
+
+
 @app.get("/api/health")
 async def health():
     """Sirve para confirmar en el primer despliegue que el enrutado funciona."""
@@ -240,6 +260,37 @@ async def health():
         "moonshot_configurado": bool(os.getenv("MOONSHOT_API_KEY")),
         "github_configurado": bool(os.getenv("GITHUB_TOKEN")),
         "token_configurado": bool(os.getenv("AGENTE_API_TOKEN")),
+        "github_marca": describir_token(os.getenv("GITHUB_TOKEN")),
+        "github_codigo": describir_token(os.getenv("GITHUB_TOKEN_CODIGO")),
+    }
+
+
+@app.get("/api/diagnostico")
+async def diagnostico(x_agente_token: str | None = Header(default=None)):
+    """Prueba las lecturas de verdad y reporta el código que devuelve GitHub.
+
+    Separado de /api/health a propósito: hace peticiones reales, y meterlas en
+    el health lo volvería lento y gastaría cuota en cada comprobación. Pide
+    token porque revela con qué credencial funciona cada repositorio.
+    """
+    verificar_token(x_agente_token)
+
+    def probar(repo: str, ruta: str, token: str | None) -> dict:
+        try:
+            con = _pedir(repo, ruta, token, crudo=True) if token else None
+            sin = _pedir(repo, ruta, None, crudo=True)
+        except requests.RequestException as e:
+            return {"repo": repo, "error_de_red": str(e)}
+        return {
+            "repo": repo,
+            "con_credencial": con.status_code if con else "no hay token configurado",
+            "sin_credencial": sin.status_code,
+            "funciona": (con.status_code == 200 if con else sin.status_code == 200),
+        }
+
+    return {
+        "marca": probar(REPO_MARCA, "colores.json", os.getenv("GITHUB_TOKEN")),
+        "codigo": probar(REPO_CODIGO, "package.json", TOKEN_CODIGO),
     }
 
 
