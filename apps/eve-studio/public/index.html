@@ -103,9 +103,10 @@ main{flex:1;display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-heigh
 .mini:hover{background:var(--eve-hielo)}
 .mini:disabled{color:var(--eve-muted);cursor:default;background:none}
 .acciones-previa{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
-.ctx{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;color:var(--eve-pizarra)}
-.ctx select{font-family:inherit;font-size:.75rem;color:var(--eve-azul-noche);
-  border:1px solid var(--eve-linea);border-radius:999px;padding:5px 8px;background:#fff}
+.burbuja.pr{display:flex;flex-direction:column;gap:3px;border:1px solid var(--eve-linea)}
+.burbuja.pr a{color:var(--eve-electrico);font-weight:600;text-decoration:none}
+.burbuja.pr a:hover{text-decoration:underline}
+.burbuja.pr small{color:var(--eve-pizarra);font-size:.75rem}
 
 .lienzo{flex:1;min-height:0;position:relative}
 .lienzo iframe{width:100%;height:100%;border:none;background:#fff;display:block}
@@ -188,18 +189,6 @@ main{flex:1;display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-heigh
         <button class="pestana" role="tab" aria-selected="false" data-panel="codigo">Código</button>
       </div>
       <div class="acciones-previa">
-        <!-- Si el código enlaza base.css con ruta relativa, el iframe no puede
-             resolverla y la página se vería sin estilos. Esto le da una base
-             desde la que resolver: la landing ya publicada. No toca el código
-             que se copia o se descarga. -->
-        <label class="ctx">
-          Estilos de
-          <select id="contexto">
-            <option value="">— autocontenido —</option>
-            <option value="https://evepay.evetev.com/">EvePay</option>
-            <option value="https://eveconecta.evetev.com/">EveConecta</option>
-          </select>
-        </label>
         <button class="mini" id="btnCopiar" disabled>Copiar código</button>
         <button class="mini" id="btnDescargar" disabled>Descargar .html</button>
       </div>
@@ -262,20 +251,33 @@ function burbuja(clase, contenido, etiqueta){
   return d;
 }
 
-/* Inserta un <base> para que el iframe resuelva rutas relativas (base.css,
-   estilos.css) contra la landing publicada. Devuelve una copia: lo que se copia
-   y se descarga tiene que ser el archivo tal cual va al repositorio. */
-function conBase(codigo, origen){
-  if(!origen || /<base\s/i.test(codigo)) return codigo;
-  const etiqueta = `<base href="${origen}">`;
-  return /<head[^>]*>/i.test(codigo)
-    ? codigo.replace(/<head[^>]*>/i, (m) => m + '\n' + etiqueta)
-    : etiqueta + codigo;
+/* Vista rápida del HTML tal cual. Si el archivo enlaza base.css con ruta
+   relativa, aquí se verá sin esos estilos — a propósito: el sitio donde se
+   revisa de verdad es la preview de Vercel del PR, que sirve la carpeta
+   entera. Elegir un contexto a mano era un ajuste que se olvidaba y fallaba
+   en silencio. */
+/* El PR es donde se revisa de verdad, así que se muestra como enlace y no
+   enterrado en el texto. Se construye con createElement y href asignado por
+   propiedad: la URL viene del servidor, pero nunca se interpola en HTML. */
+function enlacePR(url){
+  const d = document.createElement('div');
+  d.className = 'burbuja eve pr';
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.textContent = 'Ver el Pull Request →';
+  d.appendChild(a);
+  const p = document.createElement('small');
+  p.textContent = 'Revisa la preview de Vercel antes de mezclar.';
+  d.appendChild(p);
+  $('#mensajes').appendChild(d);
+  $('#mensajes').scrollTop = $('#mensajes').scrollHeight;
 }
 
 function pintarPrevia(){
   if(!ultimoCodigo) return;
-  $('#previa').srcdoc = conBase(ultimoCodigo, $('#contexto').value);
+  $('#previa').srcdoc = ultimoCodigo;
 }
 
 function mostrarResultado(codigo){
@@ -335,7 +337,12 @@ async function generar(){
 
     // En el chat va un resumen: volcar todo el HTML lo haría ilegible.
     // El historial sí guarda el mensaje crudo, que es el contexto del agente.
-    burbuja('eve', 'Interfaz generada — la ves a la derecha.', 'Eve');
+    if(cuerpo.pr_url){
+      burbuja('eve', 'Abrí un Pull Request con el cambio.', 'Eve');
+      enlacePR(cuerpo.pr_url);
+    } else {
+      burbuja('eve', 'Interfaz generada — la ves a la derecha.', 'Eve');
+    }
     historial.push({ rol:'user', contenido: texto });
     historial.push({ rol:'assistant', contenido: cuerpo.mensaje_crudo || cuerpo.codigo_html || '' });
     mostrarResultado(cuerpo.codigo_html || '');
@@ -375,10 +382,6 @@ document.querySelectorAll('.pestana').forEach(p => p.addEventListener('click', (
   $('#previa').classList.toggle('oculto', verCodigo);
   $('#codigo').classList.toggle('oculto', !verCodigo);
 }));
-
-// Cambiar el contexto vuelve a pintar la previsualización, sin regenerar nada
-// ni gastar otra llamada al agente.
-$('#contexto').addEventListener('change', pintarPrevia);
 
 $('#btnCopiar').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(ultimoCodigo); avisar('Código copiado.'); }

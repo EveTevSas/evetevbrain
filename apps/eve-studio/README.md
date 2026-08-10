@@ -31,12 +31,12 @@ misma app expone `/api/chat`. Es el mismo patrón que ya usa `apps/website`
 
 - Chat a la izquierda, previsualización en vivo a la derecha, con pestaña para
   ver el código, copiarlo o descargarlo.
-- **Selector de contexto** en la barra de la previsualización. El agente genera
-  páginas que *enlazan* `base.css` y `estilos.css` con ruta relativa, y un
-  iframe no puede resolver eso por su cuenta: se vería sin estilos. El selector
-  inyecta un `<base>` apuntando a la landing ya publicada, así que la vista
-  previa usa el CSS real. **No toca el código que se copia ni el que se
-  descarga** — eso sigue siendo el archivo tal cual va al repositorio.
+- La previsualización del iframe es una **vista rápida**: si el archivo enlaza
+  `base.css` con ruta relativa, ahí se verá sin esos estilos. Es deliberado —
+  donde se revisa de verdad es en la **preview de Vercel del PR**, que sirve la
+  carpeta entera. Hubo un selector para elegir contra qué landing resolver las
+  rutas y se quitó: era un ajuste que había que acordarse de mover y que, al
+  olvidarlo, no fallaba ruidosamente sino que solo se veía raro.
 - El HTML generado se inyecta en un `<iframe>` con `srcdoc` y **`sandbox`**: se
   renderiza aislado y no puede tocar la página que lo contiene.
 - **El token se pide una vez** y se guarda en `localStorage` del navegador. Sin
@@ -81,6 +81,7 @@ En *Settings → Environment Variables* (nunca en el repo, §4):
 | `MOONSHOT_API_KEY` | motor del agente |
 | `GITHUB_TOKEN` | leer los activos de marca (solo lectura) |
 | `GITHUB_TOKEN_CODIGO` | leer el monorepo — **opcional hoy**, ver abajo |
+| `GITHUB_TOKEN_ESCRITURA` | abrir PRs — **no la pongas sin proteger `main`** |
 | `AGENTE_API_TOKEN` | protege el endpoint — `openssl rand -hex 32` |
 
 ### Verificar el primer despliegue
@@ -147,6 +148,48 @@ autocontenida: devuelve el `index.html` tal como tiene que quedar.
 Sin esto, pegar la salida del agente sobre `index.html` dejaba huérfanos
 `base.css` y `estilos.css` —rompiendo el armazón compartido en esa landing— y se
 llevaba por delante el `noindex`.
+
+## Qué puede escribir el agente
+
+Abre **Pull Requests**; nunca escribe en `main`. Cada PR trae su preview de
+Vercel, que es la landing real funcionando: revisar deja de ser leer un diff.
+
+El arnés vive **en código, no en el prompt** — a un modelo se le puede convencer
+de saltarse una instrucción; a un `if` no:
+
+| Límite | Valor |
+|---|---|
+| Carpetas | `apps/evepay/`, `apps/eveconecta-landing/` |
+| Extensiones | `.html`, `.css` |
+| Prohibidos | `base.css` (generado desde `packages/brand`) |
+| Archivos por PR | 5 |
+| Tamaño por archivo | 100 KB |
+| Propuestas por petición | 3 |
+| Operaciones | crear y actualizar; **nunca** borrar ni renombrar |
+
+Dos exclusiones importan especialmente: **`base.css`**, porque editarlo ahí lo
+revierte el siguiente `pnpm css:sync` y rompe el job de CI; y **`apps/eve-studio`**,
+porque un agente que puede reescribir su propio arnés no tiene arnés.
+
+Una propuesta con cualquier ruta inválida **se rechaza entera**: aplicar solo la
+parte válida dejaría el repositorio en un estado que nadie pidió.
+
+Los commits van firmados como `Eve Studio <eve@evetev.com>`, para que dentro de
+seis meses se distinga de un vistazo quién escribió qué. Si la rama ya existe,
+añade commits en vez de abrir otro PR.
+
+**Requisitos antes de darle el token:**
+
+1. **Protección de rama en `main`.** El código dice «nunca escribas en main»,
+   pero un token con permiso de escritura *puede* si hay un fallo. La protección
+   lo vuelve imposible desde la plataforma, que es donde debe estar la última
+   línea. Exige el check **«CI completo»** y ningún otro.
+2. **`GITHUB_TOKEN_ESCRITURA`**: alcance fino, dueño `EveTevSas`, solo
+   `evetevbrain`, con *Contents: Read and write* y *Pull requests: Read and
+   write*. Separado de los de lectura: si se filtra, se revoca solo ese.
+
+Sin la variable configurada la herramienta responde que no hay credencial y el
+agente entrega el código por el chat, como antes.
 
 ## Qué puede leer el agente
 
