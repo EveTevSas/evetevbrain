@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { sql } from "drizzle-orm";
 import { DB, type Db } from "../../database/drizzle";
-import { tenants, merchants, merchantApiKeys } from "../../database/schema";
+import { tenants, merchantApiKeys } from "../../database/schema";
 import { generateApiKey } from "../../common/api-key.util";
 import { MerchantsService } from "../merchants/merchants.service";
 
