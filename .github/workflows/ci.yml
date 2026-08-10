@@ -22,7 +22,7 @@ jobs:
       eveconecta: ${{ steps.areas.outputs.eveconecta }}
       landings: ${{ steps.areas.outputs.landings }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Historia completa: sin ella no hay contra qué comparar.
           fetch-depth: 0
@@ -41,7 +41,7 @@ jobs:
     needs: cambios
     if: ${{ needs.cambios.outputs.landings == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -59,7 +59,7 @@ jobs:
     needs: cambios
     if: ${{ needs.cambios.outputs.shared == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v4
 
@@ -89,7 +89,7 @@ jobs:
     needs: [cambios, shared]
     if: ${{ !failure() && !cancelled() && needs.cambios.outputs.api == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v4
 
@@ -127,7 +127,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v4
 
