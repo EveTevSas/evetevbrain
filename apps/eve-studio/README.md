@@ -86,7 +86,7 @@ así que **compruébalo antes de dar por bueno el deploy**:
 curl https://<tu-deploy>.vercel.app/api/health
 ```
 
-Debe devolver un JSON con `"ok": true` y los tres flags de configuración.
+Debe devolver un JSON con `"ok": true` y los flags de configuración.
 
 En el primer despliegue devolvió el **404 de la plataforma** (con `Code:
 NOT_FOUND`, distinto del 404 de FastAPI): la petición no llegaba a la función.
@@ -100,6 +100,30 @@ rutas del router ASGI le pertenecen. Por eso `vercel.json` lleva
 que conserva el path original, que es lo que FastAPI necesita para casar
 `/api/health` y `/api/chat`. **No lo quites** pensando que sobra: sin él el
 endpoint no existe desde fuera.
+
+### Saber qué token cargó el servidor
+
+El panel de Vercel **no muestra el valor de una variable marcada Sensitive**, así
+que después de cambiarla no hay forma de confirmar desde ahí qué quedó guardado.
+Para eso están estos dos:
+
+```bash
+curl https://studio.evetev.com/api/health
+```
+
+Devuelve, por cada token, si está presente, de qué **tipo** —`alcance-fino` para
+los `github_pat_`, `clasico` para los `ghp_`— y su **longitud**. Con eso se sabe
+si el valor que se acaba de pegar es el que está corriendo, sin revelar ni un
+carácter del secreto.
+
+```bash
+curl -H "X-Agente-Token: $AGENTE_API_TOKEN" https://studio.evetev.com/api/diagnostico
+```
+
+Este hace **lecturas de verdad** contra los dos repositorios y reporta el código
+que devuelve GitHub con credencial y sin ella. Es el que dice si el token
+*funciona*, no solo si está puesto. Va aparte del health porque gasta cuota, y
+pide token porque revela con qué credencial funciona cada repositorio.
 
 ## Qué puede leer el agente
 
