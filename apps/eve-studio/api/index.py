@@ -490,6 +490,10 @@ async def health():
         "token_configurado": bool(os.getenv("AGENTE_API_TOKEN")),
         "github_marca": describir_token(os.getenv("GITHUB_TOKEN")),
         "github_codigo": describir_token(os.getenv("GITHUB_TOKEN_CODIGO")),
+        "github_escritura": describir_token(TOKEN_ESCRITURA),
+        # Sin esto no hay forma de saber desde fuera si el agente puede abrir
+        # PRs o si va a limitarse a entregar el código por el chat.
+        "puede_abrir_prs": bool(TOKEN_ESCRITURA),
     }
 
 
@@ -516,9 +520,40 @@ async def diagnostico(x_agente_token: str | None = Header(default=None)):
             "funciona": (con.status_code == 200 if con else sin.status_code == 200),
         }
 
+    def probar_escritura() -> dict:
+        """Comprueba el permiso de escritura SIN escribir nada.
+
+        GitHub devuelve `permissions` en el repositorio según la credencial, así
+        que basta con leerlo. Crear una rama de prueba para luego borrarla
+        ensuciaría el repositorio y, con el arnés, ni siquiera podría borrarla.
+        """
+        if not TOKEN_ESCRITURA:
+            return {"configurado": False, "puede_escribir": False}
+        try:
+            r = requests.get(
+                f"https://api.github.com/repos/{REPO_CODIGO}",
+                headers={
+                    "Authorization": f"Bearer {TOKEN_ESCRITURA}",
+                    "Accept": "application/vnd.github+json",
+                },
+                timeout=20,
+            )
+        except requests.RequestException as e:
+            return {"configurado": True, "error_de_red": str(e)}
+        if r.status_code != 200:
+            return {"configurado": True, "estado": r.status_code, "puede_escribir": False}
+        permisos = r.json().get("permissions", {})
+        return {
+            "configurado": True,
+            "estado": 200,
+            "puede_escribir": bool(permisos.get("push")),
+            "es_administrador": bool(permisos.get("admin")),
+        }
+
     return {
         "marca": probar(REPO_MARCA, "colores.json", os.getenv("GITHUB_TOKEN")),
         "codigo": probar(REPO_CODIGO, "package.json", TOKEN_CODIGO),
+        "escritura": probar_escritura(),
     }
 
 

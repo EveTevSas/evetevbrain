@@ -121,14 +121,18 @@ curl https://studio.evetev.com/api/health
 Devuelve, por cada token, si está presente, de qué **tipo** —`alcance-fino` para
 los `github_pat_`, `clasico` para los `ghp_`— y su **longitud**. Con eso se sabe
 si el valor que se acaba de pegar es el que está corriendo, sin revelar ni un
-carácter del secreto.
+carácter del secreto. Incluye `puede_abrir_prs`, que responde de un vistazo si
+el agente va a dejar el cambio en el repositorio o a entregarlo por el chat.
 
 ```bash
 curl -H "X-Agente-Token: $AGENTE_API_TOKEN" https://studio.evetev.com/api/diagnostico
 ```
 
 Este hace **lecturas de verdad** contra los dos repositorios y reporta el código
-que devuelve GitHub con credencial y sin ella. Es el que dice si el token
+que devuelve GitHub con credencial y sin ella. Y comprueba el permiso de
+escritura leyendo `permissions` del repositorio, **sin escribir nada**: crear una
+rama de prueba ensuciaría el repositorio y, con el arnés, ni siquiera podría
+borrarla después. Es el que dice si el token
 *funciona*, no solo si está puesto. Va aparte del health porque gasta cuota, y
 pide token porque revela con qué credencial funciona cada repositorio.
 
@@ -141,8 +145,9 @@ autocontenida: devuelve el `index.html` tal como tiene que quedar.
   tokens del CDN y el `<meta name="robots" content="noindex">`.
 - **Enlaza** `base.css` y `estilos.css` en vez de incrustar el armazón. `base.css`
   es generado desde `packages/brand/landing/base.css` y no debe reescribirse.
-- El CSS propio de la página llega **en un bloque aparte**, delimitado con
-  `/* === estilos.css === */`, para moverlo a ese archivo de un tijeretazo.
+- El CSS propio va en **`estilos.css`, como un archivo más de la propuesta**:
+  el agente lo lee entero, le añade sus reglas y lo devuelve completo. La
+  herramienta sustituye archivos, no aplica parches.
 - El color de producto va en el marcado con `--p`, no fijado en CSS.
 
 Sin esto, pegar la salida del agente sobre `index.html` dejaba huérfanos
