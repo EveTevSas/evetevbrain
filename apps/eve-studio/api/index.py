@@ -557,6 +557,68 @@ async def diagnostico(x_agente_token: str | None = Header(default=None)):
     }
 
 
+# ── Memoria: qué se recuerda de cada turno, y qué se tira ──────────────────
+# Ahora que el agente lee el repositorio, el código NO tiene por qué vivir en el
+# historial: el archivo real siempre está a una llamada de distancia. Guardar
+# aquí el HTML entero era pagar en cada turno por algo ya guardado en git.
+LIMITE_HISTORIAL = 12_000       # caracteres antes de compactar
+TURNOS_INTACTOS = 4             # los últimos se conservan literales
+
+
+def entrada_de_historial(salida: str, pr_url: str | None) -> str:
+    """Reduce la respuesta a lo que merece recordarse."""
+    sin_codigo = re.sub(r"```.*?```", "[código omitido: está en el repositorio]", salida, flags=re.S)
+    sin_codigo = re.sub(
+        r"<!DOCTYPE html>.*", "[código omitido: está en el repositorio]", sin_codigo, flags=re.S | re.I
+    ).strip()
+    if not sin_codigo:
+        sin_codigo = "Entregué código en el chat."
+    if pr_url and pr_url not in sin_codigo:
+        sin_codigo += f"\nPR: {pr_url}"
+    return sin_codigo
+
+
+def compactar_historial(historial: list[dict]) -> list[dict] | None:
+    """Resume los turnos viejos cuando el historial se pasa de largo.
+
+    Devuelve None si no hacía falta. Lo hace el propio Kimi, que es barato,
+    y solo al cruzar el umbral: sale mucho más a cuenta que reenviar un
+    historial gordo en cada turno.
+
+    Se conservan intenciones, decisiones y lo descartado con su porqué; se tiran
+    los pasos intermedios y el código ya superado.
+    """
+    total = sum(len(m["contenido"]) for m in historial)
+    if total <= LIMITE_HISTORIAL or len(historial) <= TURNOS_INTACTOS + 2:
+        return None
+
+    viejos, recientes = historial[:-TURNOS_INTACTOS], historial[-TURNOS_INTACTOS:]
+    transcripcion = "\n\n".join(f"[{m['rol']}] {m['contenido']}" for m in viejos)
+
+    peticion = (
+        "Resume este historial de trabajo sobre una landing. CONSERVA: qué se pidió, "
+        "qué se decidió, qué se descartó y por qué, las reglas de marca aplicadas, y "
+        "las rutas de archivo y PRs mencionados. DESCARTA: pasos intermedios, código, "
+        "y lo que quedó superado por cambios posteriores. Escribe en español, en "
+        "viñetas, sin preámbulo.\n\n" + transcripcion
+    )
+    try:
+        llm = ChatOpenAI(
+            api_key=os.getenv("MOONSHOT_API_KEY"),
+            base_url="https://api.moonshot.ai/v1",
+            model="kimi-k3",
+            temperature=0.2,
+        )
+        resumen = llm.invoke([HumanMessage(content=peticion)]).content
+    except Exception as e:
+        # Que falle el resumen no puede tumbar la petición: se sigue con el
+        # historial largo, que es peor pero funciona.
+        print(f"no se pudo compactar el historial: {type(e).__name__}: {e}")
+        return None
+
+    return [{"rol": "assistant", "contenido": "Resumen de lo trabajado antes:\n" + resumen}] + recientes
+
+
 @app.post("/api/chat")
 async def generar_interfaz(
     peticion: PeticionChat,
@@ -587,8 +649,21 @@ async def generar_interfaz(
     # Si abrió un PR, la URL viaja aparte: la interfaz la enseña como enlace, y
     # rebuscarla en el texto del agente sería pedirle eso a quien lo usa.
     pr = re.search(r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+", salida)
+    pr_url = pr.group(0) if pr else None
+
+    # El cliente es el dueño del almacenamiento, así que la versión compactada
+    # se le devuelve para que la guarde; aquí no queda nada.
+    entrada = entrada_de_historial(salida, pr_url)
+    compactado = compactar_historial(
+        [m.model_dump() for m in peticion.historial]
+        + [{"rol": "user", "contenido": peticion.mensaje_nuevo},
+           {"rol": "assistant", "contenido": entrada}]
+    )
+
     return {
         "codigo_html": limpiar_markdown(salida),
         "mensaje_crudo": salida,
-        "pr_url": pr.group(0) if pr else None,
+        "pr_url": pr_url,
+        "historial_entrada": entrada,
+        "historial_compactado": compactado,
     }
