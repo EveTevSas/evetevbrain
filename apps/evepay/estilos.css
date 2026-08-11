@@ -5,3 +5,25 @@
 
    Se carga DESPUÉS de base.css: lo que se declare aquí gana.
    El color de producto no se fija en CSS — va con --p en el marcado. */
+
+/* ── Servicios ───────────────────────────────────────────────────────────
+   Variante minimalista del manual (§6): sin fondo ni sombra, la jerarquía la
+   da el espacio. La grilla se centra para que un solo servicio no quede
+   arrinconado; cuando haya varios en una misma fila, se separan con el borde
+   fino de --eve-linea que indica la guía. */
+.servicios{padding:80px 0 0}
+.servicios h2{font-size:clamp(1.3rem,2.6vw,1.6rem);text-align:center}
+.servicios-intro{margin:12px auto 0;max-width:560px;text-align:center;
+  color:var(--eve-pizarra);font-size:clamp(.9rem,1.6vw,.98rem)}
+
+.servicios-grid{list-style:none;margin:44px auto 0;padding:0;max-width:900px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,320px));
+  justify-content:center;gap:36px}
+.servicio .p-ico{margin-bottom:16px}
+.servicio h3{font-size:1.02rem;font-weight:600}
+.servicio p{margin-top:8px;font-size:.9rem;color:var(--eve-pizarra)}
+
+@media (max-width:760px){
+  .servicios{padding:64px 0 0}
+  .servicios-grid{margin-top:36px;gap:32px}
+}
