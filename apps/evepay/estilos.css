@@ -6,24 +6,102 @@
    Se carga DESPUÉS de base.css: lo que se declare aquí gana.
    El color de producto no se fija en CSS — va con --p en el marcado. */
 
-/* ── Servicios ───────────────────────────────────────────────────────────
-   Variante minimalista del manual (§6): sin fondo ni sombra, la jerarquía la
-   da el espacio. La grilla se centra para que un solo servicio no quede
-   arrinconado; cuando haya varios en una misma fila, se separan con el borde
-   fino de --eve-linea que indica la guía. */
-.servicios{padding:80px 0 0}
-.servicios h2{font-size:clamp(1.3rem,2.6vw,1.6rem);text-align:center}
-.servicios-intro{margin:12px auto 0;max-width:560px;text-align:center;
+/* ── CTA de la portada ───────────────────────────────────────────────────
+   El único botón coral de la página (C2). base.css no lo posiciona, así que
+   aquí le damos aire y su nota honesta debajo. */
+.cta{margin-top:34px}
+.cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-pizarra)}
+
+/* ── Secciones ───────────────────────────────────────────────────────────
+   Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
+   claro, un solo bloque de peso (el de la demo) en azul noche. */
+.seccion{padding:84px 0}
+.seccion-tinte{background:var(--eve-tinte)}
+.seccion h2{font-size:clamp(1.3rem,2.6vw,1.6rem);text-align:center}
+.seccion-intro{margin:12px auto 0;max-width:560px;text-align:center;
   color:var(--eve-pizarra);font-size:clamp(.9rem,1.6vw,.98rem)}
 
-.servicios-grid{list-style:none;margin:44px auto 0;padding:0;max-width:900px;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,320px));
-  justify-content:center;gap:36px}
-.servicio .p-ico{margin-bottom:16px}
-.servicio h3{font-size:1.02rem;font-weight:600}
-.servicio p{margin-top:8px;font-size:.9rem;color:var(--eve-pizarra)}
+/* ── Pasos numerados ─────────────────────────────────────────────────────
+   El número es Baloo 700 (cifra protagonista, §3) en un círculo hielo;
+   nunca coral: aquí no hay acción que pedir. */
+.pasos{list-style:none;margin:48px auto 0;padding:0;max-width:960px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:36px}
+.paso{text-align:center}
+.paso-num{display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;margin:0 auto 16px;border-radius:999px;
+  background:var(--eve-hielo);color:var(--eve-mezclado);
+  font-family:'Baloo 2',system-ui,sans-serif;font-weight:700;font-size:1.1rem}
+.paso-num.sm{width:30px;height:30px;margin:0;font-size:.86rem;flex:none}
+.paso h3{font-size:1.02rem;font-weight:600}
+.paso p{margin-top:8px;font-size:.9rem;color:var(--eve-pizarra)}
+
+/* ── Características ─────────────────────────────────────────────────────
+   Variante minimalista del manual (§6): sin fondo ni sombra, la jerarquía la
+   da el espacio y el icono de producto teñido con --p. */
+.caracts-grid{list-style:none;margin:48px auto 0;padding:0;max-width:980px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:40px 36px}
+.caract .p-ico{margin-bottom:16px}
+.caract h3{font-size:1.02rem;font-weight:600}
+.caract p{margin-top:8px;font-size:.9rem;color:var(--eve-pizarra)}
+
+/* ── Link de pago por WhatsApp ───────────────────────────────────────────
+   Dos columnas en escritorio (texto / pasos), una en móvil. Los pasos usan
+   el mismo círculo numerado, en tamaño pequeño, alineado al texto. */
+.wa{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
+  max-width:980px;margin:0 auto}
+.wa-texto h2{text-align:left}
+.wa-texto p{margin-top:16px;color:var(--eve-pizarra);
+  font-size:clamp(.9rem,1.6vw,.98rem)}
+.wa-pasos{list-style:none;margin:0;padding:0;display:grid;gap:18px}
+.wa-pasos li{display:flex;align-items:flex-start;gap:14px}
+.wa-pasos p{font-size:.93rem;padding-top:3px}
+
+/* ── Demo (formulario sobre azul noche) ──────────────────────────────────
+   El bloque de peso de la página (§2). El formulario va en tarjeta blanca
+   para conservar el patrón de formularios del manual (§6) con su contraste. */
+.demo{padding:88px 0;background:var(--eve-azul-noche);color:#fff}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;
+  align-items:start;max-width:980px;margin:0 auto}
+.demo-texto h2{font-size:clamp(1.3rem,2.6vw,1.6rem)}
+.demo-texto > p{margin-top:14px;color:#B9CCE0;font-size:clamp(.9rem,1.6vw,.98rem)}
+.demo-puntos{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:14px}
+.demo-puntos li{position:relative;padding-left:26px;font-size:.9rem;color:#B9CCE0}
+.demo-puntos li::before{content:"";position:absolute;left:2px;top:8px;
+  width:8px;height:8px;border-radius:999px;background:var(--eve-cian)}
+
+.demo-form{background:#fff;border-radius:16px;padding:28px;
+  color:var(--eve-azul-noche)}
+.demo-form .campo{margin-bottom:16px}
+.demo-form label{display:block;font-size:.82rem;font-weight:500;margin-bottom:6px}
+.demo-form input,.demo-form select,.demo-form textarea{width:100%;
+  padding:11px 14px;border:1px solid #DCE7F2;border-radius:9px;
+  font-size:.88rem;font-family:'Inter',system-ui,sans-serif;background:#fff;
+  color:var(--eve-azul-noche)}
+.demo-form input:focus,.demo-form select:focus,.demo-form textarea:focus{
+  outline:2px solid var(--eve-electrico);border-color:transparent}
+.demo-form textarea{resize:vertical;min-height:72px}
+.demo-form .btn{width:100%;margin-top:4px}
+.demo-legal{margin-top:12px;font-size:.78rem;color:var(--eve-pizarra);
+  text-align:center}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width:1024px){
+  .wa{gap:40px}
+  .demo-grid{gap:40px}
+}
 
 @media (max-width:760px){
-  .servicios{padding:64px 0 0}
-  .servicios-grid{margin-top:36px;gap:32px}
+  .seccion{padding:64px 0}
+  .pasos{grid-template-columns:1fr;gap:32px;max-width:420px}
+  .wa{grid-template-columns:1fr;gap:32px}
+  .wa-texto h2{text-align:center}
+  .wa-pasos{max-width:420px;margin:0 auto}
+  .demo{padding:64px 0}
+  .demo-grid{grid-template-columns:1fr}
+  .demo-form .btn{width:100%}
+}
+
+@media (min-width:1440px){
+  .pasos,.caracts-grid,.wa,.demo-grid{max-width:1060px}
 }
