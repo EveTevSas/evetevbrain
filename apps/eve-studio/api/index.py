@@ -247,10 +247,14 @@ def _gh(metodo: str, ruta: str, cuerpo: dict | None = None):
     return respuesta
 
 
-def crear_herramienta_escritura():
+def crear_herramienta_escritura(registro: dict):
     """Se crea por petición para que el tope de propuestas sea por petición y no
     global: en Vercel el módulo se reutiliza entre invocaciones calientes, así
-    que un contador a nivel de módulo se compartiría entre usuarios."""
+    que un contador a nivel de módulo se compartiría entre usuarios.
+
+    `registro` lo aporta quien llama y recoge los archivos propuestos, para que
+    la interfaz pueda reconstruir la vista previa sin volver a pedirlos.
+    """
     hechas = {"n": 0}
 
     @tool(args_schema=PropuestaCambios)
@@ -287,6 +291,10 @@ def crear_herramienta_escritura():
             # Se rechaza la propuesta ENTERA: aplicar solo la parte válida
             # dejaría el repositorio en un estado que nadie pidió.
             return "Propuesta rechazada, no se escribió nada:\n- " + "\n- ".join(rechazos)
+
+        # Se apuntan aquí, ya validados: la interfaz los usa para armar la vista
+        # previa fiel, sin tener que descargarlos otra vez.
+        registro["archivos"] = entradas
 
         limpio = "".join(c if c.isalnum() else "-" for c in asunto.lower()).strip("-")[:40]
         rama = f"eve/{limpio or 'cambio'}"
@@ -419,7 +427,7 @@ DEJAR EL CAMBIO EN EL REPOSITORIO:
 13. Termina siempre indicando la URL del PR que te devolvió la herramienta."""
 
 
-def construir_agente():
+def construir_agente(registro: dict):
     """Se construye por invocación, no al importar el módulo: si faltara la API
     key, un fallo en el import deja la función muerta y sin diagnóstico."""
     llm = ChatOpenAI(
@@ -434,7 +442,7 @@ def construir_agente():
             obtener_activo_github,
             leer_archivo_del_repo,
             listar_carpeta_del_repo,
-            crear_herramienta_escritura(),
+            crear_herramienta_escritura(registro),
         ],
     )
 
@@ -448,6 +456,10 @@ class MensajeFrontend(BaseModel):
 class PeticionChat(BaseModel):
     historial: List[MensajeFrontend] = Field(default_factory=list)
     mensaje_nuevo: str = Field(min_length=1, max_length=8000)
+    # Instrucciones que la persona fija para ESTE proyecto. Se añaden al final
+    # del prompt del sistema, así que no pueden desactivar las reglas de arriba
+    # ni el arnés, que vive en código.
+    instrucciones: str | None = Field(default=None, max_length=4000)
 
 
 def limpiar_markdown(texto: str) -> str:
@@ -629,7 +641,16 @@ async def generar_interfaz(
     if not os.getenv("MOONSHOT_API_KEY"):
         raise HTTPException(status_code=503, detail="falta_moonshot_api_key")
 
-    mensajes = [SystemMessage(content=INSTRUCCIONES_SISTEMA)]
+    sistema = INSTRUCCIONES_SISTEMA
+    if peticion.instrucciones and peticion.instrucciones.strip():
+        sistema += (
+            "\n\nINSTRUCCIONES DE ESTE PROYECTO (las fija la persona que trabaja "
+            "contigo; respétalas salvo que choquen con las reglas de marca o con "
+            "lo que la herramienta de escritura permita):\n"
+            + peticion.instrucciones.strip()
+        )
+
+    mensajes = [SystemMessage(content=sistema)]
     for m in peticion.historial:
         mensajes.append(
             HumanMessage(content=m.contenido)
@@ -638,8 +659,9 @@ async def generar_interfaz(
         )
     mensajes.append(HumanMessage(content=peticion.mensaje_nuevo))
 
+    registro: dict = {}
     try:
-        resultado = construir_agente().invoke({"messages": mensajes})
+        resultado = construir_agente(registro).invoke({"messages": mensajes})
     except Exception as e:
         # Sin filtrar la excepción cruda al cliente: puede arrastrar la API key.
         print(f"fallo del agente: {type(e).__name__}: {e}")
@@ -666,4 +688,8 @@ async def generar_interfaz(
         "pr_url": pr_url,
         "historial_entrada": entrada,
         "historial_compactado": compactado,
+        # Los archivos tal como se propusieron: con ellos la interfaz arma una
+        # vista previa fiel sin depender de la de Vercel, que no se puede
+        # incrustar (responde 302 al SSO y manda X-Frame-Options: DENY).
+        "archivos": registro.get("archivos", []),
     }
