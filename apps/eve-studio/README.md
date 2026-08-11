@@ -41,9 +41,12 @@ misma app expone `/api/chat`. Es el mismo patrón que ya usa `apps/website`
   renderiza aislado y no puede tocar la página que lo contiene.
 - **El token se pide una vez** y se guarda en `localStorage` del navegador. Sin
   él la API responde 401, así que la interfaz lo pide antes de dejar generar.
-- El historial vive en el estado del cliente y se reenvía completo en cada
-  petición. Un turno que falla **no entra al historial**, para no ensuciar el
-  contexto del agente.
+- **Proyectos**: cada uno guarda su propia conversación en `localStorage`, así
+  que sobreviven a recargar y a cerrar el navegador. No sobreviven a cambiar de
+  equipo ni los ve otra persona; cuando eso estorbe, el paso siguiente es
+  Postgres —un proyecto de Supabase **aparte**, porque el de EveConecta declara
+  en su README que pertenece en exclusiva a esa vertical.
+- Un turno que falla **no entra al historial**, para no ensuciar el contexto.
 
 ## Correr en local
 
@@ -153,6 +156,33 @@ autocontenida: devuelve el `index.html` tal como tiene que quedar.
 Sin esto, pegar la salida del agente sobre `index.html` dejaba huérfanos
 `base.css` y `estilos.css` —rompiendo el armazón compartido en esa landing— y se
 llevaba por delante el `noindex`.
+
+## La memoria, y por qué no guarda el código
+
+Cada proyecto guarda **dos** historiales:
+
+- **`historial`** es el que viaja al agente y el que se compacta.
+- **`completo`** no se manda nunca y no se toca. Resumir pierde información sin
+  vuelta atrás, y si un resumen sale malo hay que poder mirar qué se dijo de
+  verdad. Cuesta unos bytes.
+
+**El código no entra en el historial.** Ahora que el agente lee el repositorio,
+el archivo real está siempre a una llamada de distancia: guardar el HTML en cada
+turno era pagar en todas las peticiones por algo que ya está en git. Se guarda la
+intención, las decisiones y el PR. Una respuesta de 52 000 caracteres se recuerda
+en 40.
+
+**La compactación corre al escribir**, no como tarea programada: cuando el
+historial de un proyecto pasa de 12 000 caracteres, los turnos viejos se resumen
+y los 4 últimos se conservan literales. Se hizo así porque es más simple, siempre
+está al día, y no depende de un cron —que en Hobby además va limitado a una vez
+al día.
+
+El resumen lo hace **Kimi**, que es barato, y solo al cruzar el umbral: sale más
+a cuenta que reenviar un historial gordo en cada turno. Conserva intenciones,
+decisiones, lo descartado con su porqué, rutas y PRs; descarta pasos intermedios
+y código superado. **Si el resumen falla, la petición sigue** con el historial
+largo: peor, pero funciona.
 
 ## Qué puede escribir el agente
 

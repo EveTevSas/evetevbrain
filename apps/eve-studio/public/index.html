@@ -103,6 +103,16 @@ main{flex:1;display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-heigh
 .mini:hover{background:var(--eve-hielo)}
 .mini:disabled{color:var(--eve-muted);cursor:default;background:none}
 .acciones-previa{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.proy{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;color:var(--eve-pizarra)}
+.proy select{font-family:inherit;font-size:.8rem;color:var(--eve-azul-noche);max-width:180px;
+  border:1px solid #D7E3F0;border-radius:999px;padding:8px 10px;background:#fff}
+/* En pantallas estrechas cae la palabra «Proyecto», no el selector: sin él no
+   se podría cambiar de proyecto desde el móvil. */
+@media (max-width:820px){
+  .proy{font-size:0;gap:0}
+  .proy select{max-width:120px}
+  #btnLimpiar{display:none}
+}
 .burbuja.pr{display:flex;flex-direction:column;gap:3px;border:1px solid var(--eve-linea)}
 .burbuja.pr a{color:var(--eve-electrico);font-weight:600;text-decoration:none}
 .burbuja.pr a:hover{text-decoration:underline}
@@ -146,7 +156,12 @@ main{flex:1;display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-heigh
     <span>· generador de interfaces</span>
   </div>
   <div class="cab-acciones">
-    <button class="btn btn-ghost" id="btnLimpiar" title="Empieza una conversación nueva">Nueva sesión</button>
+    <label class="proy">
+      Proyecto
+      <select id="proyectos" title="Cada proyecto guarda su propia conversación"></select>
+    </label>
+    <button class="btn btn-ghost" id="btnNuevo" title="Crea un proyecto con su propia memoria">Nuevo</button>
+    <button class="btn btn-ghost" id="btnLimpiar" title="Borra la conversación de este proyecto">Vaciar</button>
   </div>
 </header>
 
@@ -207,11 +222,73 @@ main{flex:1;display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-heigh
 const CLAVE_TOKEN = 'eve-studio-token';
 const $ = s => document.querySelector(s);
 
-/* El historial vive en el cliente y se reenvía completo en cada petición:
-   la función de Vercel es efímera y no puede guardarlo. */
-let historial = [];
+/* El historial vive en el cliente y se reenvía en cada petición: la función de
+   Vercel es efímera y no puede guardarlo.
+
+   Cada proyecto guarda DOS historiales. `historial` es el que viaja al agente y
+   el que se compacta. `completo` no se manda nunca y no se toca: es el registro
+   íntegro. Resumir pierde información sin vuelta atrás, y si un resumen sale
+   malo hay que poder mirar qué se dijo de verdad. Cuesta unos bytes. */
+const CLAVE_PROYECTOS = 'eve-studio-proyectos';
 let enviando = false;
 let ultimoCodigo = '';
+
+function cargarProyectos(){
+  try {
+    const d = JSON.parse(localStorage.getItem(CLAVE_PROYECTOS) || '{}');
+    if(d && d.lista && Object.keys(d.lista).length) return d;
+  } catch { /* almacenamiento corrupto: se empieza limpio en vez de romper */ }
+  const id = 'p' + Date.now();
+  return { activo: id, lista: { [id]: { nombre: 'General', historial: [], completo: [] } } };
+}
+
+let datos = cargarProyectos();
+const proyecto = () => datos.lista[datos.activo];
+
+function guardar(){
+  try { localStorage.setItem(CLAVE_PROYECTOS, JSON.stringify(datos)); }
+  catch { avisar('No se pudo guardar: el almacenamiento del navegador está lleno.'); }
+}
+
+function pintarSelector(){
+  const s = $('#proyectos');
+  s.innerHTML = '';
+  for(const [id, p] of Object.entries(datos.lista)){
+    const o = document.createElement('option');
+    o.value = id;
+    o.textContent = p.nombre + (p.historial.length ? ` (${Math.ceil(p.historial.length / 2)})` : '');
+    o.selected = id === datos.activo;
+    s.appendChild(o);
+  }
+}
+
+function mostrarVacio(){
+  const d = document.createElement('div');
+  d.className = 'vacio'; d.id = 'vacio';
+  d.innerHTML = '<h2>¿Qué interfaz construimos?</h2>' +
+    '<p>Describe lo que necesitas. Eve lee el manual de marca antes de escribir el código.</p>' +
+    '<div class="ejemplos"></div>';
+  for(const e of ['Cambia el titular de la portada de EvePay',
+                  'Añade una sección de preguntas frecuentes',
+                  'Un formulario de contacto accesible']){
+    const b = document.createElement('button');
+    b.className = 'ejemplo'; b.textContent = e;
+    b.addEventListener('click', () => { $('#peticion').value = e; $('#peticion').focus(); });
+    d.querySelector('.ejemplos').appendChild(b);
+  }
+  $('#mensajes').appendChild(d);
+}
+
+function pintarConversacion(){
+  $('#mensajes').innerHTML = '';
+  const p = proyecto();
+  if(!p.completo.length){ mostrarVacio(); return; }
+  for(const m of p.completo){
+    if(m.rol === 'user') burbuja('yo', m.contenido);
+    else burbuja('eve', m.contenido, 'Eve');
+  }
+  $('#mensajes').scrollTop = $('#mensajes').scrollHeight;
+}
 
 // ── Token ────────────────────────────────────────────────────────────────
 function token(){ return localStorage.getItem(CLAVE_TOKEN) || ''; }
@@ -321,7 +398,7 @@ async function generar(){
     const r = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type':'application/json', 'X-Agente-Token': token() },
-      body: JSON.stringify({ historial, mensaje_nuevo: texto })
+      body: JSON.stringify({ historial: proyecto().historial, mensaje_nuevo: texto })
     });
     let cuerpo = {};
     try { cuerpo = await r.json(); } catch { /* respuesta sin JSON */ }
@@ -336,15 +413,28 @@ async function generar(){
     }
 
     // En el chat va un resumen: volcar todo el HTML lo haría ilegible.
-    // El historial sí guarda el mensaje crudo, que es el contexto del agente.
     if(cuerpo.pr_url){
       burbuja('eve', 'Abrí un Pull Request con el cambio.', 'Eve');
       enlacePR(cuerpo.pr_url);
     } else {
       burbuja('eve', 'Interfaz generada — la ves a la derecha.', 'Eve');
     }
-    historial.push({ rol:'user', contenido: texto });
-    historial.push({ rol:'assistant', contenido: cuerpo.mensaje_crudo || cuerpo.codigo_html || '' });
+    // El servidor decide qué merece recordarse: quita el código, que ya vive en
+    // el repositorio, y deja intención, decisiones y el PR.
+    const p = proyecto();
+    const recordar = cuerpo.historial_entrada || cuerpo.mensaje_crudo || '';
+    p.historial.push({ rol:'user', contenido: texto });
+    p.historial.push({ rol:'assistant', contenido: recordar });
+    p.completo.push({ rol:'user', contenido: texto });
+    p.completo.push({ rol:'assistant', contenido: recordar });
+
+    // Si cruzó el umbral, el servidor devuelve la versión resumida. Sustituye a
+    // `historial`, nunca a `completo`.
+    if(cuerpo.historial_compactado){
+      p.historial = cuerpo.historial_compactado;
+      avisar('Historial resumido para ahorrar tokens.');
+    }
+    guardar(); pintarSelector();
     mostrarResultado(cuerpo.codigo_html || '');
   } catch {
     cargando.remove();
@@ -383,6 +473,26 @@ document.querySelectorAll('.pestana').forEach(p => p.addEventListener('click', (
   $('#codigo').classList.toggle('oculto', !verCodigo);
 }));
 
+$('#proyectos').addEventListener('change', e => {
+  datos.activo = e.target.value;
+  guardar(); pintarSelector(); pintarConversacion();
+  ultimoCodigo = '';
+  $('#previa').srcdoc = '';
+  $('#codigo').querySelector('code').textContent = '';
+  $('#sinNada').classList.remove('oculto');
+  $('#btnCopiar').disabled = true; $('#btnDescargar').disabled = true;
+});
+
+$('#btnNuevo').addEventListener('click', () => {
+  const nombre = (prompt('Nombre del proyecto:') || '').trim();
+  if(!nombre) return;
+  const id = 'p' + Date.now();
+  datos.lista[id] = { nombre: nombre.slice(0, 40), historial: [], completo: [] };
+  datos.activo = id;
+  guardar(); pintarSelector(); pintarConversacion();
+  avisar(`Proyecto «${nombre}» creado.`);
+});
+
 $('#btnCopiar').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(ultimoCodigo); avisar('Código copiado.'); }
   catch { avisar('No se pudo copiar.'); }
@@ -396,17 +506,22 @@ $('#btnDescargar').addEventListener('click', () => {
 });
 
 $('#btnLimpiar').addEventListener('click', () => {
-  if(historial.length && !confirm('¿Borrar la conversación actual?')) return;
-  historial = []; ultimoCodigo = '';
+  if(proyecto().completo.length && !confirm(`¿Vaciar la conversación de «${proyecto().nombre}»?`)) return;
+  proyecto().historial = []; proyecto().completo = [];
+  guardar(); pintarSelector();
+  ultimoCodigo = '';
   $('#mensajes').innerHTML = '';
   $('#previa').srcdoc = '';
   $('#codigo').querySelector('code').textContent = '';
   $('#sinNada').classList.remove('oculto');
   $('#btnCopiar').disabled = true; $('#btnDescargar').disabled = true;
-  location.reload();
+  pintarConversacion();
 });
 
+// ── Arranque ─────────────────────────────────────────────────────────────
 pintarAvisoToken();
+pintarSelector();
+pintarConversacion();
 </script>
 </body>
 </html>
