@@ -29,14 +29,27 @@ Estática y sin dependencias ni paso de compilación: Vercel sirve `public/` y l
 misma app expone `/api/chat`. Es el mismo patrón que ya usa `apps/website`
 (estáticos + una función en `api/`), que está funcionando en producción.
 
-- Chat a la izquierda, previsualización en vivo a la derecha, con pestaña para
-  ver el código, copiarlo o descargarlo.
-- La previsualización del iframe es una **vista rápida**: si el archivo enlaza
-  `base.css` con ruta relativa, ahí se verá sin esos estilos. Es deliberado —
-  donde se revisa de verdad es en la **preview de Vercel del PR**, que sirve la
-  carpeta entera. Hubo un selector para elegir contra qué landing resolver las
-  rutas y se quitó: era un ajuste que había que acordarse de mover y que, al
-  olvidarlo, no fallaba ruidosamente sino que solo se veía raro.
+Chat a la izquierda; a la derecha, cuatro pestañas:
+
+- **Vista previa** — se arma con los archivos propuestos: un `<base>` a la
+  landing publicada para que `base.css` cargue de verdad, y el `estilos.css`
+  **nuevo** incrustado quitando su `<link>`, porque el publicado todavía no
+  tiene los cambios del PR. El origen se deduce de la ruta que tocó el agente;
+  no lo elige nadie. Hubo un selector para eso y se quitó: era un ajuste que
+  había que acordarse de mover y que, al olvidarlo, no fallaba ruidosamente —
+  solo se veía raro.
+- **Detalles** — archivos propuestos con su tamaño, enlace al PR y la
+  explicación completa del agente.
+- **Historial** — el registro íntegro del proyecto, que nunca se manda ni se
+  resume. Con un botón para adjuntarlo al siguiente mensaje **una sola vez**: si
+  viajara siempre, volveríamos al problema que la compactación resuelve.
+- **Instrucciones** — texto que se añade al prompt en cada petición de ese
+  proyecto. Va al final del sistema, así que no puede desactivar las reglas de
+  marca ni el arnés, que vive en código.
+
+**La preview de Vercel no se puede incrustar:** responde 302 al SSO y manda
+`X-Frame-Options: DENY`. Por eso va como enlace y no como iframe, y por eso la
+vista previa se reconstruye aquí.
 - El HTML generado se inyecta en un `<iframe>` con `srcdoc` y **`sandbox`**: se
   renderiza aislado y no puede tocar la página que lo contiene.
 - **El token se pide una vez** y se guarda en `localStorage` del navegador. Sin

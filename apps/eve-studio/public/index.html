@@ -112,6 +112,12 @@ main{flex:1;display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-heigh
   .proy{font-size:0;gap:0}
   .proy select{max-width:120px}
   #btnLimpiar{display:none}
+  /* Cuatro pestañas no caben en 375 px. Desplazan DENTRO de su barra en vez de
+     empujar la página: el body nunca debe moverse en horizontal. */
+  .pestanas{flex-wrap:wrap}
+  .grupo-pestanas{overflow-x:auto;max-width:100%;scrollbar-width:none}
+  .grupo-pestanas::-webkit-scrollbar{display:none}
+  .pestana{flex:none;white-space:nowrap;padding:6px 12px}
 }
 .burbuja.pr{display:flex;flex-direction:column;gap:3px;border:1px solid var(--eve-linea)}
 .burbuja.pr a{color:var(--eve-electrico);font-weight:600;text-decoration:none}
@@ -120,8 +126,27 @@ main{flex:1;display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-heigh
 
 .lienzo{flex:1;min-height:0;position:relative}
 .lienzo iframe{width:100%;height:100%;border:none;background:#fff;display:block}
-.lienzo pre{width:100%;height:100%;overflow:auto;margin:0;padding:18px;background:var(--eve-azul-noche);
-  color:#D6E6F7;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.65}
+.panel{position:absolute;inset:0;overflow-y:auto;padding:20px 24px;background:#fff}
+.panel h3{font-family:'Baloo 2',sans-serif;font-size:.95rem;font-weight:600;margin:18px 0 8px}
+.panel h3:first-child{margin-top:0}
+.panel p, .panel li{font-size:.84rem;color:var(--eve-pizarra)}
+.panel ul{margin:0 0 4px 18px}
+.panel li{margin:3px 0}
+.panel code{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--eve-azul-noche)}
+.panel a{color:var(--eve-electrico);word-break:break-all;font-size:.84rem}
+.panel .nota{font-size:.78rem;color:var(--eve-muted);margin-top:6px}
+.panel .prosa{white-space:pre-wrap;font-family:inherit;font-size:.84rem;color:var(--eve-azul-noche);
+  background:var(--eve-tinte);border:1px solid var(--eve-linea);border-radius:10px;padding:12px 14px}
+.panel textarea{width:100%;border:1px solid #DCE7F2;border-radius:10px;padding:11px 13px;
+  font-family:'Inter',sans-serif;font-size:.84rem;resize:vertical;margin:10px 0;
+  color:var(--eve-azul-noche);background:#fff}
+.fila-registro{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.entrada{border-left:3px solid var(--eve-linea);padding:8px 0 8px 12px;margin-top:12px;
+  font-size:.83rem;white-space:pre-wrap;word-break:break-word}
+.entrada.yo{border-left-color:var(--eve-mezclado)}
+.entrada.eve{border-left-color:var(--eve-electrico)}
+.entrada b{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;
+  color:var(--eve-muted);margin-bottom:2px}
 .oculto{display:none !important}
 .sin-nada{position:absolute;inset:0;display:grid;place-items:center;text-align:center;
   color:var(--eve-muted);font-size:.85rem;padding:24px}
@@ -201,16 +226,30 @@ main{flex:1;display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-heigh
     <div class="pestanas">
       <div class="grupo-pestanas" role="tablist" aria-label="Ver como">
         <button class="pestana act" role="tab" aria-selected="true" data-panel="previa">Vista previa</button>
-        <button class="pestana" role="tab" aria-selected="false" data-panel="codigo">Código</button>
+        <button class="pestana" role="tab" aria-selected="false" data-panel="detalles">Detalles</button>
+        <button class="pestana" role="tab" aria-selected="false" data-panel="registro">Historial</button>
+        <button class="pestana" role="tab" aria-selected="false" data-panel="instrucciones">Instrucciones</button>
       </div>
       <div class="acciones-previa">
+        <!-- La preview de Vercel no se puede incrustar: responde 302 al SSO y
+             manda X-Frame-Options: DENY. Por eso es un enlace, no un iframe. -->
+        <a class="mini oculto" id="enlacePreview" target="_blank" rel="noopener noreferrer">Preview de Vercel ↗</a>
         <button class="mini" id="btnCopiar" disabled>Copiar código</button>
         <button class="mini" id="btnDescargar" disabled>Descargar .html</button>
       </div>
     </div>
     <div class="lienzo">
       <iframe id="previa" title="Vista previa de la interfaz generada" sandbox="allow-scripts"></iframe>
-      <pre id="codigo" class="oculto"><code></code></pre>
+      <div id="detalles" class="panel oculto"></div>
+      <div id="registro" class="panel oculto"></div>
+      <div id="instrucciones" class="panel oculto">
+        <h3>Instrucciones de este proyecto</h3>
+        <p>Se añaden al final del prompt en cada petición de <b id="nomProy"></b>.
+           No pueden desactivar las reglas de marca ni el arnés de escritura.</p>
+        <textarea id="txtInstrucciones" rows="10"
+          placeholder="Ej.: el tono de esta landing es directo, sin superlativos. Cada sección debe caber en una pantalla."></textarea>
+        <button class="btn btn-ghost" id="btnGuardarInstr">Guardar</button>
+      </div>
       <div class="sin-nada" id="sinNada">La interfaz generada aparecerá aquí.</div>
     </div>
   </section>
@@ -232,6 +271,8 @@ const $ = s => document.querySelector(s);
 const CLAVE_PROYECTOS = 'eve-studio-proyectos';
 let enviando = false;
 let ultimoCodigo = '';
+let ultimosArchivos = [];
+let adjuntarRegistro = false;
 
 function cargarProyectos(){
   try {
@@ -260,6 +301,91 @@ function pintarSelector(){
     o.selected = id === datos.activo;
     s.appendChild(o);
   }
+}
+
+/* Todo el texto va por textContent: lo que llega del agente nunca se interpola
+   como HTML fuera del iframe en sandbox. */
+function pintarDetalles(prUrl, prosa){
+  const d = $('#detalles');
+  d.innerHTML = '';
+  if(!ultimosArchivos.length && !prosa){
+    d.appendChild(Object.assign(document.createElement('p'),
+      {className:'nota', textContent:'Todavía no hay nada que detallar.'}));
+    return;
+  }
+  if(ultimosArchivos.length){
+    d.appendChild(Object.assign(document.createElement('h3'), {textContent:'Archivos propuestos'}));
+    const ul = document.createElement('ul');
+    for(const a of ultimosArchivos){
+      const li = document.createElement('li');
+      const c = document.createElement('code'); c.textContent = a.ruta;
+      li.appendChild(c);
+      li.appendChild(document.createTextNode(
+        `  ·  ${a.contenido.length.toLocaleString('es')} caracteres, ${a.contenido.split('\n').length} líneas`));
+      ul.appendChild(li);
+    }
+    d.appendChild(ul);
+  }
+  const en = $('#enlacePreview');
+  if(prUrl){
+    d.appendChild(Object.assign(document.createElement('h3'), {textContent:'Pull Request'}));
+    const a = document.createElement('a');
+    a.href = prUrl; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = prUrl;
+    d.appendChild(a);
+    d.appendChild(Object.assign(document.createElement('p'), {className:'nota',
+      textContent:'La preview de Vercel aparece en el PR en cuanto termina de construir. No se puede incrustar aquí: Vercel la protege con login y prohíbe el iframe.'}));
+    en.href = prUrl; en.classList.remove('oculto');
+  } else {
+    en.classList.add('oculto');
+  }
+  if(prosa){
+    d.appendChild(Object.assign(document.createElement('h3'), {textContent:'Qué dijo Eve'}));
+    d.appendChild(Object.assign(document.createElement('pre'), {className:'prosa', textContent:prosa}));
+  }
+}
+
+/* El registro completo solo viaja cuando se pide a mano, y una sola vez: si
+   fuera automático, volveríamos al problema que la compactación resuelve. */
+function registroComoTexto(){
+  return 'Para esta consulta, aquí está el registro completo del proyecto:\n\n'
+    + proyecto().completo.map(m => `[${m.rol === 'user' ? 'yo' : 'tú'}] ${m.contenido}`).join('\n\n');
+}
+
+function pintarRegistro(){
+  const r = $('#registro');
+  r.innerHTML = '';
+  const p = proyecto();
+  const cab = document.createElement('div'); cab.className = 'fila-registro';
+  cab.appendChild(Object.assign(document.createElement('h3'),
+    {textContent:`Historial completo — ${p.completo.length} mensajes`}));
+  const b = document.createElement('button');
+  b.className = 'btn btn-ghost';
+  b.textContent = adjuntarRegistro ? 'Se adjuntará al siguiente mensaje' : 'Adjuntar al siguiente mensaje';
+  b.disabled = !p.completo.length;
+  b.addEventListener('click', () => {
+    adjuntarRegistro = !adjuntarRegistro;
+    pintarRegistro();
+    avisar(adjuntarRegistro
+      ? 'El historial completo viajará una vez, con el siguiente mensaje.'
+      : 'Ya no se adjuntará.');
+  });
+  cab.appendChild(b);
+  r.appendChild(cab);
+  r.appendChild(Object.assign(document.createElement('p'), {className:'nota',
+    textContent:'Este registro no se manda al agente y no se resume nunca. Sirve para comprobar qué se dijo de verdad cuando un resumen deja dudas.'}));
+  for(const m of p.completo){
+    const e = document.createElement('div');
+    e.className = 'entrada ' + (m.rol === 'user' ? 'yo' : 'eve');
+    e.appendChild(Object.assign(document.createElement('b'),
+      {textContent: m.rol === 'user' ? 'Tú' : 'Eve'}));
+    e.appendChild(document.createTextNode(m.contenido));
+    r.appendChild(e);
+  }
+}
+
+function pintarInstrucciones(){
+  $('#nomProy').textContent = proyecto().nombre;
+  $('#txtInstrucciones').value = proyecto().instrucciones || '';
 }
 
 function mostrarVacio(){
@@ -354,16 +480,45 @@ function enlacePR(url){
 
 function pintarPrevia(){
   if(!ultimoCodigo) return;
-  $('#previa').srcdoc = ultimoCodigo;
+  $('#previa').srcdoc = armarPrevia(ultimoCodigo, ultimosArchivos);
 }
 
-function mostrarResultado(codigo){
-  ultimoCodigo = codigo;
-  $('#sinNada').classList.add('oculto');
-  pintarPrevia();                            // srcdoc + sandbox: se renderiza aislado
-  $('#codigo').querySelector('code').textContent = codigo;
-  $('#btnCopiar').disabled = false;
-  $('#btnDescargar').disabled = false;
+/* Origen publicado de cada landing: de ahí se sirve base.css para la vista
+   previa. Se deduce de la ruta que tocó el agente, no lo elige nadie — el
+   selector manual que había antes era un ajuste que se olvidaba. */
+const ORIGEN = {
+  'apps/evepay/': 'https://evepay.evetev.com/',
+  'apps/eveconecta-landing/': 'https://eveconecta.evetev.com/'
+};
+
+/* Arma una vista previa fiel con los archivos propuestos:
+   - <base> a la landing publicada, para que base.css cargue de verdad;
+   - el estilos.css NUEVO se incrusta y se quita su <link>, porque el publicado
+     todavía no tiene los cambios de este PR.
+   La preview de Vercel no sirve aquí: responde 302 al SSO y manda
+   X-Frame-Options: DENY, así que va como enlace aparte. */
+function armarPrevia(html, archivos){
+  const ruta = (archivos.find(a => a.ruta.endsWith('.html')) || {}).ruta || '';
+  const origen = Object.entries(ORIGEN).find(([c]) => ruta.startsWith(c))?.[1];
+  if(!origen) return html;
+
+  let salida = html;
+  const css = archivos.find(a => a.ruta.endsWith('estilos.css'));
+  if(css){
+    salida = salida.replace(/<link[^>]+href=["']estilos\.css["'][^>]*>/i, '');
+    salida = salida.replace(/<\/head>/i, '<style>' + css.contenido + '</style></head>');
+  }
+  return salida.replace(/<head[^>]*>/i, m => m + '\n<base href="' + origen + '">');
+}
+
+function mostrarResultado(codigo, archivos, prUrl, prosa){
+  ultimosArchivos = archivos || [];
+  ultimoCodigo = codigo || (ultimosArchivos.find(a => a.ruta.endsWith('.html')) || {}).contenido || '';
+  $('#sinNada').classList.toggle('oculto', !!ultimoCodigo);
+  pintarPrevia();
+  pintarDetalles(prUrl, prosa);
+  $('#btnCopiar').disabled = !ultimoCodigo;
+  $('#btnDescargar').disabled = !ultimoCodigo;
 }
 
 // ── Envío ────────────────────────────────────────────────────────────────
@@ -398,7 +553,11 @@ async function generar(){
     const r = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type':'application/json', 'X-Agente-Token': token() },
-      body: JSON.stringify({ historial: proyecto().historial, mensaje_nuevo: texto })
+      body: JSON.stringify({
+        historial: proyecto().historial,
+        mensaje_nuevo: adjuntarRegistro ? texto + '\n\n' + registroComoTexto() : texto,
+        instrucciones: proyecto().instrucciones || null
+      })
     });
     let cuerpo = {};
     try { cuerpo = await r.json(); } catch { /* respuesta sin JSON */ }
@@ -434,8 +593,9 @@ async function generar(){
       p.historial = cuerpo.historial_compactado;
       avisar('Historial resumido para ahorrar tokens.');
     }
+    if(adjuntarRegistro){ adjuntarRegistro = false; }   // se gasta una sola vez
     guardar(); pintarSelector();
-    mostrarResultado(cuerpo.codigo_html || '');
+    mostrarResultado(cuerpo.codigo_html || '', cuerpo.archivos || [], cuerpo.pr_url, cuerpo.mensaje_crudo || '');
   } catch {
     cargando.remove();
     burbuja('err', 'Sin conexión con el agente. Revisa tu red e inténtalo de nuevo.');
@@ -465,22 +625,33 @@ document.addEventListener('click', e => {
   if(ej){ $('#peticion').value = ej.textContent.trim(); $('#peticion').focus(); }
 });
 
-document.querySelectorAll('.pestana').forEach(p => p.addEventListener('click', () => {
-  document.querySelectorAll('.pestana').forEach(x => { x.classList.remove('act'); x.setAttribute('aria-selected','false'); });
-  p.classList.add('act'); p.setAttribute('aria-selected','true');
-  const verCodigo = p.dataset.panel === 'codigo';
-  $('#previa').classList.toggle('oculto', verCodigo);
-  $('#codigo').classList.toggle('oculto', !verCodigo);
-}));
+const PANELES = ['previa','detalles','registro','instrucciones'];
+function verPanel(cual){
+  document.querySelectorAll('.pestana').forEach(x => {
+    const act = x.dataset.panel === cual;
+    x.classList.toggle('act', act);
+    x.setAttribute('aria-selected', act ? 'true' : 'false');
+  });
+  $('#previa').classList.toggle('oculto', cual !== 'previa');
+  $('#sinNada').classList.toggle('oculto', cual !== 'previa' || !!ultimoCodigo);
+  for(const id of PANELES.slice(1)) $('#' + id).classList.toggle('oculto', id !== cual);
+  if(cual === 'registro') pintarRegistro();
+  if(cual === 'instrucciones') pintarInstrucciones();
+}
+document.querySelectorAll('.pestana').forEach(p =>
+  p.addEventListener('click', () => verPanel(p.dataset.panel)));
 
 $('#proyectos').addEventListener('change', e => {
   datos.activo = e.target.value;
   guardar(); pintarSelector(); pintarConversacion();
   ultimoCodigo = '';
   $('#previa').srcdoc = '';
-  $('#codigo').querySelector('code').textContent = '';
+  ultimosArchivos = []; adjuntarRegistro = false;
   $('#sinNada').classList.remove('oculto');
   $('#btnCopiar').disabled = true; $('#btnDescargar').disabled = true;
+  $('#enlacePreview').classList.add('oculto');
+  pintarDetalles(null, '');
+  verPanel('previa');
 });
 
 $('#btnNuevo').addEventListener('click', () => {
@@ -491,6 +662,12 @@ $('#btnNuevo').addEventListener('click', () => {
   datos.activo = id;
   guardar(); pintarSelector(); pintarConversacion();
   avisar(`Proyecto «${nombre}» creado.`);
+});
+
+$('#btnGuardarInstr').addEventListener('click', () => {
+  proyecto().instrucciones = $('#txtInstrucciones').value.trim().slice(0, 4000);
+  guardar();
+  avisar(`Instrucciones guardadas para «${proyecto().nombre}».`);
 });
 
 $('#btnCopiar').addEventListener('click', async () => {
@@ -512,9 +689,11 @@ $('#btnLimpiar').addEventListener('click', () => {
   ultimoCodigo = '';
   $('#mensajes').innerHTML = '';
   $('#previa').srcdoc = '';
-  $('#codigo').querySelector('code').textContent = '';
+  ultimosArchivos = []; adjuntarRegistro = false;
   $('#sinNada').classList.remove('oculto');
   $('#btnCopiar').disabled = true; $('#btnDescargar').disabled = true;
+  $('#enlacePreview').classList.add('oculto');
+  pintarDetalles(null, '');
   pintarConversacion();
 });
 
