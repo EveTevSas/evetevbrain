@@ -66,10 +66,10 @@
 
 <section id="nosotros" class="wrap" style="padding-top:56px">
   <div class="sec-h"><h2>Quiénes somos</h2></div>
-  <!-- El texto convive con la mascota (Eve) a la derecha. La mascota es
-       decorativa; el sprite se sirve desde el monorepo por jsDelivr fijado a un
-       commit (cache inmutable). El único que está en el CDN de marca es
-       mascota.webp; los demás sprites solo viven en el repo. -->
+  <!-- El texto convive con la mascota (Eve) a la derecha. Es decorativa, de ahí
+       alt="" y aria-hidden. El sprite sale del CDN de marca con URL estable @1;
+       antes venía del monorepo fijado a un commit, y ese anclaje apuntaba a un
+       archivo que ya no existe en main. -->
   <div class="nosotros-grid">
     <div class="texto">
       <p style="font-size:.92rem;color:var(--eve-pizarra);margin-bottom:16px">Evetev es una sociedad por acciones simplificada colombiana, dedicada a desarrollar y comercializar software diseñado con y para la inteligencia artificial. Nacemos de un equipo de ingeniería con experiencia en desarrollo full-stack, ecosistema fintech, arquitectura en la nube, operaciones y ventas B2B.</p>
@@ -77,7 +77,7 @@
       <p style="font-size:.92rem;color:var(--eve-pizarra)">Operamos tres líneas complementarias: soluciones fintech, con la pasarela de pagos EvePay como producto principal; soluciones de inteligencia artificial empresarial; y comercio electrónico y desarrollo de aplicaciones. Todas corren sobre la misma ingeniería y los mismos estándares.</p>
     </div>
     <img class="mascota-flux" alt="" aria-hidden="true" loading="lazy"
-         src="https://cdn.jsdelivr.net/gh/EveTevSas/evetevbrain@47b6711148047b46a3dfdf0481ec82cbb8178e02/packages/brand/assets/mascota/mascota-saludando.jpeg">
+         src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/mascota/mascota-saludando.png">
   </div>
 </section>
 
