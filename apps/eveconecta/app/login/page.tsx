@@ -7,7 +7,7 @@ import { ArrowRight, CheckCircle2, Eye, EyeOff, LockKeyhole, ShieldCheck } from 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import mascotaEve from "../../../../packages/brand/assets/mascota/mascota 1.png";
+import mascotaEve from "../../../../packages/brand/assets/mascota/mascota.png";
 import { BrandMark } from "../../components/brand-mark";
 import { Field, TextInput } from "../../components/form-field";
 
