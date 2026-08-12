@@ -123,35 +123,195 @@ Nunca menos de 12 px. Máximo dos familias visibles por pieza (la mono solo en c
 
 **REGLA T1 — PROHIBIDO dibujar, recrear o aproximar el logo de Evetev.** Siempre referenciar por URL del CDN.
 
+**REGLA T2 — La variante se elige por el fondo, no por gusto.** El criterio es
+el contraste, y es obligatorio:
+
+| Fondo | Isotipo | Unidad | Por qué |
+|---|---|---|---|
+| Claro (blanco, hielo, tinte) | `isotipo-azul-noche` o los de gradiente | `-negro` teñido, o las de degradado | el extremo oscuro asienta la figura |
+| **Oscuro** (azul noche, azul profundo, fotografía, video) | **`isotipo-blanco`** | **`-blanco`** | es la única que garantiza contraste; ninguna otra se sostiene |
+| Azul noche, buscando acento de color | `isotipo-cian` (plano) | **`-blanco`** | en unidades no hay plano de color: `-cian` es un degradado que **termina en noche** y ahí se partiría |
+
+**Mínimo 3:1 entre el trazo y su fondo** (WCAG 2.2, 1.4.11: elementos gráficos
+no textuales). El logo no es decoración: si no se distingue, no identifica.
+
+Consecuencia que se pasa por alto: **las variantes de degradado terminan en azul
+noche, así que sobre fondo oscuro pierden ese extremo** y la figura se corta por
+la mitad. Sobre oscuro va `-blanco`, siempre. Y `-blanco` sobre fondo claro es
+el mismo error al revés: desaparece.
+
 **Patrón de URL:** `https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/RUTA`
+
+### Qué activo usar — guía de decisión
+
+Se resuelve con tres preguntas, en este orden. La primera decide **qué pieza**;
+la segunda, **qué color**; la tercera es la que más se olvida.
+
+#### 1. ¿Dónde va?
+
+| Situación | Activo | Por qué |
+|---|---|---|
+| Encabezado de web o app | `lockup-horizontal-corporativo` | símbolo + palabra, en el formato que cabe en una barra |
+| Firma de correo, membrete | `lockup-horizontal-corporativo` | igual, y sobrevive al reenvío |
+| Portada, red social, splash | `lockup-vertical-corporativo` | proporción retrato |
+| **Contrato, factura, papelería registral** | `lockup-*-sas-*` o `logotipo-sas-*` | ahí debe constar el **nombre legal** |
+| Avatar, sello, app icon, marca de agua | `isotipo` | solo el símbolo; no hay espacio para leer |
+| Ícono de línea de producto en interfaz | `unidad-LADO-negro` teñida con `mask` | un archivo, todos los colores (ver §12) |
+| Chip, tarjeta o pieza expresiva pequeña | `unidad` de color o de degradado | el color identifica la línea |
+| Pestaña del navegador | `favicon.svg` | trae su propio fondo, funciona en tema claro y oscuro |
+| Pantalla de inicio de iOS | `apple-touch-icon.png` | opaco; iOS pone su propia máscara |
+| Pestaña fijada de Safari | `mask-icon.svg` | monocromo, lo tiñe el navegador |
+| Buscadores, `webmanifest` | `icon-512.png` | |
+
+#### 2. ¿Sobre qué fondo?
+
+Lo resuelve **T2** más arriba: fondo claro → azul noche, negro teñido o degradado;
+fondo oscuro → **`-blanco`**, sin excepción. Mínimo 3:1 de contraste.
+
+#### 3. ¿Se imprime a una tinta?
+
+Entonces `-negro`, aunque el fondo sea claro. Los degradados no sobreviven a una
+fotocopia, un fax ni un sello. Es la pregunta que nadie hace y la que produce
+membretes ilegibles.
+
+#### Cuándo NO usar cada uno
+
+- **Razón social en producto o marketing.** `Evetev S.A.S.` alarga el logotipo y
+  no aporta nada fuera de lo legal. En web y app va el lockup normal.
+- **Unidad en lugar del isotipo.** La media unidad identifica una *línea de
+  producto*, no a la empresa. Nunca sustituye al isotipo en la marca principal.
+- **Degradados fuera de piezas expresivas** (C6): prohibidos en botones, texto y
+  componentes funcionales.
+- **Mascota en documentos legales, facturas o en el flujo de pago** de EvePay.
+- **Recolorear un SVG del CDN con CSS.** `fill: currentColor` no cruza la
+  frontera de un `<img>`. Por eso existen las variantes ya hechas; si falta un
+  color, se agrega al repositorio en vez de improvisarlo.
 
 ### Isotipo (el símbolo: dos rombos entrelazados)
 | Archivo | Cuándo |
 |---|---|
 | `isotipos/isotipo-azul-noche.svg` | **Por defecto**, sobre fondos claros |
-| `isotipos/isotipo-blanco.svg` | Fondos oscuros o fotografía |
+| `isotipos/isotipo-blanco.svg` | **Fondos oscuros o fotografía** — la única que asegura contraste ahí (T2) |
 | `isotipos/isotipo-cian.svg` | Sobre azul noche |
 | `isotipos/isotipo-teal.svg` | Color heredado |
 | `isotipos/isotipo-gradiente-corporativo.svg` | Hero, portadas, piezas expresivas |
 | `isotipos/isotipo-gradiente-ia.svg` | Piezas de Eve Intelligence |
 
 ### Unidades (media unidad = ícono de línea de producto)
-`unidades/unidad-izquierda-negro.svg` · `unidad-izquierda-degradado.svg` · `unidad-derecha-negro.svg` · `unidad-derecha-degradado.svg`
+
+Cada variante existe en **izquierda** y **derecha**. El trazo es idéntico en
+todas: solo cambia el color, nunca el dibujo (T1).
+
+| Variante | Colores | Para qué |
+|---|---|---|
+| `-negro` | `#000000` | base para teñir con `mask` desde CSS |
+| `-blanco` | `#FFFFFF` | **obligatoria sobre fondos oscuros** (T2): asegura el contraste sin recolorear nada |
+| `-degradado` | noche → eléctrico → cian | corporativo, piezas expresivas |
+| `-coral` | noche ↔ `#EE3D22` | pieza expresiva |
+| `-cian` | noche ↔ `#22D3EE` | pieza expresiva |
+| `-electrico` | noche ↔ `#1E6FEB` | pieza expresiva |
+| `-violeta` | noche ↔ `#8B5CF6` | pieza expresiva |
+| `-ambar` | noche ↔ `#EB9A1E` | pieza expresiva; el ámbar es complementario del eléctrico, **no es color de marca** |
+
+Todas las de color degradan **contra azul noche `#0A2540`**, no contra negro
+puro: es lo que hace el degradado corporativo y lo que pide C4. Mezclar dos
+tintas saturadas se probó antes y se descartó — en el centro se ensucian y dan
+impresión de tinta gastada.
+
+El degradado va **en espejo**: la izquierda arranca en noche y la derecha
+termina en noche, así que al juntarlas el par queda simétrico, con el color
+encontrándose en el centro.
+
+Por eso mismo **las de color son para fondo claro**. Su extremo en azul noche se
+funde con un fondo oscuro y la figura se parte. Sobre oscuro, `-blanco` (T2).
+
+Los degradados solo en piezas expresivas (C6). Para iconos de producto en
+interfaz sigue usándose `-negro` teñido con `mask`, que es lo que permite un
+color por línea sin duplicar archivos.
 
 Se usan como **iconos de producto** (EvePay, Eve Intelligence, Tienda). Tamaño recomendado: 30–34 px.
 PROHIBIDO usarlas como marca principal o reemplazo del isotipo completo.
 
 ### Logotipo y lockups
 - `logotipos/logotipo-bicolor.svg` (Eve azul noche + tev eléctrico), `-azul-noche`, `-teal`, `-blanco`, `-negro-minuscula`
+- **Con razón social (`Evetev S.A.S.`):** `logotipo-sas-bicolor.svg` · `-sas-azul-noche` · `-sas-blanco` · `-sas-teal` · `-sas-negro-minuscula`. Cada una toma el color de su versión sin razón social, incluida la blanca — que sigue siendo la de fondo oscuro (T2).
 - `lockups/lockup-horizontal-negro.svg` · `-corporativo` → encabezados, membretes, firmas de correo
 - `lockups/lockup-vertical-negro.svg` · `-corporativo` · `-teal` → portadas, redes, app
 
+**Con razón social — `lockup-horizontal-sas-corporativo.svg` · `-sas-negro.svg`
+· `lockup-vertical-sas-corporativo.svg` · `-sas-negro.svg`.**
+Dicen **Evetev S.A.S.** Son para documentación oficial: contratos, propuestas
+formales, facturas, papelería registral, cualquier pieza donde deba aparecer el
+nombre legal completo. **En producto, web y marketing va el lockup normal**: la
+razón social ahí sobra y alarga el logotipo sin aportar nada.
+
+El «S.A.S.» está en **azul noche**, no en eléctrico: es nombre legal, no parte
+de la marca, y no debe competir con el bicolor del logotipo.
+
+La versión **`-negro`** es el mismo archivo a negro puro, sin degradado: para
+impresión a una tinta, sellos, fax, fotocopia y cualquier documento que no
+garantice color. A diferencia de los `lockup-*-negro` antiguos —que tienen su
+propia maquetación— estas comparten geometría exacta con su `-corporativo`, así
+que las dos versiones son intercambiables sin recolocar nada.
+
+Los dos conservan el isotipo y el logotipo **exactos**, sin reescalar ni mover
+nada, y con los mismos márgenes que su versión sin razón social. Lo que cambia
+es el lienzo:
+
+| | Lienzo | Por qué |
+|---|---|---|
+| horizontal | 1300 → **2037** de ancho | el texto crece; los elementos no se tocan |
+| vertical | 1000×700 → **1000×634** | mantiene el formato retrato, así que el bloque de texto se reduce y se recorta el alto sobrante |
+
+El «S.A.S.» se compuso con la **misma Baloo 2 600** del logotipo, trazada a
+curvas —no como `<text>`— para que no dependa de que la fuente esté instalada:
+en un Word o un PDF ajeno se vería con otra tipografía justo donde más se nota.
+
 ### Favicon y mascota
+
+Juego completo (`favicon/`):
+
+| Archivo | Para qué | Fondo |
+|---|---|---|
+| `favicon.svg` | pestaña, por defecto | rombo redondeado azul noche |
+| `favicon-32.png` | respaldo para navegadores sin SVG | transparente en las esquinas |
+| `apple-touch-icon.png` 180×180 | pantalla de inicio de iOS | **opaco y a sangre** |
+| `icon-512.png` 512×512 | buscadores, y manifest cuando lo haya | **opaco y a sangre** |
+| `mask-icon.svg` | pestaña fijada de Safari | transparente, monocromo |
+
 ```html
 <link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png">
+<link rel="mask-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/mask-icon.svg" color="#0A2540">
 <meta name="theme-color" content="#0A2540">
 ```
+
+**El `apple-touch-icon` y el `icon-512` van opacos y sin esquinas redondeadas
+propias.** iOS y Android aplican su propia máscara; si el archivo ya viene
+redondeado y con las esquinas transparentes, iOS lo compone sobre **negro** y
+redondea encima. En este icono el efecto es sutil —el fondo de marca ya es casi
+negro—, pero las esquinas salían en `#000000` en vez de azul noche. El
+`favicon-32.png` sí conserva las esquinas transparentes: ahí es lo correcto,
+porque debe dejar ver el fondo de la pestaña.
+
+**El `mask-icon` lleva el símbolo completo, rombo y chevron.** Safari lo pinta
+de un solo color plano y el color lo fija el atributo `color` del `<link>`, no
+el archivo.
+
+Se evaluó dejarlo solo con el rombo y **se decidió conservar el chevron a
+sabiendas**: a 16 px —el tamaño de una pestaña fijada— el trazo interior no se
+lee como chevron sino como una mancha junto al borde, porque sin color que los
+separe dos trazos finos a esa distancia se funden. A partir de 24 px se
+distingue bien. Se eligió mantener el símbolo íntegro antes que ganar nitidez
+con una silueta que cualquiera podría tener. **No es un descuido: revertirlo a
+solo el rombo es quitar el segundo `<path>`.**
+
+Los dos PNG se generan desde `favicon.svg` quitándole el `rx="190"` del fondo.
+
+**Pendiente para cuando haya `webmanifest`:** faltan los 192 px y una variante
+`maskable` con zona de respeto, que Android recorta a círculo. Hoy ninguna app
+declara manifest, así que sería trabajo sin uso.
 Mascota: `mascota/mascota.webp`. **PROHIBIDA** en documentos legales, facturas, contratos y en el flujo de pago de EvePay.
 
 ### Snippet de logo en encabezado
