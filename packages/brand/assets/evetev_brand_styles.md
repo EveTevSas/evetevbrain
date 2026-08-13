@@ -312,7 +312,56 @@ Los dos PNG se generan desde `favicon.svg` quitándole el `rx="190"` del fondo.
 **Pendiente para cuando haya `webmanifest`:** faltan los 192 px y una variante
 `maskable` con zona de respeto, que Android recorta a círculo. Hoy ninguna app
 declara manifest, así que sería trabajo sin uso.
-Mascota: `mascota/mascota.webp`. **PROHIBIDA** en documentos legales, facturas, contratos y en el flujo de pago de EvePay.
+Mascota: 23 poses en `mascota/`, todas `.webp` 1024×1024 con transparencia
+(`mascota.webp` es la neutra, a 512). Lista la carpeta antes de citar una: no
+deduzcas el nombre. **PROHIBIDA** en documentos legales, facturas, contratos y
+en el flujo de pago de EvePay.
+
+### Ilustraciones de apoyo (estas SÍ se generan)
+
+A diferencia de logos, isotipos y mascota —que **nunca** se dibujan a mano ni se
+generan—, las ilustraciones de escena sí se producen con un modelo de imagen. No
+representan a Evetev: ilustran el contexto de un producto (un conjunto
+residencial para EveConecta, un comercio para EvePay).
+
+Para que parezcan una familia y no un muestrario, **se generan siempre con este
+prompt**, cambiando solo lo que va entre corchetes:
+
+```text
+Crea una imagen de un [Objeto a dibujar] con este estilo visual:
+Estética Wireframe / Gráficos Vectoriales Puros. Este enfoque imita los límites
+de las computadoras primitivas. En lugar de renderizar superficies sólidas o
+texturas, todo el universo se compone de líneas en color #1E6FEB flotantes que
+delinean los bordes de los objetos sin entrar en detalles de ellos, solo las
+formas generales. El fondo es un vacío blanco absoluto, haciendo que las
+estructuras parezcan hologramas o planos arquitectónicos tridimensionales vivos,
+pero con poco detalle. Pero todas las líneas en color #1E6FEB y el fondo blanco.
+Sin textos, y sin saturar con detalles. Regla, no dejar lineas muy juntas porque
+de lejos parece una linea gruesa, los trazos deben ser más sueltos y separados.
+```
+
+Tres cosas del prompt no son adorno y conviene no editarlas a la ligera:
+
+- **`#1E6FEB` es `--eve-electrico`**, el token exacto (§2). Otro azul saca la
+  ilustración de la paleta.
+- **«Sin textos»** existe porque un modelo de imagen escribe mal, y un rótulo
+  torcido en una página de producto se lee como descuido. Si la escena necesita
+  un letrero, va en HTML encima, no dentro de la imagen.
+- **La regla de los trazos separados** es la que más se nota al usarla: las
+  líneas juntas se funden en una mancha gris al reducir, que es justo el tamaño
+  al que estas imágenes se ven en una landing.
+
+**Antes de publicarla:** conviértela a `.webp` (calidad 82 basta; un PNG de
+estos pesa más de 1 MB y el WebP baja a ~150 KB), súbela a `ilustraciones/` en
+este repositorio y **etiqueta una versión** — sin etiqueta, `@1` no la sirve.
+
+**Al usarla:** va de fondo, atenuada y desvanecida, nunca a plena opacidad
+detrás de un texto. Es línea densa y compite con lo que hay que leer. El patrón
+es `.portada::after` en `apps/eveconecta-landing/estilos.css`.
+
+> `conjunto-residencial.webp`, la primera publicada, es **anterior a este
+> prompt** y tiene trazos violeta además del eléctrico. Se deja como está: la
+> referencia de estilo es el prompt, no ese archivo.
 
 ### Snippet de logo en encabezado
 ```html
