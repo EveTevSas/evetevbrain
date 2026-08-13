@@ -278,6 +278,13 @@ la URL que va a acabar en la página. Un archivo puede estar en `main` y no en l
 que dejó a `@1` sirviendo el árbol viejo. Preguntarle a GitHub habría respondido
 que sí mientras el navegador recibía un 404.
 
+`agente_cli.py` **repite las dos herramientas** en vez de importarlas. Es
+duplicación consciente: `api/index.py` mantiene todo en un módulo para no
+añadirle importaciones relativas al montaje de Vercel, que ya dio problemas. El
+precio lo paga la copia, así que un cambio en el criterio de URLs o en la
+validación hay que hacerlo en los dos sitios. Es lo que se olvidó la primera vez
+y dejó el REPL entregando URLs de `raw` cuando la API ya no lo hacía.
+
 Ese desfase concreto ya se cerró: las 22 poses se publicaron en WebP en
 `Evetev-Dev/brand` v1.3.1, y `listar_carpeta_de_marca` devuelve 24 archivos.
 Pero **el desfase puede volver**, porque nada sincroniza los dos repositorios —
