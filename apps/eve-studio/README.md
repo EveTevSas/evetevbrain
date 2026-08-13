@@ -263,9 +263,20 @@ Por eso hay dos redes, y las dos hacen falta:
   deducir el nombre. Es la misma herramienta que ya tenía para el monorepo; que
   la marca no la tuviera era el hueco.
 - **`obtener_activo_github` comprueba que la imagen existe** antes de devolver
-  su URL. Pide la metadata, no el binario: unos cientos de bytes, y no se come
-  el contexto. Listar es una instrucción y a una instrucción se le puede dar
+  su URL. Listar es una instrucción y a una instrucción se le puede dar
   esquinazo; esto es un `if`.
+
+Y devuelve una URL **del CDN**, no de `raw.githubusercontent`. Esto no es
+cosmético: la landing de EveConecta se mezcló con un `<img>` apuntando a `raw`
+—porque es lo que la herramienta entregaba— y eso contradice la regla T1 del
+manual, no tiene caché de borde y sigue a `main`, así que la imagen se rompe
+sola el día que el archivo se mueva. Es la misma avería que ya arregló 0483337.
+
+La comprobación se hace **contra el CDN**, no contra la API de GitHub, porque es
+la URL que va a acabar en la página. Un archivo puede estar en `main` y no en la
+última versión etiquetada: pasó con `v1.3.0`, etiquetada antes de mezclar su PR,
+que dejó a `@1` sirviendo el árbol viejo. Preguntarle a GitHub habría respondido
+que sí mientras el navegador recibía un 404.
 
 Ese desfase concreto ya se cerró: las 22 poses se publicaron en WebP en
 `Evetev-Dev/brand` v1.3.1, y `listar_carpeta_de_marca` devuelve 24 archivos.

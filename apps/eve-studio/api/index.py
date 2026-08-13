@@ -48,6 +48,15 @@ REPO_CODIGO = os.getenv("REPO_CODIGO", "EveTevSas/evetevbrain")
 # de otra organización responde 403. Se comprobó en producción.
 TOKEN_CODIGO = os.getenv("GITHUB_TOKEN_CODIGO")
 
+# La forma canónica de citar un activo de marca es el CDN (regla T1 del manual:
+# "logos SIEMPRE desde el CDN"), no raw.githubusercontent, que no tiene caché de
+# borde, no está pensado para servir a usuarios finales y —al seguir a main— se
+# rompe en silencio el día que el archivo se mueva.
+# @1 sigue la última 1.x publicada: así un activo nuevo queda disponible sin
+# tocar este código, y las páginas ya escritas no cambian de imagen.
+VERSION_MARCA = os.getenv("VERSION_MARCA", "1")
+CDN_MARCA = f"https://cdn.jsdelivr.net/gh/{REPO_MARCA}@{VERSION_MARCA}"
+
 # ── El arnés de escritura ──────────────────────────────────────────────────
 # Todo esto vive en código y no en el prompt a propósito: a un modelo se le
 # puede convencer de saltarse una instrucción; a un `if` no.
@@ -113,8 +122,35 @@ def _leer_archivo(repo: str, ruta_archivo: str, token: str | None) -> str:
         # tal cual en el marcado. Pero antes se comprueba que exista: una URL
         # bien formada de un archivo inexistente es el peor resultado posible,
         # porque el agente la da por buena y la imagen rota solo se ve en la
-        # página. Se pide la METADATA (crudo=False), que pesa unos cientos de
-        # bytes, no el binario.
+        # página.
+        limpia = ruta_archivo.lstrip("/")
+        if repo == REPO_MARCA:
+            # Se comprueba contra el CDN, no contra la API de GitHub, porque es
+            # exactamente la URL que va a acabar en la página. Un archivo puede
+            # estar en main y NO en la última versión etiquetada: pasó con
+            # v1.3.0, que se etiquetó antes de mezclar el PR y dejaba a @1
+            # sirviendo el árbol viejo. Preguntarle a GitHub habría dicho que sí
+            # mientras el navegador recibía un 404.
+            url = f"{CDN_MARCA}/{limpia}"
+            try:
+                existe = requests.head(url, timeout=20, allow_redirects=True)
+            except requests.RequestException as e:
+                return f"Error de red consultando el CDN de marca: {e}"
+            if existe.status_code == 404:
+                return (
+                    f"El CDN no sirve '{limpia}'. O no está en el repositorio de "
+                    "marca, o está en main pero todavía no en una versión "
+                    "etiquetada. Lista la carpeta y elige uno de los publicados; "
+                    "no uses esta ruta."
+                )
+            if existe.status_code != 200:
+                return (
+                    f"No se pudo comprobar '{limpia}' en el CDN "
+                    f"(código {existe.status_code}). No la uses sin confirmarla."
+                )
+            return url
+
+        # Monorepo: no hay CDN, así que se sirve por raw fijado a main.
         try:
             existe = _pedir(repo, ruta_archivo, token, crudo=False)
         except requests.RequestException as e:
@@ -129,7 +165,7 @@ def _leer_archivo(repo: str, ruta_archivo: str, token: str | None) -> str:
                 f"No se pudo comprobar '{ruta_archivo}' en {repo} "
                 f"(código {existe.status_code}). No la uses sin confirmarla."
             )
-        return f"https://raw.githubusercontent.com/{repo}/main/{ruta_archivo.lstrip('/')}"
+        return f"https://raw.githubusercontent.com/{repo}/main/{limpia}"
     try:
         respuesta = _pedir(repo, ruta_archivo, token, crudo=True)
     except requests.RequestException as e:
@@ -409,7 +445,10 @@ REGLAS DE COMPORTAMIENTO:
 3. NUNCA deduzcas el nombre de un activo de marca. Antes de citar cualquier
    imagen, lista la carpeta con 'listar_carpeta_de_marca' y elige de lo que
    exista de verdad; luego pide esa ruta a 'obtener_activo_github' y usa la URL
-   que te devuelva tal cual. Solo sirven los activos publicados en el repo de
+   que te devuelva tal cual —será una del CDN (cdn.jsdelivr.net), que es la
+   única forma válida de citar un activo de marca; NUNCA escribas a mano una de
+   raw.githubusercontent, que no tiene caché y se rompe sola cuando el archivo
+   se mueve. Solo sirven los activos publicados en el repo de
    marca, que no son siempre los mismos que están en el monorepo: por eso hay
    que listar, no recordar. Si el activo que necesitas no aparece en el listado,
    dilo en tu respuesta y propón uno de los que sí están; no inventes la URL,
