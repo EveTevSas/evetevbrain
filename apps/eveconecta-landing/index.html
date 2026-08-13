@@ -127,8 +127,11 @@
         <div class="split-figura">
           <!-- La mascota es el rostro del asistente digital (§4). En este
                contexto ilustra y da cercanía; no está en un flujo de pago
-               real, así que su uso es válido. -->
-          <img class="mascota" src="https://raw.githubusercontent.com/Evetev-Dev/brand/main/mascota/mascota.webp"
+               real, así que su uso es válido.
+               Sale del CDN de marca (T1), no de raw.githubusercontent: aquel
+               seguía a main, así que la imagen se habría roto sola el día que
+               el archivo se moviera, y sin caché de borde. -->
+          <img class="mascota" src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/mascota/mascota.webp"
                alt="Eve, la mascota de Evetev: un gato-robot azul que asiste a los conjuntos" width="320" height="320">
           <p class="figura-nota">Eve, la de la casa, te acompaña en la operación.</p>
         </div>

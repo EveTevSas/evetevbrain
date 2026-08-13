@@ -48,6 +48,15 @@ REPO_CODIGO = os.getenv("REPO_CODIGO", "EveTevSas/evetevbrain")
 # de otra organización responde 403. Se comprobó en producción.
 TOKEN_CODIGO = os.getenv("GITHUB_TOKEN_CODIGO")
 
+# La forma canónica de citar un activo de marca es el CDN (regla T1 del manual:
+# "logos SIEMPRE desde el CDN"), no raw.githubusercontent, que no tiene caché de
+# borde, no está pensado para servir a usuarios finales y —al seguir a main— se
+# rompe en silencio el día que el archivo se mueva.
+# @1 sigue la última 1.x publicada: así un activo nuevo queda disponible sin
+# tocar este código, y las páginas ya escritas no cambian de imagen.
+VERSION_MARCA = os.getenv("VERSION_MARCA", "1")
+CDN_MARCA = f"https://cdn.jsdelivr.net/gh/{REPO_MARCA}@{VERSION_MARCA}"
+
 # ── El arnés de escritura ──────────────────────────────────────────────────
 # Todo esto vive en código y no en el prompt a propósito: a un modelo se le
 # puede convencer de saltarse una instrucción; a un `if` no.
@@ -110,8 +119,53 @@ def _pedir(repo: str, ruta: str, token: str | None, crudo: bool):
 def _leer_archivo(repo: str, ruta_archivo: str, token: str | None) -> str:
     if ruta_archivo.lower().endswith(EXTENSIONES_IMAGEN):
         # Un binario no se mete en el contexto: se devuelve su URL para usarla
-        # tal cual en el marcado.
-        return f"https://raw.githubusercontent.com/{repo}/main/{ruta_archivo.lstrip('/')}"
+        # tal cual en el marcado. Pero antes se comprueba que exista: una URL
+        # bien formada de un archivo inexistente es el peor resultado posible,
+        # porque el agente la da por buena y la imagen rota solo se ve en la
+        # página.
+        limpia = ruta_archivo.lstrip("/")
+        if repo == REPO_MARCA:
+            # Se comprueba contra el CDN, no contra la API de GitHub, porque es
+            # exactamente la URL que va a acabar en la página. Un archivo puede
+            # estar en main y NO en la última versión etiquetada: pasó con
+            # v1.3.0, que se etiquetó antes de mezclar el PR y dejaba a @1
+            # sirviendo el árbol viejo. Preguntarle a GitHub habría dicho que sí
+            # mientras el navegador recibía un 404.
+            url = f"{CDN_MARCA}/{limpia}"
+            try:
+                existe = requests.head(url, timeout=20, allow_redirects=True)
+            except requests.RequestException as e:
+                return f"Error de red consultando el CDN de marca: {e}"
+            if existe.status_code == 404:
+                return (
+                    f"El CDN no sirve '{limpia}'. O no está en el repositorio de "
+                    "marca, o está en main pero todavía no en una versión "
+                    "etiquetada. Lista la carpeta y elige uno de los publicados; "
+                    "no uses esta ruta."
+                )
+            if existe.status_code != 200:
+                return (
+                    f"No se pudo comprobar '{limpia}' en el CDN "
+                    f"(código {existe.status_code}). No la uses sin confirmarla."
+                )
+            return url
+
+        # Monorepo: no hay CDN, así que se sirve por raw fijado a main.
+        try:
+            existe = _pedir(repo, ruta_archivo, token, crudo=False)
+        except requests.RequestException as e:
+            return f"Error de red consultando GitHub: {e}"
+        if existe.status_code == 404:
+            return (
+                f"No existe '{ruta_archivo}' en {repo}. Lista la carpeta para ver "
+                "los activos que hay de verdad y elige uno; no uses esta ruta."
+            )
+        if existe.status_code != 200:
+            return (
+                f"No se pudo comprobar '{ruta_archivo}' en {repo} "
+                f"(código {existe.status_code}). No la uses sin confirmarla."
+            )
+        return f"https://raw.githubusercontent.com/{repo}/main/{limpia}"
     try:
         respuesta = _pedir(repo, ruta_archivo, token, crudo=True)
     except requests.RequestException as e:
@@ -143,14 +197,48 @@ def _leer_archivo(repo: str, ruta_archivo: str, token: str | None) -> str:
     return texto
 
 
+def _listar_carpeta(repo: str, ruta_carpeta: str, token: str | None) -> str:
+    """Una sola puerta al listado, para los dos repositorios."""
+    try:
+        respuesta = _pedir(repo, ruta_carpeta, token, crudo=False)
+    except requests.RequestException as e:
+        return f"Error de red consultando GitHub: {e}"
+
+    if respuesta.status_code != 200:
+        return f"No se pudo listar '{ruta_carpeta}' en {repo} (código {respuesta.status_code})."
+
+    contenido = respuesta.json()
+    if isinstance(contenido, dict):
+        return f"'{ruta_carpeta}' es un archivo, no una carpeta. Léelo en vez de listarlo."
+
+    entradas = sorted(
+        f"{'carpeta' if e['type'] == 'dir' else 'archivo'}  {e['path']}" for e in contenido
+    )
+    return "\n".join(entradas) if entradas else f"'{ruta_carpeta}' está vacía."
+
+
 @tool
 def obtener_activo_github(ruta_archivo: str) -> str:
     """Lee archivos del repositorio de MARCA de Evetev (logos, tokens, manual).
 
     Útil para consultar el manual (evetev_brand_styles.md), los tokens
-    (colores.json) o conseguir la URL raw de una imagen (mascota/mascota.webp).
+    (colores.json) o conseguir la URL de una imagen (mascota/mascota.webp).
+
+    Si no sabes el nombre exacto del activo, usa antes 'listar_carpeta_de_marca'.
     """
     return _leer_archivo(REPO_MARCA, ruta_archivo, os.getenv("GITHUB_TOKEN"))
+
+
+@tool
+def listar_carpeta_de_marca(ruta_carpeta: str = "") -> str:
+    """Lista los activos disponibles en el repositorio de MARCA.
+
+    Úsala ANTES de citar cualquier imagen, para partir de los archivos que
+    existen de verdad en vez de deducir el nombre. Con cadena vacía lista la
+    raíz; las carpetas son 'mascota', 'isotipos', 'logotipos', 'lockups',
+    'unidades', 'favicon' y 'tokens'.
+    """
+    return _listar_carpeta(REPO_MARCA, ruta_carpeta, os.getenv("GITHUB_TOKEN"))
 
 
 @tool
@@ -173,22 +261,7 @@ def listar_carpeta_del_repo(ruta_carpeta: str = "") -> str:
     Sirve para descubrir qué hay antes de leer. Con cadena vacía lista la raíz.
     Ejemplos de ruta: 'apps', 'apps/evepay'.
     """
-    try:
-        respuesta = _pedir(REPO_CODIGO, ruta_carpeta, TOKEN_CODIGO, crudo=False)
-    except requests.RequestException as e:
-        return f"Error de red consultando GitHub: {e}"
-
-    if respuesta.status_code != 200:
-        return f"No se pudo listar '{ruta_carpeta}' (código {respuesta.status_code})."
-
-    contenido = respuesta.json()
-    if isinstance(contenido, dict):
-        return f"'{ruta_carpeta}' es un archivo, no una carpeta. Léelo con 'leer_archivo_del_repo'."
-
-    entradas = sorted(
-        f"{'carpeta' if e['type'] == 'dir' else 'archivo'}  {e['path']}" for e in contenido
-    )
-    return "\n".join(entradas) if entradas else f"'{ruta_carpeta}' está vacía."
+    return _listar_carpeta(REPO_CODIGO, ruta_carpeta, TOKEN_CODIGO)
 
 
 # ── Escritura: rama + PR, nunca main ───────────────────────────────────────
@@ -369,7 +442,17 @@ Tu trabajo es generar código HTML y CSS puro, de alta calidad y accesible.
 REGLAS DE COMPORTAMIENTO:
 1. DEBES usar la herramienta 'obtener_activo_github' para leer 'evetev_brand_styles.md' antes de escribir código si no tienes claro el contexto visual.
 2. Si necesitas verificar un token específico, pide leer 'colores.json'.
-3. Si el diseño requiere la mascota oficial, pide la ruta 'mascota/mascota.webp' y usa la URL que te devuelva la herramienta directamente en tus etiquetas <img>.
+3. NUNCA deduzcas el nombre de un activo de marca. Antes de citar cualquier
+   imagen, lista la carpeta con 'listar_carpeta_de_marca' y elige de lo que
+   exista de verdad; luego pide esa ruta a 'obtener_activo_github' y usa la URL
+   que te devuelva tal cual —será una del CDN (cdn.jsdelivr.net), que es la
+   única forma válida de citar un activo de marca; NUNCA escribas a mano una de
+   raw.githubusercontent, que no tiene caché y se rompe sola cuando el archivo
+   se mueve. Solo sirven los activos publicados en el repo de
+   marca, que no son siempre los mismos que están en el monorepo: por eso hay
+   que listar, no recordar. Si el activo que necesitas no aparece en el listado,
+   dilo en tu respuesta y propón uno de los que sí están; no inventes la URL,
+   porque una imagen rota no falla ruidosamente.
 4. Devuelve ÚNICAMENTE código HTML, listo para ser renderizado. No agregues explicaciones fuera del bloque de código.
 
 GENERAR PARA UNA LANDING DEL MONOREPO:
@@ -440,6 +523,7 @@ def construir_agente(registro: dict):
         llm,
         tools=[
             obtener_activo_github,
+            listar_carpeta_de_marca,
             leer_archivo_del_repo,
             listar_carpeta_del_repo,
             crear_herramienta_escritura(registro),
