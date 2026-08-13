@@ -12,6 +12,33 @@
 .cta{margin-top:34px}
 .cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-pizarra)}
 
+/* ── Ilustración de portada ──────────────────────────────────────────────
+   Un conjunto residencial en trazo técnico, asomando por debajo del texto.
+   Decisiones que conviene no deshacer sin mirar la página:
+
+   - Va como ::after y NO como background de .portada, porque base.css ya usa
+     ese background para el degradado radial. Sobrescribirlo aquí se llevaría
+     por delante el armazón compartido en esta landing.
+   - Se le hace sitio con padding-bottom en vez de meterla detrás del texto:
+     es una escena densa, y el h1 sobre esas líneas se lee mal por mucho que
+     se baje la opacidad. Así el texto queda sobre blanco y la ilustración es
+     el suelo de la sección.
+   - La máscara la funde hacia arriba, para que no aparezca un borde recto a
+     media sección. Se declara con prefijo -webkit- además del estándar: sin
+     él, Safari no aplica la máscara y la imagen entra a cuchillo.
+   - opacity .55 la deja como una marca de agua. A plena opacidad compite con
+     el botón coral, que es el único de la página y tiene que ganar.
+   - La URL es del CDN de marca (T1), fijada a @1. */
+.portada{position:relative;isolation:isolate;overflow:hidden;
+  padding-bottom:clamp(190px,28vw,330px)}
+.portada::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;z-index:-1;
+  height:clamp(170px,26vw,320px);pointer-events:none;opacity:.55;
+  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial.webp")
+    center bottom/cover no-repeat;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 42%);
+          mask-image:linear-gradient(to bottom,transparent,#000 42%)}
+
 /* ── Secciones ───────────────────────────────────────────────────────────
    Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
    claro, un solo bloque de peso (el del CTA final) en azul noche. */
