@@ -245,8 +245,35 @@ Dos repositorios, ambos de solo lectura:
 
 | Repositorio | Para qué | Herramientas |
 |---|---|---|
-| `Evetev-Dev/brand` | manual, tokens, logos, mascota | `obtener_activo_github` |
+| `Evetev-Dev/brand` | manual, tokens, logos, mascota | `obtener_activo_github`, `listar_carpeta_de_marca` |
 | `EveTevSas/evetevbrain` | el código tal como está hoy | `leer_archivo_del_repo`, `listar_carpeta_del_repo` |
+
+### Las imágenes se listan, no se recuerdan
+
+El agente no puede subir binarios —solo escribe `.html` y `.css`—, así que toda
+imagen se cita por URL. El riesgo ahí no es que falle: es que **acierte la forma
+de la URL y falle el archivo**. Cuando esto se escribió, el monorepo tenía 23
+poses de la mascota y el repo de marca solo servía 2, así que un nombre
+plausible como `mascota-pensativa.png` producía una URL bien formada y un 404 en
+la página: nada fallaba en ningún sitio donde se notara.
+
+Por eso hay dos redes, y las dos hacen falta:
+
+- **`listar_carpeta_de_marca`**, para que elija de lo que existe en vez de
+  deducir el nombre. Es la misma herramienta que ya tenía para el monorepo; que
+  la marca no la tuviera era el hueco.
+- **`obtener_activo_github` comprueba que la imagen existe** antes de devolver
+  su URL. Pide la metadata, no el binario: unos cientos de bytes, y no se come
+  el contexto. Listar es una instrucción y a una instrucción se le puede dar
+  esquinazo; esto es un `if`.
+
+Ese desfase concreto ya se cerró: las 22 poses se publicaron en WebP en
+`Evetev-Dev/brand` v1.3.1, y `listar_carpeta_de_marca` devuelve 24 archivos.
+Pero **el desfase puede volver**, porque nada sincroniza los dos repositorios —
+`pnpm css:sync` solo replica `packages/brand/landing/base.css`, no los activos.
+Cada activo nuevo hay que publicarlo a mano y etiquetar una `v1.x`; hasta que
+eso pase, el agente dirá que no está, que es lo correcto, en vez de enlazarlo
+roto.
 
 Lo segundo es lo que permite pedirle *"cámbiale el titular a la portada de
 EvePay"*: lee `apps/evepay/index.html` y parte de ahí, en vez de generar una
