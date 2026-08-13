@@ -4,13 +4,16 @@
      (apps/eveconecta). Esta es solo la página pública de producto.
      Mismo montaje que apps/website y apps/evepay: HTML y CSS planos.
      Marca según packages/brand/assets/evetev_brand_styles.md (v1.0):
-     logos SIEMPRE desde el CDN (T1) y coral exclusivo de acción (C2). -->
+     logos SIEMPRE desde el CDN (T1) y coral exclusivo de acción (C2),
+     aquí un solo botón coral por vista (el CTA de la portada).
+     El color de producto va con --p en el marcado (mezclado), no en el CSS.
+     Los estilos propios de estas secciones viven en estilos.css. -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EveConecta — Gestión y recaudo para conjuntos residenciales</title>
-<meta name="description" content="EveConecta es la solución de Evetev para propiedad horizontal: cuotas por coeficiente, estado de cuenta, pago en línea del residente y paz y salvo.">
+<meta name="description" content="EveConecta recauda la cuota de administración de tus residentes y la consigna directo en la cuenta del conjunto. Dashboard con reservas, finanzas, PQRS y asambleas para propiedad horizontal.">
 
 <!-- Mientras la landing no esté terminada no debe indexarse: una página a
      medias posicionando por «EveConecta» hace más daño que no aparecer. -->
@@ -43,43 +46,266 @@
       <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
       EveConecta
     </a>
-    <nav>
+    <nav aria-label="Secciones de la página">
+      <a href="#recaudo">Recaudo</a>
+      <a href="#dashboard">Dashboard</a>
       <a href="https://evetev.com">Evetev</a>
       <!-- El portal es otra app, en otro dominio: enlace absoluto a propósito. -->
       <a class="portal" href="https://conecta.evetev.com">Entrar al portal</a>
-      <a class="btn btn-cta" href="https://evetev.com/#contacto">Hablar con el equipo</a>
     </nav>
   </div>
 </header>
 
 <main>
+
+  <!-- Portada: la única vista con botón coral de esta página (C2). El CTA
+       lleva al bloque de demo al final, que vive sobre azul noche. -->
   <section class="portada">
     <div class="wrap">
       <span class="etiqueta">
         <span class="p-ico sm" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
         EveConecta · Propiedad horizontal
       </span>
-      <h1>La administración del conjunto, sin hojas de cálculo.</h1>
+      <h1>El recaudo de la administración, directo a la cuenta del conjunto.</h1>
       <p class="entrada">
-        Cuotas por coeficiente, estado de cuenta, pago en línea del residente y
-        paz y salvo. Todo en el mismo sitio, y cuadrado.
+        EveConecta cobra la cuota de administración a tus residentes y la
+        consigna directo a la cuenta del conjunto. Con un dashboard para
+        gestionar reservas, finanzas, PQRS y asambleas, todo en el mismo sitio.
       </p>
+      <p class="cta">
+        <a class="btn btn-cta" href="#demo">Agenda una demo</a>
+      </p>
+      <p class="cta-nota">Te la mostramos con un conjunto de prueba, sin compromiso.</p>
+    </div>
+  </section>
 
-      <div class="estado">
-        <h2>Esta página está en construcción</h2>
+  <!-- El dolor: el trabajo manual que quita (tres puntos sobre tinte). -->
+  <section class="seccion seccion-tinte" aria-labelledby="titulo-dolor">
+    <div class="wrap">
+      <h2 id="titulo-dolor">Lo que EveConecta te quita de encima</h2>
+      <p class="seccion-intro">
+        La administración de un conjunto no debería depender de hojas de
+        cálculo y comprobantes por chat.
+      </p>
+      <ul class="dolores" role="list">
+        <li class="dolor">
+          <h3>Perseguir pagos</h3>
+          <p>El residente paga en línea y tú ves quién está al día, sin llamar ni llevar la cartera a mano.</p>
+        </li>
+        <li class="dolor">
+          <h3>Conciliar a mano</h3>
+          <p>Cada pago queda amarrado a su unidad y su concepto. Nada de cruzar extractos en Excel.</p>
+        </li>
+        <li class="dolor">
+          <h3>Informes para la asamblea</h3>
+          <p>El estado de cuenta y el presupuesto salen solos, listos para presentar.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Recaudo: beneficio protagonista a dos columnas, con la mascota. -->
+  <section class="seccion" id="recaudo" aria-labelledby="titulo-recaudo">
+    <div class="wrap">
+      <div class="split">
+        <div class="split-texto">
+          <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
+          <h2 id="titulo-recaudo">Recaudo que entra solo, a la cuenta del conjunto</h2>
+          <p>
+            Los residentes pagan su cuota en línea y el dinero se consigna
+            directo a la cuenta bancaria del conjunto. EveConecta no toca los
+            fondos: solo conecta el pago con su unidad y deja el estado de
+            cuenta cuadrado.
+          </p>
+          <ul class="ticks" role="list">
+            <li>Pago en línea para el residente, sin instalar nada.</li>
+            <li>Consignación directa a la cuenta del conjunto.</li>
+            <li>Paz y salvo y estado de cuenta automáticos.</li>
+            <li>Cartera al día visible en tiempo real.</li>
+          </ul>
+        </div>
+        <div class="split-figura">
+          <!-- La mascota es el rostro del asistente digital (§4). En este
+               contexto ilustra y da cercanía; no está en un flujo de pago
+               real, así que su uso es válido. -->
+          <img class="mascota" src="https://raw.githubusercontent.com/Evetev-Dev/brand/main/mascota/mascota.webp"
+               alt="Eve, la mascota de Evetev: un gato-robot azul que asiste a los conjuntos" width="320" height="320">
+          <p class="figura-nota">Eve, la de la casa, te acompaña en la operación.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard: los módulos reales de la plataforma, en listado minimalista. -->
+  <section class="seccion seccion-tinte" id="dashboard" aria-labelledby="titulo-dashboard">
+    <div class="wrap">
+      <h2 id="titulo-dashboard">Un dashboard para administrar el conjunto</h2>
+      <p class="seccion-intro">
+        Lo que hoy manejas en varios archivos y grupos de chat, reunido en un
+        solo panel, con los permisos de cada quien.
+      </p>
+      <ul class="caracts-grid" role="list">
+        <li class="caract">
+          <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
+          <h3>Finanzas y presupuesto</h3>
+          <p>Estado de cuenta, cartera y presupuesto del conjunto, cuadrados y listos para la asamblea.</p>
+        </li>
+        <li class="caract">
+          <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
+          <h3>Agenda de espacios comunes</h3>
+          <p>Reservas del salón social, la cancha o el BBQ, con su calendario y sin choques de horario.</p>
+        </li>
+        <li class="caract">
+          <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
+          <h3>Comunicaciones y PQRS</h3>
+          <p>Avisos a los residentes y peticiones, quejas y reclamos con seguimiento, sin perderse en el chat.</p>
+        </li>
+        <li class="caract">
+          <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
+          <h3>Asambleas</h3>
+          <p>Convocatoria, quorum y decisiones de la asamblea de copropietarios, con su registro.</p>
+        </li>
+        <li class="caract">
+          <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
+          <h3>Portería y mantenimiento</h3>
+          <p>Control de portería y plan de mantenimiento de las zonas comunes en un solo lugar.</p>
+        </li>
+        <li class="caract">
+          <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
+          <h3>Documentos y auditoría</h3>
+          <p>Actas, reglamentos y un registro de auditoría de cada movimiento, para rendir cuentas.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Cómo empieza: tres pasos, en español claro (§9). -->
+  <section class="seccion" aria-labelledby="titulo-como">
+    <div class="wrap">
+      <h2 id="titulo-como">Cómo empieza tu conjunto</h2>
+      <p class="seccion-intro">
+        Sin migraciones eternas. Te acompañamos a dejarlo andando.
+      </p>
+      <ol class="pasos" role="list">
+        <li class="paso">
+          <span class="paso-num" aria-hidden="true">1</span>
+          <h3>Agenda una demo</h3>
+          <p>Te mostramos EveConecta con un conjunto de prueba y resolvemos tus dudas.</p>
+        </li>
+        <li class="paso">
+          <span class="paso-num" aria-hidden="true">2</span>
+          <h3>Cargamos tu conjunto</h3>
+          <p>Unidades, residentes y cuotas por coeficiente, con ayuda del equipo.</p>
+        </li>
+        <li class="paso">
+          <span class="paso-num" aria-hidden="true">3</span>
+          <h3>Empiezas a recaudar</h3>
+          <p>Los residentes pagan en línea y la plata llega directo a la cuenta del conjunto.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Asamblea: texto (no botón) sobre tinte, para no competir con el coral. -->
+  <section class="seccion seccion-tinte" aria-labelledby="titulo-asamblea">
+    <div class="wrap">
+      <div class="asamblea">
+        <h2 id="titulo-asamblea">Llega a la asamblea con las cuentas claras</h2>
         <p>
-          EveConecta está en marcha y es además nuestro primer cliente: la
-          usamos para probar EvePay cobrando dinero real, antes de pedirle a
-          nadie más que confíe en él.
-        </p>
-        <p>
-          Si administras un conjunto y quieres verla,
-          <a href="https://evetev.com/#contacto">escríbenos</a> y te la
-          mostramos en el estado en que está, sin adornos.
+          Estado de cuenta, presupuesto ejecutado y cartera al día, presentados
+          sin armar tablas la noche anterior. Cuando los números están claros,
+          la asamblea se trata de decidir, no de discutir cifras.
         </p>
       </div>
     </div>
   </section>
+
+  <!-- FAQ: acordeón con <details>/<summary> según el manual (§6). -->
+  <section class="seccion" aria-labelledby="titulo-faq">
+    <div class="wrap">
+      <h2 id="titulo-faq">Preguntas frecuentes</h2>
+      <p class="seccion-intro">
+        Lo que más nos preguntan los administradores y consejos de administración.
+      </p>
+      <div class="faq">
+        <details>
+          <summary>¿EveConecta toca el dinero del conjunto?</summary>
+          <div class="faq-cuerpo">
+            <p>
+              No. El pago viaja del residente a la cuenta bancaria del
+              conjunto. EveConecta cobra la cuota a través de EvePay y la
+              consigna directo; nunca pasa por una cuenta nuestra.
+            </p>
+          </div>
+        </details>
+        <details>
+          <summary>¿Cómo pagan los residentes?</summary>
+          <div class="faq-cuerpo">
+            <p>
+              Cada residente entra al portal y paga su cuota en línea, desde el
+              computador o el celular, sin instalar nada. El pago queda amarrado
+              a su unidad y a su estado de cuenta.
+            </p>
+          </div>
+        </details>
+        <details>
+          <summary>¿Quién ve la información del conjunto?</summary>
+          <div class="faq-cuerpo">
+            <p>
+              Cada quien ve lo que le corresponde. La administración y el
+              consejo tienen acceso al dashboard completo; cada residente ve
+              solo su estado de cuenta, sus reservas y los avisos, sin la
+              cartera de los demás.
+            </p>
+          </div>
+        </details>
+        <details>
+          <summary>¿Cuánto cuesta?</summary>
+          <div class="faq-cuerpo">
+            <p>
+              Se cobra un porcentaje por transacción más un componente fijo, con
+              una suscripción mensual del software. Sin letra menuda: te damos
+              la cifra exacta para tu conjunto en la demo.
+            </p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA final: el bloque de peso de la página (60/20/10, §2), sobre azul
+       noche. Aquí llega el botón coral de la portada. -->
+  <section class="demo" id="demo" aria-labelledby="titulo-demo">
+    <div class="wrap">
+      <div class="demo-grid">
+        <div class="demo-texto">
+          <h2 id="titulo-demo">Ve EveConecta funcionando con un conjunto como el tuyo</h2>
+          <p>
+            Cuéntanos de tu copropiedad y te mostramos la plataforma con un
+            caso real: recaudo, reservas y el dashboard de administración. Si
+            encaja, lo dejamos andando contigo.
+          </p>
+          <ul class="demo-puntos" role="list">
+            <li>Demo guiada por el equipo que construye el producto.</li>
+            <li>Tarifas transparentes: porcentaje por transacción más un componente fijo, con suscripción mensual.</li>
+            <li>Sin compromiso: si no encaja, te lo decimos claro.</li>
+          </ul>
+        </div>
+        <div class="demo-cta">
+          <p class="demo-cta-titulo">¿Listo para verlo?</p>
+          <p class="demo-cta-texto">
+            Escríbenos y agendamos la demo esta misma semana.
+          </p>
+          <a class="btn btn-sec" href="https://evetev.com/#contacto">Hablar con el equipo</a>
+          <p class="demo-cta-nota">
+            También puedes entrar al
+            <a href="https://conecta.evetev.com">portal de residentes</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <footer class="pie">
