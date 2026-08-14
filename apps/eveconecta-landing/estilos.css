@@ -10,7 +10,7 @@
    El único botón coral de la página (C2). base.css no lo posiciona, así que
    aquí le damos aire y su nota honesta debajo. */
 .cta{margin-top:34px}
-.cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-pizarra)}
+.cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-azul-noche)}
 
 /* ── Ilustración de portada ──────────────────────────────────────────────
    El conjunto residencial en trazo técnico, de fondo, entero.
@@ -38,6 +38,14 @@
   content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.12;
   background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial.svg")
     center bottom/contain no-repeat}
+
+/* El texto de portada va en azul noche, no en el gris pizarra de base.css.
+   No es una preferencia: con el dibujo detrás, --eve-pizarra se queda en 4,06:1
+   donde una línea cruza una letra, y AA exige 4,5. Sobre blanco puro ese gris
+   ya estaba en 4,76, así que no había margen que gastar. El azul noche aguanta
+   13:1 con el dibujo detrás, y eso es lo que permite que el fondo exista.
+   Si algún día se quita la ilustración, esto puede volver a --eve-pizarra. */
+.portada .entrada{color:var(--eve-azul-noche)}
 
 /* ── Secciones ───────────────────────────────────────────────────────────
    Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
