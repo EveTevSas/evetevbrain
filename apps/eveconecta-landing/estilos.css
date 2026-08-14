@@ -13,33 +13,38 @@
 .cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-pizarra)}
 
 /* ── Ilustración de portada ──────────────────────────────────────────────
-   Un conjunto residencial en trazo técnico, asomando por debajo del texto.
+   Un conjunto residencial en trazo técnico, DETRÁS del texto, no debajo.
    Decisiones que conviene no deshacer sin mirar la página:
 
    - Va como ::after y NO como background de .portada, porque base.css ya usa
      ese background para el degradado radial. Sobrescribirlo aquí se llevaría
      por delante el armazón compartido en esta landing.
-   - Se le hace sitio con padding-bottom en vez de meterla detrás del texto:
-     es una escena densa, y el h1 sobre esas líneas se lee mal por mucho que
-     se baje la opacidad. Así el texto queda sobre blanco y la ilustración es
-     el suelo de la sección.
+   - Está detrás del texto y a la vista: opacity .7 y cubre toda la sección.
+     El padding-bottom extra que antes le hacía sitio debajo se quita, porque
+     ya no hace falta apartarla del texto.
+   - Para que el h1 y la entrada sigan leyéndose sobre una escena densa, el
+     texto lleva su propio velo blanco translúcido (::before), no una caja:
+     así la ilustración se ve, pero suavizada detrás de las palabras.
    - La máscara la funde hacia arriba, para que no aparezca un borde recto a
      media sección. Se declara con prefijo -webkit- además del estándar: sin
      él, Safari no aplica la máscara y la imagen entra a cuchillo.
-   - opacity .55 la deja como una marca de agua. A plena opacidad compite con
-     el botón coral, que es el único de la página y tiene que ganar.
+   - A plena opacidad competiría con el botón coral, que es el único de la
+     página y tiene que ganar; por eso se queda en .7.
    - La URL es del CDN de marca (T1), fijada a @1. Es un SVG: 5,8 KB en vez de
      los 148 del WebP que había antes, y nítido a cualquier tamaño. No se edita
      a mano — sale de packages/brand/ilustraciones/conjunto-residencial.py. */
-.portada{position:relative;isolation:isolate;overflow:hidden;
-  padding-bottom:clamp(190px,28vw,330px)}
+.portada{position:relative;isolation:isolate;overflow:hidden}
+.portada .wrap{position:relative;z-index:0}
+.portada .wrap::before{
+  content:"";position:absolute;inset:-24px -28px;z-index:-1;border-radius:28px;
+  background:rgba(255,255,255,.78);
+  box-shadow:0 0 60px 30px rgba(255,255,255,.55)}
 .portada::after{
-  content:"";position:absolute;left:0;right:0;bottom:0;z-index:-1;
-  height:clamp(170px,26vw,320px);pointer-events:none;opacity:.55;
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.7;
   background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial.svg")
     center bottom/cover no-repeat;
-  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 42%);
-          mask-image:linear-gradient(to bottom,transparent,#000 42%)}
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 30%);
+          mask-image:linear-gradient(to bottom,transparent,#000 30%)}
 
 /* ── Secciones ───────────────────────────────────────────────────────────
    Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
