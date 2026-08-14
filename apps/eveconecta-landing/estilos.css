@@ -28,13 +28,15 @@
      él, Safari no aplica la máscara y la imagen entra a cuchillo.
    - opacity .55 la deja como una marca de agua. A plena opacidad compite con
      el botón coral, que es el único de la página y tiene que ganar.
-   - La URL es del CDN de marca (T1), fijada a @1. */
+   - La URL es del CDN de marca (T1), fijada a @1. Es un SVG: 5,8 KB en vez de
+     los 148 del WebP que había antes, y nítido a cualquier tamaño. No se edita
+     a mano — sale de packages/brand/ilustraciones/conjunto-residencial.py. */
 .portada{position:relative;isolation:isolate;overflow:hidden;
   padding-bottom:clamp(190px,28vw,330px)}
 .portada::after{
   content:"";position:absolute;left:0;right:0;bottom:0;z-index:-1;
   height:clamp(170px,26vw,320px);pointer-events:none;opacity:.55;
-  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial.webp")
+  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial.svg")
     center bottom/cover no-repeat;
   -webkit-mask-image:linear-gradient(to bottom,transparent,#000 42%);
           mask-image:linear-gradient(to bottom,transparent,#000 42%)}
