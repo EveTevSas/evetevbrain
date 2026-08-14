@@ -62,6 +62,36 @@ pnpm lint && pnpm typecheck && pnpm test
 6. Cimientos no-reescribibles desde el primer commit: **multi-tenant** +
    **idempotencia/auditoría/conciliación** de pagos.
 
+## Despliegue: cada app se construye sola
+
+Seis proyectos de Vercel apuntan a este repositorio, y por defecto **todos**
+reconstruían en cada push, tocara lo que tocara el commit. Un cambio de una línea
+en una landing gastaba seis despliegues, y cada PR los cuenta dos veces —preview
+y merge—. Un día de trabajo normal agotó el tope diario del plan Hobby: los
+builds empezaron a fallar con `upgradeToPro=build-rate-limit`, y con ellos dejó
+de salir la preview de los PR y de actualizarse producción, sin que nada en el
+repositorio pareciera roto.
+
+Por eso cada app lleva `ignoreCommand` en su `vercel.json`:
+
+```json
+"ignoreCommand": "git rev-parse HEAD^ >/dev/null 2>&1 || exit 1; git diff --quiet HEAD^ HEAD -- ."
+```
+
+Con el Root Directory que cada proyecto ya tiene, ese `.` es su propia carpeta:
+si el commit no la tocó, Vercel cancela antes de construir y no consume cupo.
+
+Dos detalles que no son arbitrarios:
+
+- **Si no se puede averiguar el commit anterior, se construye.** Vercel clona en
+  superficie y `HEAD^` puede no existir; por eso la guarda sale con `exit 1`.
+  Ante la duda se despliega: saltarse un build por error deja producción vieja en
+  silencio, que es exactamente el fallo que esto viene a evitar.
+- **Las apps de Next añaden `../../pnpm-lock.yaml`** a las rutas vigiladas. Una
+  subida de dependencia cambia lo que se despliega sin tocar su carpeta. Las
+  landings estáticas y `eve-studio` no lo necesitan: no instalan nada del
+  workspace.
+
 ## Contribuir
 
 Trunk-based, ramas cortas, PR pequeño con **1 aprobación** y **CI en verde**.
