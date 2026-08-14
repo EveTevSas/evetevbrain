@@ -355,13 +355,24 @@ Tres cosas del prompt no son adorno y conviene no editarlas a la ligera:
 estos pesa más de 1 MB y el WebP baja a ~150 KB), súbela a `ilustraciones/` en
 este repositorio y **etiqueta una versión** — sin etiqueta, `@1` no la sirve.
 
+**Cuando la escena sea simple, dibújala en SVG en vez de generarla.** Este
+estilo —línea pura, un color, sin texturas ni texto— es justo lo que un SVG hace
+bien: `conjunto-residencial.svg` pesa 5,8 KB frente a los 148 KB de la versión
+generada, es nítido a cualquier tamaño y el `#1E6FEB` es exacto en vez de
+aproximado. Y la regla de los trazos separados deja de ser una súplica al modelo
+y pasa a comprobarse en código: el generador
+`packages/brand/ilustraciones/conjunto-residencial.py` aborta si dos trazos
+paralelos quedan a menos de 24 unidades. Lo que se pierde es carácter: un dibujo
+programático sale más regular que uno generado.
+
 **Al usarla:** va de fondo, atenuada y desvanecida, nunca a plena opacidad
 detrás de un texto. Es línea densa y compite con lo que hay que leer. El patrón
 es `.portada::after` en `apps/eveconecta-landing/estilos.css`.
 
 > `conjunto-residencial.webp`, la primera publicada, es **anterior a este
-> prompt** y tiene trazos violeta además del eléctrico. Se deja como está: la
-> referencia de estilo es el prompt, no ese archivo.
+> prompt** y tiene trazos violeta además del eléctrico. Sigue publicada porque
+> lo publicado no se retira, pero está superada por el `.svg`. La referencia de
+> estilo es el prompt, no ese archivo.
 
 ### Snippet de logo en encabezado
 ```html
