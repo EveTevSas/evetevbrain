@@ -26,18 +26,29 @@
    - Anclado abajo: el dibujo tiene el suelo en su borde inferior, así que
      apoyarlo en la base de la sección es lo que lo hace parecer un suelo y no
      una estampa flotando.
-   - opacity .12 lo deja como filigrana. Ojo al subirlo: el párrafo de portada
-     usa --eve-pizarra, que sobre blanco puro ya está en 4,76:1 y AA pide 4,5.
-     Cualquier tinte por debajo del texto se come ese margen.
+   - El dibujo se abre en el centro con una máscara radial, en vez de pasar por
+     detrás del texto. El techo de las torres cae al 21% de la sección y el
+     titular ocupa del 20% al 37%: justo encima, y justo donde el dibujo tiene
+     cornisas y rejillas. Una línea recta cruzando una letra rompe su forma, y
+     eso se lee como suciedad por muy tenue que sea. Agrandar el dibujo NO lo
+     arregla: sube el techo de las torres y cruza todavía más.
+   - Con el hueco abierto, la opacidad puede subir a .2 sin ensuciar nada: el
+     dibujo se ve mejor en los lados, que es donde no estorba.
    - La URL es del CDN de marca (T1), fijada a @1. Es un SVG: 5,8 KB y nítido a
      cualquier tamaño. No se edita a mano — sale de
      packages/brand/ilustraciones/conjunto-residencial.py. */
 .portada{position:relative;isolation:isolate;overflow:hidden;
   padding-bottom:clamp(150px,20vw,260px)}
 .portada::after{
-  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.12;
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.2;
   background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial.svg")
-    center bottom/contain no-repeat}
+    center bottom/contain no-repeat;
+  /* El hueco. Se declara con prefijo -webkit- además del estándar: sin él
+     Safari ignora la máscara y el dibujo vuelve a cruzar el titular. */
+  -webkit-mask-image:radial-gradient(46% 38% at 50% 34%,
+     transparent 0 42%,#000 100%);
+          mask-image:radial-gradient(46% 38% at 50% 34%,
+     transparent 0 42%,#000 100%)}
 
 /* El texto de portada va en azul noche, no en el gris pizarra de base.css.
    No es una preferencia: con el dibujo detrás, --eve-pizarra se queda en 4,06:1
