@@ -1,34 +1,58 @@
-"""Ilustración del conjunto residencial, en línea de un solo color.
+"""Ilustración del conjunto residencial, en línea sobre blanco.
 
-Sigue el prompt de marca (evetev_brand_styles.md §4): una sola tinta
-#1E6FEB sobre blanco, solo formas generales, sin textos, y trazos separados
-—nada por debajo de SEPARACION_MINIMA, porque al reducir dos líneas juntas
-se funden en una mancha gris.
+Sigue el prompt de marca (evetev_brand_styles.md §4): tinta #1E6FEB, solo
+formas generales, sin textos, y trazos separados —nada por debajo de
+SEPARACION_MINIMA, porque al reducir dos líneas juntas se funden en una
+mancha gris.
+
+Y la regla del color: **exactamente dos elementos** llevan relleno, la torre
+izquierda en #144A96 y el árbol de la derecha en #16A34A. Ambos van a los
+lados a propósito. Esta ilustración se usa de fondo en la portada de la
+landing de EveConecta, que le abre un hueco radial en el centro para que las
+líneas no crucen el titular; cualquier color puesto en el centro cae dentro
+de ese hueco y no se ve. Se comprobó en el navegador con una versión que
+tenía la torre y el árbol al medio: no aparecían ni subiendo la opacidad.
+
+Uso:
+    python3 conjunto-residencial.py salida.svg              → con color
+    python3 conjunto-residencial.py salida.svg --sin-color  → una sola tinta
+
+Las dos variantes están publicadas y salen de aquí, para que no se separen:
+si mañana se mueve una torre, se regeneran las dos con el mismo comando.
 """
 import sys, pathlib, math, re
 
+CON_COLOR = "--sin-color" not in sys.argv[2:]
+
 W, H = 1344, 768
 AZUL = "#1E6FEB"
+AZUL_MASA = "#144A96"   # --eve-mezclado: relleno, no trazo (han de distinguirse)
+VERDE = "#16A34A"       # --eve-exito
+VERDE_FONDO = "#0F7A37" # facetas del árbol, para que la copa no sea un disco
 SEPARACION_MINIMA = 24
 SUELO = 604
 PX, PY = 52, -30      # una sola dirección de fuga para toda la escena
 
 p = []
-def linea(x1, y1, x2, y2, w=2.0):
-    p.append(f'<line x1="{x1:.0f}" y1="{y1:.0f}" x2="{x2:.0f}" y2="{y2:.0f}" stroke-width="{w}"/>')
-def ruta(d, w=2.0, relleno="#fff"):
-    p.append(f'<path d="{d}" fill="{relleno}" stroke-width="{w}"/>')
+def linea(x1, y1, x2, y2, w=2.0, trazo=None):
+    extra = f' stroke="{trazo}"' if trazo else ""
+    p.append(f'<line x1="{x1:.0f}" y1="{y1:.0f}" x2="{x2:.0f}" y2="{y2:.0f}" '
+             f'stroke-width="{w}"{extra}/>')
+def ruta(d, w=2.0, relleno="#fff", trazo=None):
+    extra = f' stroke="{trazo}"' if trazo else ""
+    p.append(f'<path d="{d}" fill="{relleno}" stroke-width="{w}"{extra}/>')
 
-def caja(x, y, an, al, w=2.0):
-    """Prisma axonométrico. Caras con relleno blanco a propósito: un wireframe
+def caja(x, y, an, al, w=2.0, relleno="#fff"):
+    """Prisma axonométrico. Caras con relleno a propósito: un wireframe
     transparente cruzaría las líneas de un volumen con las del de atrás, y a
-    tamaño de landing eso es exactamente la mancha que hay que evitar."""
-    ruta(f"M{x},{y} l{PX},{PY} h{an} l{-PX},{-PY} Z", w)          # tapa
-    ruta(f"M{x+an},{y} l{PX},{PY} v{al} l{-PX},{-PY} Z", w)       # costado
-    ruta(f"M{x},{y} h{an} v{al} h{-an} Z", w)                     # frente (encima)
+    tamaño de landing eso es exactamente la mancha que hay que evitar.
+    Por defecto blanco; la torre con color pasa aquí su #144A96."""
+    ruta(f"M{x},{y} l{PX},{PY} h{an} l{-PX},{-PY} Z", w, relleno)          # tapa
+    ruta(f"M{x+an},{y} l{PX},{PY} v{al} l{-PX},{-PY} Z", w, relleno)       # costado
+    ruta(f"M{x},{y} h{an} v{al} h{-an} Z", w, relleno)                     # frente (encima)
 
 def ventanas(x, y, an, al, paso_x=52, paso_y=58, ancho=26, alto=30, margen=28,
-             hasta_y=None):
+             hasta_y=None, relleno="none", trazo=None):
     """`hasta_y` corta la rejilla donde empieza un volumen de primer plano.
     Dibujar ventanas detrás del parqueadero no las hace visibles: las deja
     rozando sus columnas a 4 unidades, que al reducir es una sola mancha."""
@@ -37,18 +61,38 @@ def ventanas(x, y, an, al, paso_x=52, paso_y=58, ancho=26, alto=30, margen=28,
     while cx + ancho <= x + an - margen + 1:
         cy = y + margen + 16
         while cy + alto <= tope:
+            extra = f' stroke="{trazo}"' if trazo else ""
             p.append(f'<rect x="{cx:.0f}" y="{cy:.0f}" width="{ancho}" height="{alto}" '
-                     f'fill="none" stroke-width="1.6"/>')
+                     f'fill="{relleno}" stroke-width="1.6"{extra}/>')
             cy += paso_y
         cx += paso_x
 
-def forjados(x, y, an, al, paso=76):
+def forjados(x, y, an, al, paso=76, trazo=None):
     """El costado solo insinúa los pisos. Repetir ahí la rejilla la comprimiría
     la perspectiva hasta juntar los trazos."""
     cy = y + 52
     while cy < y + al - 30:
-        linea(x + an, cy, x + an + PX, cy + PY, 1.3)
+        linea(x + an, cy, x + an + PX, cy + PY, 1.3, trazo)
         cy += paso
+
+def arbol(cx, base, r, lados=9):
+    """Copa facetada, no un círculo: el estilo es poliédrico y un disco liso
+    se leería como una mancha ajena a la escena. Las facetas van en un verde
+    más oscuro —no en #1E6FEB— porque una retícula azul sobre verde vibra."""
+    # La copa se centra a 1.55r del suelo, no a r: así su borde inferior queda
+    # a 0.6r de la base y deja tronco. Centrada a r la copa se apoyaba en el
+    # suelo y el árbol parecía un arbusto.
+    cy = base - 1.55 * r
+    pts = []
+    for i in range(lados):
+        a = -math.pi / 2 + 2 * math.pi * i / lados
+        pts.append((cx + r * math.cos(a) * 1.02, cy - r * math.sin(a) * 0.94))
+    d = "M" + " L".join(f"{x:.0f},{y:.0f}" for x, y in pts) + " Z"
+    ruta(d, 2.0, VERDE, VERDE_FONDO)
+    # Radios desde el centro: dan volumen sin añadir contorno nuevo.
+    for i in range(0, lados, 2):
+        linea(cx, cy, pts[i][0], pts[i][1], 1.4, VERDE_FONDO)
+    linea(cx, cy + r * 0.7, cx, base, 3.0, VERDE)
 
 # ── Fondo: dos cerros, sin nervios interiores ───────────────────────────────
 for (cx, rx, ry) in ((330, 300, 118), (1010, 330, 132)):
@@ -57,12 +101,21 @@ for (cx, rx, ry) in ((330, 300, 118), (1010, 330, 132)):
 # ── Torres ─────────────────────────────────────────────────────────────────
 PARQUE_Y = 428          # cota superior del parqueadero
 PORTERIA_Y = 466        # cota superior de la portería
-for (x, y, an, al, tope) in ((104, 214, 200, 390, None),
-                             (470, 162, 186, 442, PORTERIA_Y),
-                             (902, 198, 208, 406, PARQUE_Y)):
-    caja(x, y, an, al)
-    ventanas(x, y, an, al, hasta_y=tope)
-    forjados(x, y, an, al)
+# La primera es la torre con color. Va la de la izquierda y no la del centro,
+# que es la más alta y la que pediría el ojo: la del centro cae en el hueco
+# que la portada le abre al dibujo (ver cabecera).
+for (x, y, an, al, tope, color) in ((104, 214, 200, 390, None,
+                                     AZUL_MASA if CON_COLOR else "#fff"),
+                                    (470, 162, 186, 442, PORTERIA_Y, "#fff"),
+                                    (902, 198, 208, 406, PARQUE_Y, "#fff")):
+    con_color = color != "#fff"
+    caja(x, y, an, al, relleno=color)
+    # Sobre el relleno oscuro las ventanas se dibujan en blanco: un contorno
+    # #1E6FEB sobre #144A96 no tiene contraste y la fachada queda ciega.
+    ventanas(x, y, an, al, hasta_y=tope,
+             relleno="#fff" if con_color else "none",
+             trazo="#fff" if con_color else None)
+    forjados(x, y, an, al, trazo="#fff" if con_color else None)
 
 # ── Parqueadero cubierto, primer plano derecha ─────────────────────────────
 # Tres losas con relleno blanco: tapan la torre de atrás en vez de cruzarla.
@@ -83,6 +136,14 @@ gx, gy, gan, gal = 330, PORTERIA_Y, 262, 78
 caja(gx, gy, gan, gal, w=2.2)
 for cx in (gx + 30, gx + gan - 30):
     linea(cx, gy + gal, cx, SUELO + 44, 2.0)
+
+# ── Árbol, extremo derecho ─────────────────────────────────────────────────
+# El segundo elemento con color. A 1205 queda pasado el costado de la torre
+# derecha (acaba en 1162) y bien fuera del hueco central de la portada, pero
+# con 70 u de aire hasta el borde del lienzo: pegado al canto se leía como un
+# recorte y no como parte de la escena.
+if CON_COLOR:
+    arbol(1205, SUELO + 44, 66)
 
 # ── Suelo ──────────────────────────────────────────────────────────────────
 linea(0, SUELO + 44, W, SUELO + 44, 2.0)

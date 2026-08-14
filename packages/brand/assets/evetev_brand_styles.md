@@ -338,9 +338,12 @@ estructuras parezcan hologramas o planos arquitectónicos tridimensionales vivos
 pero con poco detalle. Pero todas las líneas en color #1E6FEB y el fondo blanco.
 Sin textos, y sin saturar con detalles. Regla, no dejar lineas muy juntas porque
 de lejos parece una linea gruesa, los trazos deben ser más sueltos y separados.
+En la imagen aplica color (#144A96 y #16A34A) solo a dos cosas o elementos (por
+ejemplo a un árbol y a una pared, si es un paisaje urbano, o a un par de hojas si
+es a un árbol, o solo al espejo retrovisor y a una llanta si es un carro, etc).
 ```
 
-Tres cosas del prompt no son adorno y conviene no editarlas a la ligera:
+Cuatro cosas del prompt no son adorno y conviene no editarlas a la ligera:
 
 - **`#1E6FEB` es `--eve-electrico`**, el token exacto (§2). Otro azul saca la
   ilustración de la paleta.
@@ -350,6 +353,19 @@ Tres cosas del prompt no son adorno y conviene no editarlas a la ligera:
 - **La regla de los trazos separados** es la que más se nota al usarla: las
   líneas juntas se funden en una mancha gris al reducir, que es justo el tamaño
   al que estas imágenes se ven en una landing.
+- **«Solo a dos cosas»** es la que hace la imagen interesante en vez de plana, y
+  el límite importa tanto como el color: son `--eve-mezclado` (#144A96) y
+  `--eve-exito` (#16A34A), y en dos elementos apenas. Colorear más devuelve la
+  ilustración al muestrario —deja de haber un punto donde mirar— y saca al azul
+  #1E6FEB de su papel de estructura. El relleno va en #144A96 y no en el propio
+  #1E6FEB porque el trazo y la masa tienen que distinguirse; y no en violeta,
+  que es territorio de Eve Intelligence y no de una escena de producto.
+- **Pon los dos elementos a los lados, no al centro.** Estas escenas se usan de
+  fondo en portadas que le abren un hueco al dibujo por el medio, para que las
+  líneas no crucen el titular. Se generó una con la torre y el árbol centrados
+  y en la portada no se veía el color: caía entero dentro del hueco, y subir la
+  opacidad no lo rescataba. Si vas a pedir la imagen para una portada, dilo en
+  el corchete del objeto: «…con el color en elementos de los extremos».
 
 **Antes de publicarla:** conviértela a `.webp` (calidad 82 basta; un PNG de
 estos pesa más de 1 MB y el WebP baja a ~150 KB), súbela a `ilustraciones/` en

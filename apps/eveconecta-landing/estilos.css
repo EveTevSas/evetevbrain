@@ -34,14 +34,25 @@
      arregla: sube el techo de las torres y cruza todavía más.
    - Con el hueco abierto, la opacidad puede subir a .2 sin ensuciar nada: el
      dibujo se ve mejor en los lados, que es donde no estorba.
-   - La URL es del CDN de marca (T1), fijada a @1. Es un SVG: 5,8 KB y nítido a
-     cualquier tamaño. No se edita a mano — sale de
-     packages/brand/ilustraciones/conjunto-residencial.py. */
+   - La escena lleva color en dos elementos: la torre de la izquierda en
+     #144A96 y el árbol de la derecha en #16A34A. Es lo que le quita el aire de
+     plano, y los dos van a los lados por culpa del hueco de aquí arriba: con
+     la torre y el árbol al centro el color caía dentro del hueco y no se veía
+     ni subiendo la opacidad. Se probó en el navegador antes de dejarlo así.
+   - La URL es del CDN de marca (T1), fijada a @1. Es un SVG: 6,7 KB y nítido a
+     cualquier tamaño. La misma escena en raster pesaba 202 KB, la mitad solo
+     por el canal alfa —que ahí era obligatorio, porque con `contain` sobra
+     ancho a los lados y un fondo blanco opaco dibujaría el rectángulo de la
+     imagen recortado contra el degradado—. En SVG la transparencia es gratis.
+   - No se edita a mano: sale de
+     packages/brand/ilustraciones/conjunto-residencial.py. Ese script genera
+     también conjunto-residencial.svg, la variante sin color (--sin-color), que
+     sigue publicada por si algún día el color deja de aportar. */
 .portada{position:relative;isolation:isolate;overflow:hidden;
   padding-bottom:clamp(150px,20vw,260px)}
 .portada::after{
   content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.2;
-  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial.svg")
+  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial-color.svg")
     center bottom/contain no-repeat;
   /* El hueco. Se declara con prefijo -webkit- además del estándar: sin él
      Safari ignora la máscara y el dibujo vuelve a cruzar el titular. */
