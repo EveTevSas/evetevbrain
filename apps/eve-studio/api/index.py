@@ -418,6 +418,7 @@ def crear_herramienta_escritura(registro: dict):
             abiertos = _gh("GET", f"/pulls?state=open&head={REPO_CODIGO.split('/')[0]}:{rama}")
             if abiertos.status_code == 200 and abiertos.json():
                 url = abiertos.json()[0]["html_url"]
+                registro["pr_url"] = url
                 return f"Commit añadido al PR que ya estaba abierto: {url}"
 
             r = _gh("POST", "/pulls", {
@@ -429,7 +430,10 @@ def crear_herramienta_escritura(registro: dict):
             })
             if r.status_code not in (200, 201):
                 return f"Los archivos quedaron en la rama '{rama}' pero no pude abrir el PR (código {r.status_code})."
-            return f"PR abierto: {r.json()['html_url']}"
+            # Se apunta aquí, igual que los archivos: es la URL que devolvió
+            # GitHub, la única que se sabe cierta.
+            registro["pr_url"] = r.json()["html_url"]
+            return f"PR abierto: {registro['pr_url']}"
         except requests.RequestException as e:
             return f"Error de red hablando con GitHub: {e}"
 
@@ -752,10 +756,26 @@ async def generar_interfaz(
         raise HTTPException(status_code=502, detail="fallo_del_agente")
 
     salida = resultado["messages"][-1].content
-    # Si abrió un PR, la URL viaja aparte: la interfaz la enseña como enlace, y
-    # rebuscarla en el texto del agente sería pedirle eso a quien lo usa.
-    pr = re.search(r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+", salida)
-    pr_url = pr.group(0) if pr else None
+    # La URL del PR sale de la HERRAMIENTA, que la recibió de GitHub. Antes se
+    # extraía del texto del agente con esta misma expresión regular, y eso falló
+    # en producción: abrió el PR #45 y escribió el #47 en su respuesta, así que
+    # la interfaz enlazó a un 404. Un modelo puede escribir cualquier número
+    # verosímil; la herramienta no.
+    # La regular se conserva solo como respaldo, para cuando no hay credencial
+    # de escritura y el PR lo abrió una persona antes.
+    pr_url = registro.get("pr_url")
+    if not pr_url:
+        pr = re.search(r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+", salida)
+        pr_url = pr.group(0) if pr else None
+    else:
+        # Y si el agente escribió OTRO número en su prosa, se corrige antes de
+        # enseñarla: el enlace de la interfaz iría bien, pero el número que se
+        # lee en el chat seguiría mintiendo, que es justo donde miró la persona.
+        salida = re.sub(
+            r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+",
+            lambda m: pr_url if m.group(0) != pr_url else m.group(0),
+            salida,
+        )
 
     # El cliente es el dueño del almacenamiento, así que la versión compactada
     # se le devuelve para que la guarde; aquí no queda nada.

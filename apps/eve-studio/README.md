@@ -226,6 +226,16 @@ Los commits van firmados como `Eve Studio <eve@evetev.com>`, para que dentro de
 seis meses se distinga de un vistazo quién escribió qué. Si la rama ya existe,
 añade commits en vez de abrir otro PR.
 
+**La URL del PR sale de la herramienta, no del texto del agente.** Parece obvio y
+no lo era: durante un tiempo se extraía de la respuesta redactada por el modelo
+con una expresión regular. Abrió el PR #45, escribió «#47» en su prosa, y la
+interfaz enlazó a un 404 — el cambio estaba hecho, pero parecía que había
+fallado. Ahora `proponer_cambios` apunta la URL que le devolvió GitHub en el
+mismo `registro` donde ya guardaba los archivos, y si el agente escribió otro
+número en su texto se corrige antes de enseñarlo: de nada sirve que el enlace
+esté bien si el número que se lee en el chat sigue mintiendo. La expresión
+regular queda solo de respaldo, para cuando no hay credencial de escritura.
+
 **Requisitos antes de darle el token:**
 
 1. **Protección de rama en `main`.** El código dice «nunca escribas en main»,
