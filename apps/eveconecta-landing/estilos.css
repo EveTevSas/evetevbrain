@@ -13,33 +13,31 @@
 .cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-pizarra)}
 
 /* ── Ilustración de portada ──────────────────────────────────────────────
-   Un conjunto residencial en trazo técnico, asomando por debajo del texto.
-   Decisiones que conviene no deshacer sin mirar la página:
+   El conjunto residencial en trazo técnico, de fondo, entero.
 
    - Va como ::after y NO como background de .portada, porque base.css ya usa
      ese background para el degradado radial. Sobrescribirlo aquí se llevaría
      por delante el armazón compartido en esta landing.
-   - Se le hace sitio con padding-bottom en vez de meterla detrás del texto:
-     es una escena densa, y el h1 sobre esas líneas se lee mal por mucho que
-     se baje la opacidad. Así el texto queda sobre blanco y la ilustración es
-     el suelo de la sección.
-   - La máscara la funde hacia arriba, para que no aparezca un borde recto a
-     media sección. Se declara con prefijo -webkit- además del estándar: sin
-     él, Safari no aplica la máscara y la imagen entra a cuchillo.
-   - opacity .7: se ve, pero sigue por debajo del botón coral, que es el único
-     de la página y tiene que ganar. A plena opacidad le competiría.
-   - La URL es del CDN de marca (T1), fijada a @1. Es un SVG: 5,8 KB en vez de
-     los 148 del WebP que había antes, y nítido a cualquier tamaño. No se edita
-     a mano — sale de packages/brand/ilustraciones/conjunto-residencial.py. */
+   - `contain`, no `cover`. Con cover y una banda baja, en una pantalla ancha
+     el dibujo se escalaba al ancho y se recortaba por arriba: a 2000 px solo
+     quedaba el 28 % inferior, o sea las líneas del suelo sin edificios. Se veía
+     como un error de maquetación, que es lo que era. Con contain el dibujo se
+     ve completo a cualquier ancho y nunca se recorta.
+   - Anclado abajo: el dibujo tiene el suelo en su borde inferior, así que
+     apoyarlo en la base de la sección es lo que lo hace parecer un suelo y no
+     una estampa flotando.
+   - opacity .12 lo deja como filigrana. Ojo al subirlo: el párrafo de portada
+     usa --eve-pizarra, que sobre blanco puro ya está en 4,76:1 y AA pide 4,5.
+     Cualquier tinte por debajo del texto se come ese margen.
+   - La URL es del CDN de marca (T1), fijada a @1. Es un SVG: 5,8 KB y nítido a
+     cualquier tamaño. No se edita a mano — sale de
+     packages/brand/ilustraciones/conjunto-residencial.py. */
 .portada{position:relative;isolation:isolate;overflow:hidden;
-  padding-bottom:clamp(190px,28vw,330px)}
+  padding-bottom:clamp(150px,20vw,260px)}
 .portada::after{
-  content:"";position:absolute;left:0;right:0;bottom:0;z-index:-1;
-  height:clamp(170px,26vw,320px);pointer-events:none;opacity:.7;
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.12;
   background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial.svg")
-    center bottom/cover no-repeat;
-  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 42%);
-          mask-image:linear-gradient(to bottom,transparent,#000 42%)}
+    center bottom/contain no-repeat}
 
 /* ── Secciones ───────────────────────────────────────────────────────────
    Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
