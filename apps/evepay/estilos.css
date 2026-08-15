@@ -10,7 +10,56 @@
    El único botón coral de la página (C2). base.css no lo posiciona, así que
    aquí le damos aire y su nota honesta debajo. */
 .cta{margin-top:34px}
-.cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-pizarra)}
+.cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-azul-noche)}
+
+/* ── Ilustración de portada ──────────────────────────────────────────────
+   La calle comercial en trazo técnico, de fondo, entera. Es la escena de
+   producto de EvePay igual que el conjunto residencial lo es de EveConecta,
+   y se monta con las mismas decisiones que allí, que están explicadas en
+   apps/eveconecta-landing/estilos.css. En corto:
+
+   - Va como ::after y NO como background de .portada, porque base.css ya usa
+     ese background para el degradado radial.
+   - `contain` y anclada abajo: el dibujo tiene el andén en su borde inferior,
+     así que apoyarlo en la base de la sección es lo que lo hace parecer suelo.
+   - El hueco radial deja el texto limpio. Aquí es más alto que en EveConecta
+     porque el bloque de texto también lo es: titular, entrada, botón y nota
+     ocupan del 20 % al 63 % de la sección, medido en el navegador, frente al
+     20–37 % de allá. Un hueco copiado tal cual dejaba las cornisas cruzando
+     la entrada.
+   - La sección gana padding inferior por lo mismo que allá: sin él el dibujo
+     queda pegado al texto y no hay calle que mirar.
+   - Color en dos elementos, los toldos de los extremos (#144A96 y #16A34A), y
+     por eso están en los extremos: el hueco se come el centro.
+   - No se edita a mano: sale de packages/brand/ilustraciones/comercio.py. */
+.portada{position:relative;isolation:isolate;overflow:hidden;
+  padding-bottom:clamp(150px,20vw,260px)}
+.portada::after{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.2;
+  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/comercio.svg")
+    center bottom/contain no-repeat;
+  /* Con prefijo -webkit- además del estándar: sin él Safari ignora la máscara
+     y el dibujo vuelve a cruzar el titular. */
+  -webkit-mask-image:radial-gradient(52% 46% at 50% 40%,
+     transparent 0 46%,#000 100%);
+          mask-image:radial-gradient(52% 46% at 50% 40%,
+     transparent 0 46%,#000 100%)}
+
+/* El texto de portada va en azul noche, no en el gris pizarra de base.css:
+   con el dibujo detrás, --eve-pizarra no llega al 4,5 que exige AA. Medido en
+   el navegador sobre el peor píxel de cada banda, con el dibujo compuesto al
+   20 % igual que aquí arriba:
+
+     titular y entrada en azul noche ... 11,85:1
+     la nota, en pizarra .............. 3,40:1   ← no pasa
+     la nota, en azul noche ........... 11,10:1
+
+   La nota cae más abajo que el resto y ahí el hueco de la máscara ya se cerró,
+   así que tiene el dibujo entero detrás. Por eso su color se cambió arriba, en
+   su propia regla, en vez de sobrescribirlo aquí. EveConecta ya la tenía en
+   azul noche; esta landing se había quedado en pizarra.
+   Si algún día se quita la ilustración, las dos pueden volver a --eve-pizarra. */
+.portada .entrada{color:var(--eve-azul-noche)}
 
 /* ── Secciones ───────────────────────────────────────────────────────────
    Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
