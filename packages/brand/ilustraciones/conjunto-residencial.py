@@ -14,15 +14,20 @@ de ese hueco y no se ve. Se comprobó en el navegador con una versión que
 tenía la torre y el árbol al medio: no aparecían ni subiendo la opacidad.
 
 Uso:
-    python3 conjunto-residencial.py salida.svg              → con color
-    python3 conjunto-residencial.py salida.svg --sin-color  → una sola tinta
+    python3 conjunto-residencial.py salida.svg                        → con color y halo
+    python3 conjunto-residencial.py salida.svg --sin-color --sin-glow → como se publicó en v1.5.0
 
 Las dos variantes están publicadas y salen de aquí, para que no se separen:
 si mañana se mueve una torre, se regeneran las dos con el mismo comando.
+
+`--sin-glow` existe para poder reproducir `conjunto-residencial.svg` **byte a
+byte** tal como está publicado. Esa comprobación es la que demuestra que un
+cambio nuevo no movió la escena, y se perdería si el halo entrara también ahí.
 """
 import sys, pathlib, math, re
 
 CON_COLOR = "--sin-color" not in sys.argv[2:]
+CON_GLOW = "--sin-glow" not in sys.argv[2:]
 
 W, H = 1344, 768
 AZUL = "#1E6FEB"
@@ -149,10 +154,14 @@ if CON_COLOR:
 linea(0, SUELO + 44, W, SUELO + 44, 2.0)
 linea(190, SUELO + 100, W, SUELO + 100, 1.3)
 
+trazos = chr(10).join(p)
+
+# El SVG de una capa. Es el que se somete a la regla de separación: el halo no
+# es un trazo y contarlo como tal daría falsos positivos.
 svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img">
 <rect width="{W}" height="{H}" fill="#fff"/>
 <g stroke="{AZUL}" fill="none" stroke-linejoin="round" stroke-linecap="round">
-{chr(10).join(p)}
+{trazos}
 </g>
 </svg>
 '''
@@ -191,6 +200,39 @@ if peor < SEPARACION_MINIMA:
         f"Horizontales {peor_h} u, verticales {peor_v} u. "
         "A tamaño de landing eso se ve como una linea gruesa.")
 
-pathlib.Path(sys.argv[1]).write_text(svg)
-print(f"{len(p)} trazos, {len(svg)/1024:.1f} KB")
+# ── El halo ────────────────────────────────────────────────────────────────
+# El prompt de marca pide «glow controlado» (§4). En un raster el modelo lo
+# resuelve solo; en SVG hay que dibujarlo, y son dos capas: la escena
+# desenfocada debajo y la escena nítida encima.
+#
+# La capa de abajo va SIN rellenos —se le quitan con la sustitución de aquí— y
+# por dos razones. Una, el halo tiene que salir de las líneas, que es lo que
+# pide el prompt; desenfocar además las caras blancas de los prismas produce una
+# nube gris alrededor de cada volumen, no un halo. Y dos, esas caras blancas
+# desenfocadas taparían el halo de los trazos que tienen detrás.
+#
+# stdDeviation 5 sobre un lienzo de 1344, elegido mirando: a 2,2 el halo no se
+# ve —el dibujo se muestra a menos de la mitad de su tamaño y el desenfoque se
+# encoge con él— y a 7 se mete dentro de las caras blancas y el conjunto pierde
+# el filo de plano. Si algún día cambia el ancho del lienzo, este número hay que
+# volver a mirarlo: es relativo al viewBox, no a los píxeles de la pantalla.
+glow = re.sub(r' fill="[^"]*"', '', trazos)
+
+svg_final = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img">
+<defs><filter id="halo" x="-4%" y="-4%" width="108%" height="108%">
+<feGaussianBlur stdDeviation="5"/></filter></defs>
+<rect width="{W}" height="{H}" fill="#fff"/>
+<g stroke="{AZUL}" fill="none" stroke-linejoin="round" stroke-linecap="round"
+   filter="url(#halo)" opacity=".75">
+{glow}
+</g>
+<g stroke="{AZUL}" fill="none" stroke-linejoin="round" stroke-linecap="round">
+{trazos}
+</g>
+</svg>
+''' if CON_GLOW else svg
+
+pathlib.Path(sys.argv[1]).write_text(svg_final)
+print(f"{len(p)} trazos, {len(svg_final)/1024:.1f} KB"
+      f"{'' if CON_GLOW else ', sin halo'}")
 print(f"separación mínima: {peor} u  →  {peor*375/W:.1f} px a 375 de ancho")
