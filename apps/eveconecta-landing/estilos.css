@@ -173,6 +173,9 @@
 .faq details[open] summary::after{content:"–"}
 .faq-cuerpo{padding:0 4px 20px}
 .faq-cuerpo p{font-size:.9rem;color:var(--eve-pizarra)}
+/* Hasta ahora toda respuesta cabía en un párrafo, así que dos seguidos salían
+   pegados y se leían como uno solo mal partido. */
+.faq-cuerpo p+p{margin-top:12px}
 
 /* ── CTA final (sobre azul noche) ────────────────────────────────────────
    El bloque de peso de la página (§2). El botón aquí es secundario
