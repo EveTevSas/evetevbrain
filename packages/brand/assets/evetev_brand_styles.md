@@ -341,9 +341,10 @@ de lejos parece una linea gruesa, los trazos deben ser más sueltos y separados.
 En la imagen aplica color (#144A96 y #16A34A) solo a dos cosas o elementos (por
 ejemplo a un árbol y a una pared, si es un paisaje urbano, o a un par de hojas si
 es a un árbol, o solo al espejo retrovisor y a una llanta si es un carro, etc).
+Agrega un pequeño efecto glow a las líneas (como un efecto neón controlado).
 ```
 
-Cuatro cosas del prompt no son adorno y conviene no editarlas a la ligera:
+Seis cosas del prompt no son adorno y conviene no editarlas a la ligera:
 
 - **`#1E6FEB` es `--eve-electrico`**, el token exacto (§2). Otro azul saca la
   ilustración de la paleta.
@@ -366,6 +367,17 @@ Cuatro cosas del prompt no son adorno y conviene no editarlas a la ligera:
   y en la portada no se veía el color: caía entero dentro del hueco, y subir la
   opacidad no lo rescataba. Si vas a pedir la imagen para una portada, dilo en
   el corchete del objeto: «…con el color en elementos de los extremos».
+- **«Glow controlado»**, con las dos palabras. El halo le da cuerpo a la línea y
+  es lo que separa estas escenas de un dibujo de programa de CAD. Pero «neón» a
+  secas le pide al modelo un letrero de bar: halos anchos, saturados y a menudo
+  un fondo oscuro para lucirlos, que es lo contrario del vacío blanco. El
+  adjetivo es lo que sostiene el estilo, no el sustantivo.
+
+  Dos avisos al usarla. Un halo azul sobre blanco **baja el contraste del
+  trazo**, así que si la imagen va detrás de texto hay que volver a mirar que el
+  texto siga leyéndose. Y el glow **es un efecto de raster**: si la escena se
+  redibuja en SVG —que es lo que recomienda el punto de más abajo— hay que
+  reproducirlo con un filtro, no sale solo.
 
 **Antes de publicarla:** conviértela a `.webp` (calidad 82 basta; un PNG de
 estos pesa más de 1 MB y el WebP baja a ~150 KB), súbela a `ilustraciones/` en
