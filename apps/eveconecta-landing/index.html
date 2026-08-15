@@ -139,44 +139,86 @@
     </div>
   </section>
 
-  <!-- Dashboard: los módulos reales de la plataforma, en listado minimalista. -->
+  <!-- Dashboard: los módulos reales de la plataforma, en listado minimalista.
+
+       Las descripciones de abajo salen de lo que enseña el vídeo de esta misma
+       sección, no de una lista de deseos: la matriz de autoridad y el «aprobar
+       no es pagar» de Presupuesto, la constancia de entrega por canal de
+       Comunicaciones, el depósito y el aforo de Reservas, la orden de trabajo
+       colgada de su activo en Mantenimiento, y las versiones con audiencia y
+       aviso de vencimiento de Documentos.
+
+       Lo que NO se trae del vídeo son sus cifras —97,1 % de entrega, 94 % de
+       preventivo al día, 91 % dentro de SLA—. Son datos del conjunto de prueba
+       que sale en la grabación, y publicarlas aquí las convertiría en una
+       promesa de rendimiento que nadie ha medido. Se describe lo que la
+       plataforma hace, no lo que le dio a un conjunto inventado. -->
   <section class="seccion seccion-tinte" id="dashboard" aria-labelledby="titulo-dashboard">
     <div class="wrap">
       <h2 id="titulo-dashboard">Un dashboard para administrar el conjunto</h2>
       <p class="seccion-intro">
         Lo que hoy manejas en varios archivos y grupos de chat, reunido en un
-        solo panel, con los permisos de cada quien.
+        solo panel, con los permisos de cada quien. Y cada módulo deja
+        constancia de lo que pasó: quién aprobó, a quién le llegó, qué versión
+        estaba vigente.
       </p>
+
+      <!-- Recorrido por el dashboard. Va aquí, entre la entrada y la lista de
+           módulos, porque el vídeo recorre exactamente esos módulos: primero se
+           ve el panel y después se enumera lo que lleva dentro. En la sección
+           del CTA final estorbaría al botón.
+
+           No pesa en la carga: `preload="none"` y una portada de 32 KB, así que
+           al abrir la página no se descarga ni un byte del vídeo. Empieza solo
+           cuando llega a la pantalla (script del final), y ahí sí baja 1,3 MB.
+           Es mudo —la grabación no trae sonido— y por eso lleva `muted`, que
+           además es lo que permite que un navegador lo arranque solo.
+           `controls` se queda: si el arranque automático no ocurre —datos
+           ahorrados, movimiento reducido, un bloqueo del navegador— tiene que
+           poder verse a mano. -->
+      <figure class="video-demo">
+        <video class="video-demo-el" preload="none" muted loop playsinline controls
+               poster="dashboard-poster.webp" width="1600" height="826"
+               aria-describedby="video-demo-pie">
+          <source src="dashboard.mp4" type="video/mp4">
+        </video>
+        <figcaption id="video-demo-pie" class="video-demo-pie">
+          Recorrido por el dashboard: presupuesto y gastos, reservas de zonas
+          comunes y el resto de módulos. 32 segundos, sin sonido, con datos de
+          un conjunto de prueba.
+        </figcaption>
+      </figure>
+
       <ul class="caracts-grid" role="list">
         <li class="caract">
           <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
           <h3>Finanzas y presupuesto</h3>
-          <p>Estado de cuenta, cartera y presupuesto del conjunto, cuadrados y listos para la asamblea.</p>
+          <p>Ejecución del presupuesto rubro por rubro, y cada gasto con su soporte, su proveedor y sus aprobaciones. Aprobar no es pagar: van separados a propósito.</p>
         </li>
         <li class="caract">
           <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
           <h3>Agenda de espacios comunes</h3>
-          <p>Reservas del salón social, la cancha o el BBQ, con su calendario y sin choques de horario.</p>
+          <p>Salón social, cancha o BBQ con su aforo, su tarifa y su depósito. La reserva, el cobro y el calendario van juntos, así que no hay dos eventos a la misma hora.</p>
         </li>
         <li class="caract">
           <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
           <h3>Comunicaciones y PQRS</h3>
-          <p>Avisos a los residentes y peticiones, quejas y reclamos con seguimiento, sin perderse en el chat.</p>
+          <p>Publicas un comunicado una vez y sale por la app, el correo y WhatsApp. De cada envío queda constancia de entrega, y las PQRS llevan su tiempo de respuesta.</p>
         </li>
         <li class="caract">
           <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
           <h3>Asambleas</h3>
-          <p>Convocatoria, quorum y decisiones de la asamblea de copropietarios, con su registro.</p>
+          <p>Convocatoria a los propietarios por correo certificado, quorum y decisiones. El acta queda archivada con el resto de documentos del conjunto.</p>
         </li>
         <li class="caract">
           <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
           <h3>Portería y mantenimiento</h3>
-          <p>Control de portería y plan de mantenimiento de las zonas comunes en un solo lugar.</p>
+          <p>Cada orden de trabajo cuelga de su activo —el ascensor de la torre 2, la bomba, las cámaras— con su proveedor, su evidencia y lo que costó frente a lo presupuestado.</p>
         </li>
         <li class="caract">
           <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
           <h3>Documentos y auditoría</h3>
-          <p>Actas, reglamentos y un registro de auditoría de cada movimiento, para rendir cuentas.</p>
+          <p>El reglamento, las actas y las pólizas con su versión vigente y quién puede verla. Te avisa antes de que una póliza se venza, y cada movimiento queda en el registro de auditoría.</p>
         </li>
       </ul>
     </div>
@@ -252,6 +294,22 @@
           </div>
         </details>
         <details>
+          <summary>¿Quién autoriza los gastos del conjunto?</summary>
+          <div class="faq-cuerpo">
+            <p>
+              Los que ustedes definan. Cada solicitud de gasto pasa por la
+              matriz de autoridad del conjunto y necesita las aprobaciones que
+              le correspondan antes de avanzar, con el soporte y el proveedor
+              adjuntos.
+            </p>
+            <p>
+              Y una cosa que no es un detalle: <strong>aprobar un gasto no lo
+              paga</strong>. Son dos pasos distintos, para que quien autoriza no
+              sea el mismo que ejecuta el desembolso.
+            </p>
+          </div>
+        </details>
+        <details>
           <summary>¿Quién ve la información del conjunto?</summary>
           <div class="faq-cuerpo">
             <p>
@@ -318,6 +376,36 @@
   </div>
 </footer>
 
-<script>document.getElementById('anio').textContent = new Date().getFullYear();</script>
+<script>document.getElementById('anio').textContent = new Date().getFullYear();
+
+/* El vídeo del dashboard empieza cuando llega a la pantalla, no al cargar.
+   Con `preload="none"` en el marcado, la portada es lo único que viaja hasta
+   que alguien baja hasta la sección; la página abre igual de rápido que antes.
+
+   Dos motivos para NO arrancarlo:
+   - `prefers-reduced-motion`: hay quien marea con movimiento que no pidió.
+   - `connection.saveData`: en un plan de datos, 1,3 MB no se gastan sin permiso.
+   En ambos casos se queda la portada con sus controles, y quien quiera lo abre.
+
+   `play()` devuelve una promesa que algunos navegadores rechazan pese al
+   `muted`. Se ignora el rechazo a propósito: el fallo ya tiene remedio visible,
+   que son los controles del propio vídeo. */
+(function () {
+  var v = document.querySelector('.video-demo-el');
+  if (!v || !('IntersectionObserver' in window)) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (navigator.connection && navigator.connection.saveData) return;
+
+  var io = new IntersectionObserver(function (entradas) {
+    entradas.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      v.preload = 'auto';
+      var intento = v.play();
+      if (intento && intento.catch) intento.catch(function () {});
+    });
+  }, { threshold: 0.35 });
+  io.observe(v);
+})();</script>
 </body>
 </html>

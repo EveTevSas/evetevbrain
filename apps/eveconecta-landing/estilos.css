@@ -108,6 +108,26 @@
   filter:drop-shadow(0 18px 30px rgba(10,37,64,.12))}
 .figura-nota{margin-top:16px;font-size:.84rem;color:var(--eve-pizarra)}
 
+/* ── Vídeo del dashboard ─────────────────────────────────────────────────
+   Una captura de pantalla de una app dentro de una página es un rectángulo
+   claro sobre otro rectángulo claro: sin un canto que lo separe, el vídeo
+   parece parte de la maqueta. De ahí el borde en --eve-linea y la sombra
+   suave, la misma familia que la de la mascota (§6).
+
+   `aspect-ratio` con las medidas reales del archivo: reserva el hueco antes
+   de que baje nada, así la lista de módulos no da un salto cuando aparece la
+   portada. Es la razón por la que el <video> lleva width/height en el HTML.
+
+   `background` en azul noche para el instante entre la portada y el primer
+   fotograma: en blanco ese parpadeo se ve como un destello. */
+.video-demo{margin:44px auto 0;max-width:980px}
+.video-demo-el{display:block;width:100%;height:auto;aspect-ratio:1600/826;
+  background:var(--eve-azul-noche);
+  border:1px solid var(--eve-linea);border-radius:var(--eve-radio-lg);
+  box-shadow:0 18px 40px rgba(10,37,64,.10)}
+.video-demo-pie{margin-top:14px;font-size:.84rem;color:var(--eve-pizarra);
+  text-align:center;text-wrap:balance}
+
 /* ── Características (módulos del dashboard) ─────────────────────────────
    Variante minimalista del manual (§6): sin fondo ni sombra, la jerarquía la
    da el espacio y el icono de producto teñido con --p. */
@@ -153,6 +173,9 @@
 .faq details[open] summary::after{content:"–"}
 .faq-cuerpo{padding:0 4px 20px}
 .faq-cuerpo p{font-size:.9rem;color:var(--eve-pizarra)}
+/* Hasta ahora toda respuesta cabía en un párrafo, así que dos seguidos salían
+   pegados y se leían como uno solo mal partido. */
+.faq-cuerpo p+p{margin-top:12px}
 
 /* ── CTA final (sobre azul noche) ────────────────────────────────────────
    El bloque de peso de la página (§2). El botón aquí es secundario
