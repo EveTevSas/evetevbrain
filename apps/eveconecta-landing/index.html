@@ -147,6 +147,33 @@
         Lo que hoy manejas en varios archivos y grupos de chat, reunido en un
         solo panel, con los permisos de cada quien.
       </p>
+
+      <!-- Recorrido por el dashboard. Va aquí, entre la entrada y la lista de
+           módulos, porque el vídeo recorre exactamente esos módulos: primero se
+           ve el panel y después se enumera lo que lleva dentro. En la sección
+           del CTA final estorbaría al botón.
+
+           No pesa en la carga: `preload="none"` y una portada de 32 KB, así que
+           al abrir la página no se descarga ni un byte del vídeo. Empieza solo
+           cuando llega a la pantalla (script del final), y ahí sí baja 1,3 MB.
+           Es mudo —la grabación no trae sonido— y por eso lleva `muted`, que
+           además es lo que permite que un navegador lo arranque solo.
+           `controls` se queda: si el arranque automático no ocurre —datos
+           ahorrados, movimiento reducido, un bloqueo del navegador— tiene que
+           poder verse a mano. -->
+      <figure class="video-demo">
+        <video class="video-demo-el" preload="none" muted loop playsinline controls
+               poster="dashboard-poster.webp" width="1600" height="826"
+               aria-describedby="video-demo-pie">
+          <source src="dashboard.mp4" type="video/mp4">
+        </video>
+        <figcaption id="video-demo-pie" class="video-demo-pie">
+          Recorrido por el dashboard: presupuesto y gastos, reservas de zonas
+          comunes y el resto de módulos. 32 segundos, sin sonido, con datos de
+          un conjunto de prueba.
+        </figcaption>
+      </figure>
+
       <ul class="caracts-grid" role="list">
         <li class="caract">
           <span class="p-ico" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span>
@@ -318,6 +345,36 @@
   </div>
 </footer>
 
-<script>document.getElementById('anio').textContent = new Date().getFullYear();</script>
+<script>document.getElementById('anio').textContent = new Date().getFullYear();
+
+/* El vídeo del dashboard empieza cuando llega a la pantalla, no al cargar.
+   Con `preload="none"` en el marcado, la portada es lo único que viaja hasta
+   que alguien baja hasta la sección; la página abre igual de rápido que antes.
+
+   Dos motivos para NO arrancarlo:
+   - `prefers-reduced-motion`: hay quien marea con movimiento que no pidió.
+   - `connection.saveData`: en un plan de datos, 1,3 MB no se gastan sin permiso.
+   En ambos casos se queda la portada con sus controles, y quien quiera lo abre.
+
+   `play()` devuelve una promesa que algunos navegadores rechazan pese al
+   `muted`. Se ignora el rechazo a propósito: el fallo ya tiene remedio visible,
+   que son los controles del propio vídeo. */
+(function () {
+  var v = document.querySelector('.video-demo-el');
+  if (!v || !('IntersectionObserver' in window)) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (navigator.connection && navigator.connection.saveData) return;
+
+  var io = new IntersectionObserver(function (entradas) {
+    entradas.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      v.preload = 'auto';
+      var intento = v.play();
+      if (intento && intento.catch) intento.catch(function () {});
+    });
+  }, { threshold: 0.35 });
+  io.observe(v);
+})();</script>
 </body>
 </html>
