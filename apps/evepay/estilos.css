@@ -13,9 +13,16 @@
 .cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-azul-noche)}
 
 /* ── Ilustración de portada ──────────────────────────────────────────────
-   La calle comercial en trazo técnico, de fondo, entera. Es la escena de
-   producto de EvePay igual que el conjunto residencial lo es de EveConecta,
-   y se monta con las mismas decisiones que allí, que están explicadas en
+   El flujo del pago en trazo técnico, de fondo: la tarjeta del cliente, el
+   datáfono del comercio y la cuenta donde cae el dinero, en línea recta.
+
+   Antes había aquí una calle de comercios y estaba mal. Se había construido
+   copiando el conjunto residencial de EveConecta —prismas con rejilla de
+   ventanas— y esa rejilla gana la lectura: la portada de una pasarela de pagos
+   acababa ilustrando edificios. Las dos escenas comparten estilo (trazo, fuga,
+   halo, color en dos elementos), no tema.
+
+   Se monta con las mismas decisiones que en EveConecta, explicadas en
    apps/eveconecta-landing/estilos.css. En corto:
 
    - Va como ::after y NO como background de .portada, porque base.css ya usa
@@ -29,14 +36,17 @@
      la entrada.
    - La sección gana padding inferior por lo mismo que allá: sin él el dibujo
      queda pegado al texto y no hay calle que mirar.
-   - Color en dos elementos, los toldos de los extremos (#144A96 y #16A34A), y
-     por eso están en los extremos: el hueco se come el centro.
-   - No se edita a mano: sale de packages/brand/ilustraciones/comercio.py. */
+   - Color en dos elementos y en los extremos —el cuerpo de la tarjeta en
+     #144A96 y la rueda de la caja en #16A34A—, porque el hueco se come el
+     centro. Aquí eso cuadra solo: los dos extremos del flujo son el que paga y
+     el que recibe, que es justo lo que la escena quiere que se mire.
+   - No se edita a mano: sale de
+     packages/brand/ilustraciones/flujo-de-pago.py. */
 .portada{position:relative;isolation:isolate;overflow:hidden;
   padding-bottom:clamp(150px,20vw,260px)}
 .portada::after{
   content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.2;
-  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/comercio.svg")
+  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/flujo-de-pago.svg")
     center bottom/contain no-repeat;
   /* Con prefijo -webkit- además del estándar: sin él Safari ignora la máscara
      y el dibujo vuelve a cruzar el titular. */
