@@ -521,7 +521,17 @@ DEJAR EL CAMBIO EN EL REPOSITORIO:
     que lo haga una persona.
 12. Si la herramienta rechaza la propuesta, lee el motivo y corrige. No
     insistas con la misma ruta, y no busques rodeos para escribir fuera.
-13. Termina siempre indicando la URL del PR que te devolvió la herramienta."""
+13. NO escribas nunca una URL de Pull Request. Ni una que recuerdes, ni una que
+    deduzcas, ni la que te devolvió la herramienta. El sistema añade el enlace
+    por su cuenta, con el dato que le dio GitHub. Si escribes una, se borra.
+14. Di siempre, con todas las letras, si dejaste el cambio en el repositorio:
+    - si llamaste a 'proponer_cambios' y salió bien: «Propuse el cambio.»
+    - si no la llamaste: «No propuse ningún cambio.» Y explica por qué —porque
+      la petición era una pregunta, porque hace falta tocar algo que no puedes,
+      porque necesitas que te aclaren algo—.
+    Describir el cambio que harías NO es haberlo hecho. Si tu respuesta cuenta
+    lo que cambiaste pero no llamaste a la herramienta, estás mintiendo, y la
+    persona se va a enterar cuando busque el PR y no exista."""
 
 
 def construir_agente(registro: dict):
@@ -675,6 +685,45 @@ LIMITE_HISTORIAL = 12_000       # caracteres antes de compactar
 TURNOS_INTACTOS = 4             # los últimos se conservan literales
 
 
+RE_PR = r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+"
+
+# Frases con las que el agente afirma haber dejado el cambio. No pretenden
+# cubrirlo todo: son el disparador de una comprobación, y lo que no cacen aquí
+# lo sigue cazando el aviso de después.
+FRASES_DE_CAMBIO = (
+    "propuse el cambio", "abrí un pull request", "abri un pull request",
+    "abrí el pr", "abri el pr", "pull request abierto", "pr abierto",
+    "cambio propuesto en el pr", "lo dejé en el repositorio",
+)
+
+
+def dice_que_cambio(texto: str) -> bool:
+    """¿El agente afirma haber dejado el cambio en el repositorio?
+
+    Se mira su TEXTO, no su intención: escribir una URL de PR o decir «propuse
+    el cambio» son afirmaciones verificables, y el registro de la herramienta
+    dice si son ciertas. Describir lo que haría no cuenta y no debe disparar
+    nada: una respuesta que explica una opción es una respuesta legítima."""
+    bajo = texto.lower()
+    return bool(re.search(RE_PR, texto)) or any(f in bajo for f in FRASES_DE_CAMBIO)
+
+
+# Lo que se le dice cuando se contradice. Va como mensaje de usuario porque es
+# la única vía que el agente ya sabe atender, y en segunda persona directa: el
+# objetivo es que actúe, no que se disculpe.
+AVISO_ARNES = (
+    "ALTO. Tu respuesta dice que dejaste el cambio en el repositorio, pero no "
+    "llamaste a 'proponer_cambios': no existe ninguna rama ni ningún Pull "
+    "Request. Esto lo comprueba el sistema, no es una opinión.\n\n"
+    "Haz UNA de estas dos cosas, ahora:\n"
+    "1. Si el cambio debe quedar guardado, llama a 'proponer_cambios' con el "
+    "contenido completo de cada archivo.\n"
+    "2. Si no debe quedar guardado, responde de nuevo diciendo «No propuse "
+    "ningún cambio» y explica por qué.\n\n"
+    "No vuelvas a afirmar que lo dejaste sin haber llamado a la herramienta."
+)
+
+
 def _aviso_sin_pr(registro: dict, inventadas: list) -> str | None:
     """Qué contarle a la persona cuando no hubo PR.
 
@@ -689,6 +738,14 @@ def _aviso_sin_pr(registro: dict, inventadas: list) -> str | None:
                 "La herramienta falló: " + fallos[-1])
     if fallos:
         return "No se abrió ningún Pull Request. La herramienta falló: " + fallos[-1]
+    if registro.get("arnes_disparado"):
+        # Se le dio una segunda oportunidad explícita y siguió sin escribir. Que
+        # el aviso lo diga: no es lo mismo un descuido que una insistencia, y la
+        # persona necesita saber que el sistema ya intentó corregirlo.
+        return ("El agente dijo que había dejado el cambio sin haberlo hecho. Se "
+                "le avisó y se le dio otra oportunidad, y **sigue sin haber "
+                "ningún Pull Request**. Nada de lo que cuente abajo está en el "
+                "repositorio: vuelve a pedírselo, o pásalo a mano.")
     if inventadas:
         return ("El agente dijo que abrió un Pull Request y **no abrió ninguno**: "
                 "ni siquiera llegó a intentarlo. No te fíes de lo que cuente "
@@ -779,23 +836,45 @@ async def generar_interfaz(
     mensajes.append(HumanMessage(content=peticion.mensaje_nuevo))
 
     registro: dict = {}
+    agente = construir_agente(registro)
     try:
-        resultado = construir_agente(registro).invoke({"messages": mensajes})
+        resultado = agente.invoke({"messages": mensajes})
+        salida = resultado["messages"][-1].content
+
+        # ── El arnés ───────────────────────────────────────────────────────
+        # Si el agente dice que dejó el cambio y la herramienta no corrió, se le
+        # devuelve una vuelta. Es lo que faltaba el 17 de agosto: aquella
+        # petición terminó en 36 s con tres llamadas al modelo y ninguna a
+        # GitHub, y el texto anunciaba un PR igualmente.
+        #
+        # El disparador es una CONTRADICCIÓN comprobable —sus palabras contra el
+        # registro de la herramienta—, no una suposición sobre lo que el usuario
+        # quería. Se probó a pensarlo al revés, disparando cuando la petición
+        # «pedía un cambio», y no vale: distinguir «hazlo» de «cómo se haría»
+        # exige otra llamada al modelo, y equivocarse castiga con dos minutos de
+        # espera a quien solo hizo una pregunta. Una respuesta que explica una
+        # opción sin afirmar nada no dispara nada, que es lo correcto.
+        #
+        # UNA sola vuelta. Si insiste, el aviso de más abajo lo desmiente ante
+        # la persona; lo que no se hace es dejar al modelo en bucle gastando
+        # créditos hasta que acierte.
+        if not registro.get("pr_url") and not registro.get("fallos") and dice_que_cambio(salida):
+            print("arnés: el agente dijo haber propuesto un cambio sin llamar a la herramienta")
+            registro["arnes_disparado"] = True
+            resultado = agente.invoke(
+                {"messages": list(resultado["messages"]) + [HumanMessage(content=AVISO_ARNES)]}
+            )
+            salida = resultado["messages"][-1].content
     except Exception as e:
         # Sin filtrar la excepción cruda al cliente: puede arrastrar la API key.
         print(f"fallo del agente: {type(e).__name__}: {e}")
         raise HTTPException(status_code=502, detail="fallo_del_agente")
-
-    salida = resultado["messages"][-1].content
     # La URL del PR sale de la HERRAMIENTA, que la recibió de GitHub. Antes se
     # extraía del texto del agente con esta misma expresión regular, y eso falló
     # en producción: abrió el PR #45 y escribió el #47 en su respuesta, así que
     # la interfaz enlazó a un 404. Un modelo puede escribir cualquier número
     # verosímil; la herramienta no.
-    # La regular se conserva solo como respaldo, para cuando no hay credencial
-    # de escritura y el PR lo abrió una persona antes.
     pr_url = registro.get("pr_url")
-    RE_PR = r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+"
     if pr_url:
         # Si el agente escribió OTRO número en su prosa, se corrige antes de
         # enseñarla: el enlace de la interfaz iría bien, pero el número que se

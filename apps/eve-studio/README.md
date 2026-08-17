@@ -265,6 +265,52 @@ un problema del sistema, que el agente se invente un PR es un problema del
 agente, y que no llame a la herramienta puede ser lo correcto —una respuesta que
 no cambia archivos no tiene por qué abrir nada— y por eso ese caso no avisa.
 
+### Por qué no llamaba a la herramienta
+
+Lo de arriba hace **visible** el fallo. La causa se encontró después, en los logs
+de Vercel, comparando las dos peticiones de aquella tarde:
+
+| | la que abrió el PR #57 | la que mintió |
+|---|---|---|
+| duración | 3 m 30 s | 36,5 s |
+| llamadas al modelo | 6 | 3 |
+| hueco entre llamadas | **2 m 02 s** | 4 s y 15 s |
+
+Las llamadas a GitHub no salen en el log, pero su duración sí deja huella:
+`proponer_cambios` tarda unos dos minutos —blobs, árbol, commit, rama, PR— y el
+#57 se creó dentro de ese hueco. En la petición que falló no hay ningún hueco.
+Ni error de GitHub, ni timeout, ni tope de propuestas: **el modelo no llamó a la
+herramienta y contó el resultado igualmente**.
+
+Lo que lo empujaba estaba en el propio prompt. La regla 13 decía:
+
+> «Termina siempre indicando la URL del PR que te devolvió la herramienta.»
+
+Cuando el modelo no había llamado a la herramienta, la única forma de cumplir esa
+instrucción era inventarse una URL. **La regla que debía dar trazabilidad era la
+que fabricaba el número.** Ahora dice lo contrario: no escribas ninguna URL de PR
+—el sistema pone el enlace— y di con todas las letras si dejaste o no el cambio.
+
+### El arnés
+
+Un prompt se puede desobedecer, así que además hay una comprobación en código: si
+el agente **dice** que dejó el cambio y la herramienta **no corrió**, se le
+devuelve una vuelta con un aviso que le obliga a elegir —llamar a
+`proponer_cambios`, o decir que no propuso nada—.
+
+Dos decisiones sobre el disparador:
+
+- **Se dispara con una contradicción comprobable**, sus palabras contra el
+  registro de la herramienta. Se pensó al revés —disparar cuando la petición
+  «pedía un cambio»— y no vale: distinguir «hazlo» de «cómo se haría» exige otra
+  llamada al modelo, y equivocarse castiga con dos minutos de espera a quien solo
+  hizo una pregunta. Una respuesta que explica una opción sin afirmar nada no
+  dispara nada. Probado con «para dejarlo guardado tendría que abrir un Pull
+  Request, ¿lo hago?», que no dispara.
+- **Una sola vuelta.** Si insiste, el aviso se lo dice a la persona con otras
+  palabras («se le avisó y sigue sin haber ningún PR»). Lo que no se hace es
+  dejar al modelo en bucle gastando créditos hasta que acierte.
+
 **Requisitos antes de darle el token:**
 
 1. **Protección de rama en `main`.** El código dice «nunca escribas en main»,
