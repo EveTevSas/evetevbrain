@@ -233,8 +233,37 @@ interfaz enlazó a un 404 — el cambio estaba hecho, pero parecía que había
 fallado. Ahora `proponer_cambios` apunta la URL que le devolvió GitHub en el
 mismo `registro` donde ya guardaba los archivos, y si el agente escribió otro
 número en su texto se corrige antes de enseñarlo: de nada sirve que el enlace
-esté bien si el número que se lee en el chat sigue mintiendo. La expresión
-regular queda solo de respaldo, para cuando no hay credencial de escritura.
+esté bien si el número que se lee en el chat sigue mintiendo.
+
+**Y el respaldo por expresión regular se quitó, porque era el agujero que
+quedaba.** El arreglo de arriba solo cubría el caso en que la herramienta SÍ
+había abierto un PR. Cuando no abría ninguno, el código volvía a leer la URL del
+texto del modelo — y el 17 de agosto el agente escribió `/pull/58`, un PR que
+nunca existió: no llegó ni a crear la rama. La interfaz lo enlazó igual, con su
+«Abrí un Pull Request con el cambio». Aquel respaldo estaba pensado para cuando
+no hay credencial de escritura y el PR lo abrió una persona, pero ese caso no
+compensa: **un enlace roto es peor que no tener enlace, porque parece que la
+operación salió bien.**
+
+Hoy, si la herramienta no devolvió PR, no hay PR:
+
+- las URLs de `/pull/` que el modelo se haya inventado **se tachan** del texto
+  antes de enseñarlo;
+- la respuesta lleva un `aviso` que lo dice sin rodeos, y la interfaz lo pinta
+  como error debajo del resumen;
+- viaja un `pr_verificado` aparte de `pr_url`, y **solo lo verificado anuncia un
+  PR**. Hoy es redundante —`pr_url` ya solo puede venir de la herramienta—, pero
+  la interfaz es un desplegable distinto del API y no debería tener que deducir
+  la procedencia de una URL: eso es justo lo que falló.
+
+Los fallos de la herramienta se apuntan además en `registro["fallos"]`, que el
+modelo no puede tocar. Lo que la herramienta *devuelve* lo lee el modelo y puede
+reinterpretarlo; lo que apunta en el registro es lo que permite desmentirlo.
+
+Tres avisos distintos, porque no significan lo mismo: que la herramienta falle es
+un problema del sistema, que el agente se invente un PR es un problema del
+agente, y que no llame a la herramienta puede ser lo correcto —una respuesta que
+no cambia archivos no tiene por qué abrir nada— y por eso ese caso no avisa.
 
 **Requisitos antes de darle el token:**
 

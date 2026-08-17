@@ -330,6 +330,16 @@ def crear_herramienta_escritura(registro: dict):
     """
     hechas = {"n": 0}
 
+    def _falla(motivo: str) -> str:
+        """Deja constancia del intento fallido ANTES de devolvérselo al modelo.
+
+        Lo que esta función devuelve lo lee el modelo, que puede reinterpretarlo
+        —o ignorarlo— y contar en su respuesta que abrió un PR. Por eso el
+        motivo se guarda también en `registro`, que el modelo no puede tocar:
+        es lo que permite a la capa de arriba desmentirlo."""
+        registro.setdefault("fallos", []).append(motivo)
+        return motivo
+
     @tool(args_schema=PropuestaCambios)
     def proponer_cambios(asunto: str, descripcion: str, archivos: list) -> str:
         """Abre un Pull Request con los archivos indicados. NO escribe en main.
@@ -341,17 +351,17 @@ def crear_herramienta_escritura(registro: dict):
         Devuelve la URL del PR, que debes incluir en tu respuesta.
         """
         if not TOKEN_ESCRITURA:
-            return "No hay credencial de escritura configurada en el servidor. Entrega el código en el chat."
+            return _falla("No hay credencial de escritura configurada en el servidor. Entrega el código en el chat.")
 
         hechas["n"] += 1
         if hechas["n"] > MAX_PROPUESTAS_POR_PETICION:
-            return "Límite de propuestas para esta petición alcanzado. Termina y responde."
+            return _falla("Límite de propuestas para esta petición alcanzado. Termina y responde.")
 
         entradas = [a if isinstance(a, dict) else a.model_dump() for a in archivos]
         if not entradas:
-            return "No mandaste ningún archivo."
+            return _falla("No mandaste ningún archivo.")
         if len(entradas) > MAX_ARCHIVOS:
-            return f"Demasiados archivos ({len(entradas)}); el máximo es {MAX_ARCHIVOS}."
+            return _falla(f"Demasiados archivos ({len(entradas)}); el máximo es {MAX_ARCHIVOS}.")
 
         rechazos = []
         for a in entradas:
@@ -363,7 +373,7 @@ def crear_herramienta_escritura(registro: dict):
         if rechazos:
             # Se rechaza la propuesta ENTERA: aplicar solo la parte válida
             # dejaría el repositorio en un estado que nadie pidió.
-            return "Propuesta rechazada, no se escribió nada:\n- " + "\n- ".join(rechazos)
+            return _falla("Propuesta rechazada, no se escribió nada:\n- " + "\n- ".join(rechazos))
 
         # Se apuntan aquí, ya validados: la interfaz los usa para armar la vista
         # previa fiel, sin tener que descargarlos otra vez.
@@ -375,7 +385,7 @@ def crear_herramienta_escritura(registro: dict):
         try:
             r = _gh("GET", f"/git/ref/heads/{RAMA_BASE}")
             if r.status_code != 200:
-                return f"No pude leer {RAMA_BASE} (código {r.status_code})."
+                return _falla(f"No pude leer {RAMA_BASE} (código {r.status_code}).")
             sha_base = r.json()["object"]["sha"]
 
             # Si la rama ya existe se añade encima, en vez de abrir otro PR.
@@ -409,11 +419,11 @@ def crear_herramienta_escritura(registro: dict):
                 "committer": AUTOR_COMMIT,
             })
             if r.status_code not in (200, 201):
-                return f"No pude crear el commit (código {r.status_code})."
+                return _falla(f"No pude crear el commit (código {r.status_code}).")
 
             r = _gh("PATCH", f"/git/refs/heads/{rama}", {"sha": r.json()["sha"]})
             if r.status_code != 200:
-                return f"No pude actualizar la rama (código {r.status_code})."
+                return _falla(f"No pude actualizar la rama (código {r.status_code}).")
 
             abiertos = _gh("GET", f"/pulls?state=open&head={REPO_CODIGO.split('/')[0]}:{rama}")
             if abiertos.status_code == 200 and abiertos.json():
@@ -429,13 +439,13 @@ def crear_herramienta_escritura(registro: dict):
                 + "\n\n---\nGenerado por **Eve Studio**. Revisa la preview de Vercel antes de mezclar.",
             })
             if r.status_code not in (200, 201):
-                return f"Los archivos quedaron en la rama '{rama}' pero no pude abrir el PR (código {r.status_code})."
+                return _falla(f"Los archivos quedaron en la rama '{rama}' pero no pude abrir el PR (código {r.status_code}).")
             # Se apunta aquí, igual que los archivos: es la URL que devolvió
             # GitHub, la única que se sabe cierta.
             registro["pr_url"] = r.json()["html_url"]
             return f"PR abierto: {registro['pr_url']}"
         except requests.RequestException as e:
-            return f"Error de red hablando con GitHub: {e}"
+            return _falla(f"Error de red hablando con GitHub: {e}")
 
     return proponer_cambios
 
@@ -665,6 +675,27 @@ LIMITE_HISTORIAL = 12_000       # caracteres antes de compactar
 TURNOS_INTACTOS = 4             # los últimos se conservan literales
 
 
+def _aviso_sin_pr(registro: dict, inventadas: list) -> str | None:
+    """Qué contarle a la persona cuando no hubo PR.
+
+    Tres situaciones distintas y tres avisos distintos, porque no significan lo
+    mismo: que la herramienta fallara es un problema del sistema, que el agente
+    se invente un PR es un problema del agente, y que no llamara a la
+    herramienta puede ser lo correcto —una respuesta que no cambia archivos no
+    tiene por qué abrir nada—. Solo las dos primeras se avisan."""
+    fallos = registro.get("fallos") or []
+    if fallos and inventadas:
+        return ("El agente dijo que abrió un Pull Request y **no abrió ninguno**. "
+                "La herramienta falló: " + fallos[-1])
+    if fallos:
+        return "No se abrió ningún Pull Request. La herramienta falló: " + fallos[-1]
+    if inventadas:
+        return ("El agente dijo que abrió un Pull Request y **no abrió ninguno**: "
+                "ni siquiera llegó a intentarlo. No te fíes de lo que cuente "
+                "abajo sobre cambios aplicados.")
+    return None
+
+
 def entrada_de_historial(salida: str, pr_url: str | None) -> str:
     """Reduce la respuesta a lo que merece recordarse."""
     sin_codigo = re.sub(r"```.*?```", "[código omitido: está en el repositorio]", salida, flags=re.S)
@@ -764,18 +795,29 @@ async def generar_interfaz(
     # La regular se conserva solo como respaldo, para cuando no hay credencial
     # de escritura y el PR lo abrió una persona antes.
     pr_url = registro.get("pr_url")
-    if not pr_url:
-        pr = re.search(r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+", salida)
-        pr_url = pr.group(0) if pr else None
-    else:
-        # Y si el agente escribió OTRO número en su prosa, se corrige antes de
+    RE_PR = r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+"
+    if pr_url:
+        # Si el agente escribió OTRO número en su prosa, se corrige antes de
         # enseñarla: el enlace de la interfaz iría bien, pero el número que se
         # lee en el chat seguiría mintiendo, que es justo donde miró la persona.
-        salida = re.sub(
-            r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+",
-            lambda m: pr_url if m.group(0) != pr_url else m.group(0),
-            salida,
-        )
+        salida = re.sub(RE_PR, lambda m: pr_url if m.group(0) != pr_url else m.group(0), salida)
+        aviso = None
+    else:
+        # SIN respaldo por expresión regular, y esto es lo que arregla el fallo
+        # del PR #58: antes, cuando la herramienta no había abierto nada, se
+        # recuperaba la URL del texto del agente. El agente escribió
+        # '.../pull/58', un número que no existía, y la interfaz lo enlazó como
+        # si fuera bueno. El respaldo estaba pensado para cuando no hay
+        # credencial de escritura y el PR lo abrió una persona, pero ese caso no
+        # compensa: un enlace roto es peor que no tener enlace, porque PARECE
+        # que la operación salió bien.
+        #
+        # Si no hay PR de la herramienta, no hay PR. Y las URLs que el modelo se
+        # haya inventado se tachan del texto en vez de dejarlas pasar.
+        inventadas = re.findall(RE_PR, salida)
+        if inventadas:
+            salida = re.sub(RE_PR, "[enlace retirado: no se abrió ningún PR]", salida)
+        aviso = _aviso_sin_pr(registro, inventadas)
 
     # El cliente es el dueño del almacenamiento, así que la versión compactada
     # se le devuelve para que la guarde; aquí no queda nada.
@@ -790,6 +832,11 @@ async def generar_interfaz(
         "codigo_html": limpiar_markdown(salida),
         "mensaje_crudo": salida,
         "pr_url": pr_url,
+        # `pr_url` a secas no distingue un PR real de uno inventado —fue
+        # exactamente lo que confundió a la interfaz—, así que el origen viaja
+        # aparte. Solo lo verificado puede anunciarse como PR abierto.
+        "pr_verificado": bool(registro.get("pr_url")),
+        "aviso": aviso,
         "historial_entrada": entrada,
         "historial_compactado": compactado,
         # Los archivos tal como se propusieron: con ellos la interfaz arma una
