@@ -13,40 +13,46 @@
 .cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-azul-noche)}
 
 /* ── Ilustración de portada ──────────────────────────────────────────────
-   El flujo del pago en trazo técnico, de fondo: la tarjeta del cliente, el
-   datáfono del comercio y la cuenta donde cae el dinero, en línea recta.
+   La escena del producto en trazo técnico, de fondo: la tarjeta de crédito
+   del cliente (izquierda) y la casa del comercio (derecha), unidas por el
+   flujo del pago. Es justo lo que EvePay hace: llevar el dinero de la
+   tarjeta que paga a la cuenta del comercio que recibe.
 
-   Antes había aquí una calle de comercios y estaba mal. Se había construido
-   copiando el conjunto residencial de EveConecta —prismas con rejilla de
-   ventanas— y esa rejilla gana la lectura: la portada de una pasarela de pagos
-   acababa ilustrando edificios. Las dos escenas comparten estilo (trazo, fuga,
-   halo, color en dos elementos), no tema.
+   Dibujada a mano en SVG —no generada— siguiendo la recomendación del
+   manual para escenas simples (§ Ilustraciones de apoyo): línea pura, un
+   color, sin texturas ni texto. Pesa ~3 KB, es nítida a cualquier tamaño y
+   su #1E6FEB es exacto, no aproximado por un modelo. Se monta inline como
+   data-URI porque la herramienta de escritura solo toca .html y .css: no
+   se puede subir un .svg nuevo al repo de marca (que además exige etiquetar
+   versión para que @1 lo sirva). El SVG fuente quedó en la descripción del
+   PR por si se quiere promover a `ilustraciones/` y cambiar esto por la URL
+   del CDN.
 
-   Se monta con las mismas decisiones que en EveConecta, explicadas en
+   Decisiones de estilo, según el manual:
+   - Estructura en #1E6FEB (--eve-electrico exacto) sobre vacío blanco.
+   - Color en SOLO dos elementos y en los extremos, porque la máscara radial
+     abre un hueco en el centro: el cuerpo de la tarjeta en #144A96 (el que
+     paga) y la puerta de la casa en #16A34A (el que recibe).
+   - Glow controlado con un feGaussianBlur dentro del propio SVG (el halo es
+     efecto de raster; en SVG se reproduce con filtro).
+   - Trazos sueltos y separados, sin texto dentro de la imagen.
+
+   El montaje es el mismo patrón de EveConecta, explicado en
    apps/eveconecta-landing/estilos.css. En corto:
-
    - Va como ::after y NO como background de .portada, porque base.css ya usa
      ese background para el degradado radial.
    - `contain` y anclada abajo: el dibujo tiene el andén en su borde inferior,
      así que apoyarlo en la base de la sección es lo que lo hace parecer suelo.
    - El hueco radial deja el texto limpio. Aquí es más alto que en EveConecta
      porque el bloque de texto también lo es: titular, entrada, botón y nota
-     ocupan del 20 % al 63 % de la sección, medido en el navegador, frente al
-     20–37 % de allá. Un hueco copiado tal cual dejaba las cornisas cruzando
-     la entrada.
-   - La sección gana padding inferior por lo mismo que allá: sin él el dibujo
-     queda pegado al texto y no hay calle que mirar.
-   - Color en dos elementos y en los extremos —el cuerpo de la tarjeta en
-     #144A96 y la rueda de la caja en #16A34A—, porque el hueco se come el
-     centro. Aquí eso cuadra solo: los dos extremos del flujo son el que paga y
-     el que recibe, que es justo lo que la escena quiere que se mire.
-   - No se edita a mano: sale de
-     packages/brand/ilustraciones/flujo-de-pago.py. */
+     ocupan del 20 % al 63 % de la sección, medido en el navegador.
+   - La sección gana padding inferior para que el dibujo no quede pegado al
+     texto. */
 .portada{position:relative;isolation:isolate;overflow:hidden;
   padding-bottom:clamp(150px,20vw,260px)}
 .portada::after{
   content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.2;
-  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/flujo-de-pago.svg")
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 620' fill='none'%3E%3Cdefs%3E%3Cfilter id='glow' x='-40%25' y='-40%25' width='180%25' height='180%25'%3E%3CfeGaussianBlur stdDeviation='4' result='b'/%3E%3CfeMerge%3E%3CfeMergeNode in='b'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg stroke='%231E6FEB' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' filter='url(%23glow)'%3E%3Cpath d='M40 560 H1160' opacity='.85'/%3E%3Cg transform='rotate(-7 245 340)'%3E%3Crect x='95' y='245' width='300' height='190' rx='18' fill='%23144A96'/%3E%3Crect x='95' y='245' width='300' height='190' rx='18'/%3E%3Cpath d='M95 300 H395'/%3E%3Crect x='127' y='330' width='52' height='38' rx='7'/%3E%3Cpath d='M139 330 V368 M155 330 V368 M171 330 V368'/%3E%3Cpath d='M127 402 h44 M181 402 h44 M235 402 h44 M289 402 h44'/%3E%3C/g%3E%3Cpath d='M556 386 C600 384 616 352 652 350'/%3E%3Cpath d='M642 342 L664 350 L644 360'/%3E%3Cpath d='M700 560 V420 L880 322 L1060 420 V560'/%3E%3Cpath d='M640 428 L880 300 L1120 428'/%3E%3Cpath d='M846 560 V468 a34 34 0 0 1 68 0 V560 Z' fill='%2316A34A'/%3E%3Cpath d='M846 560 V468 a34 34 0 0 1 68 0 V560'/%3E%3Crect x='752' y='452' width='52' height='52' rx='8'/%3E%3Crect x='956' y='452' width='52' height='52' rx='8'/%3E%3C/g%3E%3C/svg%3E")
     center bottom/contain no-repeat;
   /* Con prefijo -webkit- además del estándar: sin él Safari ignora la máscara
      y el dibujo vuelve a cruzar el titular. */
