@@ -338,7 +338,7 @@ estructuras parezcan hologramas o planos arquitectónicos tridimensionales vivos
 pero con poco detalle. Pero todas las líneas en color #1E6FEB y el fondo blanco.
 Sin textos, y sin saturar con detalles. Regla, no dejar lineas muy juntas porque
 de lejos parece una linea gruesa, los trazos deben ser más sueltos y separados.
-En la imagen aplica color (#144A96 y #16A34A) solo a dos cosas o elementos (por
+En la imagen aplica color (#144A96 y #3BAEC2) solo a dos cosas o elementos (por
 ejemplo a un árbol y a una pared, si es un paisaje urbano, o a un par de hojas si
 es a un árbol, o solo al espejo retrovisor y a una llanta si es un carro, etc).
 Agrega un pequeño efecto glow a las líneas (como un efecto neón controlado).
@@ -356,11 +356,24 @@ Seis cosas del prompt no son adorno y conviene no editarlas a la ligera:
   al que estas imágenes se ven en una landing.
 - **«Solo a dos cosas»** es la que hace la imagen interesante en vez de plana, y
   el límite importa tanto como el color: son `--eve-mezclado` (#144A96) y
-  `--eve-exito` (#16A34A), y en dos elementos apenas. Colorear más devuelve la
+  `--eve-teal` (#3BAEC2), y en dos elementos apenas. Colorear más devuelve la
   ilustración al muestrario —deja de haber un punto donde mirar— y saca al azul
-  #1E6FEB de su papel de estructura. El relleno va en #144A96 y no en el propio
-  #1E6FEB porque el trazo y la masa tienen que distinguirse; y no en violeta,
-  que es territorio de Eve Intelligence y no de una escena de producto.
+  #1E6FEB de su papel de estructura.
+
+  **Los dos son los que son, y los tres descartados lo son por motivos
+  distintos.** El relleno no va en el propio #1E6FEB porque el trazo y la masa
+  tienen que distinguirse. No va en violeta, que es territorio de Eve
+  Intelligence: es el color que identifica esa vertical en el sitio corporativo,
+  y gastarlo en una escena de producto se lo quita. Y **no va en #16A34A**, que
+  se usó al principio y se retiró: `--eve-exito` es un color **semántico** —en el
+  dashboard significa «aprobado», «confirmada»— así que puesto de adorno el ojo
+  lo lee como un indicador de estado y no como decoración.
+
+  `--eve-teal` gana porque es **el único token de la paleta con «ilustración»
+  escrita en su comentario**. Comparte color con la línea Tienda (§1), así que no
+  está libre de vertical —conviene saberlo—, pero ese doble uso lo autoriza la
+  propia paleta: «ilustración, línea Tienda». El violeta no tiene esa doble
+  bendición; la regla C3 dice que **solo** identifica Eve Intelligence.
 - **Pon los dos elementos a los lados, no al centro.** Estas escenas se usan de
   fondo en portadas que le abren un hueco al dibujo por el medio, para que las
   líneas no crucen el titular. Se generó una con la torre y el árbol centrados
