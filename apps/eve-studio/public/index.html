@@ -573,12 +573,19 @@ async function generar(){
     }
 
     // En el chat va un resumen: volcar todo el HTML lo haría ilegible.
-    if(cuerpo.pr_url){
+    // Solo `pr_verificado` anuncia un PR. Antes bastaba con que `pr_url`
+    // tuviera algo, y ese algo podía venir del texto del agente: se enlazó un
+    // PR #58 que no existía. La URL de la herramienta y la inventada eran
+    // indistinguibles aquí, así que ahora el origen lo dice el servidor.
+    if(cuerpo.pr_verificado && cuerpo.pr_url){
       burbuja('eve', 'Abrí un Pull Request con el cambio.', 'Eve');
       enlacePR(cuerpo.pr_url);
     } else {
       burbuja('eve', 'Interfaz generada — la ves a la derecha.', 'Eve');
     }
+    // El aviso va DESPUÉS del resumen y con estilo de error: si el agente dijo
+    // que abrió un PR sin abrirlo, eso es lo último que hay que leer.
+    if(cuerpo.aviso){ burbuja('err', cuerpo.aviso); }
     // El servidor decide qué merece recordarse: quita el código, que ya vive en
     // el repositorio, y deja intención, decisiones y el PR.
     const p = proyecto();
@@ -596,7 +603,11 @@ async function generar(){
     }
     if(adjuntarRegistro){ adjuntarRegistro = false; }   // se gasta una sola vez
     guardar(); pintarSelector();
-    mostrarResultado(cuerpo.codigo_html || '', cuerpo.archivos || [], cuerpo.pr_url, cuerpo.mensaje_crudo || '');
+    // Al panel de detalles solo va la URL verificada, por lo mismo: ahí es donde
+    // está el enlace «Preview de Vercel», y mandar a nadie a un PR inexistente.
+    mostrarResultado(cuerpo.codigo_html || '', cuerpo.archivos || [],
+                     cuerpo.pr_verificado ? cuerpo.pr_url : null,
+                     cuerpo.mensaje_crudo || '');
   } catch {
     cargando.remove();
     burbuja('err', 'Sin conexión con el agente. Revisa tu red e inténtalo de nuevo.');
