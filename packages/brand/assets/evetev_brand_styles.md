@@ -373,34 +373,70 @@ Seis cosas del prompt no son adorno y conviene no editarlas a la ligera:
   un fondo oscuro para lucirlos, que es lo contrario del vacío blanco. El
   adjetivo es lo que sostiene el estilo, no el sustantivo.
 
-  Dos avisos al usarla. Un halo azul sobre blanco **baja el contraste del
-  trazo**, así que si la imagen va detrás de texto hay que volver a mirar que el
-  texto siga leyéndose. Y el glow **es un efecto de raster**: si la escena se
-  redibuja en SVG —que es lo que recomienda el punto de más abajo— hay que
-  reproducirlo con un filtro, no sale solo.
+  Un aviso al usarla: un halo azul sobre blanco **baja el contraste del trazo**,
+  así que si la imagen va detrás de texto hay que volver a mirar que el texto
+  siga leyéndose. Se mide componiendo la imagen a la opacidad real sobre un
+  lienzo y buscando el peor píxel de la banda del texto; en las portadas de hoy
+  da 11:1, con holgura sobre el 4,5 que exige AA.
 
-**Antes de publicarla:** conviértela a `.webp` (calidad 82 basta; un PNG de
-estos pesa más de 1 MB y el WebP baja a ~150 KB), súbela a `ilustraciones/` en
-este repositorio y **etiqueta una versión** — sin etiqueta, `@1` no la sirve.
+**Estas ilustraciones SIEMPRE se generan. Nunca se dibujan en SVG a mano.**
 
-**Cuando la escena sea simple, dibújala en SVG en vez de generarla.** Este
-estilo —línea pura, un color, sin texturas ni texto— es justo lo que un SVG hace
-bien: `conjunto-residencial.svg` pesa 5,8 KB frente a los 148 KB de la versión
-generada, es nítido a cualquier tamaño y el `#1E6FEB` es exacto en vez de
-aproximado. Y la regla de los trazos separados deja de ser una súplica al modelo
-y pasa a comprobarse en código: el generador
-`packages/brand/ilustraciones/conjunto-residencial.py` aborta si dos trazos
-paralelos quedan a menos de 24 unidades. Lo que se pierde es carácter: un dibujo
-programático sale más regular que uno generado.
+Durante un tiempo el manual decía lo contrario: que una escena simple saliera
+más barata dibujada en código, porque un SVG de línea pesa 6 KB en vez de 200 y
+es nítido a cualquier tamaño. Los números eran ciertos y la conclusión era mala.
+Se dibujaron dos así —una calle de comercios y un flujo de pago— y el resultado
+**parece hecho por un niño**: prismas regulares, ángulos iguales, cero
+irregularidad. Un dibujo programático no tiene mano. Puesto en una página de
+producto, eso no se lee como «minimalista», se lee como «no había presupuesto».
+
+Los 194 KB de diferencia no valen esa impresión. **Se genera siempre**, y el
+peso se arregla en la conversión, que es donde toca arreglarlo.
+
+**Antes de publicarla, conviértela a WebP con transparencia:**
+
+| | |
+|---|---|
+| formato | **WebP**, no PNG ni JPG |
+| ancho | 2048 px (basta de sobra; el sitio la muestra a ~1000) |
+| calidad | 80 |
+| calidad del alfa | 50 |
+| resultado | **~200 KB** |
+
+Tres cosas de esa tabla no son intercambiables:
+
+- **JPG queda descartado por no tener transparencia**, no por calidad. Estas
+  escenas van de fondo con `background-size:contain`, así que sobra ancho a los
+  lados: con un fondo blanco opaco se ve el **rectángulo de la imagen recortado**
+  contra el degradado de la portada. Hay que convertir el blanco del original a
+  alfa al generar el WebP.
+- **El canal alfa cuesta la mitad del archivo.** Medido sobre la escena de
+  EveConecta: 96 KB sin transparencia, 202 KB con ella. Es caro y no es
+  opcional; bajar la calidad del alfa a 50 recorta ~140 KB sin que se note,
+  porque el alfa de una línea es casi binario.
+- **La calidad apenas mueve el peso, el ancho sí.** De calidad 82 a 60 se
+  ahorran unos 15 KB; de 2816 px a 1600 px se ahorran 150. Si hay que recortar,
+  recorta píxeles, no calidad.
+
+PNG sirve si algo va mal con WebP, pero pesa cinco veces más para el mismo
+resultado. AVIF pesa aún menos que WebP y hoy lo soportan todos los navegadores
+que nos importan; si alguien quiere probarlo, que mida antes de cambiar la
+norma.
 
 **Al usarla:** va de fondo, atenuada y desvanecida, nunca a plena opacidad
 detrás de un texto. Es línea densa y compite con lo que hay que leer. El patrón
 es `.portada::after` en `apps/eveconecta-landing/estilos.css`.
 
-> `conjunto-residencial.webp`, la primera publicada, es **anterior a este
-> prompt** y tiene trazos violeta además del eléctrico. Sigue publicada porque
-> lo publicado no se retira, pero está superada por el `.svg`. La referencia de
-> estilo es el prompt, no ese archivo.
+**Y súbela a `ilustraciones/` en este repositorio con una etiqueta nueva** — sin
+etiqueta, `@1` no la sirve. Después hay que **purgar `@1` en jsDelivr**, porque
+cachea la resolución del rango y la etiqueta sola no basta.
+
+> Los archivos publicados de esta carpeta cuentan la historia de estas reglas y
+> **ninguno es la referencia de estilo; la referencia es el prompt.**
+> `conjunto-residencial.webp` es anterior a él y tiene trazos violeta.
+> `conjunto-residencial-color.svg`, `conjunto-residencial.svg`, `comercio.svg` y
+> `flujo-de-pago.svg` son los dibujados a mano, de la época en que esto
+> recomendaba SVG. Siguen publicados porque lo publicado no se retira, pero
+> **hay que reemplazarlos por versiones generadas.**
 
 ### Snippet de logo en encabezado
 ```html
