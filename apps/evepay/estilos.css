@@ -118,14 +118,24 @@
 .caract p{margin-top:8px;font-size:.9rem;color:var(--eve-pizarra)}
 
 /* ── Link de pago por WhatsApp ───────────────────────────────────────────
-   Dos columnas en escritorio (texto / pasos), una en móvil. Los pasos usan
-   el mismo círculo numerado, en tamaño pequeño, alineado al texto. */
+   Dos columnas en escritorio (texto / mascota + pasos), una en móvil.
+   La mascota corona la columna de pasos: es el gesto de «hola» que le falta
+   al producto más conversacional de EvePay. Los pasos usan el mismo círculo
+   numerado, en tamaño pequeño, alineado al texto. */
 .wa{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
   max-width:980px;margin:0 auto}
 .wa-texto h2{text-align:left}
 .wa-texto p{margin-top:16px;color:var(--eve-pizarra);
   font-size:clamp(.9rem,1.6vw,.98rem)}
-.wa-pasos{list-style:none;margin:0;padding:0;display:grid;gap:18px}
+.wa-figura{text-align:center}
+/* Tope en 160 px, el mismo que en EveConecta: por encima el WebP de la mascota
+   se veía blando, así que va pequeña a propósito y nítida. Si algún día se
+   publica una versión del activo con más resolución, este tope se puede
+   revisar; hasta entonces no se sube. */
+.mascota{width:min(160px,70%);height:auto;margin:0 auto;display:block;
+  filter:drop-shadow(0 18px 30px rgba(10,37,64,.12))}
+.wa-pasos{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:18px;
+  text-align:left}
 .wa-pasos li{display:flex;align-items:flex-start;gap:14px}
 .wa-pasos p{font-size:.93rem;padding-top:3px}
 
@@ -168,7 +178,7 @@
   .pasos{grid-template-columns:1fr;gap:32px;max-width:420px}
   .wa{grid-template-columns:1fr;gap:32px}
   .wa-texto h2{text-align:center}
-  .wa-pasos{max-width:420px;margin:0 auto}
+  .wa-pasos{max-width:420px;margin-left:auto;margin-right:auto}
   .demo{padding:64px 0}
   .demo-grid{grid-template-columns:1fr}
   .demo-form .btn{width:100%}
