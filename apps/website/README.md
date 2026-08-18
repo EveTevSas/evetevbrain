@@ -33,6 +33,14 @@ su propia lista blanca, así que un origen curioso no puede hacer que llegue un
 correo firmado por cualquier cosa. Además del prefijo del asunto, el cuerpo
 lleva una fila `Producto:` y otra `Enviado desde:` con el host real.
 
+**Añadir un campo a un formulario es tocar DOS repositorios de decisiones.** La
+tabla `CAMPOS` de la función es la única lista blanca: dice, por formulario, qué
+claves se limpian y con qué rótulo se imprimen. Un campo que el marcado mande y
+no esté en la tabla **se descarta en silencio** — respuesta `200`, sin error y
+sin log. Pasó ya una vez: una landing añadió un teléfono obligatorio y el correo
+llegaba sin él. Por eso la tabla es una sola y no dos listas paralelas; antes
+había una para limpiar y otra para pintar, y podían no coincidir.
+
 **Por qué una sola función y no una por landing:** la clave del proveedor
 viviría entonces en tres proyectos de Vercel — tres sitios donde rotarla y tres
 donde olvidarla. Con este reparto las landings siguen siendo estáticas puras,
