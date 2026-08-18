@@ -105,7 +105,13 @@
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat}
 
 .split-figura{text-align:center}
-.mascota{width:min(320px,70%);height:auto;margin:0 auto;display:block;
+/* La mascota va a 160 px, la mitad de los 320 px con que se montó: el WebP
+   publicado no da más de sí y a 320 px se veía blando. A 160 px queda nítido
+   —en pantallas retina cuadra justo con la resolución del archivo—. El 70 %
+   se mantiene como límite para columnas angostas, no como tamaño objetivo.
+   El width/height del <img> se actualizó a 160 para que el tamaño reservado
+   coincida con el de presentación. */
+.mascota{width:min(160px,70%);height:auto;margin:0 auto;display:block;
   filter:drop-shadow(0 18px 30px rgba(10,37,64,.12))}
 .figura-nota{margin-top:16px;font-size:.84rem;color:var(--eve-pizarra)}
 
