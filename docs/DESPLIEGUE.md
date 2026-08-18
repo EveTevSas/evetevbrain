@@ -26,6 +26,11 @@ Root Directory y el dominio.
 3. Framework/build: los deja como están — `apps/website/vercel.json` ya define
    que es estático (sin build, sirve la carpeta) más la función serverless del
    formulario (`api/contacto.js`).
+   > Esa función es el buzón de **toda** la marca: también recibe, por CORS, las
+   > demos de `evepay.evetev.com` y `eveconecta.evetev.com`. Por eso la
+   > `RESEND_API_KEY` va **solo aquí** y los proyectos de las landings siguen
+   > sin variables de entorno. Si una landing estrena dominio, hay que añadirlo
+   > a la lista de orígenes de `apps/website/api/contacto.js`.
 4. **Variables de entorno** (Settings → Environment Variables):
    ```
    RESEND_API_KEY       # API key de resend.com (obligatoria para que funcione el formulario)

@@ -178,27 +178,19 @@
    pegados y se leían como uno solo mal partido. */
 .faq-cuerpo p+p{margin-top:12px}
 
-/* ── CTA final (sobre azul noche) ────────────────────────────────────────
-   El bloque de peso de la página (§2). El botón aquí es secundario
-   (mezclado) porque el único coral de la vista ya se usó en la portada. */
+/* ── Demo final (formulario sobre azul noche) ────────────────────────────
+   El bloque de peso de la página (§2). El botón es secundario (mezclado)
+   porque el único coral de la vista ya se usó en la portada.
+   La tarjeta del formulario (.demo-form) está en base.css, compartida. */
 .demo{padding:88px 0;background:var(--eve-azul-noche);color:#fff}
 .demo-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;
-  align-items:center;max-width:980px;margin:0 auto}
+  align-items:start;max-width:980px;margin:0 auto}
 .demo-texto h2{font-size:clamp(1.3rem,2.6vw,1.6rem);text-align:left}
 .demo-texto > p{margin-top:14px;color:#B9CCE0;font-size:clamp(.9rem,1.6vw,.98rem)}
 .demo-puntos{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:14px}
 .demo-puntos li{position:relative;padding-left:26px;font-size:.9rem;color:#B9CCE0}
 .demo-puntos li::before{content:"";position:absolute;left:2px;top:8px;
   width:8px;height:8px;border-radius:999px;background:var(--eve-cian)}
-
-.demo-cta{background:var(--eve-azul-noche-profundo);border:1px solid rgba(34,211,238,.25);
-  border-radius:16px;padding:32px;text-align:center}
-.demo-cta-titulo{font-family:'Baloo 2',system-ui,sans-serif;font-weight:700;
-  font-size:1.3rem}
-.demo-cta-texto{margin-top:10px;color:#B9CCE0;font-size:.92rem}
-.demo-cta .btn{margin-top:22px}
-.demo-cta-nota{margin-top:16px;font-size:.8rem;color:var(--eve-muted)}
-.demo-cta-nota a{color:var(--eve-cian)}
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width:1024px){

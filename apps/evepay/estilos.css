@@ -138,20 +138,8 @@
 .demo-puntos li::before{content:"";position:absolute;left:2px;top:8px;
   width:8px;height:8px;border-radius:999px;background:var(--eve-cian)}
 
-.demo-form{background:#fff;border-radius:16px;padding:28px;
-  color:var(--eve-azul-noche)}
-.demo-form .campo{margin-bottom:16px}
-.demo-form label{display:block;font-size:.82rem;font-weight:500;margin-bottom:6px}
-.demo-form input,.demo-form select,.demo-form textarea{width:100%;
-  padding:11px 14px;border:1px solid #DCE7F2;border-radius:9px;
-  font-size:.88rem;font-family:'Inter',system-ui,sans-serif;background:#fff;
-  color:var(--eve-azul-noche)}
-.demo-form input:focus,.demo-form select:focus,.demo-form textarea:focus{
-  outline:2px solid var(--eve-electrico);border-color:transparent}
-.demo-form textarea{resize:vertical;min-height:72px}
-.demo-form .btn{width:100%;margin-top:4px}
-.demo-legal{margin-top:12px;font-size:.78rem;color:var(--eve-pizarra);
-  text-align:center}
+/* La tarjeta del formulario (.demo-form, .demo-legal) vive en base.css: la
+   comparten las dos landings. Aquí solo queda la sección que la rodea. */
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width:1024px){
@@ -167,7 +155,6 @@
   .wa-pasos{max-width:420px;margin:0 auto}
   .demo{padding:64px 0}
   .demo-grid{grid-template-columns:1fr}
-  .demo-form .btn{width:100%}
 }
 
 @media (min-width:1440px){
