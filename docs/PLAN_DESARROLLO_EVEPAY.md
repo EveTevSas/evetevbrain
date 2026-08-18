@@ -34,7 +34,7 @@ embebido** de Akua; EvePay solo maneja tokens e IDs.
 |---|---|---|
 | `POST /v1/payments` (+ `Idempotency-Key`) | `pagos` | Crear cobro. EvePay guarda su propio agregado y máquina de estados. |
 | `/v1/tokens` (tokenización de tarjeta) | `pagos` | Cobrar sin tocar PAN (checkout/token de Akua). |
-| webhook `payment.succeeded` / `payment.failed` | `webhooks` → `pagos` | Transición de estado del cobro. |
+| webhook `payment.purchase.succeeded` / `.failed` | `webhooks` → `pagos` | Transición de estado del cobro. |
 | webhook `payment.refunded` (+ refunds) | `webhooks` → `ledger` | Reverso contable. |
 | `/v1/merchants` + webhook `merchant.approved` | `merchants` | Onboarding y KYC/KYB de comercios. |
 | `/v1/settlements` + webhook `payout.completed` | `conciliacion` | Cuadrar lo cobrado con lo liquidado. |
@@ -75,7 +75,7 @@ intención; el código y los tests son la verdad ejecutable).
         │◄───────────── { cobro_id, url_checkout }│◄──────────────────────────│  { id, checkout_url }
         │                                        │  ledger.registrarPendiente  │
         │                                        │                            │
-        │                                        │  webhooks ◄─── firmado ─────│  payment.succeeded
+        │                                        │  webhooks ◄─── firmado ─────│  payment.purchase.succeeded
         │                                        │   └─ normaliza → evento     │
         │                                        │   └─ pagos: →aprobado       │
         │                                        │   └─ ledger: asiento        │
@@ -119,7 +119,7 @@ sólidos desde el inicio; lo demás puede ser provisional.
 
 ### Fase 2 — Webhooks normalizados
 **Objetivo:** que el estado del cobro lo mueva la realidad, no un polling frágil.
-- `specs/evepay/provider-webhooks/` — verificar **firma**, procesar **idempotente** (un webhook repetido no duplica efecto), mapear `payment.succeeded→aprobado`, `payment.failed→fallido`, `payment.refunded→reverso`.
+- `specs/evepay/provider-webhooks/` — verificar **firma**, procesar **idempotente** (un webhook repetido no duplica efecto), mapear `payment.purchase.succeeded→aprobado`, `payment.purchase.failed→fallido`, `payment.refunded→reverso`.
 - Ingesta con Inngest (reintentos), normalización a eventos EvePay.
 **Validación:** replay de webhook no duplica; firma inválida se rechaza.
 

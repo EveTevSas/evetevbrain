@@ -31,12 +31,17 @@ reintente; ante firma inválida responde 401.
 - Verificación de firma **HMAC-SHA256** del cuerpo crudo con `AKUA_WEBHOOK_SECRET`,
   comparación en tiempo constante. (El header/scheme exacto se fija con el sandbox.)
 - Idempotencia por `event_id`: registrar cada evento; uno repetido no re-aplica.
-- Normalización de tipos → transición:
-  - `payment.succeeded` → `pendiente → aprobado`
-  - `payment.failed` → `pendiente → fallido`
-  - `payment.refunded`, `dispute.created`, otros → se **reconocen** (2xx) pero no se
-    procesan en esta fase (quedan para Fase 6).
-- El cobro se ubica por `provider_payment_id` (el id de Akua). Como el evento no trae
+- Normalización de tipos → transición. Los nombres son los **reales de Akua**,
+  fijados al integrar el proveedor; este documento los daba genéricos
+  (`payment.succeeded`) mientras se especificaba a ciegas, y esa diferencia dejó
+  cuatro tests en rojo un mes sin que nadie lo viera:
+  - `payment.purchase.succeeded` → `pendiente → aprobado`
+  - `payment.purchase.failed`, `payment.purchase.rejected` → `pendiente → fallido`
+  - `payment.purchase.pending`, `payment.refunded`, `dispute.created`, otros → se
+    **reconocen** (2xx) pero no se procesan en esta fase (quedan para Fase 6).
+- El cobro se ubica por `provider_payment_id`, que el evento trae en
+  `data.payment.link.id` —el link de pago que se guardó al crear el cobro— y, si
+  no hay link, en `data.payment.id`. Como el evento no trae
   tenant, la resolución del tenant del pago es una operación **de sistema** (función
   `SECURITY DEFINER`), y la actualización se hace ya acotada a ese tenant (RLS).
 - Cada transición aplicada queda **auditada** (actor `webhook:akua`).
@@ -52,16 +57,16 @@ reintente; ante firma inválida responde 401.
 - Evento ya visto (mismo `event_id`) → 2xx, sin re-aplicar (idempotente).
 - Evento para un `provider_payment_id` inexistente → 2xx, registrado y sin efecto
   (no reventar; puede ser ruido).
-- Transición inválida (p. ej. `succeeded` sobre un cobro ya `fallido`) → no se aplica;
+- Transición inválida (p. ej. `purchase.succeeded` sobre un cobro ya `fallido`) → no se aplica;
   se registra.
 - Tipo de evento desconocido → 2xx, ignorado.
 
 ## Criterios de aceptación (EARS)
 
-1. **CUANDO** llega un `payment.succeeded` con firma válida para un cobro `pendiente` no visto antes, **EL** sistema **DEBERÁ** pasar el cobro a `aprobado`, auditar la transición y responder 2xx.
+1. **CUANDO** llega un `payment.purchase.succeeded` con firma válida para un cobro `pendiente` no visto antes, **EL** sistema **DEBERÁ** pasar el cobro a `aprobado`, auditar la transición y responder 2xx.
 2. **CUANDO** llega un evento cuya firma no valida, **EL** sistema **DEBERÁ** responder 401 y no modificar ningún cobro.
 3. **CUANDO** llega un evento con un `event_id` ya procesado, **EL** sistema **DEBERÁ** responder 2xx sin volver a aplicar el efecto.
-4. **CUANDO** llega un `payment.failed` con firma válida para un cobro `pendiente`, **EL** sistema **DEBERÁ** pasarlo a `fallido` y auditarlo.
+4. **CUANDO** llega un `payment.purchase.failed` o `payment.purchase.rejected` con firma válida para un cobro `pendiente`, **EL** sistema **DEBERÁ** pasarlo a `fallido` y auditarlo.
 5. **CUANDO** el evento referencia un `provider_payment_id` inexistente, **EL** sistema **DEBERÁ** responder 2xx sin error y sin cambiar ningún cobro.
 6. **CUANDO** el tipo de evento no está soportado en esta fase, **EL** sistema **DEBERÁ** responder 2xx e ignorarlo (sin transición).
 
