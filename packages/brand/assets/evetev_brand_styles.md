@@ -338,11 +338,13 @@ Cada línea del dibujo emite su propio resplandor: un halo azul muy tenue, suave
 
 Las líneas describen la profundidad con el color: azul noche #0A2540 en los elementos del primer plano, azul eléctrico #1E6FEB en los del fondo, y más tenues cuanto más lejos. Grosor uniforme, esquinas redondeadas y remates suaves: nada de ángulos duros ni vértices en punta.
 
-Los elementos grandes de la escena —edificios, fachadas, estructuras, volúmenes principales— van SIEMPRE en línea, huecos, sin relleno oscuro. Si alguno necesita separarse del resto, rellénalo de azul hielo #EAF2FB, un tono casi blanco que da volumen sin oscurecer. La composición tiene que quedar predominantemente clara y ligera.
+Los elementos grandes de la escena van SIEMPRE en línea, huecos, sin relleno oscuro. Si alguno necesita separarse del resto, rellénalo de azul hielo #EAF2FB, un tono casi blanco que da volumen sin oscurecer. La composición tiene que quedar predominantemente clara y ligera.
 
-El azul noche sólido como relleno ocupa MENOS DEL 5% de la superficie de la imagen, y solo en objetos pequeños: un banco, una farola, un coche, una puerta, un buzón, un cartel. Nunca en edificios, fachadas ni superficies grandes.
+Dibuja ÚNICAMENTE lo que pertenece al tema pedido. NO añadas ningún objeto ajeno a ese tema para cumplir ninguna de estas reglas: las reglas dicen CÓMO dibujar la escena, nunca QUÉ meter en ella.
 
-Exactamente dos de esos objetos pequeños, situados en los extremos de la composición, llevan ese relleno azul noche #0A2540, y sobre ellos —y solo sobre ellos— unos pocos acentos luminosos en cian #22D3EE que emiten un brillo intenso, como luz encendida dentro del objeto. Son dos puntos de luz menudos en una escena clara, no dos bloques.
+El azul noche sólido como relleno ocupa MENOS DEL 5% de la superficie de la imagen, y solo en piezas pequeñas —cada una por debajo de una vigésima parte del ancho de la imagen— que ya formen parte del tema. Nunca en los volúmenes grandes ni en superficies extensas.
+
+Exactamente dos de esas piezas pequeñas, situadas en los extremos de la composición, llevan ese relleno azul noche #0A2540, y sobre ellas —y solo sobre ellas— unos pocos acentos luminosos en cian #22D3EE que emiten un brillo intenso, como luz encendida dentro del objeto. Son dos puntos de luz menudos en una escena clara, no dos bloques.
 
 Regla: no dejar líneas muy juntas, porque de lejos se funden en una mancha gris. Los trazos van sueltos y separados.
 
@@ -393,6 +395,18 @@ Siete cosas del prompt no son adorno y conviene no editarlas a la ligera:
   con los elementos centrados y el color no se veía **ni subiendo la
   opacidad**. La imagen mental que hay que darle al modelo es «dos puntos de
   luz menudos en una escena clara, no dos bloques».
+- **Las reglas dicen cómo dibujar, nunca qué dibujar.** Va en su propio párrafo
+  porque el modelo confunde las dos cosas. La versión anterior ilustraba el
+  tamaño con una lista suelta —«un banco, una farola, un coche, una puerta, un
+  buzón»— y el modelo la leyó como una lista de la compra: metió una farola y un
+  coche **dentro de un flujo de pago**, donde no pintan nada. El prompt original
+  no tenía ese problema porque sus ejemplos iban atados a su escena («…si es un
+  paisaje urbano», «…si es un carro»); al reescribirlo se perdió esa condición.
+  Ahora el tamaño se dice con un criterio —por debajo de una vigésima parte del
+  ancho— que no se puede dibujar, y la prohibición está aparte para que aplique
+  a todas las reglas y no solo a esa. Si a una escena le falta un segundo
+  elemento que iluminar, se dice **en el corchete**, que es donde va el
+  contenido.
 - **El halo se describe por acumulación, y el fondo se prohíbe explícitamente.**
   Es la diferencia entre luz y mancha. Pedir «una aureola detrás del objeto» le
   hace pintar al modelo un borrón centrado, que es exactamente lo que no
