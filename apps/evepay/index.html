@@ -227,12 +227,20 @@
              marcado como EvePay. -->
         <form class="demo-form" data-demo="evepay">
           <div class="campo">
-            <label for="f-nombre">Nombre y empresa</label>
-            <input id="f-nombre" name="nombre" type="text" autocomplete="organization" required>
+            <label for="f-nombre">Tu nombre</label>
+            <input id="f-nombre" name="nombre" type="text" autocomplete="name" maxlength="120" required>
+          </div>
+          <div class="campo">
+            <label for="f-empresa">Empresa (opcional)</label>
+            <input id="f-empresa" name="empresa" type="text" autocomplete="organization" maxlength="120">
           </div>
           <div class="campo">
             <label for="f-correo">Correo de trabajo</label>
             <input id="f-correo" name="correo" type="email" autocomplete="email" required>
+          </div>
+          <div class="campo">
+            <label for="f-telefono">Teléfono</label>
+            <input id="f-telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel" pattern="[+0-9()\\-\\s]{7,40}" maxlength="40" required>
           </div>
           <div class="campo">
             <label for="f-volumen">Ventas mensuales aproximadas</label>
