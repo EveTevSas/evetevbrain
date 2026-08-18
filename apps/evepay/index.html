@@ -169,7 +169,11 @@
   </section>
 
   <!-- Link de pago por WhatsApp: beneficio protagonista con su propio
-       bloque, a dos columnas en escritorio y una en móvil. -->
+       bloque, a dos columnas en escritorio y una en móvil.
+       La mascota va aquí y no en el checkout: el link de pago por WhatsApp
+       es un contexto de conversación, no el flujo de pago transaccional,
+       donde el manual la prohíbe (§4). Y esta es la sección más cercana de
+       la página, que es justo lo que ella aporta. -->
   <section class="seccion seccion-tinte" id="link-de-pago" aria-labelledby="titulo-whatsapp">
     <div class="wrap">
       <div class="wa">
@@ -181,24 +185,34 @@
             desarrollo, sin integración y sin que tu cliente instale nada.
           </p>
         </div>
-        <ol class="wa-pasos" role="list">
-          <li>
-            <span class="paso-num sm" aria-hidden="true">1</span>
-            <p>Crea el link con el valor del cobro.</p>
-          </li>
-          <li>
-            <span class="paso-num sm" aria-hidden="true">2</span>
-            <p>Compártelo por WhatsApp con tu cliente.</p>
-          </li>
-          <li>
-            <span class="paso-num sm" aria-hidden="true">3</span>
-            <p>Tu cliente paga en pocos clics.</p>
-          </li>
-          <li>
-            <span class="paso-num sm" aria-hidden="true">4</span>
-            <p>Recibes el dinero directo en tu banco.</p>
-          </li>
-        </ol>
+        <div class="wa-figura">
+          <!-- La mascota es el rostro del asistente digital (§4). Aquí da
+               cercanía al cobro por chat, que es el producto más informal
+               de EvePay. No está en un flujo de pago real: es marketing.
+               Sale del CDN de marca (T1). Va a 160 px, el mismo tope que en
+               EveConecta, porque el WebP se ve blando por encima; el motivo
+               está documentado en estilos.css. -->
+          <img class="mascota" src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/mascota/mascota-saludando.webp"
+               alt="Eve, la mascota de Evetev, saludando" width="160" height="160">
+          <ol class="wa-pasos" role="list">
+            <li>
+              <span class="paso-num sm" aria-hidden="true">1</span>
+              <p>Crea el link con el valor del cobro.</p>
+            </li>
+            <li>
+              <span class="paso-num sm" aria-hidden="true">2</span>
+              <p>Compártelo por WhatsApp con tu cliente.</p>
+            </li>
+            <li>
+              <span class="paso-num sm" aria-hidden="true">3</span>
+              <p>Tu cliente paga en pocos clics.</p>
+            </li>
+            <li>
+              <span class="paso-num sm" aria-hidden="true">4</span>
+              <p>Recibes el dinero directo en tu banco.</p>
+            </li>
+          </ol>
+        </div>
       </div>
     </div>
   </section>
