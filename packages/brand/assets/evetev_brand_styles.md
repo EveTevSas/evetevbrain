@@ -328,69 +328,97 @@ Para que parezcan una familia y no un muestrario, **se generan siempre con este
 prompt**, cambiando solo lo que va entre corchetes:
 
 ```text
-Crea una imagen de un [Objeto a dibujar] con este estilo visual:
-Estética Wireframe / Gráficos Vectoriales Puros. Este enfoque imita los límites
-de las computadoras primitivas. En lugar de renderizar superficies sólidas o
-texturas, todo el universo se compone de líneas en color #1E6FEB flotantes que
-delinean los bordes de los objetos sin entrar en detalles de ellos, solo las
-formas generales. El fondo es un vacío blanco absoluto, haciendo que las
-estructuras parezcan hologramas o planos arquitectónicos tridimensionales vivos,
-pero con poco detalle. Pero todas las líneas en color #1E6FEB y el fondo blanco.
-Sin textos, y sin saturar con detalles. Regla, no dejar lineas muy juntas porque
-de lejos parece una linea gruesa, los trazos deben ser más sueltos y separados.
-En la imagen aplica color (#144A96 y #3BAEC2) solo a dos cosas o elementos (por
-ejemplo a un árbol y a una pared, si es un paisaje urbano, o a un par de hojas si
-es a un árbol, o solo al espejo retrovisor y a una llanta si es un carro, etc).
-Agrega un pequeño efecto glow a las líneas (como un efecto neón controlado).
+Crea una imagen de un [Objeto a dibujar] en formato apaisado 2:1 con este estilo visual:
+
+Estética wireframe de gráficos vectoriales puros: el objeto se compone solo de líneas que delinean sus bordes, sin texturas y sin sombreado. Solo las formas generales, con mucho aire entre los elementos y sin saturar de detalles. Pocos objetos, bien separados.
+
+El fondo es blanco puro. NO pintes detrás de los objetos ninguna mancha, aureola, nube ni degradado de fondo: no hay ninguna fuente de luz aparte de las propias líneas.
+
+Cada línea del dibujo emite su propio resplandor: un halo azul muy tenue, suave y estrecho, que la envuelve y se desvanece enseguida. Tomado línea a línea es casi imperceptible; lo que se ve es el efecto acumulado, una atmósfera azulada muy leve que aparece sola donde hay más trazos juntos y desaparece donde el dibujo se queda vacío. Toda la luz de la imagen nace de las líneas y de nada más. Sin desenfocarlas ni engordarlas: el trazo sigue nítido dentro de su halo.
+
+Las líneas describen la profundidad con el color: azul noche #0A2540 en los elementos del primer plano, azul eléctrico #1E6FEB en los del fondo, y más tenues cuanto más lejos. Grosor uniforme, esquinas redondeadas y remates suaves: nada de ángulos duros ni vértices en punta.
+
+Los elementos grandes de la escena —edificios, fachadas, estructuras, volúmenes principales— van SIEMPRE en línea, huecos, sin relleno oscuro. Si alguno necesita separarse del resto, rellénalo de azul hielo #EAF2FB, un tono casi blanco que da volumen sin oscurecer. La composición tiene que quedar predominantemente clara y ligera.
+
+El azul noche sólido como relleno ocupa MENOS DEL 5% de la superficie de la imagen, y solo en objetos pequeños: un banco, una farola, un coche, una puerta, un buzón, un cartel. Nunca en edificios, fachadas ni superficies grandes.
+
+Exactamente dos de esos objetos pequeños, situados en los extremos de la composición, llevan ese relleno azul noche #0A2540, y sobre ellos —y solo sobre ellos— unos pocos acentos luminosos en cian #22D3EE que emiten un brillo intenso, como luz encendida dentro del objeto. Son dos puntos de luz menudos en una escena clara, no dos bloques.
+
+Regla: no dejar líneas muy juntas, porque de lejos se funden en una mancha gris. Los trazos van sueltos y separados.
+
+Sin textos.
 ```
 
-Seis cosas del prompt no son adorno y conviene no editarlas a la ligera:
+**El prompt existe para que la escena case con la mascota.** Esa fue la
+revisión que lo dejó como está. Las versiones anteriores usaban una sola tinta
+`#1E6FEB` y, puestas al lado de Eve, no parecían de la misma marca. El
+diagnóstico está en el degradado corporativo (§2),
+`#0A2540 → #1E6FEB → #22D3EE`: **la mascota vive en los dos extremos** —cuerpo
+azul noche, brillo cian— y **las escenas vivían solo en el medio**. Usaban
+tramos distintos de la misma escala y por eso no se tocaban nunca.
 
-- **`#1E6FEB` es `--eve-electrico`**, el token exacto (§2). Otro azul saca la
-  ilustración de la paleta.
+Siete cosas del prompt no son adorno y conviene no editarlas a la ligera:
+
+- **Cada color tiene un oficio, y no se intercambian.** `#1E6FEB`
+  (`--eve-electrico`) es la línea del fondo; `#0A2540` (`--eve-azul-noche`) es
+  la línea del primer plano y la masa de los objetos pequeños; `#22D3EE`
+  (`--eve-cian`) es la luz; `#EAF2FB` (`--eve-hielo`) es el relleno de los
+  volúmenes grandes que necesiten separarse. Son los tokens exactos (§2), y los
+  tres primeros reconstruyen el degradado corporativo.
+- **El cian solo va encima de los rellenos oscuros, nunca suelto sobre el
+  blanco.** No es gusto: la regla C7 dice que el cian sobre fondo blanco no
+  llega al contraste mínimo. Sobre la masa azul noche sí, y además es donde
+  parece luz encendida en vez de una línea de color.
 - **«Sin textos»** existe porque un modelo de imagen escribe mal, y un rótulo
   torcido en una página de producto se lee como descuido. Si la escena necesita
   un letrero, va en HTML encima, no dentro de la imagen.
 - **La regla de los trazos separados** es la que más se nota al usarla: las
   líneas juntas se funden en una mancha gris al reducir, que es justo el tamaño
-  al que estas imágenes se ven en una landing.
-- **«Solo a dos cosas»** es la que hace la imagen interesante en vez de plana, y
-  el límite importa tanto como el color: son `--eve-mezclado` (#144A96) y
-  `--eve-teal` (#3BAEC2), y en dos elementos apenas. Colorear más devuelve la
-  ilustración al muestrario —deja de haber un punto donde mirar— y saca al azul
-  #1E6FEB de su papel de estructura.
+  al que estas imágenes se ven en una landing. Por eso el prompt pide además
+  «pocos objetos»: la escena que más ha fallado fue un conjunto residencial con
+  demasiados edificios, donde las fachadas se comieron unas a otras.
+- **El relleno oscuro no pasa del 5% y va en objetos pequeños.** Es la regla
+  que más ha costado. Sin ella el modelo rellena lo más llamativo —siempre un
+  edificio— y la escena se vuelve agresiva: dos manzanas oscuras en un dibujo
+  que debía ser ligero. Y hay un motivo que no se ve mirando la imagen suelta:
+  **estas escenas se muestran al 20% de opacidad detrás de un texto**, así que
+  una masa oscura grande se convierte ahí en un bloque gris que compite con lo
+  que hay que leer. Por eso lo grande va hueco, en línea, o relleno de hielo si
+  necesita separarse, y la masa baja a un banco, una farola, un coche.
 
-  **Los dos son los que son, y los tres descartados lo son por motivos
-  distintos.** El relleno no va en el propio #1E6FEB porque el trazo y la masa
-  tienen que distinguirse. No va en violeta, que es territorio de Eve
-  Intelligence: es el color que identifica esa vertical en el sitio corporativo,
-  y gastarlo en una escena de producto se lo quita. Y **no va en #16A34A**, que
-  se usó al principio y se retiró: `--eve-exito` es un color **semántico** —en el
-  dashboard significa «aprobado», «confirmada»— así que puesto de adorno el ojo
-  lo lee como un indicador de estado y no como decoración.
+  Son **dos objetos pequeños y en los extremos**. Dos, porque el límite es lo
+  que hace la imagen interesante en vez de plana: más manchas la devuelven al
+  muestrario. Y en los extremos porque las portadas le abren al dibujo un hueco
+  radial en el centro para que las líneas no crucen el titular: se generó una
+  con los elementos centrados y el color no se veía **ni subiendo la
+  opacidad**. La imagen mental que hay que darle al modelo es «dos puntos de
+  luz menudos en una escena clara, no dos bloques».
+- **El halo se describe por acumulación, y el fondo se prohíbe explícitamente.**
+  Es la diferencia entre luz y mancha. Pedir «una aureola detrás del objeto» le
+  hace pintar al modelo un borrón centrado, que es exactamente lo que no
+  queremos; describirlo como el resplandor de cada línea, casi invisible por
+  separado y perceptible al juntarse, da la atmósfera sin ensuciar. La
+  prohibición del degradado de fondo está en mayúsculas porque el modelo
+  reincide.
 
-  `--eve-teal` gana porque es **el único token de la paleta con «ilustración»
-  escrita en su comentario**. Comparte color con la línea Tienda (§1), así que no
-  está libre de vertical —conviene saberlo—, pero ese doble uso lo autoriza la
-  propia paleta: «ilustración, línea Tienda». El violeta no tiene esa doble
-  bendición; la regla C3 dice que **solo** identifica Eve Intelligence.
-- **Pon los dos elementos a los lados, no al centro.** Estas escenas se usan de
-  fondo en portadas que le abren un hueco al dibujo por el medio, para que las
-  líneas no crucen el titular. Se generó una con la torre y el árbol centrados
-  y en la portada no se veía el color: caía entero dentro del hueco, y subir la
-  opacidad no lo rescataba. Si vas a pedir la imagen para una portada, dilo en
-  el corchete del objeto: «…con el color en elementos de los extremos».
-- **«Glow controlado»**, con las dos palabras. El halo le da cuerpo a la línea y
-  es lo que separa estas escenas de un dibujo de programa de CAD. Pero «neón» a
-  secas le pide al modelo un letrero de bar: halos anchos, saturados y a menudo
-  un fondo oscuro para lucirlos, que es lo contrario del vacío blanco. El
-  adjetivo es lo que sostiene el estilo, no el sustantivo.
-
-  Un aviso al usarla: un halo azul sobre blanco **baja el contraste del trazo**,
+  Un aviso al usarlo: un halo azul sobre blanco **baja el contraste del trazo**,
   así que si la imagen va detrás de texto hay que volver a mirar que el texto
   siga leyéndose. Se mide componiendo la imagen a la opacidad real sobre un
   lienzo y buscando el peor píxel de la banda del texto; en las portadas de hoy
   da 11:1, con holgura sobre el 4,5 que exige AA.
+- **Las esquinas redondeadas** son el otro puente con la mascota, que es toda
+  curva y esquina blanda. Un wireframe de vértices en punta al lado de Eve
+  parece de otra marca. Si el modelo se pasa y la escena queda de juguete, el
+  ajuste es «esquinas ligeramente redondeadas».
+
+**Colores que se descartaron, y por qué no volver a ellos:** el violeta es
+territorio de Eve Intelligence —la regla C3 dice que **solo** identifica esa
+vertical— y gastarlo en una escena de producto se lo quita. El verde `#16A34A`
+es `--eve-exito`, un color **semántico**: en el dashboard significa «aprobado»,
+«confirmada», así que de adorno el ojo lo lee como un indicador de estado. Y el
+teal `#3BAEC2` llegó a estar en el prompt unas horas, hasta que la revisión de
+la mascota reorganizó la paleta entera alrededor del degradado corporativo y
+dejó de tener sitio.
 
 **Estas ilustraciones SIEMPRE se generan. Nunca se dibujan en SVG a mano.**
 
