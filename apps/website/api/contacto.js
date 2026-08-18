@@ -94,25 +94,51 @@ function escapar(texto) {
     .replace(/"/g, "&quot;");
 }
 
-/** Los campos propios de cada formulario. Las dos demos comparten entrada
- *  porque cada landing solo llena la suya y las vacías se caen al filtrar. */
-function filasPropias(datos) {
-  if (datos.tipo === "postulacion") {
-    return [
-      ["Área", datos.area],
-      ["Enlace", datos.enlace]
-    ];
-  }
-  if (datos.tipo === "demo") {
-    return [
-      ["Ventas mensuales", datos.volumen],
-      ["Unidades del conjunto", datos.unidades]
-    ];
-  }
-  return [
-    ["Tamaño de empresa", datos.empresa],
-    ["Le interesa", datos.interes]
-  ];
+/**
+ * Los campos propios de cada formulario: `[rótulo, clave del cuerpo]`, en el
+ * orden en que se leen en el correo.
+ *
+ * Esta tabla es la ÚNICA lista blanca: lo que está aquí se limpia y se imprime;
+ * lo que no está, ni una cosa ni la otra. Antes eran dos listas separadas —una
+ * para limpiar el cuerpo y otra para pintarlo—, y un campo podía estar en una y
+ * faltar en la otra sin que nada fallara: así se perdió el teléfono la primera
+ * vez que una landing lo pidió. El formulario lo pedía obligatorio, la persona
+ * lo tecleaba, y el correo llegaba sin él. Con una sola tabla ese fallo no se
+ * puede volver a escribir.
+ *
+ * Las demos se reparten por producto porque preguntan cosas distintas: a un
+ * comercio se le pregunta cuánto vende, a un conjunto cuántas unidades tiene.
+ */
+const CAMPOS = {
+  contacto: [
+    ["Tamaño de empresa", "empresa"],
+    ["Le interesa", "interes"]
+  ],
+  postulacion: [
+    ["Área", "area"],
+    ["Enlace", "enlace"]
+  ],
+  "demo:evepay": [
+    ["Empresa", "empresa"],
+    ["Teléfono", "telefono"],
+    ["Ventas mensuales", "volumen"],
+    ["Cómo cobra hoy", "cobro"],
+    ["Cuándo quiere empezar", "plazo"]
+  ],
+  "demo:eveconecta": [
+    ["Conjunto", "conjunto"],
+    ["Teléfono", "telefono"],
+    ["Rol", "rol"],
+    ["Unidades del conjunto", "unidades"],
+    ["Ciudad", "ciudad"],
+    ["Cuándo quiere empezar", "plazo"]
+  ]
+};
+
+/** Una demo sin producto reconocido cae a la lista del contacto normal: se
+ *  prefiere un correo escueto a uno que invente campos. */
+function camposDe(tipo, producto) {
+  return CAMPOS[producto ? `${tipo}:${producto}` : tipo] || CAMPOS[tipo] || CAMPOS.contacto;
 }
 
 function construirMensaje(datos) {
@@ -120,19 +146,27 @@ function construirMensaje(datos) {
   // El producto va DELANTE del asunto: en la bandeja se ve sin abrir el correo
   // y sin depender de que alguien lea la firma del final.
   const prefijo = marca ? `${marca} · ` : "";
+  // En una demo, quién escribe importa menos que de dónde: «Demo: Ana Ruiz» no
+  // dice nada en la bandeja, «Demo: Ana Ruiz — Café del Parque» sí.
+  const organizacion = datos.empresa || datos.conjunto || "";
   const encabezado =
     datos.tipo === "postulacion"
       ? `Postulación: ${datos.nombre}${datos.area ? ` — ${datos.area}` : ""}`
       : datos.tipo === "demo"
-        ? `Demo: ${datos.nombre}`
+        ? `Demo: ${datos.nombre}${organizacion ? ` — ${organizacion}` : ""}`
         : `Contacto: ${datos.nombre}${datos.empresa ? ` — ${datos.empresa}` : ""}`;
   const asunto = prefijo + encabezado;
+
+  const propios = camposDe(datos.tipo, datos.producto).map(([rotulo, clave]) => [
+    rotulo,
+    datos[clave]
+  ]);
 
   const filas = [
     ["Producto", marca],
     ["Nombre", datos.nombre],
     ["Correo", datos.correo],
-    ...filasPropias(datos),
+    ...propios,
     ["Mensaje", datos.mensaje],
     ["Enviado desde", datos.origen]
   ].filter(([, v]) => v);
@@ -224,22 +258,23 @@ module.exports = async function handler(req, res) {
 
   const tipo = ["postulacion", "demo"].includes(cuerpo.tipo) ? cuerpo.tipo : "contacto";
 
+  // Fuera de la lista blanca no hay producto: el correo sale sin rótulo antes
+  // que con uno inventado por quien llamó.
+  const producto = PRODUCTOS[cuerpo.producto] ? cuerpo.producto : "";
+
   const datos = {
     tipo,
-    // Fuera de la lista blanca no hay producto: el correo sale sin rótulo antes
-    // que con uno inventado por quien llamó.
-    producto: PRODUCTOS[cuerpo.producto] ? cuerpo.producto : "",
+    producto,
     nombre: limpiar(cuerpo.nombre, LIMITES.nombre),
     correo: limpiar(cuerpo.correo, LIMITES.correo),
-    empresa: limpiar(cuerpo.empresa, LIMITES.campo),
-    interes: limpiar(cuerpo.interes, LIMITES.campo),
-    area: limpiar(cuerpo.area, LIMITES.campo),
-    enlace: limpiar(cuerpo.enlace, LIMITES.campo),
-    volumen: limpiar(cuerpo.volumen, LIMITES.campo),
-    unidades: limpiar(cuerpo.unidades, LIMITES.campo),
     mensaje: limpiar(cuerpo.mensaje, LIMITES.texto),
     origen: limpiar(cuerpo.origen, LIMITES.campo)
   };
+  // Los campos propios del formulario, tomados de la misma tabla que decide qué
+  // se imprime. Un campo que la landing mande de más se ignora aquí.
+  for (const [, clave] of camposDe(tipo, producto)) {
+    datos[clave] = limpiar(cuerpo[clave], LIMITES.campo);
+  }
 
   if (!datos.nombre) return res.status(400).json({ ok: false, error: "falta_nombre" });
   if (!correoPlausible(datos.correo)) {

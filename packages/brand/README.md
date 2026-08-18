@@ -60,3 +60,8 @@ Ese `data-demo` es lo que hace que el correo llegue marcado como EvePay o
 EveConecta. La clave debe existir en la lista blanca de
 `apps/website/api/contacto.js`; una que no esté ahí se ignora y el correo sale
 sin rótulo, nunca con uno inventado por el cliente.
+
+Lo mismo vale para **cada campo**: el script reenvía todos los `name=` del
+formulario, pero el endpoint solo limpia e imprime los que estén en su tabla
+`CAMPOS`, y descarta el resto **sin avisar** (`200`, sin error). Un campo nuevo
+en una landing es siempre dos cambios: el marcado y esa tabla.

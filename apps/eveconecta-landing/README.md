@@ -62,6 +62,13 @@ el producto y nada más:
 <form class="demo-form" data-demo="eveconecta">
 ```
 
+> **Un campo nuevo no basta con ponerlo aquí.** El endpoint solo limpia e
+> imprime lo que está en su tabla `CAMPOS` (hoy, para esta landing: `conjunto`, `telefono`, `rol`, `unidades`, `ciudad`, `plazo`,
+> más nombre, correo y mensaje, que son comunes). Lo que mande el marcado y no
+> esté en esa tabla **se descarta sin avisar**: la respuesta es `200` y el
+> correo llega sin el dato. Añadir un campo es tocar el marcado *y*
+> `apps/website/api/contacto.js`, en el mismo PR o en uno previo.
+
 ## Correr en local
 
 ```bash

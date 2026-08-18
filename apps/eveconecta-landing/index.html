@@ -364,13 +364,43 @@
              cuántas unidades— es perder la mitad por el camino: se pregunta
              aquí, donde ya decidió. -->
         <form class="demo-form" data-demo="eveconecta">
+          <!-- Nombre y conjunto separados: juntos llegaban pegados y no se
+               podía saludar a nadie por su nombre ni buscar la copropiedad. -->
           <div class="campo">
-            <label for="f-nombre">Nombre y conjunto</label>
-            <input id="f-nombre" name="nombre" type="text" autocomplete="organization" required>
+            <label for="f-nombre">Tu nombre</label>
+            <input id="f-nombre" name="nombre" type="text" autocomplete="name" maxlength="120" required>
+          </div>
+          <div class="campo">
+            <label for="f-conjunto">Nombre del conjunto</label>
+            <input id="f-conjunto" name="conjunto" type="text" autocomplete="organization" maxlength="120" required>
           </div>
           <div class="campo">
             <label for="f-correo">Correo</label>
-            <input id="f-correo" name="correo" type="email" autocomplete="email" required>
+            <input id="f-correo" name="correo" type="email" autocomplete="email" maxlength="160" required>
+          </div>
+          <!-- El patrón lleva barras SIMPLES: en un atributo HTML no hay que
+               escaparlas. Con barras dobles el navegador no logra compilarlo y
+               se salta la validación entera, que es peor que no tenerla.
+               Los paréntesis van escapados porque `pattern` se compila con la
+               bandera `v`, donde dentro de una clase son sintaxis. -->
+          <div class="campo">
+            <label for="f-telefono">Teléfono o WhatsApp</label>
+            <input id="f-telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel"
+                   pattern="[+0-9\(\)\-\s]{7,40}" maxlength="40"
+                   title="Solo dígitos, espacios y los signos + ( ) -" required>
+          </div>
+          <!-- Quién escribe cambia la conversación entera: al consejo se le
+               habla de control y de rendición de cuentas; a la administradora,
+               de cuántos conjuntos lleva. -->
+          <div class="campo">
+            <label for="f-rol">¿Desde dónde nos escribes?</label>
+            <select id="f-rol" name="rol" required>
+              <option value="" selected>Selecciona una opción</option>
+              <option value="Administrador/a del conjunto">Administrador/a del conjunto</option>
+              <option value="Consejo de administración">Consejo de administración</option>
+              <option value="Empresa administradora">Empresa administradora</option>
+              <option value="Propietario o residente">Propietario o residente</option>
+            </select>
           </div>
           <div class="campo">
             <label for="f-unidades">Unidades del conjunto</label>
@@ -380,6 +410,20 @@
               <option value="50 – 150 unidades">50 – 150</option>
               <option value="150 – 400 unidades">150 – 400</option>
               <option value="Más de 400 unidades">Más de 400</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="f-ciudad">Ciudad (opcional)</label>
+            <input id="f-ciudad" name="ciudad" type="text" autocomplete="address-level2" maxlength="80">
+          </div>
+          <div class="campo">
+            <label for="f-plazo">¿Para cuándo? (opcional)</label>
+            <select id="f-plazo" name="plazo">
+              <option value="" selected>Selecciona una opción</option>
+              <option value="Cuanto antes">Cuanto antes</option>
+              <option value="En 1–3 meses">En 1–3 meses</option>
+              <option value="Después de la próxima asamblea">Después de la próxima asamblea</option>
+              <option value="Estoy explorando">Estoy explorando</option>
             </select>
           </div>
           <div class="campo">
