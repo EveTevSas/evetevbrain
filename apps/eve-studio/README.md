@@ -216,7 +216,7 @@ de saltarse una instrucción; a un `if` no:
 | Operaciones | crear y actualizar; **nunca** borrar ni renombrar |
 
 Dos exclusiones importan especialmente: **`base.css`**, porque editarlo ahí lo
-revierte el siguiente `pnpm css:sync` y rompe el job de CI; y **`apps/eve-studio`**,
+revierte el siguiente `pnpm landings:sync` y rompe el job de CI; y **`apps/eve-studio`**,
 porque un agente que puede reescribir su propio arnés no tiene arnés.
 
 Una propuesta con cualquier ruta inválida **se rechaza entera**: aplicar solo la
@@ -373,7 +373,7 @@ y dejó el REPL entregando URLs de `raw` cuando la API ya no lo hacía.
 Ese desfase concreto ya se cerró: las 22 poses se publicaron en WebP en
 `Evetev-Dev/brand` v1.3.1, y `listar_carpeta_de_marca` devuelve 24 archivos.
 Pero **el desfase puede volver**, porque nada sincroniza los dos repositorios —
-`pnpm css:sync` solo replica `packages/brand/landing/base.css`, no los activos.
+`pnpm landings:sync` solo replica lo de `packages/brand/landing/`, no los activos.
 Cada activo nuevo hay que publicarlo a mano y etiquetar una `v1.x`; hasta que
 eso pase, el agente dirá que no está, que es lo correcto, en vez de enlazarlo
 roto.

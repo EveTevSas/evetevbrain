@@ -14,15 +14,39 @@ files/            # video de fondo e imagen de portada
 
 ## Formularios
 
-Los dos formularios del sitio (contacto en `index.html` y postulación en
-`nosotros.html`) hacen `POST /api/contacto`, y esa función envía el correo a
-**contacto@evetev.com** con `reply_to` en la dirección de quien escribe, para
-poder responderle dando a "Responder".
+`api/contacto.js` es el **único buzón de toda la marca**. Recibe cuatro
+formularios y envía el correo a **contacto@evetev.com** con `reply_to` en la
+dirección de quien escribe, para poder responderle dando a "Responder":
 
-**Falta un paso manual para que envíen de verdad.** Hoy el código está completo,
-pero sin proveedor configurado la función responde `503` y la página muestra
-"Escríbenos directo a contacto@evetev.com" — degrada, no se rompe. Para
-activarlo:
+| Formulario | Dónde vive | Asunto que llega |
+|---|---|---|
+| Contacto | `index.html` | `Contacto: nombre — tamaño` |
+| Postulación | `nosotros.html` | `Postulación: nombre — área` |
+| Demo de EvePay | `apps/evepay` | `EvePay · Demo: nombre` |
+| Demo de EveConecta | `apps/eveconecta-landing` | `EveConecta · Demo: nombre` |
+
+Los dos últimos son otros dominios y llegan aquí **por CORS**. Están en una
+lista de orígenes al principio de la función, junto con las previews de Vercel
+de esas landings y `localhost` para desarrollo. El producto no lo escribe el
+cliente: manda una clave (`evepay`, `eveconecta`) que la función traduce contra
+su propia lista blanca, así que un origen curioso no puede hacer que llegue un
+correo firmado por cualquier cosa. Además del prefijo del asunto, el cuerpo
+lleva una fila `Producto:` y otra `Enviado desde:` con el host real.
+
+**Por qué una sola función y no una por landing:** la clave del proveedor
+viviría entonces en tres proyectos de Vercel — tres sitios donde rotarla y tres
+donde olvidarla. Con este reparto las landings siguen siendo estáticas puras,
+sin variables de entorno. El precio a pagar es que **añadir o cambiar el dominio
+de una landing obliga a tocar la lista de orígenes**; si no, el navegador
+bloquea el envío y el formulario deja de funcionar sin que el despliegue avise.
+
+**Ya está activo en producción**: el proveedor está configurado y la clave
+puesta en Vercel. Si faltara —clave sin poner, proyecto nuevo—, la función
+responde `503` y la página muestra "Escríbenos directo a contacto@evetev.com":
+degrada, no se rompe.
+
+Lo que hubo que hacer, y que hay que repetir si se rehace el proyecto o se
+cambia de proveedor:
 
 1. Crear una cuenta en **Resend** (o el proveedor que se decida; el §7 de la
    constitución dejaba esto abierto).
@@ -34,7 +58,8 @@ activarlo:
    > Ponerlos juntos puede dejar a la empresa sin recibir correo.
 3. En el proyecto de Vercel de `apps/website` → *Settings → Environment
    Variables*, agregar `RESEND_API_KEY`. Opcionalmente `CONTACTO_DESTINO` y
-   `CONTACTO_REMITENTE` (ver `.env.example`). **La llave nunca va al repo (§4).**
+   `CONTACTO_REMITENTE`. **La llave nunca va al repo (§4).** Va solo en este
+   proyecto: las landings no la necesitan, llaman a esta función.
 4. Volver a desplegar para que la función tome la variable.
 
 Cambiar de proveedor es tocar solo la función `enviarCorreo` de

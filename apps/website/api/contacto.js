@@ -1,9 +1,17 @@
 /**
- * Función serverless que recibe los formularios del sitio y los envía por
- * correo a la empresa. Cubre los dos: el de contacto (index.html) y el de
- * postulación (nosotros.html).
+ * Función serverless que recibe los formularios de TODA la marca y los envía
+ * por correo a la empresa. Cubre cuatro: contacto (index.html), postulación
+ * (nosotros.html) y las dos demos de las landings de producto —EvePay y
+ * EveConecta—, que viven en otros dominios y llegan aquí por CORS.
  *
  * Decisiones y por qué:
+ * - **Una sola función para las cuatro.** Las landings son proyectos de Vercel
+ *   aparte, así que duplicar la función ahí obligaría a repetir la clave del
+ *   proveedor en cada proyecto: tres sitios donde rotarla y tres donde
+ *   olvidarla. Con un único endpoint la credencial vive en un solo lugar y las
+ *   landings siguen siendo estáticas, sin variables de entorno.
+ * - **El correo dice de qué producto viene.** `producto` entra por una lista
+ *   blanca y decide el prefijo del asunto; el cliente no escribe el rótulo.
  * - **Sin dependencias.** Se llama a la API del proveedor con `fetch` nativo
  *   (Node 18+). El paquete `@evetev/website` no tiene node_modules ni build, y
  *   meterle uno solo por esto no se justifica (§1, no sobre-ingeniar).
@@ -25,7 +33,47 @@ const DESTINO = process.env.CONTACTO_DESTINO || "contacto@evetev.com";
    correo existente. */
 const REMITENTE = process.env.CONTACTO_REMITENTE || "Web Evetev <web@send.evetev.com>";
 
+/* Quién puede llamar desde el navegador. Los formularios de las landings son
+   cross-origin, así que sin esto el navegador bloquea la respuesta.
+
+   Ojo con lo que esta lista SÍ y NO hace: impide que una página ajena use el
+   endpoint desde el navegador de un visitante, no que alguien lo llame con
+   curl. Contra eso está la trampa antibots, no el CORS. */
+const ORIGENES = new Set([
+  "https://evetev.com",
+  "https://www.evetev.com",
+  "https://evepay.evetev.com",
+  "https://eveconecta.evetev.com"
+]);
+/* Previews de Vercel de las dos landings, para poder probar el formulario en
+   el despliegue de un PR. El correo que llega lleva el host real en «Enviado
+   desde», así que una prueba nunca se confunde con un cliente. */
+const ORIGEN_PREVIEW = /^https:\/\/(evepay|eveconecta-landing)-[a-z0-9-]+\.vercel\.app$/;
+/* Desarrollo local: `pnpm dev` sirve las landings en localhost. */
+const ORIGEN_LOCAL = /^http:\/\/localhost:\d{2,5}$/;
+
+/** Rótulo del producto. Lista blanca a propósito: el asunto del correo no lo
+ *  escribe el cliente, solo elige entre estas dos claves. */
+const PRODUCTOS = { evepay: "EvePay", eveconecta: "EveConecta" };
+
 const LIMITES = { nombre: 120, correo: 160, texto: 4000, campo: 240 };
+
+function origenPermitido(origen) {
+  if (!origen) return false;
+  return ORIGENES.has(origen) || ORIGEN_PREVIEW.test(origen) || ORIGEN_LOCAL.test(origen);
+}
+
+/** Cabeceras de CORS. `Vary` para que ningún caché sirva la respuesta de un
+ *  origen a otro distinto. */
+function aplicarCors(req, res) {
+  res.setHeader("Vary", "Origin");
+  const origen = req.headers.origin;
+  if (!origenPermitido(origen)) return;
+  res.setHeader("Access-Control-Allow-Origin", origen);
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Max-Age", "86400");
+}
 
 function limpiar(valor, max) {
   if (typeof valor !== "string") return "";
@@ -46,17 +94,45 @@ function escapar(texto) {
     .replace(/"/g, "&quot;");
 }
 
+/** Los campos propios de cada formulario. Las dos demos comparten entrada
+ *  porque cada landing solo llena la suya y las vacías se caen al filtrar. */
+function filasPropias(datos) {
+  if (datos.tipo === "postulacion") {
+    return [
+      ["Área", datos.area],
+      ["Enlace", datos.enlace]
+    ];
+  }
+  if (datos.tipo === "demo") {
+    return [
+      ["Ventas mensuales", datos.volumen],
+      ["Unidades del conjunto", datos.unidades]
+    ];
+  }
+  return [
+    ["Tamaño de empresa", datos.empresa],
+    ["Le interesa", datos.interes]
+  ];
+}
+
 function construirMensaje(datos) {
-  const esPostulacion = datos.tipo === "postulacion";
-  const asunto = esPostulacion
-    ? `Postulación: ${datos.nombre}${datos.area ? ` — ${datos.area}` : ""}`
-    : `Contacto: ${datos.nombre}${datos.empresa ? ` — ${datos.empresa}` : ""}`;
+  const marca = PRODUCTOS[datos.producto];
+  // El producto va DELANTE del asunto: en la bandeja se ve sin abrir el correo
+  // y sin depender de que alguien lea la firma del final.
+  const prefijo = marca ? `${marca} · ` : "";
+  const encabezado =
+    datos.tipo === "postulacion"
+      ? `Postulación: ${datos.nombre}${datos.area ? ` — ${datos.area}` : ""}`
+      : datos.tipo === "demo"
+        ? `Demo: ${datos.nombre}`
+        : `Contacto: ${datos.nombre}${datos.empresa ? ` — ${datos.empresa}` : ""}`;
+  const asunto = prefijo + encabezado;
 
   const filas = [
+    ["Producto", marca],
     ["Nombre", datos.nombre],
     ["Correo", datos.correo],
-    esPostulacion ? ["Área", datos.area] : ["Tamaño de empresa", datos.empresa],
-    esPostulacion ? ["Enlace", datos.enlace] : ["Le interesa", datos.interes],
+    ...filasPropias(datos),
     ["Mensaje", datos.mensaje],
     ["Enviado desde", datos.origen]
   ].filter(([, v]) => v);
@@ -113,8 +189,18 @@ async function enviarCorreo({ asunto, texto, html, responderA }) {
 // CommonJS a propósito: el paquete no declara "type": "module", y así el
 // archivo funciona sin depender de cómo se resuelva el sistema de módulos.
 module.exports = async function handler(req, res) {
+  aplicarCors(req, res);
+
+  // El navegador pregunta antes de mandar JSON desde otro dominio. Si el
+  // origen no está en la lista, la respuesta sale sin las cabeceras de CORS y
+  // es el propio navegador el que corta.
+  if (req.method === "OPTIONS") {
+    res.setHeader("Allow", "POST, OPTIONS");
+    return res.status(204).end();
+  }
+
   if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
+    res.setHeader("Allow", "POST, OPTIONS");
     return res.status(405).json({ ok: false, error: "metodo_no_permitido" });
   }
 
@@ -136,14 +222,21 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
+  const tipo = ["postulacion", "demo"].includes(cuerpo.tipo) ? cuerpo.tipo : "contacto";
+
   const datos = {
-    tipo: cuerpo.tipo === "postulacion" ? "postulacion" : "contacto",
+    tipo,
+    // Fuera de la lista blanca no hay producto: el correo sale sin rótulo antes
+    // que con uno inventado por quien llamó.
+    producto: PRODUCTOS[cuerpo.producto] ? cuerpo.producto : "",
     nombre: limpiar(cuerpo.nombre, LIMITES.nombre),
     correo: limpiar(cuerpo.correo, LIMITES.correo),
     empresa: limpiar(cuerpo.empresa, LIMITES.campo),
     interes: limpiar(cuerpo.interes, LIMITES.campo),
     area: limpiar(cuerpo.area, LIMITES.campo),
     enlace: limpiar(cuerpo.enlace, LIMITES.campo),
+    volumen: limpiar(cuerpo.volumen, LIMITES.campo),
+    unidades: limpiar(cuerpo.unidades, LIMITES.campo),
     mensaje: limpiar(cuerpo.mensaje, LIMITES.texto),
     origen: limpiar(cuerpo.origen, LIMITES.campo)
   };
@@ -155,10 +248,15 @@ module.exports = async function handler(req, res) {
 
   try {
     await enviarCorreo({ ...construirMensaje(datos), responderA: datos.correo });
-    console.log(`formulario enviado (${datos.tipo})`); // sin PII (§4)
+    // sin PII (§4): solo el tipo y el producto, nunca lo que escribió la persona
+    console.log(`formulario enviado (${datos.tipo}${datos.producto ? `/${datos.producto}` : ""})`);
     return res.status(200).json({ ok: true });
   } catch (e) {
-    console.error(`formulario falló (${datos.tipo}):`, e.message, e.detalle || "");
+    console.error(
+      `formulario falló (${datos.tipo}${datos.producto ? `/${datos.producto}` : ""}):`,
+      e.message,
+      e.detalle || ""
+    );
     return res
       .status(e.codigo || 500)
       .json({ ok: false, error: e.message === "sin_proveedor" ? "sin_proveedor" : "envio_fallido" });

@@ -32,11 +32,12 @@ jobs:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: bash scripts/ci-areas.sh
 
-  # ── Landings: una sola base de CSS ─────────────────────────────────────────
-  # Las landings son estáticas y cada una lleva su copia de base.css, generada
-  # desde packages/brand/landing/base.css. Este job impide que se desvíen.
+  # ── Landings: una sola fuente de lo compartido ─────────────────────────────
+  # Las landings son estáticas y cada una lleva su copia de base.css y de
+  # formularios.js, generadas desde packages/brand/landing/. Este job impide
+  # que se desvíen.
   landings:
-    name: CSS de las landings
+    name: Archivos compartidos de las landings
     runs-on: ubuntu-latest
     needs: cambios
     if: ${{ needs.cambios.outputs.landings == 'true' }}
@@ -50,7 +51,7 @@ jobs:
       # Sin dependencias a propósito: el script usa solo node:fs y node:path,
       # así que no hace falta instalar el workspace para comprobarlo.
       - name: Copias al día
-        run: node scripts/css-landings.mjs --check
+        run: node scripts/landings-sync.mjs --check
 
   # ── Paso 1: shared (bloquea todo lo demás) ─────────────────────────────────
   shared:

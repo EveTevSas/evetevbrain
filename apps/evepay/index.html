@@ -221,7 +221,11 @@
             <li>Sin compromiso: si no encaja, te lo decimos claro.</li>
           </ul>
         </div>
-        <form class="demo-form" action="https://evetev.com/#contacto" method="get">
+        <!-- El envío lo hace formularios.js (compartido con las demás landings):
+             POST a evetev.com/api/contacto, el único sitio con la credencial
+             del correo. `data-demo` es lo que hace que el mensaje llegue
+             marcado como EvePay. -->
+        <form class="demo-form" data-demo="evepay">
           <div class="campo">
             <label for="f-nombre">Nombre y empresa</label>
             <input id="f-nombre" name="nombre" type="text" autocomplete="organization" required>
@@ -234,17 +238,30 @@
             <label for="f-volumen">Ventas mensuales aproximadas</label>
             <select id="f-volumen" name="volumen" required>
               <option value="" selected>Selecciona un rango</option>
-              <option value="menos-50">Menos de $50 millones COP</option>
-              <option value="50-300">$50 – $300 millones COP</option>
-              <option value="300-1000">$300 – $1.000 millones COP</option>
-              <option value="mas-1000">Más de $1.000 millones COP</option>
+              <option value="Menos de $50 millones COP">Menos de $50 millones COP</option>
+              <option value="$50 – $300 millones COP">$50 – $300 millones COP</option>
+              <option value="$300 – $1.000 millones COP">$300 – $1.000 millones COP</option>
+              <option value="Más de $1.000 millones COP">Más de $1.000 millones COP</option>
             </select>
           </div>
           <div class="campo">
             <label for="f-mensaje">¿Cómo cobras hoy? (opcional)</label>
             <textarea id="f-mensaje" name="mensaje" rows="3"></textarea>
           </div>
+          <!-- Trampa antibots: una persona nunca ve este campo, así que si
+               llega lleno la función descarta el envío. -->
+          <div class="trampa" aria-hidden="true">
+            <label for="f-sitio">No llenar</label>
+            <input id="f-sitio" name="sitio" type="text" tabindex="-1" autocomplete="off">
+          </div>
+          <noscript>
+            <p class="demo-estado error">
+              Este formulario necesita JavaScript para enviarse. Escríbenos a
+              <a href="mailto:contacto@evetev.com">contacto@evetev.com</a>.
+            </p>
+          </noscript>
           <button class="btn btn-cta" type="submit">Quiero probar EvePay</button>
+          <p class="demo-estado" data-estado role="status" aria-live="polite"></p>
           <p class="demo-legal">
             Al enviar aceptas el tratamiento de tus datos según nuestra
             política de tratamiento de datos.
@@ -264,5 +281,7 @@
 </footer>
 
 <script>document.getElementById('anio').textContent = new Date().getFullYear();</script>
+<!-- GENERADO desde packages/brand/landing/formularios.js — ver README. -->
+<script src="formularios.js"></script>
 </body>
 </html>

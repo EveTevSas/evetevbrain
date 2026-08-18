@@ -354,17 +354,59 @@
             <li>Sin compromiso: si no encaja, te lo decimos claro.</li>
           </ul>
         </div>
-        <div class="demo-cta">
-          <p class="demo-cta-titulo">¿Listo para verlo?</p>
-          <p class="demo-cta-texto">
-            Escríbenos y agendamos la demo esta misma semana.
-          </p>
-          <a class="btn btn-sec" href="https://evetev.com/#contacto">Hablar con el equipo</a>
-          <p class="demo-cta-nota">
+        <!-- El envío lo hace formularios.js (compartido con las demás landings):
+             POST a evetev.com/api/contacto, el único sitio con la credencial
+             del correo. `data-demo` es lo que hace que el mensaje llegue
+             marcado como EveConecta.
+
+             Antes esto era un enlace a evetev.com/#contacto. Mandar a la
+             persona a otro dominio a repetir el contexto —de qué conjunto es,
+             cuántas unidades— es perder la mitad por el camino: se pregunta
+             aquí, donde ya decidió. -->
+        <form class="demo-form" data-demo="eveconecta">
+          <div class="campo">
+            <label for="f-nombre">Nombre y conjunto</label>
+            <input id="f-nombre" name="nombre" type="text" autocomplete="organization" required>
+          </div>
+          <div class="campo">
+            <label for="f-correo">Correo</label>
+            <input id="f-correo" name="correo" type="email" autocomplete="email" required>
+          </div>
+          <div class="campo">
+            <label for="f-unidades">Unidades del conjunto</label>
+            <select id="f-unidades" name="unidades" required>
+              <option value="" selected>Selecciona un rango</option>
+              <option value="Menos de 50 unidades">Menos de 50</option>
+              <option value="50 – 150 unidades">50 – 150</option>
+              <option value="150 – 400 unidades">150 – 400</option>
+              <option value="Más de 400 unidades">Más de 400</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="f-mensaje">¿Qué te está costando hoy? (opcional)</label>
+            <textarea id="f-mensaje" name="mensaje" rows="3"></textarea>
+          </div>
+          <!-- Trampa antibots: una persona nunca ve este campo, así que si
+               llega lleno la función descarta el envío. -->
+          <div class="trampa" aria-hidden="true">
+            <label for="f-sitio">No llenar</label>
+            <input id="f-sitio" name="sitio" type="text" tabindex="-1" autocomplete="off">
+          </div>
+          <noscript>
+            <p class="demo-estado error">
+              Este formulario necesita JavaScript para enviarse. Escríbenos a
+              <a href="mailto:contacto@evetev.com">contacto@evetev.com</a>.
+            </p>
+          </noscript>
+          <!-- Mezclado, no coral: el único coral de la vista ya se usó en la
+               portada (C2). -->
+          <button class="btn btn-sec" type="submit">Agendar la demo</button>
+          <p class="demo-estado" data-estado role="status" aria-live="polite"></p>
+          <p class="demo-legal">
             También puedes entrar al
             <a href="https://conecta.evetev.com">portal de residentes</a>.
           </p>
-        </div>
+        </form>
       </div>
     </div>
   </section>
@@ -409,5 +451,7 @@
   }, { threshold: 0.35 });
   io.observe(v);
 })();</script>
+<!-- GENERADO desde packages/brand/landing/formularios.js — ver README. -->
+<script src="formularios.js"></script>
 </body>
 </html>
