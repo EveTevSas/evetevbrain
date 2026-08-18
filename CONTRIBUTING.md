@@ -26,8 +26,17 @@ O usa el atajo:
 
 - **Trunk-based**: rama corta por feature (vida < 2–3 días), PR pequeño.
 - **Conventional Commits**: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`…
-- **Nada se mergea a `main` sin PR** y **1 aprobación**, con **CI en verde**
-  (`lint` · `typecheck` · `test`).
+- **Nada se mergea a `main` sin PR**, y el PR no se mezcla hasta que el check
+  **«CI completo»** esté en verde. Lo aplica el ruleset «Proteger main», no la
+  buena voluntad: `main` tampoco se puede borrar ni reescribir con un push
+  forzado. Squash, merge y rebase están los tres permitidos.
+- **La aprobación no está exigida hoy** (`required_approving_review_count: 0`).
+  El §3 de la constitución pide 1 aprobación *de otra persona*, y ese sigue
+  siendo el objetivo; mientras el repo tenga un solo committer humano, exigirla
+  bloquearía todos los PR —GitHub no deja aprobar el propio— sin añadir una
+  segunda mirada que no existe. **Cuando entre la segunda persona, hay que subir
+  el contador a 1**; si no, la revisión se queda en costumbre y se olvida el día
+  que haya prisa.
 - `main` siempre desplegable.
 
 ## Antes de dar un PR por listo
