@@ -55,9 +55,13 @@ describe("WebhooksService — normalización de eventos", () => {
     service = new WebhooksService(repo, new LedgerService(ledgerRepo, repo), merchants, noopDelivery, noopWebhookRepo);
   });
 
-  it("EARS 1: payment.succeeded pasa el cobro pendiente → aprobado y lo audita", async () => {
+  it("EARS 1: payment.purchase.succeeded pasa el cobro pendiente → aprobado y lo audita", async () => {
     const id = await seedCobro(repo);
-    await service.procesar({ id: "evt-1", type: "payment.succeeded", providerPaymentId: PROV });
+    await service.procesar({
+      id: "evt-1",
+      type: "payment.purchase.succeeded",
+      providerPaymentId: PROV
+    });
 
     const cobro = await repo.buscarCobro(TENANT, id);
     expect(cobro?.estado).toBe("aprobado");
@@ -71,19 +75,28 @@ describe("WebhooksService — normalización de eventos", () => {
     );
   });
 
-  it("EARS 4: payment.failed pasa el cobro pendiente → fallido", async () => {
+  it("EARS 4: payment.purchase.failed pasa el cobro pendiente → fallido", async () => {
     const id = await seedCobro(repo);
-    await service.procesar({ id: "evt-2", type: "payment.failed", providerPaymentId: PROV });
+    await service.procesar({
+      id: "evt-2",
+      type: "payment.purchase.failed",
+      providerPaymentId: PROV
+    });
     const cobro = await repo.buscarCobro(TENANT, id);
     expect(cobro?.estado).toBe("fallido");
   });
 
   it("EARS 3: un event_id ya procesado no re-aplica el efecto", async () => {
     const id = await seedCobro(repo);
-    await service.procesar({ id: "evt-1", type: "payment.succeeded", providerPaymentId: PROV });
+    const evento = {
+      id: "evt-1",
+      type: "payment.purchase.succeeded",
+      providerPaymentId: PROV
+    };
+    await service.procesar(evento);
     const auditsAntes = repo.auditoria.length;
 
-    await service.procesar({ id: "evt-1", type: "payment.succeeded", providerPaymentId: PROV });
+    await service.procesar(evento);
     const cobro = await repo.buscarCobro(TENANT, id);
 
     expect(cobro?.estado).toBe("aprobado");
@@ -92,9 +105,35 @@ describe("WebhooksService — normalización de eventos", () => {
 
   it("EARS 5: evento para un provider_payment_id inexistente no cambia nada", async () => {
     const id = await seedCobro(repo);
-    await service.procesar({ id: "evt-9", type: "payment.succeeded", providerPaymentId: "no-existe" });
+    await service.procesar({
+      id: "evt-9",
+      type: "payment.purchase.succeeded",
+      providerPaymentId: "no-existe"
+    });
     const cobro = await repo.buscarCobro(TENANT, id);
     expect(cobro?.estado).toBe("pendiente");
+  });
+
+  it("EARS 4: payment.purchase.rejected también deja el cobro fallido", async () => {
+    const id = await seedCobro(repo);
+    await service.procesar({
+      id: "evt-2b",
+      type: "payment.purchase.rejected",
+      providerPaymentId: PROV
+    });
+    expect((await repo.buscarCobro(TENANT, id))?.estado).toBe("fallido");
+  });
+
+  /* Akua nombra sus eventos `payment.purchase.*`. Este spec vivió cuatro
+     semanas contra los nombres genéricos que se supusieron antes de tener la
+     integración real, y pasó de rojo sin que nadie mirara. Fijar aquí que los
+     nombres cortos NO disparan nada evita que el arreglo se deshaga solo. */
+  it("los nombres genéricos de antes de Akua no disparan transición", async () => {
+    const id = await seedCobro(repo);
+    for (const type of ["payment.succeeded", "payment.failed"]) {
+      await service.procesar({ id: `evt-viejo-${type}`, type, providerPaymentId: PROV });
+    }
+    expect((await repo.buscarCobro(TENANT, id))?.estado).toBe("pendiente");
   });
 
   it("EARS 6: tipo de evento no soportado se ignora (sin transición)", async () => {
