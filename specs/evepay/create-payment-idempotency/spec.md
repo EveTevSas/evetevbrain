@@ -38,7 +38,7 @@ cobro**, sin crear otro ni llamar de nuevo a Akua.
 
 ## No-objetivos
 
-- Confirmación del pago (llega por webhook `payment.succeeded` → ver
+- Confirmación del pago (llega por webhook `payment.purchase.succeeded` → ver
   `specs/evepay/provider-webhooks`).
 - Asientos de ledger detallados (→ `specs/evepay/ledger-posting`).
 - Refunds, disputas, split payments.
