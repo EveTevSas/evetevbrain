@@ -418,7 +418,11 @@ Dos reglas:
 ### Configuración obligatoria (higiene desde el día uno)
 
 - **2FA obligatorio** para toda la organización (Settings → Authentication security). Manejamos dinero y PII: es básico.
-- **Branch protection sobre `main`:** exige PR, exige **1 aprobación**, exige **CI en verde** (lint · typecheck · test), y **prohíbe push directo**. (En repo privado suele requerir plan Team.)
+- **Protección de `main`** — lo que hay configurado hoy, en un *ruleset* llamado «Proteger main» (un ruleset, no la *branch protection* clásica que decía esta línea antes; se configura en Settings → Rules):
+  - exige **PR**: no se empuja directo a `main`;
+  - exige **un solo check en verde, «CI completo»** — es el job final que depende de todos los demás, así que exigir ese basta y no hay que tocar el ruleset cada vez que se añade un job;
+  - **prohíbe borrar `main`** y **reescribirla** con un push forzado;
+  - **no exige aprobación** (`required_approving_review_count: 0`). El §3 pide 1 aprobación de otra persona y ese sigue siendo el objetivo, pero con un solo committer humano exigirla bloquearía todos los PR: GitHub no deja aprobar el propio. **Hay que subirlo a 1 cuando entre la segunda persona** (`CONTRIBUTING.md` lo repite donde se trabaja a diario).
 - **Secretos** en GitHub Actions secrets / environments, **nunca** en el repo (amarra con §4).
 - **Preview deploys por PR** (Vercel, Railway/Render): cada PR levanta una URL desechable con esa versión. Ideal para enseñarle una pantalla a un conjunto piloto o revisar entre los tres sin bajar la rama.
 
