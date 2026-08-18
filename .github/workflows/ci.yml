@@ -154,6 +154,18 @@ jobs:
       - name: Build
         run: pnpm --filter @evetev/eveconecta build
 
+  # ── Las URLs del CDN de marca responden ────────────────────────────────────
+  # Corre SIEMPRE, sin filtrar por área, y es a propósito: lo que rompe estas
+  # URLs casi nunca es un cambio de este repositorio, sino algo que pasó —o que
+  # no pasó— en el de marca. Ver el porqué completo en scripts/ci-cdn.sh.
+  cdn:
+    name: Enlaces del CDN
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Comprobar que responden 200
+        run: bash scripts/ci-cdn.sh
+
   # ── El único check que debe exigir la protección de rama ───────────────────
   # Corre siempre, y solo se pone en rojo si algo falló o se canceló. Un job
   # omitido no es un fallo: es que ese área no se tocó.
@@ -161,7 +173,7 @@ jobs:
     name: CI completo
     runs-on: ubuntu-latest
     if: always()
-    needs: [cambios, landings, shared, api, eveconecta]
+    needs: [cambios, landings, cdn, shared, api, eveconecta]
     steps:
       - name: Comprobar los resultados
         run: |
