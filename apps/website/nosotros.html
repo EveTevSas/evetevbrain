@@ -107,6 +107,13 @@
   </div>
 </section>
 
+<!-- OCULTA, NO BORRADA — «Dónde vamos» (hoja de ruta), 19-ago-2026.
+     Se comenta en bloque para poder devolverla tal cual estaba: el contenido y
+     el marcado quedan intactos, solo dejan de renderizarse. Para restaurarla,
+     borrar esta línea de apertura y el cierre que va justo tras </section>.
+     El CSS de .ruta sigue en estilos.css a propósito, para que al volver no
+     haya que reponer nada. -->
+<!--
 <section class="wrap" style="padding-top:44px">
   <div class="sec-h"><h2>Dónde vamos</h2><p>La hoja de ruta, tal como está hoy.</p></div>
   <ol class="ruta">
@@ -128,7 +135,15 @@
     </li>
   </ol>
 </section>
+-->
 
+<!-- OCULTA, NO BORRADA — «El equipo», 19-ago-2026. Mismo criterio que la
+     sección de arriba: se comenta entera, con las cuatro fichas y sus datos,
+     para poder devolverla sin reescribir nada. El id="equipo" queda dentro del
+     comentario, así que los enlaces del pie que apuntaban a #equipo se
+     comentaron también —en este archivo y en index.html—: al restaurar la
+     sección hay que descomentar los tres sitios. -->
+<!--
 <section id="equipo" class="precios" style="margin-top:44px">
   <div class="wrap">
     <div class="sec-h"><h2>El equipo</h2><p>Un equipo fundador pequeño que cubre el ciclo completo: ingeniería, operaciones y comercial.</p></div>
@@ -164,6 +179,7 @@
     </div>
   </div>
 </section>
+-->
 
 <section id="trabaja" class="wrap" style="padding-top:76px">
   <div class="contacto">
@@ -246,7 +262,7 @@
       <div class="foot-col">
         <h4>Empresa</h4>
         <a href="nosotros.html#nosotros">Nosotros</a>
-        <a href="nosotros.html#equipo">Equipo</a>
+        <!-- <a href="nosotros.html#equipo">Equipo</a> --> <!-- oculto con la sección «El equipo» (19-ago-2026) -->
         <a href="index.html#contacto">Contacto</a>
         <a href="nosotros.html#trabaja">Trabaja con nosotros</a>
       </div>
