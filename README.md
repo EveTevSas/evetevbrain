@@ -10,6 +10,7 @@ vertical: la cuña con la que validamos la plataforma cobrando dinero real.
 > Servicios y cuentas del stack: [`docs/INFRAESTRUCTURA_Y_CUENTAS.md`](docs/INFRAESTRUCTURA_Y_CUENTAS.md).
 > Cómo desplegar (Vercel + DNS): [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md).
 > Plan de desarrollo de EvePay (SDD + Akua): [`docs/PLAN_DESARROLLO_EVEPAY.md`](docs/PLAN_DESARROLLO_EVEPAY.md).
+> Plan del asistente RAG (Fluxi): [`docs/PLAN_ASISTENTE_FLUXI.md`](docs/PLAN_ASISTENTE_FLUXI.md).
 
 ## Estructura (arranque mínimo, §8)
 
