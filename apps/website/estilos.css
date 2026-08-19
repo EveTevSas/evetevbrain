@@ -150,14 +150,6 @@ nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(
 .chip svg{width:11px;height:11px;flex:none}
 .chip.build{background:#EAF2FB;border-color:#CFE0F5;color:var(--eve-mezclado)}
 
-/* Roadmap — tratamiento ligero: son futuros, no productos de hoy */
-/* Tarjetas sutiles: fondo tinte y nada de borde. Agrupan sin dibujar la
-   retícula de líneas que sobrecargaba la sección. */
-.roadmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:clamp(14px,1.6vw,20px)}
-.roadmap>div{background:var(--eve-tinte);border-radius:14px;padding:20px 22px}
-.roadmap h4{font-size:.88rem;font-weight:600;margin-bottom:5px;display:flex;align-items:center}
-.roadmap p{font-size:.79rem;color:var(--eve-pizarra);margin:0}
-
 /* OJO con el espaciado vertical de las secciones: `.wrap` es un selector de
    clase y `section` uno de etiqueta, así que `.wrap{padding:0 …}` gana por
    especificidad y anula el `padding:64px 0` de `section`. Toda sección que
