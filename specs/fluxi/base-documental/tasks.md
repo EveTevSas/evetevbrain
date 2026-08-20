@@ -8,12 +8,12 @@
       entrega al cliente para que mantenga su propia base.
 - [x] **T4 — Reglas de contenido** en `base/_reglas.json`: frases vetadas,
       competidores, patrones de tarifa y de promesa de fecha.
-- [ ] **T5 — Validador** `src/ingesta/validar.ts` con las siete comprobaciones, y
+- [x] **T5 — Validador** `src/ingesta/validar.ts` con las siete comprobaciones, y
       un test por cada criterio EARS de la spec.
-- [ ] **T6 — Troceo y contextualización** `src/ingesta/trocear.ts` +
+- [ ] **T6 — Troceo hecho; contextualización pendiente.** `src/ingesta/trocear.ts` +
       `contextualizar.ts`, con huella SHA-256 por fragmento para no repagar
       embeddings.
-- [ ] **T7 — Compilador** `scripts/compilar.ts`: base → `indice/indice.json` +
+- [x] **T7 — Compilador** `scripts/compilar.ts`: base → `indice/indice.json` +
       `indice/vectores.bin` (int8, 512d).
 - [ ] **T8 — Guardas de CI**: sincronía base ↔ índice, y etiqueta
       `revisión-de-contenido` según el diff.
