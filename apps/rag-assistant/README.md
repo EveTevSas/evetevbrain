@@ -22,12 +22,12 @@ apps/rag-assistant/
     ├── _reglas.json      # las reglas de contenido, en forma legible por máquina
     ├── README.md         # manual de redacción — el que se le entrega al cliente
     ├── empresa/     (8)
-    ├── evepay/     (12)
+    ├── evepay/     (13)
     ├── eveconecta/  (9)
     └── legales/     (3)
 ```
 
-32 documentos consultables más cuatro archivos de configuración.
+33 documentos consultables más cuatro archivos de configuración.
 
 ## Cómo se prueba hoy
 

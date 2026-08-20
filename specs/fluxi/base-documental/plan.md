@@ -9,7 +9,7 @@ apps/rag-assistant/base/
 ├── _selladas.md         # preguntas con respuesta   │ no se indexan como documentos
 │                                                   ─┘
 ├── empresa/    (8)      # identidad · líneas · misión · principios · estado · contacto · equipo · cómo trabajamos
-├── evepay/    (12)      # qué es · estado · gateway puro · seguridad · capacidades · API · link de pago · para quién · tarifas · métodos · reportes · piloto
+├── evepay/    (13)      # qué es · estado · adquirencia · gateway puro · seguridad · capacidades · API · link de pago · para quién · tarifas · métodos · reportes · piloto
 ├── eveconecta/ (9)      # qué es · recaudo · dashboard · residentes · gobierno · visibilidad · tarifas · cómo empieza · puente con EvePay
 └── legales/    (3)      # datos personales · privacidad del chat · permanencia
 ```

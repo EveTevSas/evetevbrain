@@ -145,12 +145,22 @@ spec no puede resolver sola:
 | `docs/ESTANDARES_INGENIERIA.md` §7, decisión 5 | **Akua** como backbone, **único proveedor, sin agregador intermedio**, detrás de la interfaz `PaymentProvider`. La tokenización es la de Akua, y es lo que nos deja fuera de PCI                             |
 | `apps/website/index.html` (FAQ)                | «checkout embebido **del proveedor**», sin nombrarlo                                                                                                                                                         |
 
-Son **dos historias distintas** sobre quién procesa y quién tokeniza. La base
-documental v1 **no nombra adquirente ni proveedor de tokenización**: se queda en
-lo que las tres fuentes sí comparten —que la habilitación con la adquirencia corre
-en paralelo y que nunca tocamos el número de tarjeta—. El documento
-`evepay/adquirencia.md` queda **sin escribir** hasta que John diga cuál de las dos
-versiones es la vigente.
+Son **dos historias distintas** sobre quién procesa y quién tokeniza.
+
+**Resuelto el 19 de agosto de 2026:** John confirmó que **Akua es lo vigente y la
+landing de EvePay está desactualizada**. De ahí salen dos consecuencias distintas:
+
+1. **El corpus sí puede describir la arquitectura**, y `evepay/adquirencia.md`
+   queda escrito: un único backbone de adquirencia, sin agregadores intermedios,
+   con su tokenización y su checkout embebido.
+2. **Pero sigue sin nombrar al proveedor.** El nombre no aparece en ninguna página
+   de producto, y la regla de esta spec es que al corpus solo entra material
+   público. Nombrarlo sería estrenar el asistente filtrando algo que la compañía
+   todavía no ha publicado.
+
+Queda abierto fuera de esta spec: **la landing publica dos afirmaciones que la
+decisión vigente contradice**, y corregirlas es copia pública sobre quién procesa
+los pagos.
 
 Es exactamente el fallo que esta spec existe para atrapar, y apareció en el primer
 día de corpus.

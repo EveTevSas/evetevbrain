@@ -21,12 +21,20 @@
       ataques. Se redactan mirando lo que la gente pregunta, no lo que la base
       contesta.
 
-## Bloqueado, a la espera de decisión
+- [x] **T10 — `evepay/adquirencia.md`.** Desbloqueada el 19 de agosto de 2026:
+      John confirmó que **Akua es lo vigente y la landing de EvePay está
+      desactualizada**. El documento describe la arquitectura —un único backbone de
+      adquirencia, sin agregadores intermedios, con su tokenización y su checkout—
+      **sin nombrar al proveedor**, porque el nombre no está publicado en ninguna
+      página de producto y el corpus solo lleva material público.
 
-- [ ] **T10 — `evepay/adquirencia.md`.** La landing de EvePay dice Credibanco y
-      Redeban con tokenización de VGS / Basis Theory; la constitución (§7, decisión 5)
-      dice Akua como único proveedor. Son dos historias distintas y el corpus no
-      nombra ninguna hasta que John diga cuál está vigente.
+## Se abre fuera de esta spec
+
+- [ ] **Corregir `apps/evepay/index.html`.** Publica hoy dos afirmaciones que la
+      decisión vigente contradice: «Integración con Credibanco y Redeban
+      (adquirencia directa)» y «Tokenización como Servicio (TaaS) con proveedores
+      como VGS y Basis Theory». Va en PR aparte, con revisión de contenido: es
+      copia pública sobre quién procesa los pagos.
 
 ## Definition of Done (además de §6)
 

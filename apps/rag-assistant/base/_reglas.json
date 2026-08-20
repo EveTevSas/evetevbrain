@@ -32,6 +32,14 @@
       "La regla real es que toda frase que mencione disponibilidad lleve la",
       "negación en la MISMA frase. Se detectó al pasar el validador sobre el",
       "primer corpus, no en teoría."
+    ],
+    "_notaImplementacion": [
+      "La frase se recorta por puntuación, NUNCA por salto de línea. Partir",
+      "también por \\n marcó «…todavía no se / puede usar en producción.» como",
+      "si fuera una afirmación: Prettier había reajustado el ancho del párrafo",
+      "y la negación quedó en la línea anterior. Una regla que depende de dónde",
+      "cae el salto de línea es una regla que falla el día que alguien",
+      "reformatea. Normalizar los espacios del párrafo antes de recortar."
     ]
   },
 
