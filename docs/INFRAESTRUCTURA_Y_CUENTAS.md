@@ -30,5 +30,7 @@ la topología de despliegue de `ESTANDARES_INGENIERIA.md` (§10).
   - `evetev.com` → proyecto Vercel de `apps/website`
   - `conecta.evetev.com` → proyecto Vercel de `apps/eveconecta`
   - `api.evetev.com` → API en Railway (cuando se despliegue)
-  - `fluxi.evetev.com` → proyecto Vercel de `apps/rag-assistant` (**pendiente de crear**)
+  - `fluxi.evetev.com` → proyecto Vercel de `apps/rag-assistant` (creado; producción en
+    `rag-assistant-ochre.vercel.app`. **Falta el CNAME en name.com**: nombre `fluxi`,
+    valor `5202b8778fa8f959.vercel-dns-017.com.`)
 - **Railway:** la cuenta **todavía no existe**; se crea cuando haya que desplegar la API de EvePay. Al crearla, anotar aquí el método de inicio de sesión.

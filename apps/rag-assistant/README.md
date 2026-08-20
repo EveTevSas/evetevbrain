@@ -112,6 +112,36 @@ corre en Vercel:
 pnpm --filter @evetev/rag-assistant servir   # http://localhost:3005
 ```
 
+## Desplegado
+
+Proyecto de Vercel **`rag-assistant`**, creado el 19 de agosto de 2026 apuntando a
+este mismo repositorio:
+
+| Ajuste           | Valor                                                                                              |
+| ---------------- | -------------------------------------------------------------------------------------------------- |
+| Root Directory   | `apps/rag-assistant`                                                                               |
+| Framework Preset | Other (lo fija `vercel.json` con `framework: null`)                                                |
+| Producción       | `rag-assistant-ochre.vercel.app` — Vercel añadió el sufijo porque `rag-assistant` ya estaba tomado |
+| Dominio          | `fluxi.evetev.com` — **añadido pero sin resolver todavía**                                         |
+
+Comprobado en producción: `/demo.html`, `/fluxi.js`, `/api/salud`, la emisión de
+sesión, una respuesta sellada transmitida entera y un `403` desde un origen ajeno.
+
+### Lo que falta, y por qué no lo hizo el agente
+
+- **El registro DNS.** En name.com hay que crear `CNAME` con nombre `fluxi` y
+  valor `5202b8778fa8f959.vercel-dns-017.com.` Ese panel entra por
+  email/contraseña, y **las contraseñas no las escribe el agente**.
+- **Las dos llaves.** En _Settings → Environment Variables_ del proyecto:
+  `MOONSHOT_API_KEY` y `FLUXI_SECRETO` (`openssl rand -hex 32`). Tampoco las
+  escribe el agente: son secretos.
+  `FLUXI_ORIGENES` sí quedó puesta —no es un secreto— con
+  `https://evetev.com,https://www.evetev.com,https://fluxi.evetev.com`.
+
+**Mientras falte `MOONSHOT_API_KEY` el asistente ya funciona degradado**, y eso no
+es un accidente: responde las preguntas selladas y los temas vetados, y deriva en
+todo lo demás. Está comprobado contra el despliegue real.
+
 ## El widget
 
 Se instala con una línea:
