@@ -24,35 +24,35 @@ export default function ParticlesBackground() {
         opacity: {
           value: 0.35,
           random: true,
-          anim: { enable: true, speed: 1, opacity_min: 0.1 },
+          anim: { enable: true, speed: 1, opacity_min: 0.1 }
         },
         size: {
           value: 3,
           random: true,
-          anim: { enable: true, speed: 2, size_min: 0.5 },
+          anim: { enable: true, speed: 2, size_min: 0.5 }
         },
         line_linked: {
           enable: true,
           distance: 150,
           color: "#1E6FEB",
           opacity: 0.25,
-          width: 1,
+          width: 1
         },
-        move: { enable: true, speed: 1.5, random: true, out_mode: "bounce" },
+        move: { enable: true, speed: 1.5, random: true, out_mode: "bounce" }
       },
       interactivity: {
         detect_on: "canvas",
         events: {
           onhover: { enable: true, mode: "grab" },
           onclick: { enable: true, mode: "push" },
-          resize: true,
+          resize: true
         },
         modes: {
           grab: { distance: 200, line_linked: { opacity: 0.6 } },
-          push: { particles_nb: 3 },
-        },
+          push: { particles_nb: 3 }
+        }
       },
-      retina_detect: true,
+      retina_detect: true
     });
   }, []);
 
@@ -76,7 +76,7 @@ export default function ParticlesBackground() {
       style={{
         position: "absolute",
         inset: 0,
-        background: "linear-gradient(145deg, #dce8f8 0%, #c8dcf4 40%, #b8d0f0 100%)",
+        background: "linear-gradient(145deg, #dce8f8 0%, #c8dcf4 40%, #b8d0f0 100%)"
       }}
     />
   );

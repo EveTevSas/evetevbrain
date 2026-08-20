@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!-- evepay.evetev.com — landing del producto EvePay.
      Mismo montaje que apps/website: HTML y CSS planos, sin compilación.
      Marca según packages/brand/assets/evetev_brand_styles.md (v1.0):
@@ -6,323 +6,433 @@
      aquí un solo botón coral por vista (el CTA de la portada).
      Los estilos propios de estas secciones viven en estilos.css. -->
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EvePay — Pasarela de pagos para Colombia</title>
-<meta name="description" content="EvePay es la pasarela de pagos de Evetev: gateway puro donde el dinero va directo al banco del comercio, tokenización como servicio y link de pago por WhatsApp. Pide tu demo.">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EvePay — Pasarela de pagos para Colombia</title>
+    <meta
+      name="description"
+      content="EvePay es la pasarela de pagos de Evetev: gateway puro donde el dinero va directo al banco del comercio, tokenización como servicio y link de pago por WhatsApp. Pide tu demo."
+    />
 
-<!-- Mientras la landing no esté terminada no debe indexarse: una página a
+    <!-- Mientras la landing no esté terminada no debe indexarse: una página a
      medias posicionando por «EvePay» hace más daño que no aparecer. -->
-<meta name="robots" content="noindex">
+    <meta name="robots" content="noindex" />
 
-<!-- Favicon desde el CDN de marca (§4) -->
-<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png">
-<link rel="mask-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/mask-icon.svg" color="#0A2540">
-<meta name="theme-color" content="#0A2540">
+    <!-- Favicon desde el CDN de marca (§4) -->
+    <link
+      rel="icon"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg"
+      type="image/svg+xml"
+    />
+    <link
+      rel="icon"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png"
+      sizes="32x32"
+      type="image/png"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="mask-icon"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/mask-icon.svg"
+      color="#0A2540"
+    />
+    <meta name="theme-color" content="#0A2540" />
 
-<!-- Tipografía oficial (§3): Baloo 2 (titulares) + Inter (interfaz) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+    <!-- Tipografía oficial (§3): Baloo 2 (titulares) + Inter (interfaz) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+    />
 
-<!-- Tokens de color oficiales (§2), con respaldo local en base.css -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css">
+    <!-- Tokens de color oficiales (§2), con respaldo local en base.css -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css"
+    />
 
-<!-- Armazón compartido (generado desde packages/brand) y luego lo propio -->
-<link rel="stylesheet" href="base.css">
-<link rel="stylesheet" href="estilos.css">
-</head>
-<body>
-
-<header class="nav">
-  <div class="wrap">
-    <a class="marca" href="/" aria-label="EvePay, inicio">
-      <span class="p-ico" style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span>
-      EvePay
-    </a>
-    <nav aria-label="Secciones de la página">
-      <a href="#caracteristicas">Características</a>
-      <a href="#link-de-pago">Link de pago</a>
-      <a href="#demo">Pedir una demo</a>
-    </nav>
-  </div>
-</header>
-
-<main>
-
-  <!-- Portada: la única vista con botón coral de esta página (C2). El CTA
-       lleva al formulario de demo al final, que vive sobre azul noche. -->
-  <section class="portada">
-    <div class="wrap">
-      <span class="etiqueta">
-        <span class="p-ico sm" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span>
-        EvePay · Pasarela de pagos
-      </span>
-      <h1>Cobra en línea y recibe el dinero directo en tu banco.</h1>
-      <p class="entrada">
-        EvePay es una pasarela de arquitectura gateway puro: el dinero fluye
-        del cliente a la cuenta de tu comercio, sin pasar por nuestra
-        tesorería. Menos intermediarios, menos comisiones y menos riesgo
-        regulatorio.
-      </p>
-      <p class="cta">
-        <a class="btn btn-cta" href="#demo">Pedir una demo</a>
-      </p>
-      <p class="cta-nota">Te contactamos en menos de un día hábil.</p>
-    </div>
-  </section>
-
-  <!-- Cómo funciona: tres pasos sobre fondo tinte, en español claro (§9). -->
-  <section class="seccion seccion-tinte" aria-labelledby="titulo-como">
-    <div class="wrap">
-      <h2 id="titulo-como">Así de simple es cobrar</h2>
-      <p class="seccion-intro">
-        Sin integraciones eternas ni letra menuda. Tu comercio cobra; el
-        banco de tu comercio recibe.
-      </p>
-      <ol class="pasos" role="list">
-        <li class="paso">
-          <span class="paso-num" aria-hidden="true">1</span>
-          <h3>Crea el cobro</h3>
-          <p>Desde el panel, con la API o con un link de pago por WhatsApp.</p>
-        </li>
-        <li class="paso">
-          <span class="paso-num" aria-hidden="true">2</span>
-          <h3>Tu cliente paga</h3>
-          <p>En un checkout accesible que funciona en cualquier dispositivo.</p>
-        </li>
-        <li class="paso">
-          <span class="paso-num" aria-hidden="true">3</span>
-          <h3>Recibes en tu banco</h3>
-          <p>El dinero llega directo a tu cuenta. EvePay nunca lo toca.</p>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- Características: listado minimalista del manual (§6), sin fondo ni
-       sombra. El color de producto va con --p en el marcado, no en el CSS. -->
-  <section class="seccion" id="caracteristicas" aria-labelledby="titulo-caracteristicas">
-    <div class="wrap">
-      <h2 id="titulo-caracteristicas">Lo que EvePay hace por tu negocio</h2>
-      <p class="seccion-intro">
-        Infraestructura de pagos seria, explicada sin jerga.
-      </p>
-      <ul class="caracts-grid" role="list">
-        <li class="caract">
-          <span class="p-ico" style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span>
-          <h3>El dinero va directo a tu banco</h3>
-          <p>
-            Arquitectura gateway puro: los fondos viajan del cliente al banco
-            de tu comercio. Al no pasar por nuestra tesorería hay menos
-            intermediarios, menos comisiones y menos riesgo regulatorio.
-          </p>
-        </li>
-        <li class="caract">
-          <span class="p-ico" style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span>
-          <h3>Seguridad sin cargar con la auditoría</h3>
-          <p>
-            Tokenización como Servicio (TaaS) con proveedores como VGS y Basis
-            Theory: los datos de la tarjeta nunca tocan tus sistemas y el
-            alcance de auditoría se reduce a SAQ-A, sin certificaciones PCI
-            propias.
-          </p>
-        </li>
-        <li class="caract">
-          <span class="p-ico" style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span>
-          <h3>Conectado a las redes de Colombia</h3>
-          <p>
-            Integración con Credibanco y Redeban (adquirencia directa). En
-            fases posteriores, métodos locales como PSE, Nequi y Bre-B.
-          </p>
-        </li>
-        <li class="caract">
-          <span class="p-ico" style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span>
-          <h3>Un checkout que todos pueden usar</h3>
-          <p>
-            Checkout 100% accesible (WCAG/ARIA), con diseño minimalista
-            eco-tech. Más personas completando el pago significa más ventas
-            cerradas.
-          </p>
-        </li>
-        <li class="caract">
-          <span class="p-ico" style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span>
-          <h3>Reportes que responden preguntas</h3>
-          <p>
-            Motor de reportes con arquitectura RAG: consulta tus ventas y
-            conciliación en lenguaje natural, sin armar tablas ni fórmulas.
-          </p>
-        </li>
-        <li class="caract">
-          <span class="p-ico" style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span>
-          <h3>Pensado para comercios con volumen</h3>
-          <p>
-            Para pymes y medianas empresas colombianas con código de
-            adquirencia propio y alto volumen transaccional.
-          </p>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Link de pago por WhatsApp: beneficio protagonista con su propio
-       bloque, a dos columnas en escritorio y una en móvil. -->
-  <section class="seccion seccion-tinte" id="link-de-pago" aria-labelledby="titulo-whatsapp">
-    <div class="wrap">
-      <div class="wa">
-        <div class="wa-texto">
-          <h2 id="titulo-whatsapp">Un link de pago por WhatsApp, listo en menos de 5 clics</h2>
-          <p>
-            Genera el link desde tu panel, envíalo por el chat donde ya
-            hablas con tu cliente y recibe el pago directo en tu banco. Sin
-            desarrollo, sin integración y sin que tu cliente instale nada.
-          </p>
-        </div>
-        <ol class="wa-pasos" role="list">
-          <li>
-            <span class="paso-num sm" aria-hidden="true">1</span>
-            <p>Crea el link con el valor del cobro.</p>
-          </li>
-          <li>
-            <span class="paso-num sm" aria-hidden="true">2</span>
-            <p>Compártelo por WhatsApp con tu cliente.</p>
-          </li>
-          <li>
-            <span class="paso-num sm" aria-hidden="true">3</span>
-            <p>Tu cliente paga en pocos clics.</p>
-          </li>
-          <li>
-            <span class="paso-num sm" aria-hidden="true">4</span>
-            <p>Recibes el dinero directo en tu banco.</p>
-          </li>
-        </ol>
+    <!-- Armazón compartido (generado desde packages/brand) y luego lo propio -->
+    <link rel="stylesheet" href="base.css" />
+    <link rel="stylesheet" href="estilos.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap">
+        <a class="marca" href="/" aria-label="EvePay, inicio">
+          <span
+            class="p-ico"
+            style="
+              --p: var(--eve-electrico);
+              --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+            "
+            aria-hidden="true"
+          ></span>
+          EvePay
+        </a>
+        <nav aria-label="Secciones de la página">
+          <a href="#caracteristicas">Características</a>
+          <a href="#link-de-pago">Link de pago</a>
+          <a href="#demo">Pedir una demo</a>
+        </nav>
       </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- Formulario de demo: vive sobre azul noche (proporción 60/20/10, §2)
-       y cierra la página con el único objetivo: pedir una prueba. -->
-  <section class="demo" id="demo" aria-labelledby="titulo-demo">
-    <div class="wrap">
-      <div class="demo-grid">
-        <div class="demo-texto">
-          <h2 id="titulo-demo">Pide una demo de EvePay</h2>
-          <p>
-            Cuéntanos de tu negocio y te mostramos EvePay funcionando con un
-            caso como el tuyo. Si encaja, arrancas como piloto con
-            acompañamiento del equipo.
+    <main>
+      <!-- Portada: la única vista con botón coral de esta página (C2). El CTA
+       lleva al formulario de demo al final, que vive sobre azul noche. -->
+      <section class="portada">
+        <div class="wrap">
+          <span class="etiqueta">
+            <span
+              class="p-ico sm"
+              style="
+                --p: var(--eve-mezclado);
+                --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+              "
+              aria-hidden="true"
+            ></span>
+            EvePay · Pasarela de pagos
+          </span>
+          <h1>Cobra en línea y recibe el dinero directo en tu banco.</h1>
+          <p class="entrada">
+            EvePay es una pasarela de arquitectura gateway puro: el dinero fluye del cliente a la
+            cuenta de tu comercio, sin pasar por nuestra tesorería. Menos intermediarios, menos
+            comisiones y menos riesgo regulatorio.
           </p>
-          <ul class="demo-puntos" role="list">
-            <li>Demo guiada por el equipo que construye el producto.</li>
-            <li>Tarifas transparentes: porcentaje por transacción más un componente fijo, con suscripción mensual del software.</li>
-            <li>Sin compromiso: si no encaja, te lo decimos claro.</li>
+          <p class="cta">
+            <a class="btn btn-cta" href="#demo">Pedir una demo</a>
+          </p>
+          <p class="cta-nota">Te contactamos en menos de un día hábil.</p>
+        </div>
+      </section>
+
+      <!-- Cómo funciona: tres pasos sobre fondo tinte, en español claro (§9). -->
+      <section class="seccion seccion-tinte" aria-labelledby="titulo-como">
+        <div class="wrap">
+          <h2 id="titulo-como">Así de simple es cobrar</h2>
+          <p class="seccion-intro">
+            Sin integraciones eternas ni letra menuda. Tu comercio cobra; el banco de tu comercio
+            recibe.
+          </p>
+          <ol class="pasos" role="list">
+            <li class="paso">
+              <span class="paso-num" aria-hidden="true">1</span>
+              <h3>Crea el cobro</h3>
+              <p>Desde el panel, con la API o con un link de pago por WhatsApp.</p>
+            </li>
+            <li class="paso">
+              <span class="paso-num" aria-hidden="true">2</span>
+              <h3>Tu cliente paga</h3>
+              <p>En un checkout accesible que funciona en cualquier dispositivo.</p>
+            </li>
+            <li class="paso">
+              <span class="paso-num" aria-hidden="true">3</span>
+              <h3>Recibes en tu banco</h3>
+              <p>El dinero llega directo a tu cuenta. EvePay nunca lo toca.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Características: listado minimalista del manual (§6), sin fondo ni
+       sombra. El color de producto va con --p en el marcado, no en el CSS. -->
+      <section class="seccion" id="caracteristicas" aria-labelledby="titulo-caracteristicas">
+        <div class="wrap">
+          <h2 id="titulo-caracteristicas">Lo que EvePay hace por tu negocio</h2>
+          <p class="seccion-intro">Infraestructura de pagos seria, explicada sin jerga.</p>
+          <ul class="caracts-grid" role="list">
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-electrico);
+                  --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>El dinero va directo a tu banco</h3>
+              <p>
+                Arquitectura gateway puro: los fondos viajan del cliente al banco de tu comercio. Al
+                no pasar por nuestra tesorería hay menos intermediarios, menos comisiones y menos
+                riesgo regulatorio.
+              </p>
+            </li>
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-electrico);
+                  --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Seguridad sin cargar con la auditoría</h3>
+              <p>
+                Tokenización como Servicio (TaaS) con proveedores como VGS y Basis Theory: los datos
+                de la tarjeta nunca tocan tus sistemas y el alcance de auditoría se reduce a SAQ-A,
+                sin certificaciones PCI propias.
+              </p>
+            </li>
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-electrico);
+                  --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Conectado a las redes de Colombia</h3>
+              <p>
+                Integración con Credibanco y Redeban (adquirencia directa). En fases posteriores,
+                métodos locales como PSE, Nequi y Bre-B.
+              </p>
+            </li>
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-electrico);
+                  --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Un checkout que todos pueden usar</h3>
+              <p>
+                Checkout 100% accesible (WCAG/ARIA), con diseño minimalista eco-tech. Más personas
+                completando el pago significa más ventas cerradas.
+              </p>
+            </li>
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-electrico);
+                  --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Reportes que responden preguntas</h3>
+              <p>
+                Motor de reportes con arquitectura RAG: consulta tus ventas y conciliación en
+                lenguaje natural, sin armar tablas ni fórmulas.
+              </p>
+            </li>
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-electrico);
+                  --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Pensado para comercios con volumen</h3>
+              <p>
+                Para pymes y medianas empresas colombianas con código de adquirencia propio y alto
+                volumen transaccional.
+              </p>
+            </li>
           </ul>
         </div>
-        <!-- El envío lo hace formularios.js (compartido con las demás landings):
+      </section>
+
+      <!-- Link de pago por WhatsApp: beneficio protagonista con su propio
+       bloque, a dos columnas en escritorio y una en móvil. -->
+      <section class="seccion seccion-tinte" id="link-de-pago" aria-labelledby="titulo-whatsapp">
+        <div class="wrap">
+          <div class="wa">
+            <div class="wa-texto">
+              <h2 id="titulo-whatsapp">Un link de pago por WhatsApp, listo en menos de 5 clics</h2>
+              <p>
+                Genera el link desde tu panel, envíalo por el chat donde ya hablas con tu cliente y
+                recibe el pago directo en tu banco. Sin desarrollo, sin integración y sin que tu
+                cliente instale nada.
+              </p>
+            </div>
+            <ol class="wa-pasos" role="list">
+              <li>
+                <span class="paso-num sm" aria-hidden="true">1</span>
+                <p>Crea el link con el valor del cobro.</p>
+              </li>
+              <li>
+                <span class="paso-num sm" aria-hidden="true">2</span>
+                <p>Compártelo por WhatsApp con tu cliente.</p>
+              </li>
+              <li>
+                <span class="paso-num sm" aria-hidden="true">3</span>
+                <p>Tu cliente paga en pocos clics.</p>
+              </li>
+              <li>
+                <span class="paso-num sm" aria-hidden="true">4</span>
+                <p>Recibes el dinero directo en tu banco.</p>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- Formulario de demo: vive sobre azul noche (proporción 60/20/10, §2)
+       y cierra la página con el único objetivo: pedir una prueba. -->
+      <section class="demo" id="demo" aria-labelledby="titulo-demo">
+        <div class="wrap">
+          <div class="demo-grid">
+            <div class="demo-texto">
+              <h2 id="titulo-demo">Pide una demo de EvePay</h2>
+              <p>
+                Cuéntanos de tu negocio y te mostramos EvePay funcionando con un caso como el tuyo.
+                Si encaja, arrancas como piloto con acompañamiento del equipo.
+              </p>
+              <ul class="demo-puntos" role="list">
+                <li>Demo guiada por el equipo que construye el producto.</li>
+                <li>
+                  Tarifas transparentes: porcentaje por transacción más un componente fijo, con
+                  suscripción mensual del software.
+                </li>
+                <li>Sin compromiso: si no encaja, te lo decimos claro.</li>
+              </ul>
+            </div>
+            <!-- El envío lo hace formularios.js (compartido con las demás landings):
              POST a evetev.com/api/contacto, el único sitio con la credencial
              del correo. `data-demo` es lo que hace que el mensaje llegue
              marcado como EvePay. -->
-        <form class="demo-form" data-demo="evepay">
-          <!-- Nombre y empresa separados: iban en un solo campo y llegaban
+            <form class="demo-form" data-demo="evepay">
+              <!-- Nombre y empresa separados: iban en un solo campo y llegaban
                pegados, así que no se podía saludar a nadie por su nombre ni
                buscar el comercio después. -->
-          <div class="campo">
-            <label for="f-nombre">Tu nombre</label>
-            <input id="f-nombre" name="nombre" type="text" autocomplete="name" maxlength="120" required>
-          </div>
-          <div class="campo">
-            <label for="f-empresa">Empresa</label>
-            <input id="f-empresa" name="empresa" type="text" autocomplete="organization" maxlength="120" required>
-          </div>
-          <div class="campo">
-            <label for="f-correo">Correo de trabajo</label>
-            <input id="f-correo" name="correo" type="email" autocomplete="email" maxlength="160" required>
-          </div>
-          <!-- El patrón lleva barras SIMPLES: en un atributo HTML no hay que
+              <div class="campo">
+                <label for="f-nombre">Tu nombre</label>
+                <input
+                  id="f-nombre"
+                  name="nombre"
+                  type="text"
+                  autocomplete="name"
+                  maxlength="120"
+                  required
+                />
+              </div>
+              <div class="campo">
+                <label for="f-empresa">Empresa</label>
+                <input
+                  id="f-empresa"
+                  name="empresa"
+                  type="text"
+                  autocomplete="organization"
+                  maxlength="120"
+                  required
+                />
+              </div>
+              <div class="campo">
+                <label for="f-correo">Correo de trabajo</label>
+                <input
+                  id="f-correo"
+                  name="correo"
+                  type="email"
+                  autocomplete="email"
+                  maxlength="160"
+                  required
+                />
+              </div>
+              <!-- El patrón lleva barras SIMPLES: en un atributo HTML no hay que
                escaparlas. Con barras dobles el navegador no logra compilarlo y
                se salta la validación entera, que es peor que no tenerla.
                Los paréntesis van escapados porque `pattern` se compila con la
                bandera `v`, donde dentro de una clase son sintaxis. -->
-          <div class="campo">
-            <label for="f-telefono">Teléfono o WhatsApp</label>
-            <input id="f-telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel"
-                   pattern="[+0-9\(\)\-\s]{7,40}" maxlength="40"
-                   title="Solo dígitos, espacios y los signos + ( ) -" required>
-          </div>
-          <div class="campo">
-            <label for="f-volumen">Ventas mensuales aproximadas</label>
-            <select id="f-volumen" name="volumen" required>
-              <option value="" selected>Selecciona un rango</option>
-              <option value="Menos de $50 millones COP">Menos de $50 millones COP</option>
-              <option value="$50 – $300 millones COP">$50 – $300 millones COP</option>
-              <option value="$300 – $1.000 millones COP">$300 – $1.000 millones COP</option>
-              <option value="Más de $1.000 millones COP">Más de $1.000 millones COP</option>
-            </select>
-          </div>
-          <!-- Antes esto era el textarea «¿Cómo cobras hoy?». Como lista se
+              <div class="campo">
+                <label for="f-telefono">Teléfono o WhatsApp</label>
+                <input
+                  id="f-telefono"
+                  name="telefono"
+                  type="tel"
+                  autocomplete="tel"
+                  inputmode="tel"
+                  pattern="[+0-9\(\)\-\s]{7,40}"
+                  maxlength="40"
+                  title="Solo dígitos, espacios y los signos + ( ) -"
+                  required
+                />
+              </div>
+              <div class="campo">
+                <label for="f-volumen">Ventas mensuales aproximadas</label>
+                <select id="f-volumen" name="volumen" required>
+                  <option value="" selected>Selecciona un rango</option>
+                  <option value="Menos de $50 millones COP">Menos de $50 millones COP</option>
+                  <option value="$50 – $300 millones COP">$50 – $300 millones COP</option>
+                  <option value="$300 – $1.000 millones COP">$300 – $1.000 millones COP</option>
+                  <option value="Más de $1.000 millones COP">Más de $1.000 millones COP</option>
+                </select>
+              </div>
+              <!-- Antes esto era el textarea «¿Cómo cobras hoy?». Como lista se
                responde de un toque y llega comparable entre un comercio y otro;
                lo que no cabe en las opciones sigue teniendo el campo libre. -->
-          <div class="campo">
-            <label for="f-cobro">¿Cómo cobras hoy? (opcional)</label>
-            <select id="f-cobro" name="cobro">
-              <option value="" selected>Selecciona una opción</option>
-              <option value="Datáfono">Datáfono</option>
-              <option value="Transferencia (Nequi, Daviplata, PSE)">Transferencia (Nequi, Daviplata, PSE)</option>
-              <option value="Efectivo">Efectivo</option>
-              <option value="Link de pago de otra pasarela">Link de pago de otra pasarela</option>
-              <option value="Todavía no cobro en línea">Todavía no cobro en línea</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label for="f-plazo">¿Para cuándo? (opcional)</label>
-            <select id="f-plazo" name="plazo">
-              <option value="" selected>Selecciona una opción</option>
-              <option value="Cuanto antes">Cuanto antes</option>
-              <option value="En 1–3 meses">En 1–3 meses</option>
-              <option value="Estoy explorando">Estoy explorando</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label for="f-mensaje">Algo más que debamos saber (opcional)</label>
-            <textarea id="f-mensaje" name="mensaje" rows="3"></textarea>
-          </div>
-          <!-- Trampa antibots: una persona nunca ve este campo, así que si
+              <div class="campo">
+                <label for="f-cobro">¿Cómo cobras hoy? (opcional)</label>
+                <select id="f-cobro" name="cobro">
+                  <option value="" selected>Selecciona una opción</option>
+                  <option value="Datáfono">Datáfono</option>
+                  <option value="Transferencia (Nequi, Daviplata, PSE)">
+                    Transferencia (Nequi, Daviplata, PSE)
+                  </option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Link de pago de otra pasarela">
+                    Link de pago de otra pasarela
+                  </option>
+                  <option value="Todavía no cobro en línea">Todavía no cobro en línea</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="f-plazo">¿Para cuándo? (opcional)</label>
+                <select id="f-plazo" name="plazo">
+                  <option value="" selected>Selecciona una opción</option>
+                  <option value="Cuanto antes">Cuanto antes</option>
+                  <option value="En 1–3 meses">En 1–3 meses</option>
+                  <option value="Estoy explorando">Estoy explorando</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="f-mensaje">Algo más que debamos saber (opcional)</label>
+                <textarea id="f-mensaje" name="mensaje" rows="3"></textarea>
+              </div>
+              <!-- Trampa antibots: una persona nunca ve este campo, así que si
                llega lleno la función descarta el envío. -->
-          <div class="trampa" aria-hidden="true">
-            <label for="f-sitio">No llenar</label>
-            <input id="f-sitio" name="sitio" type="text" tabindex="-1" autocomplete="off">
+              <div class="trampa" aria-hidden="true">
+                <label for="f-sitio">No llenar</label>
+                <input id="f-sitio" name="sitio" type="text" tabindex="-1" autocomplete="off" />
+              </div>
+              <noscript>
+                <p class="demo-estado error">
+                  Este formulario necesita JavaScript para enviarse. Escríbenos a
+                  <a href="mailto:contacto@evetev.com">contacto@evetev.com</a>.
+                </p>
+              </noscript>
+              <button class="btn btn-cta" type="submit">Quiero probar EvePay</button>
+              <p class="demo-estado" data-estado role="status" aria-live="polite"></p>
+              <p class="demo-legal">
+                Al enviar aceptas el tratamiento de tus datos según nuestra política de tratamiento
+                de datos.
+              </p>
+            </form>
           </div>
-          <noscript>
-            <p class="demo-estado error">
-              Este formulario necesita JavaScript para enviarse. Escríbenos a
-              <a href="mailto:contacto@evetev.com">contacto@evetev.com</a>.
-            </p>
-          </noscript>
-          <button class="btn btn-cta" type="submit">Quiero probar EvePay</button>
-          <p class="demo-estado" data-estado role="status" aria-live="polite"></p>
-          <p class="demo-legal">
-            Al enviar aceptas el tratamiento de tus datos según nuestra
-            política de tratamiento de datos.
-          </p>
-        </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="pie">
+      <div class="wrap">
+        <span>© <span id="anio">2026</span> Evetev SAS · Bogotá, Colombia</span>
+        <a href="https://evetev.com">evetev.com</a>
       </div>
-    </div>
-  </section>
+    </footer>
 
-</main>
-
-<footer class="pie">
-  <div class="wrap">
-    <span>© <span id="anio">2026</span> Evetev SAS · Bogotá, Colombia</span>
-    <a href="https://evetev.com">evetev.com</a>
-  </div>
-</footer>
-
-<script>document.getElementById('anio').textContent = new Date().getFullYear();</script>
-<!-- GENERADO desde packages/brand/landing/formularios.js — ver README. -->
-<script src="formularios.js"></script>
-</body>
+    <script>
+      document.getElementById("anio").textContent = new Date().getFullYear();
+    </script>
+    <!-- GENERADO desde packages/brand/landing/formularios.js — ver README. -->
+    <script src="formularios.js"></script>
+  </body>
 </html>

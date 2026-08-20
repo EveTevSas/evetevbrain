@@ -6,8 +6,8 @@ Pasos únicos para dejar los activos disponibles por URL para todo el equipo.
 
 En la organización **Evetev-Dev** de GitHub → **New repository**
 
-- Nombre: `brand`  
-- Visibilidad: **Público** (requisito para que jsDelivr lo sirva; los logos son públicos por naturaleza)  
+- Nombre: `brand`
+- Visibilidad: **Público** (requisito para que jsDelivr lo sirva; los logos son públicos por naturaleza)
 - Sin README (ya viene uno aquí)
 
 ## 2\. Subir los archivos
@@ -52,7 +52,6 @@ Comparte el enlace del repo. El `README.md` tiene el catálogo completo y los sn
 
 ## Notas
 
-- **2FA obligatorio** en la organización (ya está en sus estándares §8) — aplica también a este repo.  
-- **Branch protection sobre `main`:** exigir PR \+ 1 aprobación. Un logo mal cambiado se replica al instante en todos los proyectos, así que merece el mismo cuidado que el código.  
+- **2FA obligatorio** en la organización (ya está en sus estándares §8) — aplica también a este repo.
+- **Branch protection sobre `main`:** exigir PR \+ 1 aprobación. Un logo mal cambiado se replica al instante en todos los proyectos, así que merece el mismo cuidado que el código.
 - Los **archivos originales editables** (Figma, .ai, fotos en tamaño completo) van en Google Drive, no aquí. Este repo distribuye lo optimizado para web; Drive archiva lo maestro.
-

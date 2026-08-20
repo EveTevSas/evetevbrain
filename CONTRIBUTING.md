@@ -20,7 +20,7 @@ O usa el atajo:
 ```
 
 > Es config **local** (solo este repo); no afecta tu git global. Ojo: un `git rebase`
-> re-sella el *committer* con esta config, así que déjala puesta.
+> re-sella el _committer_ con esta config, así que déjala puesta.
 
 ## Flujo de trabajo (§3, §8)
 
@@ -31,7 +31,7 @@ O usa el atajo:
   buena voluntad: `main` tampoco se puede borrar ni reescribir con un push
   forzado. Squash, merge y rebase están los tres permitidos.
 - **La aprobación no está exigida hoy** (`required_approving_review_count: 0`).
-  El §3 de la constitución pide 1 aprobación *de otra persona*, y ese sigue
+  El §3 de la constitución pide 1 aprobación _de otra persona_, y ese sigue
   siendo el objetivo; mientras el repo tenga un solo committer humano, exigirla
   bloquearía todos los PR —GitHub no deja aprobar el propio— sin añadir una
   segunda mirada que no existe. **Cuando entre la segunda persona, hay que subir

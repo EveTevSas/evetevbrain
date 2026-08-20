@@ -24,10 +24,10 @@ redefinen colores por app (§8: "ninguna app define colores propios").
 **Fuente única** de los dos archivos que llevan idénticos todas las landings
 estáticas (`apps/evepay`, `apps/eveconecta-landing`, y las que vengan):
 
-| Archivo | Qué es |
-|---|---|
-| `landing/base.css` | el armazón: respaldo de tokens, reset, tipografía, contenedor, isotipo teñido, nav, botones, portada, **formulario de demo** y pie |
-| `landing/formularios.js` | el envío del formulario de demo al endpoint de `evetev.com` |
+| Archivo                  | Qué es                                                                                                                             |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `landing/base.css`       | el armazón: respaldo de tokens, reset, tipografía, contenedor, isotipo teñido, nav, botones, portada, **formulario de demo** y pie |
+| `landing/formularios.js` | el envío del formulario de demo al endpoint de `evetev.com`                                                                        |
 
 No se sirven por CDN como `assets/`: son internos del monorepo, y publicarlos
 obligaría a etiquetar una versión del repo de marca por cada ajuste. Se replican
@@ -53,7 +53,7 @@ landing solo escribe HTML —el contrato está comentado al principio del archiv
 y el producto sale de un atributo:
 
 ```html
-<form class="demo-form" data-demo="evepay">   <!-- o "eveconecta" -->
+<form class="demo-form" data-demo="evepay"><!-- o "eveconecta" --></form>
 ```
 
 Ese `data-demo` es lo que hace que el correo llegue marcado como EvePay o

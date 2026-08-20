@@ -15,93 +15,223 @@
    Marca: packages/brand/assets/evetev_brand_styles.md (v1.0). El color de
    producto no se fija aquí: cada landing lo pasa con --p en el marcado, para
    que un mismo armazón sirva a EvePay, EveConecta y las que vengan. */
-:root{
+:root {
   /* Respaldo de los tokens oficiales — valores exactos, no aproximar (§2) */
-  --eve-azul-noche:#0A2540;
-  --eve-azul-noche-profundo:#081D33;
-  --eve-hielo:#EAF2FB;
-  --eve-tinte:#F4F9FD;
-  --eve-linea:#EDF3FA;
-  --eve-pizarra:#64748B;
-  --eve-muted:#94A3B8;
-  --eve-coral:#EE3D22;
-  --eve-coral-hover:#CF3016;
-  --eve-electrico:#1E6FEB;
-  --eve-mezclado:#144A96;
-  --eve-exito:#16A34A;
-  --eve-alerta:#D97706;
-  --eve-error:#B91C1C;
+  --eve-azul-noche: #0a2540;
+  --eve-azul-noche-profundo: #081d33;
+  --eve-hielo: #eaf2fb;
+  --eve-tinte: #f4f9fd;
+  --eve-linea: #edf3fa;
+  --eve-pizarra: #64748b;
+  --eve-muted: #94a3b8;
+  --eve-coral: #ee3d22;
+  --eve-coral-hover: #cf3016;
+  --eve-electrico: #1e6feb;
+  --eve-mezclado: #144a96;
+  --eve-exito: #16a34a;
+  --eve-alerta: #d97706;
+  --eve-error: #b91c1c;
 }
 
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-body{
-  margin:0;
-  font-family:'Inter',system-ui,sans-serif;
-  color:var(--eve-azul-noche);
-  background:#fff;
-  -webkit-font-smoothing:antialiased;
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--eve-azul-noche);
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1,h2,h3{font-family:'Baloo 2',system-ui,sans-serif;line-height:1.15;margin:0}
-p{margin:0;line-height:1.6}
-a{color:var(--eve-electrico);text-decoration:none}
-a:hover{text-decoration:underline}
-:focus-visible{outline:2px solid var(--eve-electrico);outline-offset:2px;border-radius:4px}
+h1,
+h2,
+h3 {
+  font-family: "Baloo 2", system-ui, sans-serif;
+  line-height: 1.15;
+  margin: 0;
+}
+p {
+  margin: 0;
+  line-height: 1.6;
+}
+a {
+  color: var(--eve-electrico);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+:focus-visible {
+  outline: 2px solid var(--eve-electrico);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
 
-.wrap{width:min(1120px,92vw);margin-inline:auto}
+.wrap {
+  width: min(1120px, 92vw);
+  margin-inline: auto;
+}
 
 /* El isotipo se tiñe con mask sobre el SVG del CDN: nunca se redibuja
    ni se recolorea el archivo (regla T1). */
-.p-ico{width:34px;height:34px;display:block;background-color:var(--p);
-  -webkit-mask:var(--u) center/contain no-repeat;mask:var(--u) center/contain no-repeat}
-.p-ico.sm{width:19px;height:19px;flex:none}
+.p-ico {
+  width: 34px;
+  height: 34px;
+  display: block;
+  background-color: var(--p);
+  -webkit-mask: var(--u) center/contain no-repeat;
+  mask: var(--u) center/contain no-repeat;
+}
+.p-ico.sm {
+  width: 19px;
+  height: 19px;
+  flex: none;
+}
 
 /* ── Encabezado ─────────────────────────────────────────────────────────── */
-.nav{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);
-  backdrop-filter:blur(8px);border-bottom:1px solid var(--eve-linea)}
-.nav .wrap{display:flex;align-items:center;gap:18px;height:66px}
-.marca{display:flex;align-items:center;gap:9px;color:var(--eve-azul-noche);
-  font-family:'Baloo 2',system-ui,sans-serif;font-weight:700;font-size:1.12rem}
-.marca:hover{text-decoration:none}
-.nav nav{margin-left:auto;display:flex;align-items:center;gap:22px}
-.nav nav a{color:var(--eve-azul-noche);font-size:.92rem;font-weight:500}
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--eve-linea);
+}
+.nav .wrap {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 66px;
+}
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--eve-azul-noche);
+  font-family: "Baloo 2", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.12rem;
+}
+.marca:hover {
+  text-decoration: none;
+}
+.nav nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.nav nav a {
+  color: var(--eve-azul-noche);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
 
-.btn{display:inline-block;border:none;cursor:pointer;font-family:inherit;
-  font-weight:600;font-size:.92rem;padding:11px 22px;border-radius:999px;
-  transition:background .15s ease}
-.btn-cta{background:var(--eve-coral);color:#fff}
-.btn-cta:hover{background:var(--eve-coral-hover);text-decoration:none}
+.btn {
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 11px 22px;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+.btn-cta {
+  background: var(--eve-coral);
+  color: #fff;
+}
+.btn-cta:hover {
+  background: var(--eve-coral-hover);
+  text-decoration: none;
+}
 /* Secundario (mezclado). El coral es único por vista (C2), así que la segunda
    acción de una landing —el envío del formulario de demo, por ejemplo— usa
    este. Estaba en el manual y en el sitio corporativo, pero faltaba aquí: el
    marcado ya lo pedía y salía sin fondo. */
-.btn-sec{background:var(--eve-mezclado);color:#fff}
-.btn-sec:hover{background:#0E3568;text-decoration:none}
-.btn:disabled{opacity:.65;cursor:progress}
+.btn-sec {
+  background: var(--eve-mezclado);
+  color: #fff;
+}
+.btn-sec:hover {
+  background: #0e3568;
+  text-decoration: none;
+}
+.btn:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
 
 /* ── Portada ────────────────────────────────────────────────────────────── */
-.portada{padding:96px 0 88px;background:
-  radial-gradient(900px 420px at 50% -10%,var(--eve-tinte),#fff 70%)}
-.portada .wrap{max-width:760px;text-align:center}
-.portada h1{font-size:clamp(2.1rem,5.2vw,3.4rem);letter-spacing:-.01em}
-.portada .entrada{margin-top:20px;font-size:1.08rem;color:var(--eve-pizarra)}
+.portada {
+  padding: 96px 0 88px;
+  background: radial-gradient(900px 420px at 50% -10%, var(--eve-tinte), #fff 70%);
+}
+.portada .wrap {
+  max-width: 760px;
+  text-align: center;
+}
+.portada h1 {
+  font-size: clamp(2.1rem, 5.2vw, 3.4rem);
+  letter-spacing: -0.01em;
+}
+.portada .entrada {
+  margin-top: 20px;
+  font-size: 1.08rem;
+  color: var(--eve-pizarra);
+}
 
-.etiqueta{display:inline-flex;align-items:center;gap:8px;margin-bottom:22px;
-  background:var(--eve-hielo);color:var(--eve-mezclado);border-radius:999px;
-  padding:7px 15px;font-size:.82rem;font-weight:600}
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  background: var(--eve-hielo);
+  color: var(--eve-mezclado);
+  border-radius: 999px;
+  padding: 7px 15px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
 
 /* ── Aviso de estado ────────────────────────────────────────────────────── */
-.estado{margin:56px auto 0;max-width:680px;border:1px dashed #D7E3F0;
-  border-radius:14px;padding:22px 24px;background:var(--eve-tinte);text-align:left}
-.estado h2{font-size:1.05rem;margin-bottom:8px}
-.estado p{font-size:.93rem;color:var(--eve-pizarra)}
-.estado p + p{margin-top:10px}
+.estado {
+  margin: 56px auto 0;
+  max-width: 680px;
+  border: 1px dashed #d7e3f0;
+  border-radius: 14px;
+  padding: 22px 24px;
+  background: var(--eve-tinte);
+  text-align: left;
+}
+.estado h2 {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+.estado p {
+  font-size: 0.93rem;
+  color: var(--eve-pizarra);
+}
+.estado p + p {
+  margin-top: 10px;
+}
 
 /* ── Formulario de demo ─────────────────────────────────────────────────────
    La tarjeta blanca sobre el bloque azul noche del cierre. Vive aquí, y no en
@@ -109,30 +239,72 @@ a:hover{text-decoration:underline}
    formulario al mismo endpoint con el mismo JS: separarlo era garantizar que
    se desviaran. Lo que NO va aquí es la sección que lo rodea (.demo, .demo-grid,
    .demo-texto), que cada landing compone a su manera. */
-.demo-form{background:#fff;border-radius:16px;padding:28px;
-  color:var(--eve-azul-noche)}
-.demo-form .campo{margin-bottom:16px}
-.demo-form label{display:block;font-size:.82rem;font-weight:500;margin-bottom:6px}
-.demo-form input,.demo-form select,.demo-form textarea{width:100%;
-  padding:11px 14px;border:1px solid #DCE7F2;border-radius:9px;
-  font-size:.88rem;font-family:'Inter',system-ui,sans-serif;background:#fff;
-  color:var(--eve-azul-noche)}
+.demo-form {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  color: var(--eve-azul-noche);
+}
+.demo-form .campo {
+  margin-bottom: 16px;
+}
+.demo-form label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.demo-form input,
+.demo-form select,
+.demo-form textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #dce7f2;
+  border-radius: 9px;
+  font-size: 0.88rem;
+  font-family: "Inter", system-ui, sans-serif;
+  background: #fff;
+  color: var(--eve-azul-noche);
+}
 /* 44px es el mínimo táctil de las guías de iOS y Android. Con el padding solo
    salían 41: se llena bien con ratón y se falla con el pulgar, que es como se
    llena una landing. El textarea ya es más alto por su min-height. */
-.demo-form input,.demo-form select{min-height:44px}
-.demo-form input:focus,.demo-form select:focus,.demo-form textarea:focus{
-  outline:2px solid var(--eve-electrico);border-color:transparent}
-.demo-form textarea{resize:vertical;min-height:72px}
-.demo-form .btn{width:100%;margin-top:4px}
-.demo-legal{margin-top:12px;font-size:.78rem;color:var(--eve-pizarra);
-  text-align:center}
+.demo-form input,
+.demo-form select {
+  min-height: 44px;
+}
+.demo-form input:focus,
+.demo-form select:focus,
+.demo-form textarea:focus {
+  outline: 2px solid var(--eve-electrico);
+  border-color: transparent;
+}
+.demo-form textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+.demo-form .btn {
+  width: 100%;
+  margin-top: 4px;
+}
+.demo-legal {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: var(--eve-pizarra);
+  text-align: center;
+}
 
 /* ── Trampa antibots del formulario de demo ─────────────────────────────────
    Fuera de la pantalla, fuera del orden de foco y con aria-hidden en el
    marcado: invisible también para un lector de pantalla. `display:none` no
    sirve —hay bots que lo detectan y saltan el campo—. */
-.trampa{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.trampa {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
 
 /* ── Resultado del formulario de demo ───────────────────────────────────────
    Lo rellena formularios.js —el otro archivo compartido— con la clase `ok` o
@@ -142,25 +314,58 @@ a:hover{text-decoration:underline}
 
    El error NO va en coral: el coral es la marca, y teñir de marca un fallo
    confunde el CTA con la advertencia. */
-.demo-estado{margin-top:12px;font-size:.84rem;line-height:1.5;font-weight:500}
-.demo-estado:empty{display:none}
-.demo-estado.ok{color:var(--eve-exito)}
-.demo-estado.error{color:var(--eve-error)}
+.demo-estado {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.demo-estado:empty {
+  display: none;
+}
+.demo-estado.ok {
+  color: var(--eve-exito);
+}
+.demo-estado.error {
+  color: var(--eve-error);
+}
 
 /* ── Pie ────────────────────────────────────────────────────────────────── */
-.pie{margin-top:90px;border-top:1px solid var(--eve-linea);padding:30px 0;
-  background:var(--eve-tinte)}
-.pie .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:14px;
-  font-size:.86rem;color:var(--eve-pizarra)}
-.pie .wrap a{margin-left:auto}
+.pie {
+  margin-top: 90px;
+  border-top: 1px solid var(--eve-linea);
+  padding: 30px 0;
+  background: var(--eve-tinte);
+}
+.pie .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.86rem;
+  color: var(--eve-pizarra);
+}
+.pie .wrap a {
+  margin-left: auto;
+}
 
-@media (max-width:640px){
+@media (max-width: 640px) {
   /* En móvil se recorta el nav, pero «Entrar al portal» se queda: es lo que
      un residente busca desde el teléfono. El que cae es el enlace corporativo,
      que además está repetido en el pie. */
-  .nav nav a:not(.btn):not(.portal){display:none}
-  .nav nav{gap:14px}
-  .nav nav a.portal{font-size:.88rem}
-  .portada{padding:64px 0 56px}
-  .pie .wrap a{margin-left:0}
+  .nav nav a:not(.btn):not(.portal) {
+    display: none;
+  }
+  .nav nav {
+    gap: 14px;
+  }
+  .nav nav a.portal {
+    font-size: 0.88rem;
+  }
+  .portada {
+    padding: 64px 0 56px;
+  }
+  .pie .wrap a {
+    margin-left: 0;
+  }
 }

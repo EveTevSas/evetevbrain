@@ -41,6 +41,11 @@ export class AppModule implements NestModule {
     // TenantMiddleware resuelve API keys reales (Bearer evpk_*) o headers internos.
     consumer
       .apply(TenantMiddleware)
-      .forRoutes(PagosController, ConciliacionController, MerchantsController, OutboundWebhooksController);
+      .forRoutes(
+        PagosController,
+        ConciliacionController,
+        MerchantsController,
+        OutboundWebhooksController
+      );
   }
 }

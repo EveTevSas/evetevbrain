@@ -10,13 +10,13 @@ la topología de despliegue de `ESTANDARES_INGENIERIA.md` (§10).
 
 ## Cuentas y servicios
 
-| Servicio | Para qué | Inicio de sesión |
-|---|---|---|
-| **GitHub** | Código, monorepo, CI (Actions), fuente de verdad. Org `EveTevSas`, repo `evetevbrain`. | Cuenta GitHub del equipo |
-| **Supabase** | Postgres + Auth + RLS. Schemas `evepay` y `conjuntos`. | **Con GitHub** (SSO) |
-| **Vercel** | Hosting de los frontends: `website` (evetev.com) y `eveconecta` (conecta.evetev.com). | **Con GitHub** (SSO) |
-| **Railway** | Hosting de la API de EvePay (NestJS, proceso de larga vida). | *Cuenta aún no creada — se crea cuando se requiera desplegar la API* |
-| **name.com** | Registrador del dominio **evetev.com** y su DNS. | **Con email `contacto@evetev.com`** |
+| Servicio     | Para qué                                                                               | Inicio de sesión                                                     |
+| ------------ | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **GitHub**   | Código, monorepo, CI (Actions), fuente de verdad. Org `EveTevSas`, repo `evetevbrain`. | Cuenta GitHub del equipo                                             |
+| **Supabase** | Postgres + Auth + RLS. Schemas `evepay` y `conjuntos`.                                 | **Con GitHub** (SSO)                                                 |
+| **Vercel**   | Hosting de los frontends: `website` (evetev.com) y `eveconecta` (conecta.evetev.com).  | **Con GitHub** (SSO)                                                 |
+| **Railway**  | Hosting de la API de EvePay (NestJS, proceso de larga vida).                           | _Cuenta aún no creada — se crea cuando se requiera desplegar la API_ |
+| **name.com** | Registrador del dominio **evetev.com** y su DNS.                                       | **Con email `contacto@evetev.com`**                                  |
 
 ## Notas
 

@@ -1,7 +1,10 @@
 const API = process.env.NEXT_PUBLIC_EVEPAY_API_URL ?? "https://api.evetev.com";
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string
+  ) {
     super(message);
   }
 }
@@ -74,7 +77,10 @@ export const api = {
       if (hasta) q.set("hasta", hasta);
       return request<Stats>(`/v1/pagos/stats${q.size ? `?${q}` : ""}`, key);
     },
-    listar: (key: string, params: { desde?: string; hasta?: string; estado?: string; page?: number; limit?: number }) => {
+    listar: (
+      key: string,
+      params: { desde?: string; hasta?: string; estado?: string; page?: number; limit?: number }
+    ) => {
       const q = new URLSearchParams();
       if (params.desde) q.set("desde", params.desde);
       if (params.hasta) q.set("hasta", params.hasta);

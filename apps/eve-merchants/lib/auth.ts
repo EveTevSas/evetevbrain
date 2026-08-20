@@ -6,7 +6,10 @@ export function getApiKey(): string | null {
   return localStorage.getItem(KEY);
 }
 
-export function setSession(apiKey: string, merchant: { id: string; legalName: string; estado: string }): void {
+export function setSession(
+  apiKey: string,
+  merchant: { id: string; legalName: string; estado: string }
+): void {
   localStorage.setItem(KEY, apiKey);
   localStorage.setItem(MERCHANT_KEY, JSON.stringify(merchant));
 }
@@ -15,7 +18,11 @@ export function getMerchant(): { id: string; legalName: string; estado: string }
   if (typeof window === "undefined") return null;
   const raw = localStorage.getItem(MERCHANT_KEY);
   if (!raw) return null;
-  try { return JSON.parse(raw) as { id: string; legalName: string; estado: string }; } catch { return null; }
+  try {
+    return JSON.parse(raw) as { id: string; legalName: string; estado: string };
+  } catch {
+    return null;
+  }
 }
 
 export function logout(): void {
