@@ -18,10 +18,18 @@ export interface Umbrales {
   coseno: number;
 }
 
-/** Valores de arranque. **Sin calibrar todavía**: se fijan con el set dorado en
- *  cuanto exista, y hasta entonces son una conjetura razonada, no un número
- *  medido. */
-export const UMBRALES_INICIALES: Umbrales = { cobertura: 0.5, coseno: 0.55 };
+/** Umbrales **provisionales**, medidos sobre 13 preguntas —8 de dentro del
+ *  alcance y 5 de fuera— con `scripts/senal.ts`:
+ *
+ *  - fuera de alcance: de 0,00 a **0,18**
+ *  - dentro, el peor caso que recupera bien: **0,36**
+ *
+ *  0,30 cae en ese hueco con margen por los dos lados. **No es una
+ *  calibración**: son 13 puntos, no un set dorado. Se fija de verdad cuando
+ *  exista la base definitiva y sus preguntas.
+ *
+ *  El coseno sigue sin medir: no hay vectores todavía. */
+export const UMBRALES_INICIALES: Umbrales = { cobertura: 0.3, coseno: 0.55 };
 
 export interface Señales {
   cobertura: number;

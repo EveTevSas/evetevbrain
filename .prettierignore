@@ -5,3 +5,8 @@ out
 coverage
 pnpm-lock.yaml
 packages/brand/**/*.svg
+
+# Índice compilado de Fluxi: lo escribe `pnpm --filter @evetev/rag-assistant
+# compilar` con un formato estable. Si Prettier lo reformatea, cada compilación
+# produce un diff de miles de líneas que no dice nada.
+apps/rag-assistant/indice/

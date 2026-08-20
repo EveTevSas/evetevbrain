@@ -79,3 +79,31 @@ export function cobertura(consulta: string, texto: string): number {
   for (const t of terminos) if (enDocumento.has(t)) encontrados++;
   return encontrados / terminos.size;
 }
+
+/** Cobertura **ponderada por idf**: cuánto del *peso informativo* de la
+ *  pregunta aparece en el fragmento.
+ *
+ *  La cobertura plana trata «pasa» y «cliente» igual que «idempotencia», y por
+ *  eso «¿qué pasa si mi cliente paga dos veces?» se abstenía **con el fragmento
+ *  correcto ya recuperado de primero**: las palabras de relleno de la pregunta
+ *  hundían la proporción. Pesar cada término por su idf hace que manden los
+ *  términos que discriminan, que son los que de verdad dicen si el fragmento
+ *  habla de lo que se preguntó.
+ *
+ *  Un término que no está en el corpus recibe el idf más alto y cuenta como no
+ *  cubierto: por eso una pregunta ajena al negocio sigue dando cerca de cero. */
+export function coberturaPonderada(indice: IndiceBm25, consulta: string, texto: string): number {
+  const terminos = [...new Set(tokenizar(consulta))];
+  if (terminos.length === 0) return 0;
+  const enDocumento = new Set(tokenizar(texto));
+
+  let total = 0;
+  let cubierto = 0;
+  for (const termino of terminos) {
+    const df = indice.postings[termino]?.length ?? 0;
+    const idf = Math.log(1 + (indice.total - df + 0.5) / (df + 0.5));
+    total += idf;
+    if (enDocumento.has(termino)) cubierto += idf;
+  }
+  return total === 0 ? 0 : cubierto / total;
+}

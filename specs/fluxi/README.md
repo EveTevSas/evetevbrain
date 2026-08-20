@@ -11,7 +11,7 @@ cliente que lo compre.
 | ---------------------- | ---- | ------------------------------------------------------------------ |
 | `base-documental`      | 0    | **escrita** — formato, reglas de contenido y gobernanza del corpus |
 | `recuperacion-hibrida` | 1    | por escribir — BM25 + densa, RRF y compuerta de abstención         |
-| `generacion-anclada`   | 2    | por escribir — prompt, verificación de citas y de cifras           |
+| `generacion-anclada`   | 2    | **escrita** — prompt, verificación de citas, cifras y enlaces      |
 | `guardas-y-cupos`      | 2    | por escribir — orígenes, límites, presupuesto y degradación        |
 | `widget-embebible`     | 3    | por escribir — accesibilidad, marca y streaming                    |
 | `evaluacion`           | 1–2  | por escribir — set dorado y umbrales de CI                         |

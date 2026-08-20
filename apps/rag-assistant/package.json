@@ -9,7 +9,9 @@
     "preguntar": "tsx scripts/preguntar.ts",
     "lint": "eslint src scripts --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "comparar": "tsx scripts/comparar.ts",
+    "senal": "tsx scripts/senal.ts"
   },
   "devDependencies": {
     "@evetev/config": "workspace:*",

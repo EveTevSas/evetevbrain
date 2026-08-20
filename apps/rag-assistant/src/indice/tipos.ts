@@ -6,8 +6,6 @@ import type { IndiceBm25 } from "../recuperar/bm25.js";
  *  `git revert`. Con este tamano de corpus la recuperacion no toca la red. */
 export interface Indice {
   version: 1;
-  /** Fecha de compilacion, ISO. Informativa. */
-  compilado: string;
   /** SHA-256 del corpus. La CI lo compara con el de `base/` y falla si no
    *  cuadran: sin esta comprobacion un PR podria cambiar la base y dejar
    *  publicado el indice viejo, y el asistente responderia la version anterior

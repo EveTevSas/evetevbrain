@@ -68,7 +68,8 @@ const paraIndexar = fragmentos.map((f) => `${f.contexto} ${f.texto}`.trim());
 
 const indice: Indice = {
   version: 1,
-  compilado: new Date().toISOString(),
+  // Sin marca de tiempo a proposito: dejaria un diff en cada compilacion aunque
+  // el contenido fuera identico, y la huella ya identifica el corpus exacto.
   huella: huellaCorpus(crudos),
   fragmentos,
   bm25: construirBm25(paraIndexar)

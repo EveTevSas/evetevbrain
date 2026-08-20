@@ -64,9 +64,46 @@ ruidosamente si algún documento rompe una de las reglas de `base/_reglas.json`,
 con `--comprobar` verifica que el índice corresponde a la base sin reescribirlo
 (es lo que correrá en CI).
 
-`preguntar` **todavía no llama al modelo**: muestra qué camino tomó la consulta y,
-cuando toca generar, qué fragmentos se le entregarían. Es lo que permite calibrar
-la compuerta sin gastar un token.
+`preguntar` **sin `MOONSHOT_API_KEY`** muestra qué camino tomó la consulta y qué
+fragmentos se entregarían — así se calibra la compuerta sin gastar un token. Con
+llave, responde de verdad:
+
+```
+> que pasa si mi cliente paga dos veces
+[GENERADA] kimi-k2.6 · 3119 ms · 1369 entrada (512 en cache) · 73 salida
+
+Si tu cliente paga dos veces, el sistema no lo cobra dos veces. Cada cobro lleva
+una clave de idempotencia y una máquina de estados explícita, así que el reintento
+devuelve el cobro que ya existía. [#evepay-capacidades#1]
+```
+
+`comparar` mide modelos sobre las mismas preguntas y `senal` compara las señales
+de la compuerta dentro y fuera del alcance. Los dos existen porque estas
+decisiones **se miden**, no se heredan.
+
+## El modelo se eligió midiendo
+
+| Modelo      | Generadas | Descartadas | Latencia media | Entrada (cacheada) | Salida  |
+| ----------- | --------- | ----------- | -------------- | ------------------ | ------- |
+| `kimi-k3`   | 5         | 0           | 4.963 ms       | 1.495 (1.331)      | 138     |
+| `kimi-k2.6` | 5         | 0           | **3.461 ms**   | 1.409 (1.277)      | **110** |
+
+Calidad equivalente, `kimi-k2.6` un 30% más rápido y con menos salida — y
+`kimi-k3` cuesta US$3,00/M de entrada y US$15,00/M de salida. **Se usa
+`kimi-k2.6`.**
+
+Tres cosas que solo se supieron llamando al modelo de verdad:
+
+- **`kimi-k2.6` no admite `temperature`** distinta de 1: responde 400. El
+  parámetro pasó a ser opcional. Que esto no rompiera nada es la prueba de que el
+  anclaje está donde debe: la compuerta decide si se llama, la verificación
+  decide si se muestra. La temperatura nunca fue la guarda.
+- **Los modelos razonan antes de responder y ese razonamiento gasta el
+  presupuesto de salida.** La primera llamada real devolvió **texto vacío**
+  habiéndose comido los 220 tokens. Se apaga.
+- **La guarda de enlaces tumbaba respuestas correctas.** El prompt manda ofrecer
+  `contacto@evetev.com`, el modelo obedecía, y como no estaba en los fragmentos
+  se marcaba como inventado. El conjunto válido es contexto **∪ prompt**.
 
 Calidad:
 
@@ -84,9 +121,10 @@ pnpm --filter @evetev/rag-assistant test
   BM25 no puede saltar de «quedan/plata» a «dinero/tesorería». Hay un test que lo
   fija; el día que entren los vectores ese test va a fallar y habrá que cambiarlo
   a «generar». Es el hueco que el híbrido existe para cerrar.
-- **La generación.** El motor prepara los fragmentos; llamar al modelo es la
-  fase 2, junto con la verificación de citas y de cifras.
 - **La contextualización** de fragmentos en la ingesta. Necesita modelo.
-- **La calibración de los umbrales.** Los de hoy (0,5 de cobertura, 0,55 de
-  coseno) son una conjetura razonada, no un número medido, y así está dicho en el
-  código. Se calibran con el set dorado cuando exista la base definitiva.
+- **El endpoint HTTP** con streaming al navegador, las guardas de abuso y el
+  registro de eventos. Es lo que sigue.
+- **La calibración de los umbrales.** El de cobertura (0,30) sale de medir 13
+  preguntas con `senal`: fuera de alcance no pasa de 0,18 y el peor caso legítimo
+  da 0,36. Es un hueco con margen, **pero no es una calibración** — son 13
+  puntos. El del coseno (0,55) sigue sin medir porque no hay vectores.
