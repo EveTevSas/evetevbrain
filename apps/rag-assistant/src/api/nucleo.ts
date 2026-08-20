@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import type { Indice } from "../indice/tipos.js";
 import { atenderEnTrozos, type Evento } from "../atender.js";
 import { responder } from "../responder.js";
@@ -27,13 +28,24 @@ export function leerEntorno(env: Record<string, string | undefined>): Entorno {
     .filter(Boolean);
   return {
     origenes,
-    // Sin secreto propio el token de sesion no protege nada, pero tampoco vale
-    // la pena tumbar el servicio por eso: se degrada a un valor por proceso.
-    secreto: env["FLUXI_SECRETO"] ?? "fluxi-sin-secreto-configurado",
+    // Sin `FLUXI_SECRETO` se cae a un valor **aleatorio, generado al arrancar el
+    // proceso**. La version anterior usaba una constante escrita aqui mismo, y
+    // eso no era degradar: era publicar la llave. El repositorio es publico, asi
+    // que cualquiera podia firmarse una sesion valida y saltarse la guarda. Se
+    // detecto probandolo contra produccion, no razonandolo.
+    //
+    // El precio de la aleatoria es que las sesiones no cruzan de una instancia a
+    // otra —Vercel levanta varias y son efimeras—, y por eso el widget reintenta
+    // una vez pidiendo sesion nueva cuando recibe 401. Con el secreto puesto no
+    // pasa ninguna de las dos cosas.
+    secreto: env["FLUXI_SECRETO"] ?? SECRETO_DE_ARRANQUE,
     llaveModelo: env["MOONSHOT_API_KEY"],
     modelo: env["FLUXI_MODELO"] ?? "kimi-k2.6"
   };
 }
+
+/** Un secreto distinto en cada arranque. Nunca sale del proceso. */
+const SECRETO_DE_ARRANQUE = randomBytes(32).toString("hex");
 
 export interface Peticion {
   ruta: string;

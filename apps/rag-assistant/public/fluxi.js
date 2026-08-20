@@ -301,12 +301,14 @@
     var burbuja = pintar("eve pensando", "…");
 
     obtenerSesion()
-      .then(function () {
-        return fetch(cfg.api + "/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Fluxi-Sesion": sesion },
-          body: JSON.stringify({ mensaje: texto })
-        });
+      .then(enviar)
+      .then(function (r) {
+        // Una sesión puede dejar de valer por caducidad o porque respondió otra
+        // instancia del servidor. No es un error que merezca enseñarle a nadie:
+        // se pide una nueva y se reintenta UNA vez.
+        if (r.status !== 401) return r;
+        sesion = null;
+        return obtenerSesion().then(enviar);
       })
       .then(function (r) {
         if (!r.ok || !r.body)
@@ -332,6 +334,14 @@
         ocupado = false;
         campo.focus();
       });
+
+    function enviar() {
+      return fetch(cfg.api + "/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Fluxi-Sesion": sesion },
+        body: JSON.stringify({ mensaje: texto })
+      });
+    }
   }
 
   function obtenerSesion() {
