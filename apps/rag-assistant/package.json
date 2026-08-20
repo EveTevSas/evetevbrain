@@ -1,0 +1,11 @@
+{
+  "name": "@evetev/rag-assistant",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Fluxi — motor de asistente RAG sobre base documental cerrada. Fase 0: solo la base documental; el motor entra en la fase 1.",
+  "scripts": {
+    "lint": "echo \"(rag-assistant) fase 0: todavía no hay código\" && exit 0",
+    "typecheck": "echo \"(rag-assistant) fase 0: todavía no hay código\" && exit 0",
+    "test": "echo \"(rag-assistant) fase 0: todavía no hay código\" && exit 0"
+  }
+}
