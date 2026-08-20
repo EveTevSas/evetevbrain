@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { cargar } from "../cargar";
 import { reiniciarCupos } from "../guardas/cupos";
-import { emitirSesion } from "../guardas/sesion";
+import { emitirSesion, verificarSesion } from "../guardas/sesion";
 import { leerEntorno, manejar, type Peticion } from "./nucleo";
 
 const indice = cargar();
@@ -24,6 +24,27 @@ function peticion(p: Partial<Peticion>): Peticion {
 const sesion = () => emitirSesion(entorno.secreto);
 
 beforeEach(reiniciarCupos);
+
+describe("secreto de firma", () => {
+  it("sin FLUXI_SECRETO usa un valor aleatorio, no una constante del repositorio", () => {
+    // La version anterior caia a una cadena escrita en el codigo. Como el
+    // repositorio es publico, cualquiera podia firmarse una sesion valida: se
+    // comprobo contra produccion, no se dedujo.
+    const sinSecreto = leerEntorno({});
+    expect(sinSecreto.secreto).not.toBe("fluxi-sin-secreto-configurado");
+    expect(sinSecreto.secreto.length).toBeGreaterThanOrEqual(32);
+  });
+
+  it("respeta el secreto configurado cuando existe", () => {
+    expect(leerEntorno({ FLUXI_SECRETO: "el-mio" }).secreto).toBe("el-mio");
+  });
+
+  it("una sesion firmada con el secreto de otro entorno no vale", () => {
+    const a = leerEntorno({ FLUXI_SECRETO: "uno" });
+    const b = leerEntorno({ FLUXI_SECRETO: "otro" });
+    expect(verificarSesion(emitirSesion(a.secreto), b.secreto)).toMatchObject({ valida: false });
+  });
+});
 
 describe("nucleo HTTP", () => {
   it("responde al vuelo previo sin exigir nada", async () => {
