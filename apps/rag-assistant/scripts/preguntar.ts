@@ -17,13 +17,13 @@ if (!consulta) {
   process.exit(1);
 }
 
-const cargado = cargar();
+const indice = cargar();
 const llave = process.env["MOONSHOT_API_KEY"];
 
 console.log(`\n> ${consulta}\n`);
 
 if (!llave) {
-  const r = responder(consulta, cargado);
+  const r = responder(consulta, { indice });
   if (r.camino === "generar") {
     console.log(
       `[GENERAR] cobertura ${r.senales.cobertura.toFixed(2)} — sin llave, no se llama al modelo`
@@ -47,7 +47,7 @@ const motor = motorMoonshot({
   claveDeCache: "fluxi-sistema-v1"
 });
 
-const r = await atender(consulta, { ...cargado, motor });
+const r = await atender(consulta, { indice, motor });
 
 const etiqueta = r.camino.toUpperCase();
 if (r.uso) {

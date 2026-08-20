@@ -3,17 +3,11 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Indice } from "./indice/tipos";
-import { leerLimites } from "./limites";
 import { responder, type Contexto } from "./responder";
-import { leerSelladas } from "./selladas";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const indice = JSON.parse(readFileSync(join(RAIZ, "indice", "indice.json"), "utf8")) as Indice;
-const ctx: Contexto = {
-  indice,
-  selladas: leerSelladas(readFileSync(join(RAIZ, "base", "_selladas.md"), "utf8")),
-  limites: leerLimites(readFileSync(join(RAIZ, "base", "_limites.md"), "utf8"))
-};
+const ctx: Contexto = { indice };
 
 describe("los cuatro caminos de una respuesta", () => {
   it("sella una pregunta frecuente sin tocar el modelo", () => {

@@ -23,7 +23,7 @@ const FUERA = [
   "cuanto cuesta un carro en Colombia"
 ];
 
-const { indice } = cargar();
+const indice = cargar();
 
 function medir(consulta: string) {
   const lista = buscarBm25(indice.bm25, consulta, 20);

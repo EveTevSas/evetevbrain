@@ -47,6 +47,8 @@ Reglas:
    información de Evetev que tengas en los fragmentos.
 10. No inventes enlaces. Los únicos que puedes escribir son los que aparezcan en
     los fragmentos.
+11. Escribe en texto plano. Nada de negritas, listas ni marcado: la respuesta se
+    muestra tal cual y los asteriscos se ven como asteriscos.
 
 Cuando no puedas responder, usa esta forma:
 

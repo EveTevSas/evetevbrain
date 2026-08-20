@@ -26,7 +26,7 @@ if (!llave) {
   process.exit(1);
 }
 
-const cargado = cargar();
+const indice = cargar();
 
 for (const modelo of MODELOS) {
   const motor = motorMoonshot({ llave, modelo, claveDeCache: "fluxi-sistema-v1" });
@@ -40,7 +40,7 @@ for (const modelo of MODELOS) {
   let generadas = 0;
 
   for (const pregunta of PREGUNTAS) {
-    const r = await atender(pregunta, { ...cargado, motor });
+    const r = await atender(pregunta, { indice, motor });
     if (r.uso) {
       msTotal += r.uso.milisegundos;
       entradaTotal += r.uso.tokensEntrada;

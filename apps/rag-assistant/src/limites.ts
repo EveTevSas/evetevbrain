@@ -1,3 +1,4 @@
+import { desenvolver } from "./desenvolver.js";
 import { sinTildes } from "./normalizar.js";
 
 /** Los temas que Eve no responde, con la respuesta **ya redactada**.
@@ -30,10 +31,9 @@ export function leerLimites(markdown: string): Limites {
     const tema = (lineas.shift() ?? "").trim();
     const resto = lineas.join("\n");
 
-    const respuesta = [...resto.matchAll(/^>\s?(.*)$/gm)]
-      .map((m) => (m[1] ?? "").trim())
-      .join(" ")
-      .trim();
+    const respuesta = desenvolver(
+      [...resto.matchAll(/^>\s?(.*)$/gm)].map((m) => (m[1] ?? "").trim()).join(" ")
+    );
     if (!tema || !respuesta) continue;
 
     // La linea de senales se lee sobre el parrafo con los espacios normalizados,

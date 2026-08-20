@@ -1,3 +1,4 @@
+import { desenvolver } from "./desenvolver.js";
 import { tokenizar } from "./recuperar/texto.js";
 
 /** Respuestas selladas: preguntas frecuentes con respuesta literal, que salen
@@ -31,7 +32,7 @@ export function leerSelladas(markdown: string): Sellada[] {
         .split("·")
         .map((v) => v.trim())
         .filter(Boolean),
-      respuesta: (respuesta[1] ?? "").trim()
+      respuesta: desenvolver(respuesta[1] ?? "")
     });
   }
 
