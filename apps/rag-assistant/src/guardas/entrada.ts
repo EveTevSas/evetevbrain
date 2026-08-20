@@ -17,8 +17,14 @@ export const POR_DEFECTO = {
   topeHistorial: 4
 } as const;
 
-/** Previews de Vercel del propio proyecto, para poder probar en el PR. */
-const ORIGEN_PREVIEW = /^https:\/\/rag-assistant-[a-z0-9-]+\.vercel\.app$/;
+/** Previews de Vercel de **nuestros** proyectos, para poder probar en el PR.
+ *
+ *  Incluye `website-*` y no solo `rag-assistant-*`: sin eso, la preview de
+ *  cualquier PR del sitio mostraba el asistente degradado al enlace de contacto
+ *  —el navegador bloquea la petición— y **nada se ponía rojo**. Es el mismo modo
+ *  de fallo silencioso que ya conocemos de la lista de orígenes de los
+ *  formularios, y se arregla antes de que muerda, no después. */
+const ORIGEN_PREVIEW = /^https:\/\/(rag-assistant|website)-[a-z0-9-]+\.vercel\.app$/;
 const ORIGEN_LOCAL = /^http:\/\/localhost:\d{2,5}$/;
 
 /** **El punto fragil de todo esto**, y ya nos mordio una vez con los
