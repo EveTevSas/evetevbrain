@@ -220,7 +220,7 @@ del mercado tienen.
 | #   | Capa                        | Dónde vive               | Qué garantiza                                                                                                                                                                                          |
 | --- | --------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1   | **Solo el contexto entra**  | `generar/plantilla.ts`   | El prompt no lleva conocimiento del mundo. Lo único que el modelo puede afirmar son los 6 fragmentos recuperados, con sus identificadores.                                                             |
-| 2   | **Compuerta de abstención** | `recuperar/compuerta.ts` | Si el mejor puntaje fusionado no llega al umbral, **no hay llamada al modelo**. Sale la respuesta de derivación. Es imposible inventar sobre algo que nunca se preguntó al modelo.                     |
+| 2   | **Compuerta de abstención** | `recuperar/compuerta.ts` | Si ninguna señal de recuperación llega a su umbral, **no hay llamada al modelo**. Sale la respuesta de derivación. Es imposible inventar sobre algo que nunca se preguntó al modelo.                   |
 | 3   | **Prompt de anclaje**       | `base/_sistema.md`       | Temperatura 0, tope de 220 tokens, respuesta de máximo tres frases, cita obligatoria, y la instrucción de decir «no lo tengo» sin adornar. Versionado y revisado por PR como cualquier otro documento. |
 | 4   | **Verificación de citas**   | `guardas/salida.ts`      | Toda cita `[#id]` que el modelo escriba tiene que existir entre los fragmentos que se le pasaron. Si cita algo que no recibió, la respuesta se descarta y degrada a derivación.                        |
 | 5   | **Regla de cifras**         | `guardas/salida.ts`      | Cualquier número, porcentaje o fecha en la respuesta tiene que aparecer literalmente en el contexto. Es la guarda que impide que una tarifa se «redondee».                                             |
@@ -276,6 +276,14 @@ de Vercel hasta Model Studio en Singapur. Dos mitigaciones, las dos en la fase 1
   Tokenizador español con lista de vacías y raíz ligera.
 - **RRF con k=60**, el valor que la literatura reporta como estable. Fusiona por
   posición, no por puntaje: por eso no hay que normalizar escalas incompatibles.
+- **La compuerta no mira el puntaje de la fusión** — corrección de diseño hecha al
+  implementar la fase 1. Como RRF puntúa por **posición**, un primer puesto suma
+  `1/(60+1)` tanto si el resultado es perfecto como si es basura; usarlo para
+  decidir si responder habría sido una compuerta que siempre abre. La fusión
+  decide el **orden**; la compuerta decide **si**, y mira las dos señales crudas:
+  la **cobertura léxica** —qué proporción de los términos de la pregunta aparece
+  en el mejor fragmento, acotada en [0,1] y explicable en una frase— y el
+  **coseno** del mejor fragmento denso. Basta con que una pase.
 - **Reranking**: no en la v1. Con 6 candidatos sobre 400 fragmentos, un
   reordenador añade una llamada de red para ganar poco. La costura queda hecha
   (`recuperar/rerank.ts` vacío) para cuando un cliente traiga un corpus grande.
@@ -409,6 +417,12 @@ API, y se dispara únicamente cuando el PR toca `base/`, el prompt o `src/genera
 Cada fase termina con algo que se puede enseñar. Ninguna arranca sin que la
 anterior esté verde.
 
+> **La base de agosto de 2026 es provisional.** Servicios, precios y alcance se
+> cierran en reuniones de la semana del 24 de agosto, y el corpus se reescribe
+> con lo que salga de ahí **antes** de que Fluxi quede de cara al cliente. Lo de
+> hoy sirve para construir y calibrar el motor, que no conoce su contenido:
+> cambiar la base entera es recompilar el índice.
+
 ### Fase 0 — Especificación y base documental _(sin una línea de código)_
 
 - `specs/fluxi/base-documental/spec.md` con criterios EARS.
@@ -492,7 +506,7 @@ anterior esté verde.
 | Spec                         | Fase | Criterio EARS de muestra                                                                                                                                                                          |
 | ---------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `fluxi/base-documental`      | 0    | **CUANDO** un documento supera su fecha de `vigencia`, **EL** sistema **DEBERÁ** incluirlo en el informe mensual de vencidos y marcar sus fragmentos como confianza media.                        |
-| `fluxi/recuperacion-hibrida` | 1    | **CUANDO** el puntaje fusionado del mejor fragmento no alcanza el umbral, **EL** sistema **DEBERÁ** responder con la derivación al formulario **sin** llamar al modelo generador.                 |
+| `fluxi/recuperacion-hibrida` | 1    | **CUANDO** ni la cobertura léxica ni el coseno del mejor fragmento alcanzan su umbral, **EL** sistema **DEBERÁ** responder con la derivación al formulario **sin** llamar al modelo generador.    |
 | `fluxi/generacion-anclada`   | 2    | **CUANDO** la respuesta del modelo contiene una cita a un identificador que no estaba entre los fragmentos entregados, **EL** sistema **DEBERÁ** descartar la respuesta y devolver la derivación. |
 | `fluxi/guardas-y-cupos`      | 2    | **CUANDO** una sesión supera 8 mensajes en 10 minutos, **EL** sistema **DEBERÁ** responder 429 con el enlace al formulario y **no** consumir tokens.                                              |
 | `fluxi/widget-embebible`     | 3    | **CUANDO** el endpoint responde error o no responde, **EL** widget **DEBERÁ** mostrar el enlace al formulario de contacto y seguir siendo operable.                                               |

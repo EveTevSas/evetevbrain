@@ -73,14 +73,20 @@
   ],
 
   "tarifas": {
-    "patron": "(tarifa|comisión|porcentaje por transacción|componente fijo|suscripción mensual|\\$\\s?\\d|COP\\s?\\d|\\d+[.,]\\d+\\s*%)",
+    "patron": "(tarifa|porcentaje por transacción|componente fijo|suscripción mensual|\\$\\s?\\d|COP\\s?\\d|\\d+[.,]\\d+\\s*%)",
     "exigeAlgunaDe": ["referencia", "cotización", "cotizacion"],
     "_nota": [
       "Toda cifra o modelo de tarifa va acompañado de que es de referencia y de",
       "una derivación a cotización.",
       "El patrón NO puede ser un «%» suelto: marcaba «checkout 100% accesible»,",
       "que no habla de plata. Se dispara por contexto de tarifa o por una cifra",
-      "con decimales, que es como se escribe un porcentaje de comisión."
+      "con decimales, que es como se escribe un porcentaje de comisión.",
+      "«comisión» tampoco sirve de disparador: marcaba «menos comisiones",
+      "acumuladas», que describe la arquitectura y no nuestro precio. Y solo",
+      "apareció al hacer el validador insensible a tildes — el plural",
+      "«comisiones» no lleva acento, así que el patrón con tilde nunca lo veía.",
+      "Una afirmación de precio siempre trae una cifra o una de las frases del",
+      "modelo de cobro; una palabra suelta no."
     ]
   },
 
