@@ -2,28 +2,17 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Indice } from "./indice/tipos.js";
-import { extraerPromptDeSistema } from "./generar/plantilla.js";
-import { leerLimites, type Limites } from "./limites.js";
-import { leerSelladas, type Sellada } from "./selladas.js";
 
-/** Carga lo que el asistente necesita para atender: indice, selladas, limites y
- *  el prompt de anclaje. Todo son archivos del repositorio, asi que esto es
- *  lectura de disco y nada mas — no hay base de datos que despertar. */
-export interface Cargado {
-  indice: Indice;
-  selladas: Sellada[];
-  limites: Limites;
-  sistema: string;
-}
-
-export function cargar(raiz = raizPorDefecto()): Cargado {
-  const leer = (...partes: string[]) => readFileSync(join(raiz, ...partes), "utf8");
-  return {
-    indice: JSON.parse(leer("indice", "indice.json")) as Indice,
-    selladas: leerSelladas(leer("base", "_selladas.md")),
-    limites: leerLimites(leer("base", "_limites.md")),
-    sistema: extraerPromptDeSistema(leer("base", "_sistema.md"))
-  };
+/** Carga el indice compilado. **Es lo unico que hace falta para atender**:
+ *  fragmentos, BM25, selladas, limites y el prompt de anclaje viajan todos
+ *  dentro del mismo archivo.
+ *
+ *  Se hizo asi al montar el endpoint: si la funcion desplegada tuviera que leer
+ *  `base/*.md` habria que acertar con `includeFiles` y con rutas relativas que
+ *  cambian al empaquetar — un modo de fallo que solo aparece en produccion. Un
+ *  artefacto, importado como modulo, no tiene ese problema. */
+export function cargar(raiz = raizPorDefecto()): Indice {
+  return JSON.parse(readFileSync(join(raiz, "indice", "indice.json"), "utf8")) as Indice;
 }
 
 function raizPorDefecto(): string {

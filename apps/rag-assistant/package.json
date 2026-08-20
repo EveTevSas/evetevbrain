@@ -7,11 +7,12 @@
   "scripts": {
     "compilar": "tsx scripts/compilar.ts",
     "preguntar": "tsx scripts/preguntar.ts",
-    "lint": "eslint src scripts --max-warnings=0",
+    "lint": "eslint src scripts api --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "comparar": "tsx scripts/comparar.ts",
-    "senal": "tsx scripts/senal.ts"
+    "senal": "tsx scripts/senal.ts",
+    "servir": "tsx scripts/servir.ts"
   },
   "devDependencies": {
     "@evetev/config": "workspace:*",

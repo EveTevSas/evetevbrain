@@ -8,13 +8,13 @@ import {
   type Umbrales
 } from "./recuperar/compuerta.js";
 import { fusionarRrf } from "./recuperar/rrf.js";
-import { buscarLimite, type Limites } from "./limites.js";
-import { buscarSellada, type Sellada } from "./selladas.js";
+import { buscarLimite } from "./limites.js";
+import { buscarSellada } from "./selladas.js";
 
+/** Todo lo que hace falta para enrutar viaja dentro del indice: fragmentos,
+ *  BM25, selladas, limites y prompt. */
 export interface Contexto {
   indice: Indice;
-  selladas: Sellada[];
-  limites: Limites;
   umbrales?: Umbrales;
   /** Cuantos fragmentos se le entregan al modelo. */
   tope?: number;
@@ -35,12 +35,12 @@ export interface Senales {
  *  modelo**: la sellada y la abstencion. En un sitio corporativo se llevan la
  *  mayor parte del trafico, cuestan cero y no pueden inventar nada. */
 export function responder(consulta: string, ctx: Contexto): Resultado {
-  const sellada = buscarSellada(consulta, ctx.selladas);
+  const sellada = buscarSellada(consulta, ctx.indice.selladas);
   if (sellada) {
     return { camino: "sellada", respuesta: sellada.respuesta, pregunta: sellada.pregunta };
   }
 
-  const limite = buscarLimite(consulta, ctx.limites);
+  const limite = buscarLimite(consulta, ctx.indice.limites);
   if (limite) {
     return { camino: "limite", respuesta: limite.respuesta, tema: limite.tema };
   }
@@ -63,7 +63,7 @@ export function responder(consulta: string, ctx: Contexto): Resultado {
   const decision = decidir(senales, ctx.umbrales ?? UMBRALES_INICIALES);
 
   if (!decision.responder || fragmentos.length === 0) {
-    return { camino: "abstencion", respuesta: ctx.limites.derivacionGeneral, senales };
+    return { camino: "abstencion", respuesta: ctx.indice.limites.derivacionGeneral, senales };
   }
 
   return { camino: "generar", fragmentos, senales, decision };

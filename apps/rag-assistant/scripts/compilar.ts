@@ -18,6 +18,9 @@ import { validar, vencidos } from "../src/base/validar.js";
 import { huellaCorpus } from "../src/indice/huella.js";
 import type { Indice } from "../src/indice/tipos.js";
 import { construirBm25 } from "../src/recuperar/bm25.js";
+import { extraerPromptDeSistema } from "../src/generar/plantilla.js";
+import { leerLimites } from "../src/limites.js";
+import { leerSelladas } from "../src/selladas.js";
 import type { Fragmento } from "../src/base/tipos.js";
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
@@ -72,7 +75,10 @@ const indice: Indice = {
   // el contenido fuera identico, y la huella ya identifica el corpus exacto.
   huella: huellaCorpus(crudos),
   fragmentos,
-  bm25: construirBm25(paraIndexar)
+  bm25: construirBm25(paraIndexar),
+  selladas: leerSelladas(readFileSync(join(BASE, "_selladas.md"), "utf8")),
+  limites: leerLimites(readFileSync(join(BASE, "_limites.md"), "utf8")),
+  sistema: extraerPromptDeSistema(readFileSync(join(BASE, "_sistema.md"), "utf8"))
 };
 
 const resumen = [

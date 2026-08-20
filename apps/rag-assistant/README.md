@@ -105,6 +105,41 @@ Tres cosas que solo se supieron llamando al modelo de verdad:
   `contacto@evetev.com`, el modelo obedecía, y como no estaba en los fragmentos
   se marcaba como inventado. El conjunto válido es contexto **∪ prompt**.
 
+Y con el servidor local se prueba el widget de verdad, con el mismo núcleo que
+corre en Vercel:
+
+```bash
+pnpm --filter @evetev/rag-assistant servir   # http://localhost:3005
+```
+
+## El widget
+
+Se instala con una línea:
+
+```html
+<script src="https://fluxi.evetev.com/fluxi.js" data-nombre="Eve" defer></script>
+```
+
+Vive en un **Shadow DOM**: se instala en sitios ajenos, así que su CSS no puede
+tocar la página ni la página tocarlo a él. Sin JavaScript, sin llave o con la API
+caída, muestra el enlace de contacto — que es lo que el muñeco de la esquina hacía
+antes. **Nunca se rompe: se convierte en lo que ya era.**
+
+Los identificadores `[#id]` no se muestran: son para verificar. Debajo de la
+respuesta sale una línea discreta con el nombre de los documentos que la
+sustentan.
+
+## Transmitir sin poder desdecirse
+
+El endpoint no emite token a token, y no es un capricho: **lo que ya se mostró no
+se puede desdecir**. Si se transmite en crudo y la verificación falla al final, la
+respuesta mala ya la vio la persona.
+
+Se transmite **por frases ya verificadas**: se acumula, se corta en frases
+completas —con sus citas, que van _después_ del punto— y cada una se comprueba
+antes de emitirse. El primer texto aparece al cabo de una frase en vez de al cabo
+de la respuesta entera, y nada sin verificar llega nunca a la pantalla.
+
 Calidad:
 
 ```bash
@@ -122,8 +157,14 @@ pnpm --filter @evetev/rag-assistant test
   fija; el día que entren los vectores ese test va a fallar y habrá que cambiarlo
   a «generar». Es el hueco que el híbrido existe para cerrar.
 - **La contextualización** de fragmentos en la ingesta. Necesita modelo.
-- **El endpoint HTTP** con streaming al navegador, las guardas de abuso y el
-  registro de eventos. Es lo que sigue.
+- **El proyecto de Vercel** y el dominio `fluxi.evetev.com`. No se pudo hoy: la
+  cuenta llegó al tope de despliegues del plan Hobby.
+- **El relevo del FAB en `apps/website`**, que va _después_ del punto anterior:
+  hasta que el endpoint tenga dominio, el widget solo mostraría el enlace de
+  contacto, que es peor que la burbuja de hoy.
+- **El registro de eventos y el cupo duradero.** El contador de hoy vive en
+  memoria del proceso: en Vercel hay varias instancias y son efímeras, así que es
+  un badén, no una barrera.
 - **La calibración de los umbrales.** El de cobertura (0,30) sale de medir 13
   preguntas con `senal`: fuera de alcance no pasa de 0,18 y el peor caso legítimo
   da 0,36. Es un hueco con margen, **pero no es una calibración** — son 13

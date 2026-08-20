@@ -1,5 +1,7 @@
 import type { Fragmento } from "../base/tipos.js";
+import type { Limites } from "../limites.js";
 import type { IndiceBm25 } from "../recuperar/bm25.js";
+import type { Sellada } from "../selladas.js";
 
 /** El indice es **un archivo del repositorio**, no un artefacto de compilacion
  *  ni una base de datos: se revisa en el PR, tiene historia y se deshace con
@@ -13,6 +15,13 @@ export interface Indice {
   huella: string;
   fragmentos: Fragmento[];
   bm25: IndiceBm25;
+  /** Todo lo que el asistente necesita para atender viaja aqui dentro: asi la
+   *  funcion desplegada **no lee el sistema de archivos**. Un solo artefacto,
+   *  sin `includeFiles` que acertar ni rutas que se rompan al empaquetar. */
+  selladas: Sellada[];
+  limites: Limites;
+  /** El texto bajo `## Prompt` de `_sistema.md`, ya extraido. */
+  sistema: string;
   /** Presente solo si se compilo con vectores. */
   denso?: {
     modelo: string;

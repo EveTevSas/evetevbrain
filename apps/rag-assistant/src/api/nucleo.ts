@@ -1,0 +1,182 @@
+import type { Indice } from "../indice/tipos.js";
+import { atenderEnTrozos, type Evento } from "../atender.js";
+import { responder } from "../responder.js";
+import { motorMoonshot } from "../generar/moonshot.js";
+import { cabecerasCors, origenPermitido, POR_DEFECTO, validarCuerpo } from "../guardas/entrada.js";
+import { anotarUso, consultarCupo } from "../guardas/cupos.js";
+import { emitirSesion, verificarSesion } from "../guardas/sesion.js";
+
+/** El nucleo HTTP, sin conocer a Vercel ni a Node.
+ *
+ *  Recibe una peticion normalizada y devuelve una respuesta normalizada, que
+ *  puede llevar un flujo de eventos. Los adaptadores —la funcion de Vercel y el
+ *  servidor local— solo traducen. Asi lo que corre en produccion es lo mismo que
+ *  se prueba en el portatil, sin una segunda implementacion que se desincronice. */
+
+export interface Entorno {
+  origenes: string[];
+  secreto: string;
+  llaveModelo: string | undefined;
+  modelo: string;
+}
+
+export function leerEntorno(env: Record<string, string | undefined>): Entorno {
+  const origenes = (env["FLUXI_ORIGENES"] ?? "https://evetev.com,https://www.evetev.com")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+  return {
+    origenes,
+    // Sin secreto propio el token de sesion no protege nada, pero tampoco vale
+    // la pena tumbar el servicio por eso: se degrada a un valor por proceso.
+    secreto: env["FLUXI_SECRETO"] ?? "fluxi-sin-secreto-configurado",
+    llaveModelo: env["MOONSHOT_API_KEY"],
+    modelo: env["FLUXI_MODELO"] ?? "kimi-k2.6"
+  };
+}
+
+export interface Peticion {
+  ruta: string;
+  metodo: string;
+  origen?: string | undefined;
+  sesion?: string | undefined;
+  ip: string;
+  cuerpo?: unknown;
+}
+
+export interface Respuesta {
+  estado: number;
+  cabeceras: Record<string, string>;
+  json?: unknown;
+  eventos?: AsyncIterable<Evento>;
+}
+
+export async function manejar(
+  peticion: Peticion,
+  ctx: { indice: Indice; entorno: Entorno }
+): Promise<Respuesta> {
+  const { entorno } = ctx;
+  const cors = cabecerasCors(peticion.origen, entorno.origenes);
+
+  if (peticion.metodo === "OPTIONS") return { estado: 204, cabeceras: cors };
+
+  if (peticion.ruta.endsWith("/salud")) {
+    return {
+      estado: 200,
+      cabeceras: cors,
+      json: {
+        ok: true,
+        fragmentos: ctx.indice.fragmentos.length,
+        huella: ctx.indice.huella.slice(0, 12),
+        modelo: entorno.modelo,
+        modeloConfigurado: Boolean(entorno.llaveModelo),
+        origenes: entorno.origenes.length
+      }
+    };
+  }
+
+  // Todo lo demas exige origen permitido. Sin esto el endpoint queda abierto a
+  // cualquier pagina del mundo, gastando nuestro presupuesto.
+  if (!origenPermitido(peticion.origen, entorno.origenes)) {
+    return { estado: 403, cabeceras: cors, json: { error: "origen_no_permitido" } };
+  }
+
+  if (peticion.ruta.endsWith("/sesion")) {
+    // **POST y no GET, a proposito.** El navegador no manda cabecera `Origin`
+    // en un GET del mismo origen, asi que la guarda de origen rechazaba la
+    // peticion de sesion del propio widget con un 403. En POST siempre la
+    // manda, y asi el comportamiento es identico servido desde el mismo dominio
+    // o desde otro — que es como va a estar en produccion.
+    if (peticion.metodo !== "POST") {
+      return { estado: 405, cabeceras: cors, json: { error: "metodo_no_permitido" } };
+    }
+    return { estado: 200, cabeceras: cors, json: { sesion: emitirSesion(entorno.secreto) } };
+  }
+
+  if (!peticion.ruta.endsWith("/chat")) {
+    return { estado: 404, cabeceras: cors, json: { error: "no_encontrado" } };
+  }
+  if (peticion.metodo !== "POST") {
+    return { estado: 405, cabeceras: cors, json: { error: "metodo_no_permitido" } };
+  }
+
+  const sesion = verificarSesion(peticion.sesion, entorno.secreto);
+  if (!sesion.valida) {
+    return { estado: 401, cabeceras: cors, json: { error: sesion.motivo } };
+  }
+
+  const validacion = validarCuerpo(peticion.cuerpo, POR_DEFECTO.topeMensaje);
+  if (!validacion.valido) {
+    // La trampa responde 200 y no hace nada: al bot no se le confirma que fue
+    // detectado.
+    if (validacion.motivo === "trampa") {
+      return { estado: 200, cabeceras: cors, json: { respuesta: derivacion(ctx.indice) } };
+    }
+    return { estado: validacion.estado, cabeceras: cors, json: { error: validacion.motivo } };
+  }
+
+  const clave = `${sesion.id}|${peticion.ip}`;
+  const cupo = consultarCupo(clave);
+  if (!cupo.permitido) {
+    // Degrada al formulario, no da error seco: la persona sigue teniendo salida.
+    return {
+      estado: 429,
+      cabeceras: cors,
+      json: { error: cupo.motivo, respuesta: derivacion(ctx.indice) }
+    };
+  }
+
+  if (!entorno.llaveModelo) {
+    // Sin llave el asistente no se rompe: responde lo que puede sin modelo
+    // —selladas, limites— y deriva en lo demas. Mismo criterio que el
+    // formulario de contacto cuando falta la clave del proveedor de correo.
+    return { estado: 200, cabeceras: cors, eventos: sinModelo(validacion.mensaje, ctx.indice) };
+  }
+
+  const motor = motorMoonshot({
+    llave: entorno.llaveModelo,
+    modelo: entorno.modelo,
+    claveDeCache: `fluxi-${ctx.indice.huella.slice(0, 8)}`
+  });
+
+  return {
+    estado: 200,
+    cabeceras: cors,
+    eventos: conAnotacionDeUso(
+      atenderEnTrozos(validacion.mensaje, { indice: ctx.indice, motor }),
+      clave
+    )
+  };
+}
+
+function derivacion(indice: Indice): string {
+  return indice.limites.derivacionGeneral;
+}
+
+/** Sin llave del modelo el asistente **no se rompe**: sigue resolviendo lo que
+ *  no necesita modelo —selladas y limites— y deriva en todo lo demas. Es el
+ *  mismo criterio que el formulario de contacto cuando falta la clave del
+ *  proveedor de correo: degrada, no da error.
+ *
+ *  Se enruta a mano en vez de pasar por `atenderEnTrozos` con un motor de
+ *  mentira: un motor que solo sabe lanzar excepciones es mas codigo y menos
+ *  claro que este `if`. */
+async function* sinModelo(mensaje: string, indice: Indice): AsyncGenerator<Evento> {
+  const enrutado = responder(mensaje, { indice });
+  const texto =
+    enrutado.camino === "generar" ? indice.limites.derivacionGeneral : enrutado.respuesta;
+  yield { tipo: "texto", texto };
+  yield { tipo: "fin", camino: enrutado.camino === "generar" ? "abstencion" : enrutado.camino };
+}
+
+async function* conAnotacionDeUso(
+  eventos: AsyncIterable<Evento>,
+  clave: string
+): AsyncGenerator<Evento> {
+  for await (const evento of eventos) {
+    if (evento.tipo === "fin") {
+      anotarUso(clave, (evento.uso?.tokensEntrada ?? 0) + (evento.uso?.tokensSalida ?? 0));
+    }
+    yield evento;
+  }
+}

@@ -20,9 +20,9 @@ function motorFalso(texto: string | ((p: PeticionModelo) => string)): Motor {
   };
 }
 
-const cargado = cargar();
+const indice = cargar();
 function ctx(motor: Motor): ContextoCompleto {
-  return { ...cargado, motor };
+  return { indice, motor };
 }
 
 const PREGUNTA = "quien autoriza los gastos del conjunto";

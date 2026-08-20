@@ -10,13 +10,15 @@ la topología de despliegue de `ESTANDARES_INGENIERIA.md` (§10).
 
 ## Cuentas y servicios
 
-| Servicio | Para qué | Inicio de sesión |
-|---|---|---|
-| **GitHub** | Código, monorepo, CI (Actions), fuente de verdad. Org `EveTevSas`, repo `evetevbrain`. | Cuenta GitHub del equipo |
-| **Supabase** | Postgres + Auth + RLS. Schemas `evepay` y `conjuntos`. | **Con GitHub** (SSO) |
-| **Vercel** | Hosting de los frontends: `website` (evetev.com) y `eveconecta` (conecta.evetev.com). | **Con GitHub** (SSO) |
-| **Railway** | Hosting de la API de EvePay (NestJS, proceso de larga vida). | *Cuenta aún no creada — se crea cuando se requiera desplegar la API* |
-| **name.com** | Registrador del dominio **evetev.com** y su DNS. | **Con email `contacto@evetev.com`** |
+| Servicio                       | Para qué                                                                                                                                                                                | Inicio de sesión                                                     |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **GitHub**                     | Código, monorepo, CI (Actions), fuente de verdad. Org `EveTevSas`, repo `evetevbrain`.                                                                                                  | Cuenta GitHub del equipo                                             |
+| **Supabase**                   | Postgres + Auth + RLS. Schemas `evepay` y `conjuntos`.                                                                                                                                  | **Con GitHub** (SSO)                                                 |
+| **Vercel**                     | Hosting de los frontends: `website` (evetev.com) y `eveconecta` (conecta.evetev.com).                                                                                                   | **Con GitHub** (SSO)                                                 |
+| **Railway**                    | Hosting de la API de EvePay (NestJS, proceso de larga vida).                                                                                                                            | _Cuenta aún no creada — se crea cuando se requiera desplegar la API_ |
+| **name.com**                   | Registrador del dominio **evetev.com** y su DNS.                                                                                                                                        | **Con email `contacto@evetev.com`**                                  |
+| **Moonshot (Kimi)**            | Motor generador de `apps/eve-studio` y de **Fluxi** (`apps/rag-assistant`). Modelo elegido midiendo: `kimi-k2.6`.                                                                       | Cuenta propia con `MOONSHOT_API_KEY`                                 |
+| **Alibaba Cloud Model Studio** | Embeddings de Fluxi (`text-embedding-v4`). _Cuenta aún no creada_ — se abre cuando exista la base documental definitiva, porque los vectores hay que recalcularlos si el corpus cambia. | _Pendiente_                                                          |
 
 ## Notas
 
@@ -28,4 +30,5 @@ la topología de despliegue de `ESTANDARES_INGENIERIA.md` (§10).
   - `evetev.com` → proyecto Vercel de `apps/website`
   - `conecta.evetev.com` → proyecto Vercel de `apps/eveconecta`
   - `api.evetev.com` → API en Railway (cuando se despliegue)
+  - `fluxi.evetev.com` → proyecto Vercel de `apps/rag-assistant` (**pendiente de crear**)
 - **Railway:** la cuenta **todavía no existe**; se crea cuando haya que desplegar la API de EvePay. Al crearla, anotar aquí el método de inicio de sesión.
