@@ -295,13 +295,6 @@ section{padding:64px 0}
 .toast svg{width:17px;height:17px;flex:none}
 
 /* Mascota Eve (§4) */
-.eve-fab{position:fixed;right:22px;bottom:22px;z-index:90;width:64px;height:64px;border-radius:50%;background:#fff;border:2px solid #DCE7F2;box-shadow:0 8px 24px rgba(10,37,64,.18);padding:5px;transition:.2s;cursor:pointer}
-.eve-fab img{width:100%;height:100%;object-fit:contain;display:block}
-.eve-fab:hover{transform:scale(1.07)}
-.eve-burbuja{position:fixed;right:22px;bottom:96px;z-index:90;background:#fff;border:1px solid var(--eve-linea);border-radius:16px 16px 4px 16px;box-shadow:0 12px 32px rgba(10,37,64,.16);padding:16px 18px;max-width:262px;display:none}
-.eve-burbuja.open{display:block}
-.eve-burbuja p{font-size:.83rem;color:var(--eve-pizarra);margin:0 0 12px;line-height:1.5}
-.eve-burbuja b{color:var(--eve-azul-noche)}
 
 /* FOOTER (§6) */
 footer{background:var(--eve-azul-noche);color:#B9CCE0;margin-top:64px}

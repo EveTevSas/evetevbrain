@@ -13,6 +13,16 @@ describe("guarda de origen", () => {
     expect(origenPermitido("http://localhost:3005", PERMITIDOS)).toBe(true);
   });
 
+  it("deja pasar la preview del sitio, que es quien instala el widget", () => {
+    // Sin esto, cada PR de la web enseñaba el asistente degradado y nada se
+    // ponía rojo.
+    expect(origenPermitido("https://website-9f2k1-evetev.vercel.app", PERMITIDOS)).toBe(true);
+  });
+
+  it("no deja pasar una preview de un proyecto ajeno", () => {
+    expect(origenPermitido("https://otracosa-9f2k1-evetev.vercel.app", PERMITIDOS)).toBe(false);
+  });
+
   it("rechaza cualquier otro origen", () => {
     expect(origenPermitido("https://sitio-ajeno.com", PERMITIDOS)).toBe(false);
   });
