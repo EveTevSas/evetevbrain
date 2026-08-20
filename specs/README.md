@@ -12,13 +12,18 @@ specs/
 │       ├── spec.md      # qué y por qué + criterios de aceptación (EARS)
 │       ├── plan.md      # arquitectura y restricciones
 │       └── tasks.md     # unidades implementables
-└── eve-conecta/      # primera vertical — conjuntos residenciales
+├── eve-conecta/      # primera vertical — conjuntos residenciales
+│   └── <feature>/ …
+└── fluxi/            # asistente RAG — producto, no vertical
     └── <feature>/ …
 ```
 
 **Spec obligatoria** para pagos, ledger, conciliación, multi-tenancy y RBAC (núcleo),
 y para cuotas, aplicación de pagos, mora y visibilidad entre roles (vertical). Lo
 presentacional o desechable va con prompt directo (ver el gatillo en §9).
+
+En **Fluxi la spec es obligatoria siempre**: el corpus es lo que el asistente
+afirma en nombre de la compañía, y ese error no se ve hasta que ya salió.
 
 Los criterios se escriben en **EARS** (`CUANDO … EL sistema DEBERÁ …`), y cada uno
 debería poder convertirse en un test. El roadmap del núcleo está en

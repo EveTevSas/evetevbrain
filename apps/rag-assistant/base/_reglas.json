@@ -1,0 +1,102 @@
+{
+  "_comentario": [
+    "Reglas de contenido que el validador aplica al compilar la base.",
+    "Viven aquí y no en el código para que un cliente nuevo traiga las suyas",
+    "sin tocar el motor. Misma idea que la lista blanca CAMPOS de contacto.js:",
+    "una sola lista, no dos paralelas que puedan desalinearse."
+  ],
+
+  "frasesVetadas": [
+    "tarifa fija sin porcentaje",
+    "tarifa plana sin porcentaje",
+    "sin comisión por transacción",
+    "cero comisiones",
+    "el más barato del mercado",
+    "el mejor del mercado",
+    "garantizamos que"
+  ],
+
+  "disponibilidad": {
+    "patron": "(en producción|ya está disponible|puedes abrir tu cuenta|empieza a cobrar hoy|ya puedes usar)",
+    "exigeNegacionEnLaFrase": [
+      "todavía no",
+      "aún no",
+      "no está",
+      "no se puede",
+      "no en producción",
+      "antes de"
+    ],
+    "_nota": [
+      "Una veda por subcadena marca los negativos y es inservible: la frase",
+      "«ninguno está en producción todavía» es exactamente la que queremos.",
+      "La regla real es que toda frase que mencione disponibilidad lleve la",
+      "negación en la MISMA frase. Se detectó al pasar el validador sobre el",
+      "primer corpus, no en teoría."
+    ]
+  },
+
+  "promesasDeFecha": {
+    "frases": [
+      "estará listo en",
+      "estará disponible en",
+      "lanzamos en",
+      "el próximo mes",
+      "el próximo año",
+      "en unas semanas",
+      "en unos meses",
+      "primer trimestre",
+      "segundo trimestre"
+    ],
+    "_notaFrases": [
+      "«sale en» estuvo en esta lista y marcó «la cifra exacta sale en la demo»,",
+      "que no promete ninguna fecha. Una frase corta y común genera más ruido",
+      "que señal: la lista solo lleva construcciones que ya traen el tiempo",
+      "dentro."
+    ],
+    "patronMesAno": "(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\\s+de\\s+20\\d{2}"
+  },
+
+  "competidores": ["Wompi", "PayU", "Mercado Pago", "ePayco", "Stripe", "Bold", "Siigo"],
+  "_competidoresNota": [
+    "Solo pasarelas y plataformas con las que competimos. Los bancos y las",
+    "billeteras NO van aquí: PSE, Nequi, Daviplata o Bre-B son métodos de pago",
+    "que la base necesita poder nombrar. La regla es no comparar, no es no",
+    "existir."
+  ],
+
+  "tarifas": {
+    "patron": "(tarifa|comisión|porcentaje por transacción|componente fijo|suscripción mensual|\\$\\s?\\d|COP\\s?\\d|\\d+[.,]\\d+\\s*%)",
+    "exigeAlgunaDe": ["referencia", "cotización", "cotizacion"],
+    "_nota": [
+      "Toda cifra o modelo de tarifa va acompañado de que es de referencia y de",
+      "una derivación a cotización.",
+      "El patrón NO puede ser un «%» suelto: marcaba «checkout 100% accesible»,",
+      "que no habla de plata. Se dispara por contexto de tarifa o por una cifra",
+      "con decimales, que es como se escribe un porcentaje de comisión."
+    ]
+  },
+
+  "frontmatter": {
+    "obligatorios": ["id", "titulo", "producto", "audiencia", "vigencia", "fuente", "confianza"],
+    "producto": ["empresa", "evepay", "eveconecta", "legales"],
+    "audiencia": ["general", "comercio", "residente", "desarrollador", "candidato"],
+    "confianza": ["alta", "media"],
+    "fuente": ["sitio-web", "manual-de-marca", "constitucion", "decision-john-2026-08-19"]
+  },
+
+  "configuracion": {
+    "_nota": [
+      "Estos dos archivos DESCRIBEN las prohibiciones, así que las contienen por",
+      "definición y las reglas de contenido no les aplican. _selladas.md NO está",
+      "aquí a propósito: su texto es el que la persona recibe literalmente, así",
+      "que tiene que cumplir las mismas reglas que cualquier documento."
+    ],
+    "archivos": ["_sistema.md", "_limites.md"]
+  },
+
+  "troceo": {
+    "tokensObjetivo": 300,
+    "tokensMaximo": 350,
+    "solapeFrases": 1
+  }
+}
