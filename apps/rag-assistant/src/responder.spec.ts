@@ -58,12 +58,27 @@ describe("los cuatro caminos de una respuesta", () => {
 });
 
 describe("hueco conocido: sin vectores el lexico no cubre el vocabulario", () => {
-  it("se abstiene ante una pregunta que si esta en la base, dicha con otras palabras", () => {
-    // «quedan/plata» contra «dinero/tesoreria/fondos». Es EXACTAMENTE el hueco
-    // que cierra la mitad densa de la recuperacion, y el motivo por el que el
-    // hibrido no es un adorno. Se deja escrito como test para que el dia que
-    // entren los vectores esto falle y haya que cambiarlo a "generar".
+  it("recupera el fragmento equivocado cuando la persona usa otras palabras", () => {
+    // «quedan/plata» contra «dinero/tesoreria/fondos»: la respuesta esta en la
+    // base —evepay-gateway-puro— pero BM25 no llega a ella y trae otra cosa.
+    // Es EXACTAMENTE el hueco que cierra la mitad densa de la recuperacion, y
+    // el motivo por el que el hibrido no es un adorno. Se deja escrito para que
+    // el dia que entren los vectores esto falle y haya que cambiarlo.
     const r = responder("ustedes se quedan con mi plata mientras tanto?", ctx);
-    expect(r.camino).toBe("abstencion");
+    expect(r.camino).toBe("generar");
+    if (r.camino === "generar") {
+      expect(r.fragmentos[0]?.documentoId).not.toBe("evepay-gateway-puro");
+    }
+  });
+
+  it("ya no se abstiene con la pregunta de cobro duplicado", () => {
+    // Antes se abstenia con el fragmento correcto ya recuperado de primero: la
+    // cobertura plana hundia el puntaje con las palabras de relleno de la
+    // pregunta. Con la señal ponderada por idf pasa la compuerta.
+    const r = responder("que pasa si mi cliente paga dos veces", ctx);
+    expect(r.camino).toBe("generar");
+    if (r.camino === "generar") {
+      expect(r.fragmentos[0]?.documentoId).toBe("evepay-capacidades");
+    }
   });
 });

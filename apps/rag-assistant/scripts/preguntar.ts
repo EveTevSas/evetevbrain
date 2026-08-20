@@ -1,20 +1,15 @@
 /** Banco de pruebas del motor, en la terminal.
  *
- *      pnpm --filter @evetev/rag-assistant preguntar "como cobran?"
+ *      pnpm --filter @evetev/rag-assistant preguntar "¿cómo cobran?"
  *
- *  Todavia NO llama al modelo: muestra el camino que tomo la peticion y, cuando
- *  toca generar, los fragmentos que se le entregarian. Es lo que permite
- *  calibrar la compuerta antes de gastar un solo token. */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-import type { Indice } from "../src/indice/tipos.js";
-import { leerLimites } from "../src/limites.js";
+ *  Sin `MOONSHOT_API_KEY` muestra el camino que tomo la peticion y los
+ *  fragmentos que se entregarian — util para calibrar la compuerta sin gastar
+ *  un token. Con llave, responde de verdad y verifica lo que el modelo escribio.
+ */
+import { atender } from "../src/atender.js";
+import { cargar } from "../src/cargar.js";
+import { motorMoonshot } from "../src/generar/moonshot.js";
 import { responder } from "../src/responder.js";
-import { leerSelladas } from "../src/selladas.js";
-
-const AQUI = dirname(fileURLToPath(import.meta.url));
-const RAIZ = join(AQUI, "..");
 
 const consulta = process.argv.slice(2).join(" ").trim();
 if (!consulta) {
@@ -22,40 +17,48 @@ if (!consulta) {
   process.exit(1);
 }
 
-const indice = JSON.parse(readFileSync(join(RAIZ, "indice", "indice.json"), "utf8")) as Indice;
-const selladas = leerSelladas(readFileSync(join(RAIZ, "base", "_selladas.md"), "utf8"));
-const limites = leerLimites(readFileSync(join(RAIZ, "base", "_limites.md"), "utf8"));
-
-const resultado = responder(consulta, { indice, selladas, limites });
+const cargado = cargar();
+const llave = process.env["MOONSHOT_API_KEY"];
 
 console.log(`\n> ${consulta}\n`);
 
-switch (resultado.camino) {
-  case "sellada":
-    console.log(`[SELLADA] coincide con "${resultado.pregunta}" — 0 tokens\n`);
-    console.log(resultado.respuesta);
-    break;
-  case "limite":
-    console.log(`[LIMITE] tema "${resultado.tema}" — 0 tokens\n`);
-    console.log(resultado.respuesta);
-    break;
-  case "abstencion":
+if (!llave) {
+  const r = responder(consulta, cargado);
+  if (r.camino === "generar") {
     console.log(
-      `[ABSTENCION] cobertura ${resultado.senales.cobertura.toFixed(2)} bajo umbral — 0 tokens\n`
+      `[GENERAR] cobertura ${r.senales.cobertura.toFixed(2)} — sin llave, no se llama al modelo`
     );
-    console.log(resultado.respuesta);
-    break;
-  case "generar": {
-    console.log(
-      `[GENERAR] pasa por ${resultado.decision.responder ? resultado.decision.motivo : ""}` +
-        ` — cobertura ${resultado.senales.cobertura.toFixed(2)}\n`
-    );
-    console.log(`Fragmentos que se le entregarian al modelo (${resultado.fragmentos.length}):\n`);
-    for (const f of resultado.fragmentos) {
+    console.log(`\nFragmentos que se entregarian (${r.fragmentos.length}):\n`);
+    for (const f of r.fragmentos) {
       const marca = f.confianza === "media" ? " [confianza media]" : "";
       console.log(`  [#${f.id}] ${f.titulo} > ${f.seccion}${marca}`);
     }
-    break;
+  } else {
+    console.log(`[${r.camino.toUpperCase()}] — 0 tokens\n`);
+    console.log(r.respuesta);
   }
+  console.log("");
+  process.exit(0);
 }
+
+const motor = motorMoonshot({
+  llave,
+  modelo: process.env["FLUXI_MODELO"] ?? "kimi-k2.6",
+  claveDeCache: "fluxi-sistema-v1"
+});
+
+const r = await atender(consulta, { ...cargado, motor });
+
+const etiqueta = r.camino.toUpperCase();
+if (r.uso) {
+  const { tokensEntrada, tokensSalida, tokensCacheados, milisegundos } = r.uso;
+  console.log(
+    `[${etiqueta}] ${motor.nombre} · ${milisegundos} ms · ${tokensEntrada} entrada` +
+      ` (${tokensCacheados} en cache) · ${tokensSalida} salida\n`
+  );
+} else {
+  console.log(`[${etiqueta}] — 0 tokens\n`);
+}
+if (r.descarte) console.log(`descartada por ${r.descarte}\n`);
+console.log(r.respuesta);
 console.log("");

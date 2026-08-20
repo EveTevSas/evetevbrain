@@ -1,6 +1,6 @@
 import type { Fragmento } from "./base/tipos.js";
 import type { Indice } from "./indice/tipos.js";
-import { buscarBm25, cobertura } from "./recuperar/bm25.js";
+import { buscarBm25, coberturaPonderada } from "./recuperar/bm25.js";
 import {
   decidir,
   UMBRALES_INICIALES,
@@ -57,7 +57,9 @@ export function responder(consulta: string, ctx: Contexto): Resultado {
     .filter((f): f is Fragmento => f !== undefined);
 
   const mejor = fragmentos[0];
-  const senales: Senales = { cobertura: mejor ? cobertura(consulta, mejor.texto) : 0 };
+  const senales: Senales = {
+    cobertura: mejor ? coberturaPonderada(ctx.indice.bm25, consulta, mejor.texto) : 0
+  };
   const decision = decidir(senales, ctx.umbrales ?? UMBRALES_INICIALES);
 
   if (!decision.responder || fragmentos.length === 0) {
