@@ -132,11 +132,25 @@ sesión, una respuesta sellada transmitida entera y un `403` desde un origen aje
 - **El registro DNS.** En name.com hay que crear `CNAME` con nombre `fluxi` y
   valor `5202b8778fa8f959.vercel-dns-017.com.` Ese panel entra por
   email/contraseña, y **las contraseñas no las escribe el agente**.
-- **Las dos llaves.** En _Settings → Environment Variables_ del proyecto:
-  `MOONSHOT_API_KEY` y `FLUXI_SECRETO` (`openssl rand -hex 32`). Tampoco las
-  escribe el agente: son secretos.
-  `FLUXI_ORIGENES` sí quedó puesta —no es un secreto— con
-  `https://evetev.com,https://www.evetev.com,https://fluxi.evetev.com`.
+- **`FLUXI_SECRETO`** (`openssl rand -hex 32`). Sin ella el token de sesión se
+  firma con un valor por proceso: funciona, pero deja de servir para lo que
+  existe. Es un secreto, así que la pone una persona.
+
+`MOONSHOT_API_KEY` y `FLUXI_ORIGENES` ya están puestas.
+
+> **Cambiar una variable no afecta al despliegue que ya está en vivo.** Hay que
+> volver a desplegar para que la tome. Se nota tarde y mal: el asistente sigue
+> comportándose como antes y parece que la variable no funciona. Un cambio en
+> `apps/rag-assistant/` al mezclar ya dispara el despliegue; si no hay ninguno,
+> se hace _Redeploy_ a mano desde el panel.
+
+> **Ojo con dónde se pega la llave.** Guardarla dentro de `FLUXI_ORIGENES` en vez
+> de crear una variable nueva rompe las dos cosas a la vez: la lista de orígenes
+> desaparece —y con ella el permiso de `evetev.com`, que pasa a recibir `403`— y
+> el modelo sigue apagado porque `MOONSHOT_API_KEY` no existe. Pasó, y el síntoma
+> engaña: el banco de pruebas seguía funcionando, porque el dominio
+> `rag-assistant-*.vercel.app` entra por la regla de previews. `/api/salud` lo
+> delata en un vistazo: `origenes` bajó de 3 a 1.
 
 **Mientras falte `MOONSHOT_API_KEY` el asistente ya funciona degradado**, y eso no
 es un accidente: responde las preguntas selladas y los temas vetados, y deriva en
