@@ -58,12 +58,30 @@
     "color:#FDFEFF;font-size:18px;cursor:pointer}",
     ".pie button:focus-visible{outline:3px solid #1E6FEB;outline-offset:2px}",
     ".trampa{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}",
+    ".saludo{position:fixed;right:88px;bottom:26px;width:min(280px,calc(100vw - 110px));",
+    "background:#FDFEFF;color:#0A2540;border:1px solid #EDF3FA;border-radius:14px;padding:14px;",
+    "box-shadow:0 12px 32px rgba(10,37,64,.18);z-index:2147483000;",
+    "font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif;",
+    "animation:fluxi-entra .25s ease}",
+    ".saludo[hidden]{display:none}",
+    ".saludo-txt{margin:0 18px 10px 0}",
+    ".saludo-cta{border:0;border-radius:9px;background:#144A96;color:#FDFEFF;font:inherit;",
+    "font-weight:600;padding:9px 14px;cursor:pointer;min-height:38px}",
+    ".saludo-cta:focus-visible{outline:3px solid #1E6FEB;outline-offset:2px}",
+    ".saludo-x{position:absolute;top:6px;right:6px;width:28px;height:28px;border:0;",
+    "background:transparent;color:#94A3B8;font-size:17px;line-height:1;cursor:pointer;",
+    "border-radius:7px}",
+    ".saludo-x:hover{background:#EAF2FB;color:#64748B}",
+    ".saludo-x:focus-visible{outline:2px solid #1E6FEB;outline-offset:1px}",
+    "@keyframes fluxi-entra{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}",
     /* En movil no es una ventana flotante: es una hoja inferior, que es como se
      * usa el chat en un telefono. */
     "@media (max-width:560px){",
     ".panel{right:0;left:0;bottom:0;width:100%;max-height:82vh;border-radius:16px 16px 0 0}",
-    ".fab{right:14px;bottom:14px}}",
-    "@media (prefers-reduced-motion:reduce){.fab{transition:none}.fab:hover{transform:none}}"
+    ".fab{right:14px;bottom:14px}",
+    ".saludo{right:14px;left:14px;bottom:84px;width:auto}}",
+    "@media (prefers-reduced-motion:reduce){.fab{transition:none}.fab:hover{transform:none}",
+    ".saludo{animation:none}}"
   ].join("");
 
   var guion = document.currentScript;
@@ -74,6 +92,11 @@
       "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/mascota/mascota.webp",
     contacto: (guion && guion.dataset.contacto) || "mailto:contacto@evetev.com",
     nombre: (guion && guion.dataset.nombre) || "Eve",
+    saludo:
+      (guion && guion.dataset.saludo) ||
+      "¿Dudas sobre EvePay o EveConecta? Pregúntame: respondo con la información de Evetev.",
+    // Cuánto espera antes de asomarse. 0 lo desactiva.
+    saludoEspera: Number((guion && guion.dataset.saludoEspera) || 10000),
     privacidad: (guion && guion.dataset.privacidad) || ""
   };
 
@@ -92,6 +115,11 @@
 
   raiz.innerHTML = [
     "<style>" + ESTILOS + "</style>",
+    '<aside class="saludo" aria-label="Mensaje de ' + cfg.nombre + '" hidden>',
+    '  <p class="saludo-txt"></p>',
+    '  <button class="saludo-cta" type="button">Pregúntame</button>',
+    '  <button class="saludo-x" type="button"><span class="sr">Descartar el mensaje</span>&times;</button>',
+    "</aside>",
     '<button class="fab" type="button" aria-expanded="false" aria-controls="panel">',
     '  <img alt="" src="' + cfg.mascota + '" width="40" height="40">',
     '  <span class="sr">Abrir el asistente ' + cfg.nombre + "</span>",
@@ -120,9 +148,61 @@
   var forma = raiz.querySelector(".pie");
   var campo = raiz.querySelector("#txt");
   var trampa = raiz.querySelector(".trampa");
+  var saludo = raiz.querySelector(".saludo");
   var sesion = null;
   var ocupado = false;
   var saludado = false;
+  var temporizadorSaludo = null;
+
+  /* El saludo se asoma UNA vez por sesión de navegación, no cada N segundos.
+   * Un globo que reaparece cada rato es un banner: molesta, tapa contenido y a
+   * quien navega con lector de pantalla le interrumpe. Una vez basta para decir
+   * qué es esto, y después queda a un toque de la mascota. */
+  (function asomarUnaVez() {
+    if (!cfg.saludoEspera || !cfg.saludo) return;
+    try {
+      if (sessionStorage.getItem("fluxi-saludo") === "visto") return;
+    } catch (_) {
+      /* sin sessionStorage (modo privado): se muestra igual, una vez por carga */
+    }
+    setTimeout(function () {
+      if (!panel.hidden) return; // ya está conversando: no se le interrumpe
+      raiz.querySelector(".saludo-txt").textContent = cfg.saludo;
+      saludo.hidden = false;
+      marcarSaludoVisto();
+      // Se retira solo, salvo que la persona lo esté mirando de cerca.
+      temporizadorSaludo = setTimeout(function () {
+        if (saludo.contains(raiz.activeElement)) return;
+        ocultarSaludo();
+      }, 12000);
+    }, cfg.saludoEspera);
+  })();
+
+  function marcarSaludoVisto() {
+    try {
+      sessionStorage.setItem("fluxi-saludo", "visto");
+    } catch (_) {
+      /* da igual: el peor caso es que se asome otra vez al recargar */
+    }
+  }
+
+  function ocultarSaludo() {
+    clearTimeout(temporizadorSaludo);
+    temporizadorSaludo = null;
+    saludo.hidden = true;
+  }
+
+  saludo.addEventListener("mouseenter", function () {
+    clearTimeout(temporizadorSaludo);
+  });
+  raiz.querySelector(".saludo-cta").addEventListener("click", function () {
+    ocultarSaludo();
+    abrir();
+  });
+  raiz.querySelector(".saludo-x").addEventListener("click", function () {
+    ocultarSaludo();
+    fab.focus();
+  });
 
   fab.addEventListener("click", function () {
     panel.hidden ? abrir() : cerrar();
@@ -152,6 +232,7 @@
   });
 
   function abrir() {
+    ocultarSaludo();
     panel.hidden = false;
     fab.setAttribute("aria-expanded", "true");
     if (!saludado) {

@@ -1,6 +1,6 @@
 {
  "version": 1,
- "huella": "705660c2910c961282964189da5860b3425e42b81e14b5e13f49b32a766e5417",
+ "huella": "2f54785f08030909877ddd43ac2108edcff9d9098f0dd6f21e19e5b0e611db95",
  "fragmentos": [
   {
    "id": "empresa-como-trabajamos#1",
@@ -9464,6 +9464,31 @@
   "total": 72
  },
  "selladas": [
+  {
+   "pregunta": "Hola",
+   "variantes": [
+    "hola",
+    "buenas",
+    "buenos días",
+    "buenas tardes",
+    "hey",
+    "qué tal",
+    "hola eve",
+    "saludos"
+   ],
+   "respuesta": "¡Hola! Soy Eve, la asistente de Evetev. Pregúntame por EvePay, por EveConecta o por la compañía y te respondo con lo que tengo; si algo no lo sé, te lo digo y te paso con una persona."
+  },
+  {
+   "pregunta": "¿Qué productos tienen?",
+   "variantes": [
+    "qué productos tiene evetev",
+    "qué venden",
+    "qué ofrecen",
+    "cuáles son sus productos",
+    "qué servicios tienen"
+   ],
+   "respuesta": "Dos con página propia: EvePay, la pasarela de pagos, y EveConecta, la gestión y recaudo para conjuntos residenciales. Los dos están en construcción todavía. La compañía además opera inteligencia artificial empresarial y comercio electrónico, sin ficha de producto publicada — si te interesa alguno, escríbenos y te cuenta una persona del equipo."
+  },
   {
    "pregunta": "¿Cómo los contacto?",
    "variantes": [

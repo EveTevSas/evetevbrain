@@ -15,6 +15,24 @@ menos de 60 ms y con cero riesgo de invención.
 Formato: un `##` por pregunta. `Variantes` son las formas de preguntar lo mismo
 que el normalizador tiene que reconocer; `Respuesta` es el texto exacto que sale.
 
+## Hola
+
+**Variantes:** hola · buenas · buenos días · buenas tardes · hey · qué tal · hola eve · saludos
+**Respuesta:**
+¡Hola! Soy Eve, la asistente de Evetev. Pregúntame por EvePay, por EveConecta o
+por la compañía y te respondo con lo que tengo; si algo no lo sé, te lo digo y te
+paso con una persona.
+
+## ¿Qué productos tienen?
+
+**Variantes:** qué productos tiene evetev · qué venden · qué ofrecen · cuáles son sus productos · qué servicios tienen
+**Respuesta:**
+Dos con página propia: EvePay, la pasarela de pagos, y EveConecta, la gestión y
+recaudo para conjuntos residenciales. Los dos están en construcción todavía. La
+compañía además opera inteligencia artificial empresarial y comercio electrónico,
+sin ficha de producto publicada — si te interesa alguno, escríbenos y te cuenta
+una persona del equipo.
+
 ## ¿Cómo los contacto?
 
 **Variantes:** contacto · cómo escribo · correo · dónde los ubico · quiero hablar con alguien · teléfono
