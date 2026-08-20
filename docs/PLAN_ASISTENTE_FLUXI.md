@@ -49,21 +49,27 @@ Se decidieron el 19 de agosto de 2026 y **no se rediscuten salvo dolor real y
 demostrable** (misma regla del §7 de la constitución). Cambiar una es un PR sobre
 este documento con la justificación.
 
-| #   | Decisión                           | Elegido                                             | Por qué                                                                                                                                                                                                                                                                           |
-| --- | ---------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Dónde vive                         | **`apps/rag-assistant`**, proyecto propio en Vercel | Independiente desde el día uno. `evetev.com` lo consume **igual que lo haría un cliente** (dogfooding, §1.4). Si viviera dentro de `apps/website`, el día de la primera venta habría que separar base documental de motor con el producto ya en producción.                       |
-| 2   | Proveedor de modelo                | **Qwen (Alibaba Cloud Model Studio)** para todo     | Da embeddings **y** generación en la misma cuenta, con API compatible con OpenAI. **DeepSeek no tiene endpoint de embeddings** —solo `chat/completions`—, así que un RAG con DeepSeek obligaba igual a una segunda cuenta. Una llave, una factura, un proveedor.                  |
-| 3   | Lenguaje                           | **TypeScript**, runtime Node en Vercel              | El §2 lo fija como base end-to-end y aquí ninguna librería exige Python: BM25, coseno y el cliente HTTP son código nuestro. Evita el arranque en frío de Python que ya cargamos en `eve-studio`.                                                                                  |
-| 4   | Almacén de vectores                | **Índice compilado en el repo**, no base de datos   | Con ~400 fragmentos, la matriz cuantizada a int8 pesa ~200 KB y viaja dentro del paquete de la función: recuperación en **microsegundos, sin red y sin costo**. `pgvector` (§2) entra detrás de la misma interfaz cuando un corpus lo pida — hoy sería infraestructura para nada. |
-| 5   | Recuperación                       | **Híbrida BM25 + densa, fusionadas con RRF**        | Léxico y semántica fallan en sitios distintos: el híbrido cubre los dos huecos y RRF fusiona por **posición**, no por puntaje, que es lo que evita el problema de escalas incompatibles. Es el estándar de 2026 y además el BM25 corre en proceso, sin latencia.                  |
-| 6   | Alcance de la base                 | **Las tres líneas de negocio**                      | La web ofrece dos productos, la empresa opera tres. Fluxi confirma que Evetev hace IA empresarial y comercio electrónico, **sin detallar producto ni precios**, y deriva al formulario. Coherente con #79: retirar algo de la vitrina no borra lo que la compañía hace.           |
-| 7   | Dependencias en el camino caliente | **Cero**                                            | Solo Zod en la frontera de entrada (§2). BM25, coseno, RRF y el cliente del modelo son ~400 líneas propias. Un motor que se vende tiene que poder leerse entero en una tarde y no arrastrar la cadena de suministro de nadie.                                                     |
+| #   | Decisión                           | Elegido                                                        | Por qué                                                                                                                                                                                                                                                                                                                                                             |
+| --- | ---------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Dónde vive                         | **`apps/rag-assistant`**, proyecto propio en Vercel            | Independiente desde el día uno. `evetev.com` lo consume **igual que lo haría un cliente** (dogfooding, §1.4). Si viviera dentro de `apps/website`, el día de la primera venta habría que separar base documental de motor con el producto ya en producción.                                                                                                         |
+| 2   | Proveedor de modelo                | **Kimi (Moonshot)** genera · **Qwen (Model Studio)** vectoriza | Ningún proveedor de los tres evaluados cubre las dos capas: **ni DeepSeek ni Kimi tienen endpoint de embeddings**, solo `chat/completions`. Como hacen falta dos cuentas de todos modos, la generación va donde ya hay cuenta funcionando y pagada —Moonshot, el motor de `eve-studio`— y los embeddings donde sí los hay. Las dos APIs son compatibles con OpenAI. |
+| 3   | Lenguaje                           | **TypeScript**, runtime Node en Vercel                         | El §2 lo fija como base end-to-end y aquí ninguna librería exige Python: BM25, coseno y el cliente HTTP son código nuestro. Evita el arranque en frío de Python que ya cargamos en `eve-studio`.                                                                                                                                                                    |
+| 4   | Almacén de vectores                | **Índice compilado en el repo**, no base de datos              | Con ~400 fragmentos, la matriz cuantizada a int8 pesa ~200 KB y viaja dentro del paquete de la función: recuperación en **microsegundos, sin red y sin costo**. `pgvector` (§2) entra detrás de la misma interfaz cuando un corpus lo pida — hoy sería infraestructura para nada.                                                                                   |
+| 5   | Recuperación                       | **Híbrida BM25 + densa, fusionadas con RRF**                   | Léxico y semántica fallan en sitios distintos: el híbrido cubre los dos huecos y RRF fusiona por **posición**, no por puntaje, que es lo que evita el problema de escalas incompatibles. Es el estándar de 2026 y además el BM25 corre en proceso, sin latencia.                                                                                                    |
+| 6   | Alcance de la base                 | **Las tres líneas de negocio**                                 | La web ofrece dos productos, la empresa opera tres. Fluxi confirma que Evetev hace IA empresarial y comercio electrónico, **sin detallar producto ni precios**, y deriva al formulario. Coherente con #79: retirar algo de la vitrina no borra lo que la compañía hace.                                                                                             |
+| 7   | Dependencias en el camino caliente | **Cero**                                                       | Solo Zod en la frontera de entrada (§2). BM25, coseno, RRF y el cliente del modelo son ~400 líneas propias. Un motor que se vende tiene que poder leerse entero en una tarde y no arrastrar la cadena de suministro de nadie.                                                                                                                                       |
 
 ### Lo que queda abierto
 
-- **Modelo generador concreto** dentro de Qwen (turbo / plus / max): se decide en
-  la fase 1 **midiendo** calidad, latencia y costo sobre el set dorado, no por
-  catálogo. La interfaz `Motor` deja el cambio en un archivo.
+- **Nivel de modelo generador.** `eve-studio` usa `kimi-k3`, que cuesta
+  **US$3,00/M de entrada sin caché y US$15,00/M de salida** — un modelo de
+  razonamiento con 1M de contexto para leer seis fragmentos y escribir tres
+  frases. Es la tarea más barata que hay, así que la fase 1 mide `kimi-k3`
+  contra un nivel inferior de Moonshot y contra un modelo de Qwen, y se elige
+  con datos. La interfaz `Motor` deja el cambio en un archivo.
+- **Caché de contexto, obligatorio.** El prompt de sistema es idéntico en cada
+  petición y en Kimi la entrada con acierto de caché cuesta **10× menos**
+  (US$0,30/M frente a US$3,00/M). Sin caché el motor cuesta lo que no debe.
 - **Umbral de la compuerta de abstención**: se calibra con datos en la fase 1.
 - **Precio de venta del producto**: se fija en la fase 5, cuando el costo por
   respuesta esté medido en producción y no estimado.
@@ -73,7 +79,7 @@ este documento con la justificación.
 ## 2. Arquitectura
 
 ```
-navegador (widget)                apps/rag-assistant                Model Studio (Qwen)
+navegador (widget)                apps/rag-assistant           Model Studio · Moonshot
       │                                   │                                  │
       │ POST /api/chat {pregunta, sesión} │                                  │
       │──────────────────────────────────►│ 1 GUARDAS DE ENTRADA             │
@@ -89,7 +95,7 @@ navegador (widget)                apps/rag-assistant                Model Studio
       │                                   │                                  │
       │                                   │ 5 COMPUERTA ─── bajo umbral ──► deriva al formulario (0 tokens)
       │                                   │        │ pasa                     │
-      │                                   │ 6 GENERACIÓN ────────────────────►│ qwen-… T=0, tope 220 tokens
+      │                                   │ 6 GENERACIÓN ────────────────────►│ kimi-… T=0, tope 220 tokens
       │◄═════ SSE, token a token ═════════│◄─────────────────────────────────│
       │                                   │ 7 VERIFICACIÓN DE SALIDA          │
       │                                   │   citas existen · cifras del contexto
@@ -323,12 +329,22 @@ tarde.
 
 **Costo por respuesta (estimado, a confirmar midiendo).** Entrada ~1.800 tokens
 (sistema 600 + 6 fragmentos + historial), salida ~150. Como referencia verificada
-de orden de magnitud, con las tarifas publicadas de `deepseek-v4-flash` sale en
-**~US$0,001 por respuesta**; las de Qwen están en el mismo orden y se confirman en
-la fase 1. Con caché de contexto sobre el prompt de sistema, menos. **Las selladas
-y las abstenidas cuestan cero.** A 1.000 respuestas al mes: **menos de US$2**. La
-ingesta completa del corpus, incluida la contextualización, ronda **US$0,50** y se
-paga una vez por versión de la base.
+de orden de magnitud, el rango entre niveles de modelo es este:
+
+| Modelo                                         | Entrada (sin caché)            | Salida     | Por respuesta | 1.000 respuestas/mes |
+| ---------------------------------------------- | ------------------------------ | ---------- | ------------- | -------------------- |
+| `kimi-k3` — el que usa `eve-studio` hoy        | US$3,00/M                      | US$15,00/M | ~US$0,0077    | ~US$7,70             |
+| `kimi-k3` **con caché** del prompt de sistema  | US$0,30/M en la parte cacheada | US$15,00/M | ~US$0,006     | ~US$6                |
+| Referencia de nivel bajo (`deepseek-v4-flash`) | US$0,44/M                      | US$1,32/M  | ~US$0,001     | ~US$1                |
+
+**Las selladas y las abstenidas cuestan cero**, y son la mayor parte del tráfico
+real. La ingesta completa del corpus, incluida la contextualización, se paga una
+vez por versión de la base.
+
+En nuestra factura la diferencia es de unos pocos dólares al mes y no decide nada.
+**Decide cuando se vende:** un cliente con 50.000 respuestas al mes son US$385
+frente a US$50, y ese margen es el del producto. Por eso el nivel de modelo se
+elige midiendo en la fase 1 y no por costumbre.
 
 ---
 
@@ -401,8 +417,10 @@ anterior esté verde.
 - Los tres conjuntos de evaluación, escritos **antes** del motor: las preguntas se
   redactan mirando lo que la gente pregunta de verdad, no lo que la base contesta.
 - Cuenta de Alibaba Cloud Model Studio creada y **facturación internacional
-  verificada desde Colombia** (es un bloqueo potencial: comprobarlo aquí, no en la
-  fase 2). Se anota en `docs/INFRAESTRUCTURA_Y_CUENTAS.md`.
+  verificada desde Colombia**, solo para embeddings. La cuenta de Moonshot ya
+  existe y está pagada —es el motor de `eve-studio`—, así que la generación no
+  depende de abrir nada. Ambas se anotan en
+  `docs/INFRAESTRUCTURA_Y_CUENTAS.md`.
 
 > **Listo cuando** John haya leído y aprobado la base v1 completa. Es la única
 > fase cuyo entregable no es técnico y la única que no se puede acelerar.
@@ -413,8 +431,9 @@ anterior esté verde.
 - Recuperación híbrida completa + compuerta, con un CLI de prueba.
 - `eval/correr.ts` y la primera medición: acierto de recuperación y **calibración
   del umbral de abstención** con datos.
-- **Comparación medida** de modelos generadores de Qwen sobre el set dorado:
-  calidad, latencia y costo. Se cierra la decisión abierta #1.
+- **Comparación medida** de generadores sobre el set dorado —`kimi-k3`, un nivel
+  inferior de Moonshot y un modelo de Qwen—: calidad, latencia y costo por
+  respuesta. Se cierra la decisión abierta #1.
 
 > **Listo cuando** el acierto de recuperación pase 0,95 en el set dorado, corriendo
 > en el portátil, sin haber desplegado nada.
@@ -504,7 +523,7 @@ anterior esté verde.
 | **Plan Hobby de Vercel**                  | Es de uso personal y no comercial, corta a los 100 despliegues en 24 h móviles, y retiene logs 1 hora. Un asistente comercial de cara al cliente es exactamente el caso que empuja a Pro. | Registro propio desde la fase 4 (no dependemos de sus logs) y `ignoreCommand` en el proyecto nuevo. La decisión de pasar a Pro se toma con el tráfico real. |
 | **Latencia a Singapur**                   | El embedding de la consulta puede costar 350 ms.                                                                                                                                          | Caché LRU de consultas + medición en fase 1 + interfaz `Vectorizador` para cambiar de proveedor.                                                            |
 | **Lista de orígenes CORS**                | Si una landing estrena dominio y no se agrega, el widget deja de funcionar **sin que nada se ponga rojo**. Ya pasó con los formularios.                                                   | Prueba de humo automática que verifique el origen de producción tras cada despliegue.                                                                       |
-| **Facturación de Alibaba desde Colombia** | Bloquea la fase 1 entera si la tarjeta no pasa.                                                                                                                                           | Se verifica en la fase 0, antes de escribir código.                                                                                                         |
+| **Facturación de Alibaba desde Colombia** | Deja sin embeddings, es decir sin la mitad densa de la recuperación. Ya **no** bloquea la fase 1 entera: la generación corre sobre la cuenta de Moonshot que ya funciona.                 | Se verifica en la fase 0. Si no pasa, la v1 arranca con BM25 y respuestas selladas —degradado pero funcional— mientras se busca otro proveedor de vectores. |
 | **La base envejece**                      | El asistente afirma con seguridad algo que dejó de ser cierto.                                                                                                                            | `vigencia` obligatoria en el frontmatter + informe mensual de vencidos.                                                                                     |
 | **Deriva de marca**                       | El asistente afirma cosas del negocio que nadie aprobó.                                                                                                                                   | Revisión obligatoria de John en PR que toquen afirmaciones de compañía.                                                                                     |
 | **Habeas Data**                           | Alguien escribe su cédula en el chat.                                                                                                                                                     | Redacción antes de escribir el evento, retención 90 días, aviso de privacidad en el primer turno.                                                           |
