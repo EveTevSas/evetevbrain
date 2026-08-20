@@ -43,7 +43,11 @@ export class DrizzleMerchantsRepository implements MerchantsRepository {
   async buscarPorTenant(tenantId: string): Promise<Merchant | null> {
     return this.db.transaction(async (tx): Promise<Merchant | null> => {
       await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
-      const rows = await tx.select().from(merchants).where(eq(merchants.tenantId, tenantId)).limit(1);
+      const rows = await tx
+        .select()
+        .from(merchants)
+        .where(eq(merchants.tenantId, tenantId))
+        .limit(1);
       const row = rows[0];
       return row ? this.aMerchant(row) : null;
     });
@@ -82,11 +86,7 @@ export class DrizzleMerchantsRepository implements MerchantsRepository {
     };
   }
 
-  async aplicarEstado(
-    tenantId: string,
-    merchantId: string,
-    estado: EstadoMerchant
-  ): Promise<void> {
+  async aplicarEstado(tenantId: string, merchantId: string, estado: EstadoMerchant): Promise<void> {
     await this.db.transaction(async (tx): Promise<void> => {
       await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
       await tx

@@ -5,7 +5,10 @@ import { puedeTransicionar } from "../pagos/payment-state";
 import { LedgerService } from "../ledger/ledger.service";
 import { MerchantsService } from "../merchants/merchants.service";
 import { OutboundWebhookDeliveryService } from "../outbound-webhooks/outbound-webhook-delivery.service";
-import { OUTBOUND_WEBHOOKS_REPOSITORY, type OutboundWebhooksRepository } from "../outbound-webhooks/outbound-webhooks.repository";
+import {
+  OUTBOUND_WEBHOOKS_REPOSITORY,
+  type OutboundWebhooksRepository
+} from "../outbound-webhooks/outbound-webhooks.repository";
 
 /** Evento normalizado del proveedor. */
 export interface EventoWebhook {

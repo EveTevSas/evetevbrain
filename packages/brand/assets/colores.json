@@ -7,42 +7,48 @@
     "nota": "Paleta votada por socios. El coral es exclusivo de acciones (un CTA por pantalla); el violeta identifica Eve Intelligence y no se usa en botones."
   },
   "base": {
-    "azulNoche":          { "value": "#0A2540", "rol": "Texto principal, fondos de peso, footer" },
-    "azulNocheProfundo":  { "value": "#081D33", "rol": "Fondo de modo oscuro" },
-    "hielo":              { "value": "#EAF2FB", "rol": "Superficies claras, tarjetas" },
-    "tinte":              { "value": "#F4F9FD", "rol": "Secciones alternas suaves" },
-    "linea":              { "value": "#EDF3FA", "rol": "Bordes y divisores" },
-    "pizarra":            { "value": "#64748B", "rol": "Texto secundario" },
-    "muted":              { "value": "#94A3B8", "rol": "Metadatos, placeholders" }
+    "azulNoche": { "value": "#0A2540", "rol": "Texto principal, fondos de peso, footer" },
+    "azulNocheProfundo": { "value": "#081D33", "rol": "Fondo de modo oscuro" },
+    "hielo": { "value": "#EAF2FB", "rol": "Superficies claras, tarjetas" },
+    "tinte": { "value": "#F4F9FD", "rol": "Secciones alternas suaves" },
+    "linea": { "value": "#EDF3FA", "rol": "Bordes y divisores" },
+    "pizarra": { "value": "#64748B", "rol": "Texto secundario" },
+    "muted": { "value": "#94A3B8", "rol": "Metadatos, placeholders" }
   },
   "accion": {
-    "coral":       { "value": "#EE3D22", "rol": "CTA primario — exclusivo. Un botón coral por pantalla" },
-    "coralHover":  { "value": "#CF3016", "rol": "Hover del CTA" }
+    "coral": { "value": "#EE3D22", "rol": "CTA primario — exclusivo. Un botón coral por pantalla" },
+    "coralHover": { "value": "#CF3016", "rol": "Hover del CTA" }
   },
   "azules": {
     "electrico": { "value": "#1E6FEB", "rol": "Enlaces, anillo de foco" },
-    "mezclado":  { "value": "#144A96", "rol": "Secundario: botones 2os, sliders, switches, gráficos" },
-    "cian":      { "value": "#22D3EE", "rol": "Realce sobre fondos oscuros" },
-    "teal":      { "value": "#3BAEC2", "rol": "Herencia del isotipo, ilustración" }
+    "mezclado": {
+      "value": "#144A96",
+      "rol": "Secundario: botones 2os, sliders, switches, gráficos"
+    },
+    "cian": { "value": "#22D3EE", "rol": "Realce sobre fondos oscuros" },
+    "teal": { "value": "#3BAEC2", "rol": "Herencia del isotipo, ilustración" }
   },
   "violeta": {
-    "base":  { "value": "#8B5CF6", "rol": "Eve Intelligence — no usar en botones" },
+    "base": { "value": "#8B5CF6", "rol": "Eve Intelligence — no usar en botones" },
     "texto": { "value": "#6D28D9", "rol": "Texto violeta accesible sobre claros" },
     "tinte": { "value": "#EDE9FE", "rol": "Fondos y chips de la línea IA" }
   },
   "semanticos": {
-    "exito":  { "value": "#16A34A" },
+    "exito": { "value": "#16A34A" },
     "alerta": { "value": "#D97706" },
-    "error":  { "value": "#B91C1C", "regla": "Siempre acompañado de ícono + texto; nunca solo color (evita confusión con el coral)" }
+    "error": {
+      "value": "#B91C1C",
+      "regla": "Siempre acompañado de ícono + texto; nunca solo color (evita confusión con el coral)"
+    }
   },
   "degradados": {
     "corporativo": { "value": ["#0A2540", "#1E6FEB", "#22D3EE"], "rol": "Marca y hero" },
-    "ia":          { "value": ["#8B5CF6", "#6366F1", "#22D3EE"], "rol": "Eve Intelligence" }
+    "ia": { "value": ["#8B5CF6", "#6366F1", "#22D3EE"], "rol": "Eve Intelligence" }
   },
   "tipografia": {
     "marca": { "value": "Baloo 2", "pesos": [600, 700] },
-    "ui":    { "value": "Inter", "pesos": [400, 500, 600] },
-    "mono":  { "value": "JetBrains Mono", "pesos": [400, 500] }
+    "ui": { "value": "Inter", "pesos": [400, 500, 600] },
+    "mono": { "value": "JetBrains Mono", "pesos": [400, 500] }
   },
   "radios": { "sm": "8px", "md": "12px", "lg": "16px", "pill": "999px" }
 }

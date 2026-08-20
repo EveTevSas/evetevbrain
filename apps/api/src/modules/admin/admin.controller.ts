@@ -54,7 +54,8 @@ export class AdminController {
   private verificarAdmin(secret: string | undefined): void {
     const expected = process.env.ADMIN_SECRET;
     if (!expected) throw new ForbiddenException("ADMIN_SECRET no configurado.");
-    if (!secret || secret !== expected) throw new ForbiddenException("Acceso de administrador requerido.");
+    if (!secret || secret !== expected)
+      throw new ForbiddenException("Acceso de administrador requerido.");
   }
 }
 

@@ -1,6 +1,10 @@
 import { randomBytes } from "node:crypto";
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { OUTBOUND_WEBHOOKS_REPOSITORY, type OutboundWebhooksRepository, type WebhookConfig } from "./outbound-webhooks.repository";
+import {
+  OUTBOUND_WEBHOOKS_REPOSITORY,
+  type OutboundWebhooksRepository,
+  type WebhookConfig
+} from "./outbound-webhooks.repository";
 
 export interface RegistrarWebhookInput {
   url: string;
@@ -57,7 +61,10 @@ export class OutboundWebhooksService {
     return toPublico(config);
   }
 
-  async actualizar(tenantId: string, input: Partial<RegistrarWebhookInput & { activa: boolean }>): Promise<WebhookRegistrado> {
+  async actualizar(
+    tenantId: string,
+    input: Partial<RegistrarWebhookInput & { activa: boolean }>
+  ): Promise<WebhookRegistrado> {
     const config = await this.repo.actualizar(tenantId, {
       ...(input.url ? { url: input.url } : {}),
       ...(input.events ? { events: input.events } : {}),

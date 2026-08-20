@@ -2,7 +2,13 @@ import { createHash } from "node:crypto";
 import { ConflictException, Inject, Injectable } from "@nestjs/common";
 import type { Cobro, CrearCobroInput, PaymentProvider } from "@evetev/shared";
 import { PAYMENT_PROVIDER } from "./payment-provider.token";
-import { PAGOS_REPOSITORY, type FiltrosCobros, type PaginaCobros, type PagosRepository, type StatsCobros } from "./pagos.repository";
+import {
+  PAGOS_REPOSITORY,
+  type FiltrosCobros,
+  type PaginaCobros,
+  type PagosRepository,
+  type StatsCobros
+} from "./pagos.repository";
 
 /** Contexto del cobro: tenant (comercio) y actor para auditoría. */
 export interface CobroContext {
@@ -33,7 +39,12 @@ export class PagosService {
     // Reintento con la misma clave: devolver lo existente sin volver a llamar a Akua.
     const previo = await this.repo.buscarIdempotencia(ctx.tenantId, idempotencyKey);
     if (previo) {
-      return this.recuperarExistente(ctx.tenantId, previo.paymentId, previo.requestHash, requestHash);
+      return this.recuperarExistente(
+        ctx.tenantId,
+        previo.paymentId,
+        previo.requestHash,
+        requestHash
+      );
     }
 
     // Primera vez: crear en el proveedor (una sola llamada) y persistir.
@@ -87,9 +98,7 @@ export class PagosService {
     hashActual: string
   ): Promise<Cobro> {
     if (hashGuardado !== hashActual) {
-      throw new ConflictException(
-        "La 'Idempotency-Key' ya se usó con un cuerpo distinto."
-      );
+      throw new ConflictException("La 'Idempotency-Key' ya se usó con un cuerpo distinto.");
     }
     const cobro = await this.repo.buscarCobro(tenantId, paymentId);
     if (!cobro) {

@@ -1,11 +1,11 @@
 # Estándares de Ingeniería — Evetev SAS
 
-*Estándares de ingeniería de **Evetev SAS**. Nuestro producto es **EvePay**, la plataforma de pagos (PSP/gateway sobre Akua); el **dashboard de conjuntos residenciales** es su primera vertical.*
+_Estándares de ingeniería de **Evetev SAS**. Nuestro producto es **EvePay**, la plataforma de pagos (PSP/gateway sobre Akua); el **dashboard de conjuntos residenciales** es su primera vertical._
 
 > Documento vivo. Es la fuente de verdad para que Evetev desarrolle alineada.
 > Cualquier cambio se propone por PR sobre este archivo y se discute antes de mergear.
 >
-> **Contexto del producto:** nuestro **eje central es EvePay, una plataforma de pagos AI-native** (PSP/gateway) construida sobre **Akua** como backbone de adquirencia. Eso es lo que vendemos, a comercios de distintas verticales. El **dashboard de conjuntos residenciales es nuestra primera vertical**: la cuña con la que validamos la plataforma cobrando dinero real a clientes reales — no es el producto, es la prueba viviente de que el producto funciona (somos nuestro primer cliente). Manejamos **dinero de terceros** y **datos personales**, así que la seguridad y la trazabilidad *son* el producto, no un adorno.
+> **Contexto del producto:** nuestro **eje central es EvePay, una plataforma de pagos AI-native** (PSP/gateway) construida sobre **Akua** como backbone de adquirencia. Eso es lo que vendemos, a comercios de distintas verticales. El **dashboard de conjuntos residenciales es nuestra primera vertical**: la cuña con la que validamos la plataforma cobrando dinero real a clientes reales — no es el producto, es la prueba viviente de que el producto funciona (somos nuestro primer cliente). Manejamos **dinero de terceros** y **datos personales**, así que la seguridad y la trazabilidad _son_ el producto, no un adorno.
 >
 > **Prioridad actual (0–6 meses):** validar la plataforma de pagos con la primera vertical (conjuntos) cobrando de verdad. Ante la duda, elegimos lo que nos deja lanzar antes sin comprometer los cimientos no-reescribibles: aislamiento multi-tenant (cada comercio es un tenant) e idempotencia/auditoría/conciliación de pagos.
 
@@ -32,45 +32,45 @@ Elecciones por defecto del equipo. Donde hay una bifurcación real, se indica y 
 
 ### Lenguaje y frameworks
 
-| Capa | Elección por defecto | Notas |
-|---|---|---|
-| Lenguaje base | **TypeScript** end-to-end | `strict: true` obligatorio. Tipos compartidos entre front y back. |
-| IA / datos | **Python** solo donde la librería lo exija | No mezclar sin razón; aislar en su propio servicio/carpeta. |
-| Frontend | **Next.js** (App Router) + React | Mobile-first: los residentes entran desde el celular. |
-| Estilos | **Tailwind CSS** + **shadcn/ui** | Componentes accesibles por defecto (ver §5). |
-| Backend | **NestJS** (monolito modular) | Módulos con fronteras explícitas. Alternativa válida: Node + framework liviano, pero decidimos uno solo. |
-| Validación | **Zod** | Un esquema por frontera de entrada. Nunca confiar en input sin validar. |
+| Capa          | Elección por defecto                       | Notas                                                                                                    |
+| ------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Lenguaje base | **TypeScript** end-to-end                  | `strict: true` obligatorio. Tipos compartidos entre front y back.                                        |
+| IA / datos    | **Python** solo donde la librería lo exija | No mezclar sin razón; aislar en su propio servicio/carpeta.                                              |
+| Frontend      | **Next.js** (App Router) + React           | Mobile-first: los residentes entran desde el celular.                                                    |
+| Estilos       | **Tailwind CSS** + **shadcn/ui**           | Componentes accesibles por defecto (ver §5).                                                             |
+| Backend       | **NestJS** (monolito modular)              | Módulos con fronteras explícitas. Alternativa válida: Node + framework liviano, pero decidimos uno solo. |
+| Validación    | **Zod**                                    | Un esquema por frontera de entrada. Nunca confiar en input sin validar.                                  |
 
 ### Datos e infraestructura
 
-| Componente | Elección | Notas |
-|---|---|---|
-| Base de datos | **PostgreSQL** | Relacional + ACID. Obligatorio para dinero. |
-| Vectores IA | **pgvector** (misma DB) | Embeddings junto a los datos, sin base extra. |
-| Postgres administrado | **Supabase** o **Neon** — *elegir uno* | Supabase suma Auth y RLS integrados; Neon es Postgres puro con branching. |
-| ORM / acceso | **Prisma** o **Drizzle** — *elegir uno* | Migraciones versionadas en el repo, siempre. |
-| Auth | **Supabase Auth** o **Clerk** — *elegir uno* | No construimos auth a mano. |
-| Pagos | **Akua** detrás de la interfaz `PaymentProvider` | Backbone de adquirencia (licencia, procesamiento, settlement). Onboarding vía su equipo de partnerships. Ver §4. |
-| Workflows durables | **Inngest** o **Trigger.dev** | Reintentos de pago, cobranza, conciliación. Amigables con agentes. |
-| Notificaciones | WhatsApp (API oficial) + email transaccional | Detrás de una interfaz `Notifier`. |
-| IA / LLM | API de modelos + RAG con pgvector | Capa delgada. Un agente a la vez, cuando lo pida la validación. |
-| Observabilidad | **Sentry** (errores) + **PostHog** (producto/eventos) | PostHog además nutre de eventos limpios a la IA. |
-| Hosting | **Vercel** (front) + PaaS (**Railway**/**Render**) + DB administrada | Nada de AWS/K8s todavía. |
-| CI/CD | **GitHub Actions** | Lint + typecheck + tests en cada PR. Sin verde no se mergea. |
+| Componente            | Elección                                                             | Notas                                                                                                            |
+| --------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Base de datos         | **PostgreSQL**                                                       | Relacional + ACID. Obligatorio para dinero.                                                                      |
+| Vectores IA           | **pgvector** (misma DB)                                              | Embeddings junto a los datos, sin base extra.                                                                    |
+| Postgres administrado | **Supabase** o **Neon** — _elegir uno_                               | Supabase suma Auth y RLS integrados; Neon es Postgres puro con branching.                                        |
+| ORM / acceso          | **Prisma** o **Drizzle** — _elegir uno_                              | Migraciones versionadas en el repo, siempre.                                                                     |
+| Auth                  | **Supabase Auth** o **Clerk** — _elegir uno_                         | No construimos auth a mano.                                                                                      |
+| Pagos                 | **Akua** detrás de la interfaz `PaymentProvider`                     | Backbone de adquirencia (licencia, procesamiento, settlement). Onboarding vía su equipo de partnerships. Ver §4. |
+| Workflows durables    | **Inngest** o **Trigger.dev**                                        | Reintentos de pago, cobranza, conciliación. Amigables con agentes.                                               |
+| Notificaciones        | WhatsApp (API oficial) + email transaccional                         | Detrás de una interfaz `Notifier`.                                                                               |
+| IA / LLM              | API de modelos + RAG con pgvector                                    | Capa delgada. Un agente a la vez, cuando lo pida la validación.                                                  |
+| Observabilidad        | **Sentry** (errores) + **PostHog** (producto/eventos)                | PostHog además nutre de eventos limpios a la IA.                                                                 |
+| Hosting               | **Vercel** (front) + PaaS (**Railway**/**Render**) + DB administrada | Nada de AWS/K8s todavía.                                                                                         |
+| CI/CD                 | **GitHub Actions**                                                   | Lint + typecheck + tests en cada PR. Sin verde no se mergea.                                                     |
 
 ### EvePay — la plataforma de pagos (nuestro producto)
 
-**EvePay** no es "un módulo más": es lo que vendemos, así que sus atributos de calidad son *features*, no higiene interna. Las capacidades que la definen, en orden de importancia para el MVP:
+**EvePay** no es "un módulo más": es lo que vendemos, así que sus atributos de calidad son _features_, no higiene interna. Las capacidades que la definen, en orden de importancia para el MVP:
 
 - **Cobros idempotentes** con clave de idempotencia y máquina de estados clara (creado → pendiente → aprobado/fallido → conciliado).
 - **Ledger / libro de movimientos** inmutable: la verdad contable de cada peso que entra y sale.
 - **Conciliación** contra el backbone (Akua): lo cobrado cuadra con lo registrado.
-- **Webhooks normalizados:** los eventos del proveedor se traducen a *nuestros* eventos internos.
+- **Webhooks normalizados:** los eventos del proveedor se traducen a _nuestros_ eventos internos.
 - **Onboarding de comercios** (merchants) con sus datos y, cuando aplique, KYC/KYB.
 - **Checkout / elements white-label** embebibles, para que el comercio no toque el PAN — nos mantiene fuera de PCI.
 - **Split payments / liquidación** a beneficiarios: más adelante, cuando una vertical lo pida.
 
-Regla: EvePay habla con la adquirencia **solo** por la interfaz `PaymentProvider` (§4). Akua es el backbone detrás de esa interfaz. Como el onboarding de Akua se gestiona con su equipo de partnerships y toma semanas, se arranca **en paralelo** al desarrollo: el núcleo se construye contra la interfaz y se prueba con una implementación *fake* en tests, sin esperar la certificación.
+Regla: EvePay habla con la adquirencia **solo** por la interfaz `PaymentProvider` (§4). Akua es el backbone detrás de esa interfaz. Como el onboarding de Akua se gestiona con su equipo de partnerships y toma semanas, se arranca **en paralelo** al desarrollo: el núcleo se construye contra la interfaz y se prueba con una implementación _fake_ en tests, sin esperar la certificación.
 
 ### Lo que NO usamos todavía (para no sobre-ingeniar)
 
@@ -197,26 +197,31 @@ Objetivo: **WCAG 2.2 nivel AA**. Nuestros usuarios son administradores y residen
 Un desarrollo **no está listo para mergear** hasta cumplir todo esto. Es lo que mantiene alineado el trabajo de los tres, cada uno en su rama.
 
 **Funcionalidad**
+
 - [ ] Hace lo que pide el ticket y se probó el camino feliz + al menos un caso de error.
 
 **Código**
+
 - [ ] Pasa `lint`, `typecheck` y `test` en CI (verde).
 - [ ] Sin `any` injustificado; fronteras de entrada validadas con Zod.
 - [ ] Respeta las fronteras de módulos (no importa entrañas de otro módulo).
 - [ ] PR pequeño, con descripción clara; 1 aprobación de otra persona.
 
 **Seguridad**
+
 - [ ] Datos de tenant aislados por RLS; verificado que no hay fuga entre tenants.
 - [ ] Si toca pagos: idempotente, auditado, y **sin** datos de tarjeta en servidor/logs.
 - [ ] Sin secretos en el código; `.env.example` actualizado si cambió la config.
 - [ ] Endpoints declaran el rol requerido (RBAC); logs sin PII sensible.
 
 **Accesibilidad**
+
 - [ ] Navegable solo con teclado; foco visible.
 - [ ] Contraste AA; formularios con labels y errores claros.
 - [ ] Lighthouse/axe sin errores críticos en la pantalla nueva.
 
 **Operación**
+
 - [ ] README/.env.example actualizados si cambió cómo se levanta o corre el proyecto.
 - [ ] Eventos relevantes se registran (para producto e IA).
 
@@ -226,15 +231,15 @@ Un desarrollo **no está listo para mergear** hasta cumplir todo esto. Es lo que
 
 Estas eran las bifurcaciones del stack. Ya están decididas: **no se rediscuten salvo dolor real y demostrable.** Si alguien quiere cambiar una, se propone por PR sobre este documento con la justificación.
 
-| # | Decisión | Elegido | Por qué |
-|---|---|---|---|
-| 1 | Postgres administrado | **Supabase** | Trae Postgres + Auth + RLS integrados; los claims del JWT alimentan directo las políticas de aislamiento por tenant (§4). Una integración menos. |
-| 2 | Auth | **Supabase Auth** | Se resuelve solo con la #1: mismo proveedor, los claims del token son la entrada del RLS. |
-| 3 | ORM / acceso a datos | **Drizzle** | SQL-first y liviano; su control explícito de la conexión encaja con el `SET LOCAL app.tenant_id` que exige el RLS. |
-| 4 | Workflows durables | **Inngest** | Modelo event-first, alineado con el principio "event-logged" (§1). Reintentos de cobro, cobranza y conciliación. |
-| 5 | Proveedor de pagos | **Akua** | Backbone de adquirencia (licencia, procesamiento, settlement, riesgo). **Único proveedor, sin agregador intermedio**, detrás de `PaymentProvider` (§4). |
+| #   | Decisión              | Elegido           | Por qué                                                                                                                                                 |
+| --- | --------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Postgres administrado | **Supabase**      | Trae Postgres + Auth + RLS integrados; los claims del JWT alimentan directo las políticas de aislamiento por tenant (§4). Una integración menos.        |
+| 2   | Auth                  | **Supabase Auth** | Se resuelve solo con la #1: mismo proveedor, los claims del token son la entrada del RLS.                                                               |
+| 3   | ORM / acceso a datos  | **Drizzle**       | SQL-first y liviano; su control explícito de la conexión encaja con el `SET LOCAL app.tenant_id` que exige el RLS.                                      |
+| 4   | Workflows durables    | **Inngest**       | Modelo event-first, alineado con el principio "event-logged" (§1). Reintentos de cobro, cobranza y conciliación.                                        |
+| 5   | Proveedor de pagos    | **Akua**          | Backbone de adquirencia (licencia, procesamiento, settlement, riesgo). **Único proveedor, sin agregador intermedio**, detrás de `PaymentProvider` (§4). |
 
-**Nota operativa sobre Akua:** su habilitación se gestiona con su equipo de partnerships (no es self-service) y toma semanas. Por eso el onboarding corre **en paralelo** al desarrollo: construimos el núcleo contra la interfaz `PaymentProvider` y lo probamos con una implementación *fake* en tests. El día que Akua queda certificado, se enchufa la implementación real sin tocar el núcleo.
+**Nota operativa sobre Akua:** su habilitación se gestiona con su equipo de partnerships (no es self-service) y toma semanas. Por eso el onboarding corre **en paralelo** al desarrollo: construimos el núcleo contra la interfaz `PaymentProvider` y lo probamos con una implementación _fake_ en tests. El día que Akua queda certificado, se enchufa la implementación real sin tocar el núcleo.
 
 ### Decisiones que siguen abiertas
 
@@ -259,7 +264,7 @@ Son decisiones independientes. Elegimos ambas, por razones distintas.
 
 1. **Tipos compartidos entre apps.** Es el premio principal y se cobra desde el día uno: el contrato de la API de EvePay (DTOs + esquemas Zod) se define una vez en `packages/shared`. Si cambia un campo, la app consumidora **no compila** hasta actualizarla — el error salta en tu máquina, no en la cara de un merchant.
 2. **Un feature aterriza en un solo PR.** Un cambio que toca EvePay, la vertical y los tipos entra junto, con un solo CI y una sola revisión. En repos separados serían tres PRs coordinados a mano.
-3. **Refactor sin miedo.** Renombras algo y el compilador te muestra *cada* lugar que se rompió, en todas las apps. Con tres personas en ramas cortas, ese es el tercer par de ojos que no se cansa.
+3. **Refactor sin miedo.** Renombras algo y el compilador te muestra _cada_ lugar que se rompió, en todas las apps. Con tres personas en ramas cortas, ese es el tercer par de ojos que no se cansa.
 4. **Una sola config de calidad.** ESLint, Prettier y tsconfig se definen una vez en `packages/config` y aplican a todo. No hay forma de que tres personas produzcan tres estilos.
 
 **Lo que NO significa monorepo:**
@@ -289,13 +294,13 @@ evetev/
 
 Eso es todo. **pnpm workspaces y nada más.** Turborepo, `evepay-sdk`, `ui`, la regla de boundaries y el resto de apps se agregan **cuando el dolor aparezca**, no por anticipado:
 
-| Se agrega… | Cuando… |
-|---|---|
-| **Turborepo** | los tiempos de CI o de build local empiecen a doler |
-| **`packages/ui`** | haya un segundo frontend real (llega rápido: `website`) |
-| **`packages/evepay-sdk`** | exista un consumidor externo o una segunda vertical |
-| **regla de lint de boundaries** | el equipo crezca o alguien cruce una frontera por accidente |
-| **`checkout` / `dashboard-merchant`** | lo pida el primer cliente externo |
+| Se agrega…                            | Cuando…                                                     |
+| ------------------------------------- | ----------------------------------------------------------- |
+| **Turborepo**                         | los tiempos de CI o de build local empiecen a doler         |
+| **`packages/ui`**                     | haya un segundo frontend real (llega rápido: `website`)     |
+| **`packages/evepay-sdk`**             | exista un consumidor externo o una segunda vertical         |
+| **regla de lint de boundaries**       | el equipo crezca o alguien cruce una frontera por accidente |
+| **`checkout` / `dashboard-merchant`** | lo pida el primer cliente externo                           |
 
 Regla general: **no se abstrae al primer uso, se abstrae al segundo.** Con un solo consumidor no sabes qué es genuinamente compartido y qué es específico; adivinar produce la abstracción equivocada.
 
@@ -398,7 +403,7 @@ packages/
     └── icons/
 ```
 
-Separamos **tokens** de **components** a propósito: los tokens son la marca en forma de datos, y son lo que necesitará el `checkout` white-label para que cada comercio lo pinte con *sus* colores sin tocar código. Mezclarlos hoy significa desenredarlos después.
+Separamos **tokens** de **components** a propósito: los tokens son la marca en forma de datos, y son lo que necesitará el `checkout` white-label para que cada comercio lo pinte con _sus_ colores sin tocar código. Mezclarlos hoy significa desenredarlos después.
 
 Dos reglas:
 
@@ -418,7 +423,7 @@ Dos reglas:
 ### Configuración obligatoria (higiene desde el día uno)
 
 - **2FA obligatorio** para toda la organización (Settings → Authentication security). Manejamos dinero y PII: es básico.
-- **Protección de `main`** — lo que hay configurado hoy, en un *ruleset* llamado «Proteger main» (un ruleset, no la *branch protection* clásica que decía esta línea antes; se configura en Settings → Rules):
+- **Protección de `main`** — lo que hay configurado hoy, en un _ruleset_ llamado «Proteger main» (un ruleset, no la _branch protection_ clásica que decía esta línea antes; se configura en Settings → Rules):
   - exige **PR**: no se empuja directo a `main`;
   - exige **un solo check en verde, «CI completo»** — es el job final que depende de todos los demás, así que exigir ese basta y no hay que tocar el ruleset cada vez que se añade un job;
   - **prohíbe borrar `main`** y **reescribirla** con un push forzado;
@@ -433,29 +438,33 @@ Va en `.github/pull_request_template.md`. Así cada PR trae el checklist de §6 
 ```markdown
 ## Qué hace este PR
 
-
 ## Checklist (Definition of Done)
 
 **Funcionalidad**
+
 - [ ] Hace lo que pide el ticket; probado camino feliz + un caso de error.
 
 **Código**
+
 - [ ] `lint`, `typecheck` y `test` en verde.
 - [ ] Sin `any` injustificado; fronteras de entrada validadas con Zod.
 - [ ] Respeta fronteras de módulos (no importa entrañas de otro módulo).
 
 **Seguridad**
+
 - [ ] Datos de tenant aislados por RLS; sin fuga entre tenants.
 - [ ] Si toca pagos: idempotente, auditado, sin datos de tarjeta en servidor/logs.
 - [ ] Sin secretos en el código; `.env.example` actualizado si cambió la config.
 - [ ] Endpoints declaran rol requerido (RBAC); logs sin PII sensible.
 
 **Accesibilidad**
+
 - [ ] Navegable solo con teclado; foco visible.
 - [ ] Contraste AA; formularios con labels y errores claros.
 - [ ] Lighthouse/axe sin errores críticos en la pantalla nueva.
 
 **Operación**
+
 - [ ] README/.env.example actualizados si cambió cómo se corre.
 - [ ] Eventos relevantes se registran (para producto e IA).
 ```
@@ -464,7 +473,7 @@ Va en `.github/pull_request_template.md`. Así cada PR trae el checklist de §6 
 
 ## 9. Reglas de codificación: Spec-Driven Development (SDD)
 
-Codificamos con **Spec-Driven Development**: la especificación es la fuente de verdad, y el código es un artefacto que se *genera y verifica* a partir de ella. Como somos AI-native y los tres trabajamos con agentes (Claude Code), esto es lo que nos separa del *vibe coding* — prompt al agente y aceptar lo que salga — que es rápido para prototipos y miserable para algo que hay que mantener. La frase que resume todo: **la spec es el prompt.**
+Codificamos con **Spec-Driven Development**: la especificación es la fuente de verdad, y el código es un artefacto que se _genera y verifica_ a partir de ella. Como somos AI-native y los tres trabajamos con agentes (Claude Code), esto es lo que nos separa del _vibe coding_ — prompt al agente y aceptar lo que salga — que es rápido para prototipos y miserable para algo que hay que mantener. La frase que resume todo: **la spec es el prompt.**
 
 Por qué encaja con nosotros: una plataforma de pagos tiene comportamientos que **no** se pueden dejar a la interpretación del agente (idempotencia, máquina de estados, conciliación, aislamiento por tenant). Escribir la spec primero fuerza la claridad ahí, justo donde un error cuesta plata o confianza.
 
@@ -474,15 +483,15 @@ Todos los frameworks de SDD convergen en el mismo ciclo. El nuestro:
 
 1. **Constitución** — principios, estándares y guardarraíles. **Este documento ES nuestra constitución.** No la reescribimos por feature; la citamos.
 2. **Especificar** — qué se construye: problema, usuarios, requisitos, criterios de aceptación. Nada de tecnología todavía.
-3. **Clarificar** — resolver ambigüedades, dependencias y casos borde *antes* de planear. El agente no puede corregir una ambigüedad que nunca resolvimos.
+3. **Clarificar** — resolver ambigüedades, dependencias y casos borde _antes_ de planear. El agente no puede corregir una ambigüedad que nunca resolvimos.
 4. **Plan** — traducir la intención a arquitectura y restricciones (respetando §2 y §8).
 5. **Tareas** — partir el trabajo en unidades implementables (mapea a ramas cortas, §3).
 6. **Implementar** — el agente genera código y tests contra la spec; nosotros dirigimos.
 7. **Validar** — verificar que la salida cumple la spec y el Definition of Done (§6).
 
-### Nuestro nivel de rigor: *spec-anchored* (no dogmático)
+### Nuestro nivel de rigor: _spec-anchored_ (no dogmático)
 
-Hay tres niveles: *spec-first*, *spec-anchored* y *spec-as-source*. Nosotros apuntamos a **spec-anchored**: la spec ancla la intención y es el contrato humano↔agente, pero **el código sigue siendo la verdad ejecutable y los tests son el enforcer**. No convertimos la spec en un dios ceremonial; si el código y la spec divergen, actualizamos uno de los dos conscientemente. La spec es un documento vivo, no un archivo de una sola vez.
+Hay tres niveles: _spec-first_, _spec-anchored_ y _spec-as-source_. Nosotros apuntamos a **spec-anchored**: la spec ancla la intención y es el contrato humano↔agente, pero **el código sigue siendo la verdad ejecutable y los tests son el enforcer**. No convertimos la spec en un dios ceremonial; si el código y la spec divergen, actualizamos uno de los dos conscientemente. La spec es un documento vivo, no un archivo de una sola vez.
 
 ### Cuándo SÍ escribir spec y cuándo no
 
@@ -494,7 +503,7 @@ Aterrizado a nuestro producto:
 
 - **Spec obligatoria (siempre):** todo lo que toque **pagos, dinero, ledger, conciliación, multi-tenancy o RBAC**. Aquí no hay "arreglo rápido"; la precisión es el producto.
 - **Spec recomendada:** casos de uso del núcleo con reglas de negocio no triviales, o features que tocan varios módulos.
-- **Prompt directo (sin spec):** UI presentacional, ajustes chicos, scripts desechables. *Empieza vibe, termina spec-driven.*
+- **Prompt directo (sin spec):** UI presentacional, ajustes chicos, scripts desechables. _Empieza vibe, termina spec-driven._
 
 ### Herramienta
 
@@ -537,27 +546,35 @@ La **spec dice qué**; los **tests prueban que se cumple**; el código hace ambo
 # <Nombre del feature>
 
 ## Problema
+
 ¿Qué resuelve? ¿Para quién?
 
 ## Usuarios / actores
+
 Quién lo usa (comercio, residente, admin, sistema).
 
 ## Resultado esperado
+
 Qué pasa cuando funciona bien.
 
 ## Requisitos funcionales
+
 - ...
 
 ## No-objetivos
+
 - Qué queda fuera de esta versión.
 
 ## Casos borde
+
 - Qué puede salir mal (reintentos, fallos del proveedor, concurrencia...).
 
 ## Criterios de aceptación (EARS)
+
 - CUANDO ... EL sistema DEBERÁ ...
 
 ## Restricciones de la constitución
+
 - Cimientos tocados: multi-tenancy / idempotencia / auditoría (§4).
 ```
 
@@ -577,15 +594,15 @@ Cómo pasa el código de la máquina de cada uno a producción. Coherente con §
 
 ### Topología
 
-| Qué | Dónde | Notas |
-|---|---|---|
-| `website` (evetev.com) | **Vercel** | Next.js estático (SSG): SEO y velocidad. |
-| `eveconecta` | **Vercel** | Front + sus Route Handlers de dominio (§8). |
-| `api` — EvePay | **Railway** | NestJS, monolito modular. Proceso de larga vida. |
-| Base de datos | **Supabase** | Postgres + Auth + RLS. Schemas `evepay` y `conjuntos`. |
-| Workflows durables | **Inngest** | Reintentos de cobro, cobranza, conciliación. |
-| Observabilidad | **Sentry** + **PostHog** | Errores y eventos de producto (que además nutren la IA). |
-| Adquirencia | **Akua** | Externo. Solo lo toca la implementación de `PaymentProvider`. |
+| Qué                    | Dónde                    | Notas                                                         |
+| ---------------------- | ------------------------ | ------------------------------------------------------------- |
+| `website` (evetev.com) | **Vercel**               | Next.js estático (SSG): SEO y velocidad.                      |
+| `eveconecta`           | **Vercel**               | Front + sus Route Handlers de dominio (§8).                   |
+| `api` — EvePay         | **Railway**              | NestJS, monolito modular. Proceso de larga vida.              |
+| Base de datos          | **Supabase**             | Postgres + Auth + RLS. Schemas `evepay` y `conjuntos`.        |
+| Workflows durables     | **Inngest**              | Reintentos de cobro, cobranza, conciliación.                  |
+| Observabilidad         | **Sentry** + **PostHog** | Errores y eventos de producto (que además nutren la IA).      |
+| Adquirencia            | **Akua**                 | Externo. Solo lo toca la implementación de `PaymentProvider`. |
 
 **Dominios:** `evetev.com` → website · `conecta.evetev.com` → eveconecta · `api.evetev.com` → EvePay.
 
@@ -611,7 +628,7 @@ Dev (rama corta)  →  PR a GitHub  →  GitHub Actions: lint · typecheck · te
 
 Tres, y ninguno comparte datos con otro:
 
-1. **Local** — Supabase local o proyecto de desarrollo; `PaymentProvider` con implementación *fake*.
+1. **Local** — Supabase local o proyecto de desarrollo; `PaymentProvider` con implementación _fake_.
 2. **Preview** — efímero por PR, contra la base de desarrollo y el ambiente de pruebas de Akua. **Jamás** contra datos reales.
 3. **Producción** — solo desde `main`, con las credenciales productivas de Akua.
 

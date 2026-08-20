@@ -12,7 +12,9 @@ import { WebhooksService } from "./webhooks.service";
 const noopDelivery = { entregar: async () => {} } as unknown as OutboundWebhookDeliveryService;
 const noopWebhookRepo: OutboundWebhooksRepository = {
   buscarPorTenant: async () => null,
-  registrar: async () => { throw new Error("not used"); },
+  registrar: async () => {
+    throw new Error("not used");
+  },
   actualizar: async () => null
 };
 
@@ -52,7 +54,13 @@ describe("WebhooksService — normalización de eventos", () => {
     ledgerRepo = new InMemoryLedgerRepository();
     merchantsRepo = new InMemoryMerchantsRepository();
     merchants = new MerchantsService(merchantsRepo, new FakePaymentProvider());
-    service = new WebhooksService(repo, new LedgerService(ledgerRepo, repo), merchants, noopDelivery, noopWebhookRepo);
+    service = new WebhooksService(
+      repo,
+      new LedgerService(ledgerRepo, repo),
+      merchants,
+      noopDelivery,
+      noopWebhookRepo
+    );
   });
 
   it("EARS 1: payment.purchase.succeeded pasa el cobro pendiente → aprobado y lo audita", async () => {
@@ -65,14 +73,14 @@ describe("WebhooksService — normalización de eventos", () => {
 
     const cobro = await repo.buscarCobro(TENANT, id);
     expect(cobro?.estado).toBe("aprobado");
-    expect(repo.auditoria.some((a) => a.toStatus === "aprobado" && a.actor === "webhook:akua")).toBe(
-      true
-    );
+    expect(
+      repo.auditoria.some((a) => a.toStatus === "aprobado" && a.actor === "webhook:akua")
+    ).toBe(true);
     // Ledger (Fase 3): al aprobar se asienta el movimiento balanceado.
     expect(await ledgerRepo.contarAsientosPorPago(TENANT, id)).toBe(1);
-    expect(ledgerRepo.lines.filter((l) => l.account === `merchant_payable:${MERCHANT}`)).toHaveLength(
-      1
-    );
+    expect(
+      ledgerRepo.lines.filter((l) => l.account === `merchant_payable:${MERCHANT}`)
+    ).toHaveLength(1);
   });
 
   it("EARS 4: payment.purchase.failed pasa el cobro pendiente → fallido", async () => {

@@ -16,13 +16,13 @@ async function bootstrap(): Promise<void> {
     "http://localhost:3003",
     "https://merchants.evetev.com",
     "https://eve-merchants.vercel.app",
-    ...extraOrigins,
+    ...extraOrigins
   ];
   app.enableCors({
     origin: origins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   });
 
   app.setGlobalPrefix("v1", { exclude: ["admin"] });

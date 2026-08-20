@@ -292,8 +292,9 @@ module.exports = async function handler(req, res) {
       e.message,
       e.detalle || ""
     );
-    return res
-      .status(e.codigo || 500)
-      .json({ ok: false, error: e.message === "sin_proveedor" ? "sin_proveedor" : "envio_fallido" });
+    return res.status(e.codigo || 500).json({
+      ok: false,
+      error: e.message === "sin_proveedor" ? "sin_proveedor" : "envio_fallido"
+    });
   }
 };

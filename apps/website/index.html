@@ -1,206 +1,427 @@
-<!DOCTYPE html>
+<!doctype html>
 <!-- Evetev — sitio corporativo / marketing.
      Marca según packages/brand/assets/evetev_brand_styles.md (v1.0):
      tokens oficiales, logos SIEMPRE desde el CDN de marca (regla T1),
      coral #EE3D22 exclusivo de acción (C2): CTA del nav + botón de
      suscripción del footer (spec §6 footer). Resto de acciones: azul. -->
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evetev — Pagos e inteligencia artificial, sin complicaciones</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evetev — Pagos e inteligencia artificial, sin complicaciones</title>
 
-<!-- Favicon y mascota desde el CDN de marca (§4) -->
-<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png">
-<link rel="mask-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/mask-icon.svg" color="#0A2540">
-<meta name="theme-color" content="#0A2540">
+    <!-- Favicon y mascota desde el CDN de marca (§4) -->
+    <link
+      rel="icon"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg"
+      type="image/svg+xml"
+    />
+    <link
+      rel="icon"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png"
+      sizes="32x32"
+      type="image/png"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="mask-icon"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/mask-icon.svg"
+      color="#0A2540"
+    />
+    <meta name="theme-color" content="#0A2540" />
 
-<!-- Tipografía oficial (§3): Baloo 2 (marca/titulares) + Inter (UI) + JetBrains Mono (técnico) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+    <!-- Tipografía oficial (§3): Baloo 2 (marca/titulares) + Inter (UI) + JetBrains Mono (técnico) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
 
-<!-- Tokens de color oficiales (§2). La redeclaración local en :root actúa de
+    <!-- Tokens de color oficiales (§2). La redeclaración local en :root actúa de
      respaldo si el CDN no está disponible. -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css"
+    />
 
-<link rel="stylesheet" href="estilos.css">
-</head>
-<body>
-
-<nav aria-label="Navegación principal">
-  <div class="wrap nav-in">
-    <a class="logo" href="#" aria-label="Evetev inicio">
-      <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg" alt="" width="32" height="23">
-      <span class="brand">Evetev</span>
-    </a>
-    <div class="menu" id="menu">
-      <div class="drop" id="drop1">
-        <button aria-haspopup="true" aria-expanded="false">Productos <span style="font-size:9px" aria-hidden="true">▾</span></button>
-        <div class="drop-panel">
-          <a href="#servicios"><span class="p-ico sm" style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')" aria-hidden="true"></span> EvePay</a>
-          <a href="#servicios"><span class="p-ico sm" style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')" aria-hidden="true"></span> EveConecta</a>
+    <link rel="stylesheet" href="estilos.css" />
+  </head>
+  <body>
+    <nav aria-label="Navegación principal">
+      <div class="wrap nav-in">
+        <a class="logo" href="#" aria-label="Evetev inicio">
+          <img
+            src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg"
+            alt=""
+            width="32"
+            height="23"
+          />
+          <span class="brand">Evetev</span>
+        </a>
+        <div class="menu" id="menu">
+          <div class="drop" id="drop1">
+            <button aria-haspopup="true" aria-expanded="false">
+              Productos <span style="font-size: 9px" aria-hidden="true">▾</span>
+            </button>
+            <div class="drop-panel">
+              <a href="#servicios"
+                ><span
+                  class="p-ico sm"
+                  style="
+                    --p: var(--eve-electrico);
+                    --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+                  "
+                  aria-hidden="true"
+                ></span>
+                EvePay</a
+              >
+              <a href="#servicios"
+                ><span
+                  class="p-ico sm"
+                  style="
+                    --p: var(--eve-mezclado);
+                    --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg&quot;);
+                  "
+                  aria-hidden="true"
+                ></span>
+                EveConecta</a
+              >
+            </div>
+          </div>
+          <a href="#desarrolladores">Desarrolladores</a>
+          <a href="nosotros.html">Nosotros</a>
+          <a href="#contacto">Contacto</a>
+          <button class="link" onclick="mostrarToast('Inicio de sesión: demo visual')">
+            Entrar
+          </button>
+        </div>
+        <div class="nav-acciones">
+          <!-- CTA coral principal (regla C2); el otro coral es la suscripción del footer (spec §6) -->
+          <button class="btn btn-cta" onclick="abrirModal()">Crear cuenta</button>
+          <button
+            class="burger"
+            id="burger"
+            aria-label="Abrir menú"
+            aria-expanded="false"
+            aria-controls="menu"
+          >
+            <span></span><span></span><span></span>
+          </button>
         </div>
       </div>
-      <a href="#desarrolladores">Desarrolladores</a>
-      <a href="nosotros.html">Nosotros</a>
-      <a href="#contacto">Contacto</a>
-      <button class="link" onclick="mostrarToast('Inicio de sesión: demo visual')">Entrar</button>
-    </div>
-    <div class="nav-acciones">
-      <!-- CTA coral principal (regla C2); el otro coral es la suscripción del footer (spec §6) -->
-      <button class="btn btn-cta" onclick="abrirModal()">Crear cuenta</button>
-      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
-    </div>
-  </div>
-</nav>
+    </nav>
 
-<!-- La banda es el marco del fondo de partículas: al vivir en el flujo normal
+    <!-- La banda es el marco del fondo de partículas: al vivir en el flujo normal
      (y no fija a la ventana) la red sube con el scroll y se queda en el hero. -->
-<div class="hero-banda">
-  <div id="eve-particulas" aria-hidden="true"></div>
-  <header class="wrap hero">
-    <div class="hero-marca">
-      <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-gradiente-corporativo.svg" alt="" width="46" height="32">
+    <div class="hero-banda">
+      <div id="eve-particulas" aria-hidden="true"></div>
+      <header class="wrap hero">
+        <div class="hero-marca">
+          <img
+            src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-gradiente-corporativo.svg"
+            alt=""
+            width="46"
+            height="32"
+          />
+        </div>
+        <h1>Pagos e inteligencia artificial, sin complicaciones</h1>
+        <p>Tarifas transparentes. Tecnología propia. Cero letra menuda.</p>
+        <div class="hero-cta">
+          <a class="btn btn-sec" href="#contacto">Habla con nosotros</a>
+          <a class="link" href="#servicios">Ver cómo funciona →</a>
+        </div>
+      </header>
+      <span class="hero-scroll" aria-hidden="true">
+        Desliza
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 5v14"></path>
+          <path d="m19 12-7 7-7-7"></path>
+        </svg>
+      </span>
     </div>
-    <h1>Pagos e inteligencia artificial, sin complicaciones</h1>
-    <p>Tarifas transparentes. Tecnología propia. Cero letra menuda.</p>
-    <div class="hero-cta">
-      <a class="btn btn-sec" href="#contacto">Habla con nosotros</a>
-      <a class="link" href="#servicios">Ver cómo funciona →</a>
-    </div>
-  </header>
-  <span class="hero-scroll" aria-hidden="true">
-    Desliza
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
-  </span>
-</div>
 
-<section class="banda" aria-label="La red de Evetev">
-  <div class="banda-media">
-    <video autoplay muted loop playsinline preload="metadata" poster="./files/portada-red.jpg" aria-hidden="true">
-      <source src="./files/evepay-background.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="contenido">
-    <h2>Una red que conecta tu negocio con su dinero</h2>
-    <p>Infraestructura propia, monitoreada las 24 horas, diseñada para no fallar en tu mejor día de ventas.</p>
-  </div>
-</section>
+    <section class="banda" aria-label="La red de Evetev">
+      <div class="banda-media">
+        <video
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          poster="./files/portada-red.jpg"
+          aria-hidden="true"
+        >
+          <source src="./files/evepay-background.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <div class="contenido">
+        <h2>Una red que conecta tu negocio con su dinero</h2>
+        <p>
+          Infraestructura propia, monitoreada las 24 horas, diseñada para no fallar en tu mejor día
+          de ventas.
+        </p>
+      </div>
+    </section>
 
-<!-- Sin <hr> aquí a propósito: el borde oscuro del video ya separa con fuerza,
+    <!-- Sin <hr> aquí a propósito: el borde oscuro del video ya separa con fuerza,
      y una línea encima de tanto aire sobraba. -->
-<section id="servicios" class="wrap" style="padding-top:76px">
-  <div class="sec-h">
-    <h2>Productos</h2>
-    <p>Lo que estamos construyendo hoy. Sin adornos.</p>
-  </div>
+    <section id="servicios" class="wrap" style="padding-top: 76px">
+      <div class="sec-h">
+        <h2>Productos</h2>
+        <p>Lo que estamos construyendo hoy. Sin adornos.</p>
+      </div>
 
-  <!-- Cada producto lleva el color de su línea (§12). El ícono NO se redibuja:
+      <!-- Cada producto lleva el color de su línea (§12). El ícono NO se redibuja:
        es la unidad oficial del CDN usada como máscara y teñida con --p (T1). -->
-  <div class="prod">
-    <article style="--p:var(--eve-electrico);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg')">
-      <span class="p-ico" role="img" aria-label="Ícono de EvePay"></span>
-      <h3>EvePay
-        <span class="chip build"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="9"></circle></svg>En construcción</span>
-      </h3>
-      <span class="sub">Plataforma de pagos</span>
-      <p>Nuestra pasarela de pagos. Arquitectura de gateway puro: el dinero va directo del cliente al banco del comercio, sin pasar por nuestra tesorería.</p>
-      <ul>
-        <li>Cobros idempotentes: reintentar nunca cobra dos veces.</li>
-        <li>Libro de movimientos inmutable, en doble partida.</li>
-        <li>Conciliación de lo cobrado contra lo liquidado.</li>
-        <li>Nunca tocamos el número de tarjeta: checkout embebido del proveedor.</li>
-      </ul>
-      <div class="enlaces">
-        <a class="link destacado" href="https://evepay.evetev.com">Conocer EvePay →</a>
-        <a class="link" href="#desarrolladores">Ver cómo se integra →</a>
-      </div>
-    </article>
+      <div class="prod">
+        <article
+          style="
+            --p: var(--eve-electrico);
+            --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+          "
+        >
+          <span class="p-ico" role="img" aria-label="Ícono de EvePay"></span>
+          <h3>
+            EvePay
+            <span class="chip build"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <path d="M12 6v6l4 2"></path>
+                <circle cx="12" cy="12" r="9"></circle></svg
+              >En construcción</span
+            >
+          </h3>
+          <span class="sub">Plataforma de pagos</span>
+          <p>
+            Nuestra pasarela de pagos. Arquitectura de gateway puro: el dinero va directo del
+            cliente al banco del comercio, sin pasar por nuestra tesorería.
+          </p>
+          <ul>
+            <li>Cobros idempotentes: reintentar nunca cobra dos veces.</li>
+            <li>Libro de movimientos inmutable, en doble partida.</li>
+            <li>Conciliación de lo cobrado contra lo liquidado.</li>
+            <li>Nunca tocamos el número de tarjeta: checkout embebido del proveedor.</li>
+          </ul>
+          <div class="enlaces">
+            <a class="link destacado" href="https://evepay.evetev.com">Conocer EvePay →</a>
+            <a class="link" href="#desarrolladores">Ver cómo se integra →</a>
+          </div>
+        </article>
 
-    <article style="--p:var(--eve-mezclado);--u:url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg')">
-      <span class="p-ico" role="img" aria-label="Ícono de EveConecta"></span>
-      <h3>EveConecta
-        <span class="chip build"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="9"></circle></svg>En construcción</span>
-      </h3>
-      <span class="sub">Gestión y recaudo para conjuntos</span>
-      <p>Administración y recaudo para propiedad horizontal. Es además nuestro primer cliente: la prueba, cobrando dinero real, de que EvePay funciona.</p>
-      <ul>
-        <li>Cuotas por coeficiente, estado de cuenta y paz y salvo.</li>
-        <li>Pago en línea del residente y panel de cartera del administrador.</li>
-        <li>Recordatorios con tope de frecuencia y horario respetuoso.</li>
-        <li>Cada movimiento queda auditado: quién, cuándo y por qué.</li>
-      </ul>
-      <div class="enlaces">
-        <a class="link destacado" href="https://eveconecta.evetev.com">Conocer EveConecta →</a>
-        <a class="link" href="#contacto">Hablar de un piloto →</a>
+        <article
+          style="
+            --p: var(--eve-mezclado);
+            --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg&quot;);
+          "
+        >
+          <span class="p-ico" role="img" aria-label="Ícono de EveConecta"></span>
+          <h3>
+            EveConecta
+            <span class="chip build"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <path d="M12 6v6l4 2"></path>
+                <circle cx="12" cy="12" r="9"></circle></svg
+              >En construcción</span
+            >
+          </h3>
+          <span class="sub">Gestión y recaudo para conjuntos</span>
+          <p>
+            Administración y recaudo para propiedad horizontal. Es además nuestro primer cliente: la
+            prueba, cobrando dinero real, de que EvePay funciona.
+          </p>
+          <ul>
+            <li>Cuotas por coeficiente, estado de cuenta y paz y salvo.</li>
+            <li>Pago en línea del residente y panel de cartera del administrador.</li>
+            <li>Recordatorios con tope de frecuencia y horario respetuoso.</li>
+            <li>Cada movimiento queda auditado: quién, cuándo y por qué.</li>
+          </ul>
+          <div class="enlaces">
+            <a class="link destacado" href="https://eveconecta.evetev.com">Conocer EveConecta →</a>
+            <a class="link" href="#contacto">Hablar de un piloto →</a>
+          </div>
+        </article>
       </div>
-    </article>
-  </div>
-</section>
+    </section>
 
-<section id="desarrolladores" class="wrap">
-  <div class="sec-h"><h2>Para comercios y para desarrolladores</h2></div>
-  <div class="tabs" role="tablist" aria-label="Audiencia">
-    <button class="tab act" role="tab" id="tab-t1" aria-controls="t1" aria-selected="true" data-t="t1">Para comercios</button>
-    <button class="tab" role="tab" id="tab-t2" aria-controls="t2" aria-selected="false" data-t="t2">Para desarrolladores</button>
-  </div>
-  <div class="tab-body act" id="t1" role="tabpanel" aria-labelledby="tab-t1">
-    <p>Gateway puro: el dinero va directo del cliente a tu banco, sin pasar por nuestra tesorería. Eso reduce intermediarios y riesgo regulatorio. Cada cobro queda con su historial completo de estados, y la conciliación cuadra lo cobrado contra lo que efectivamente se liquidó — para que “yo sí pagué” se resuelva mirando datos y no discutiendo.</p>
-    <p style="margin-top:12px">Estamos abriendo cupos de piloto con comercios que quieran entrar temprano y ayudarnos a moldear el producto.</p>
-  </div>
-  <div class="tab-body" id="t2" role="tabpanel" aria-labelledby="tab-t2">
-    <p>API REST sobre HTTP, con validación de esquema en cada frontera y tipos compartidos entre la plataforma y quien la consume. Crear un cobro es un <code>POST /pagos</code> con una <code>Idempotency-Key</code>: si reintentas con la misma clave, te devolvemos el cobro que ya existía en vez de cobrar otra vez.</p>
-    <p style="margin-top:12px">El estado lo mueve la realidad, no un <em>polling</em> frágil: los webhooks del proveedor llegan firmados, se verifican y se normalizan a nuestros propios eventos. La máquina de estados es explícita — <code>creado → pendiente → aprobado | fallido → conciliado</code> — y toda transición queda auditada, sin edición ni borrado.</p>
-  </div>
-</section>
-
-<section class="wrap" id="soluciones" style="padding-top:84px;padding-bottom:92px">
-  <div class="sec-h"><h2>Cómo se ve en la práctica</h2><p>Todavía no tenemos casos de clientes que mostrar: estamos en fundación. Esto es lo que la ingeniería ya resuelve.</p></div>
-  <div class="icards">
-    <article class="icard">
-      <svg class="cover" viewBox="0 0 400 220" role="img" aria-label="Ilustración del checkout de EvePay">
-        <defs><linearGradient id="cv1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0A2540"></stop><stop offset="1" stop-color="#1E6FEB"></stop></linearGradient></defs>
-        <rect width="400" height="220" fill="url(#cv1)"></rect>
-        <rect x="52" y="34" width="150" height="152" rx="14" fill="#FFFFFF"></rect>
-        <rect x="68" y="52" width="70" height="8" rx="4" fill="#CBD5E1"></rect>
-        <rect x="68" y="70" width="118" height="14" rx="4" fill="#0A2540"></rect>
-        <rect x="68" y="98" width="118" height="22" rx="6" fill="#EAF2FB"></rect>
-        <rect x="68" y="128" width="118" height="22" rx="6" fill="#EAF2FB"></rect>
-        <rect x="68" y="158" width="118" height="18" rx="9" fill="#144A96"></rect>
-        <rect x="103" y="164" width="48" height="6" rx="3" fill="#FFFFFF"></rect>
-        <circle cx="290" cy="165" r="26" fill="#22D3EE"></circle>
-        <path d="M279 165 l8 8 l15 -16" stroke="#0A2540" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-      </svg>
-      <div class="cuerpo">
-        <h3>Un cobro que no se cobra dos veces</h3>
-        <p>Cada cobro lleva clave de idempotencia y una máquina de estados explícita. El reintento devuelve el cobro que ya existía.</p>
-        <a class="link" href="#desarrolladores">Ver la integración →</a>
+    <section id="desarrolladores" class="wrap">
+      <div class="sec-h"><h2>Para comercios y para desarrolladores</h2></div>
+      <div class="tabs" role="tablist" aria-label="Audiencia">
+        <button
+          class="tab act"
+          role="tab"
+          id="tab-t1"
+          aria-controls="t1"
+          aria-selected="true"
+          data-t="t1"
+        >
+          Para comercios
+        </button>
+        <button
+          class="tab"
+          role="tab"
+          id="tab-t2"
+          aria-controls="t2"
+          aria-selected="false"
+          data-t="t2"
+        >
+          Para desarrolladores
+        </button>
       </div>
-    </article>
-    <article class="icard">
-      <svg class="cover" viewBox="0 0 400 220" role="img" aria-label="Ilustración de una compra con descuento">
-        <defs><linearGradient id="cv3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0E7490"></stop><stop offset="1" stop-color="#22D3EE"></stop></linearGradient></defs>
-        <rect width="400" height="220" fill="url(#cv3)"></rect>
-        <path d="M120 88 L280 88 L262 178 Q260 190 248 190 L152 190 Q140 190 138 178 Z" fill="#FFFFFF"></path>
-        <path d="M160 88 Q160 54 200 54 Q240 54 240 88" stroke="#0A2540" stroke-width="9" fill="none" stroke-linecap="round"></path>
-        <rect x="150" y="112" width="100" height="9" rx="4.5" fill="#CBD5E1"></rect>
-        <rect x="150" y="132" width="72" height="9" rx="4.5" fill="#EAF2FB"></rect>
-        <circle cx="258" cy="72" r="24" fill="#144A96"></circle>
-        <text x="258" y="78" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="15" fill="#FFFFFF">-20%</text>
-      </svg>
-      <div class="cuerpo">
-        <h3>La plata cuadra o se nota</h3>
-        <p>Un libro de movimientos inmutable en doble partida, y una conciliación que cruza lo cobrado contra lo liquidado y reporta cada diferencia.</p>
-        <a class="link" href="#contacto">Conversemos →</a>
+      <div class="tab-body act" id="t1" role="tabpanel" aria-labelledby="tab-t1">
+        <p>
+          Gateway puro: el dinero va directo del cliente a tu banco, sin pasar por nuestra
+          tesorería. Eso reduce intermediarios y riesgo regulatorio. Cada cobro queda con su
+          historial completo de estados, y la conciliación cuadra lo cobrado contra lo que
+          efectivamente se liquidó — para que “yo sí pagué” se resuelva mirando datos y no
+          discutiendo.
+        </p>
+        <p style="margin-top: 12px">
+          Estamos abriendo cupos de piloto con comercios que quieran entrar temprano y ayudarnos a
+          moldear el producto.
+        </p>
       </div>
-    </article>
-  </div>
-</section>
+      <div class="tab-body" id="t2" role="tabpanel" aria-labelledby="tab-t2">
+        <p>
+          API REST sobre HTTP, con validación de esquema en cada frontera y tipos compartidos entre
+          la plataforma y quien la consume. Crear un cobro es un <code>POST /pagos</code> con una
+          <code>Idempotency-Key</code>: si reintentas con la misma clave, te devolvemos el cobro que
+          ya existía en vez de cobrar otra vez.
+        </p>
+        <p style="margin-top: 12px">
+          El estado lo mueve la realidad, no un <em>polling</em> frágil: los webhooks del proveedor
+          llegan firmados, se verifican y se normalizan a nuestros propios eventos. La máquina de
+          estados es explícita — <code>creado → pendiente → aprobado | fallido → conciliado</code> —
+          y toda transición queda auditada, sin edición ni borrado.
+        </p>
+      </div>
+    </section>
 
-<!-- COTIZADOR OCULTO POR AHORA (jul-2026): se muestra cuando haya tarifas
+    <section class="wrap" id="soluciones" style="padding-top: 84px; padding-bottom: 92px">
+      <div class="sec-h">
+        <h2>Cómo se ve en la práctica</h2>
+        <p>
+          Todavía no tenemos casos de clientes que mostrar: estamos en fundación. Esto es lo que la
+          ingeniería ya resuelve.
+        </p>
+      </div>
+      <div class="icards">
+        <article class="icard">
+          <svg
+            class="cover"
+            viewBox="0 0 400 220"
+            role="img"
+            aria-label="Ilustración del checkout de EvePay"
+          >
+            <defs>
+              <linearGradient id="cv1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#0A2540"></stop>
+                <stop offset="1" stop-color="#1E6FEB"></stop>
+              </linearGradient>
+            </defs>
+            <rect width="400" height="220" fill="url(#cv1)"></rect>
+            <rect x="52" y="34" width="150" height="152" rx="14" fill="#FFFFFF"></rect>
+            <rect x="68" y="52" width="70" height="8" rx="4" fill="#CBD5E1"></rect>
+            <rect x="68" y="70" width="118" height="14" rx="4" fill="#0A2540"></rect>
+            <rect x="68" y="98" width="118" height="22" rx="6" fill="#EAF2FB"></rect>
+            <rect x="68" y="128" width="118" height="22" rx="6" fill="#EAF2FB"></rect>
+            <rect x="68" y="158" width="118" height="18" rx="9" fill="#144A96"></rect>
+            <rect x="103" y="164" width="48" height="6" rx="3" fill="#FFFFFF"></rect>
+            <circle cx="290" cy="165" r="26" fill="#22D3EE"></circle>
+            <path
+              d="M279 165 l8 8 l15 -16"
+              stroke="#0A2540"
+              stroke-width="5"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></path>
+          </svg>
+          <div class="cuerpo">
+            <h3>Un cobro que no se cobra dos veces</h3>
+            <p>
+              Cada cobro lleva clave de idempotencia y una máquina de estados explícita. El
+              reintento devuelve el cobro que ya existía.
+            </p>
+            <a class="link" href="#desarrolladores">Ver la integración →</a>
+          </div>
+        </article>
+        <article class="icard">
+          <svg
+            class="cover"
+            viewBox="0 0 400 220"
+            role="img"
+            aria-label="Ilustración de una compra con descuento"
+          >
+            <defs>
+              <linearGradient id="cv3" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#0E7490"></stop>
+                <stop offset="1" stop-color="#22D3EE"></stop>
+              </linearGradient>
+            </defs>
+            <rect width="400" height="220" fill="url(#cv3)"></rect>
+            <path
+              d="M120 88 L280 88 L262 178 Q260 190 248 190 L152 190 Q140 190 138 178 Z"
+              fill="#FFFFFF"
+            ></path>
+            <path
+              d="M160 88 Q160 54 200 54 Q240 54 240 88"
+              stroke="#0A2540"
+              stroke-width="9"
+              fill="none"
+              stroke-linecap="round"
+            ></path>
+            <rect x="150" y="112" width="100" height="9" rx="4.5" fill="#CBD5E1"></rect>
+            <rect x="150" y="132" width="72" height="9" rx="4.5" fill="#EAF2FB"></rect>
+            <circle cx="258" cy="72" r="24" fill="#144A96"></circle>
+            <text
+              x="258"
+              y="78"
+              text-anchor="middle"
+              font-family="Arial"
+              font-weight="bold"
+              font-size="15"
+              fill="#FFFFFF"
+            >
+              -20%
+            </text>
+          </svg>
+          <div class="cuerpo">
+            <h3>La plata cuadra o se nota</h3>
+            <p>
+              Un libro de movimientos inmutable en doble partida, y una conciliación que cruza lo
+              cobrado contra lo liquidado y reporta cada diferencia.
+            </p>
+            <a class="link" href="#contacto">Conversemos →</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- COTIZADOR OCULTO POR AHORA (jul-2026): se muestra cuando haya tarifas
      reales que enseñar. Para reactivarlo: descomentar esta sección Y el bloque
      JS del calculador (marcado igual más abajo), y restaurar los enlaces
      "Precios" del nav y el footer y el CTA "Calcular mi costo" del hero.
@@ -240,196 +461,450 @@
 </section>
 -->
 
-
-<section id="contacto" class="wrap" style="padding-top:84px">
-  <div class="contacto-grid">
-  <div class="contacto">
-    <h2>Hablemos de tu proyecto</h2>
-    <p>Cuéntanos qué necesitas y te respondemos en un día hábil.</p>
-    <div class="campo">
-      <label for="fNombre">Nombre</label>
-      <input type="text" id="fNombre" placeholder="María Rodríguez" aria-describedby="errNombre">
-      <p class="err" id="errNombre">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
-        <span>Cuéntanos tu nombre para responderte.</span>
-      </p>
-    </div>
-    <div class="campo">
-      <label for="fEmail">Correo empresarial</label>
-      <input type="email" id="fEmail" placeholder="maria@tuempresa.co" aria-describedby="errEmail">
-      <p class="err" id="errEmail">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
-        <span>Necesitamos un correo válido para responderte.</span>
-      </p>
-    </div>
-    <div class="campo">
-      <label for="fTam">Tamaño de tu empresa</label>
-      <select id="fTam">
-        <option>1 a 10 personas</option>
-        <option>11 a 50 personas</option>
-        <option>51 a 200 personas</option>
-        <option>Más de 200</option>
-      </select>
-    </div>
-    <div class="campo">
-      <label>Me interesa</label>
-      <div class="checks">
-        <label class="chk"><input type="checkbox" checked=""><span>EvePay</span></label>
-        <label class="chk"><input type="checkbox"><span>EveConecta</span></label>
-      </div>
-    </div>
-    <div class="campo">
-      <label for="fMensaje">Cuéntanos qué necesitas</label>
-      <textarea id="fMensaje" placeholder="Qué problema quieres resolver, en qué punto estás y cómo podemos ayudarte."></textarea>
-    </div>
-    <!-- Trampa antibots: oculta y fuera del orden de foco, invisible para
+    <section id="contacto" class="wrap" style="padding-top: 84px">
+      <div class="contacto-grid">
+        <div class="contacto">
+          <h2>Hablemos de tu proyecto</h2>
+          <p>Cuéntanos qué necesitas y te respondemos en un día hábil.</p>
+          <div class="campo">
+            <label for="fNombre">Nombre</label>
+            <input
+              type="text"
+              id="fNombre"
+              placeholder="María Rodríguez"
+              aria-describedby="errNombre"
+            />
+            <p class="err" id="errNombre">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 8v4"></path>
+                <path d="M12 16h.01"></path>
+              </svg>
+              <span>Cuéntanos tu nombre para responderte.</span>
+            </p>
+          </div>
+          <div class="campo">
+            <label for="fEmail">Correo empresarial</label>
+            <input
+              type="email"
+              id="fEmail"
+              placeholder="maria@tuempresa.co"
+              aria-describedby="errEmail"
+            />
+            <p class="err" id="errEmail">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 8v4"></path>
+                <path d="M12 16h.01"></path>
+              </svg>
+              <span>Necesitamos un correo válido para responderte.</span>
+            </p>
+          </div>
+          <div class="campo">
+            <label for="fTam">Tamaño de tu empresa</label>
+            <select id="fTam">
+              <option>1 a 10 personas</option>
+              <option>11 a 50 personas</option>
+              <option>51 a 200 personas</option>
+              <option>Más de 200</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Me interesa</label>
+            <div class="checks">
+              <label class="chk"><input type="checkbox" checked="" /><span>EvePay</span></label>
+              <label class="chk"><input type="checkbox" /><span>EveConecta</span></label>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="fMensaje">Cuéntanos qué necesitas</label>
+            <textarea
+              id="fMensaje"
+              placeholder="Qué problema quieres resolver, en qué punto estás y cómo podemos ayudarte."
+            ></textarea>
+          </div>
+          <!-- Trampa antibots: oculta y fuera del orden de foco, invisible para
          lectores de pantalla. Si llega llena, el envío se descarta. -->
-    <div class="trampa" aria-hidden="true">
-      <label for="fSitio">No llenar</label>
-      <input type="text" id="fSitio" tabindex="-1" autocomplete="off">
-    </div>
-    <button class="btn btn-sec" id="btnContacto" onclick="enviarForm()">Enviar mensaje</button>
-    <p class="ayuda" style="margin-top:14px">Usamos tus datos solo para responder a esta consulta. Nada de listas ni terceros.</p>
-  </div>
+          <div class="trampa" aria-hidden="true">
+            <label for="fSitio">No llenar</label>
+            <input type="text" id="fSitio" tabindex="-1" autocomplete="off" />
+          </div>
+          <button class="btn btn-sec" id="btnContacto" onclick="enviarForm()">
+            Enviar mensaje
+          </button>
+          <p class="ayuda" style="margin-top: 14px">
+            Usamos tus datos solo para responder a esta consulta. Nada de listas ni terceros.
+          </p>
+        </div>
 
-  <!-- Antes había medio ancho vacío a la derecha del formulario. Aquí van los
+        <!-- Antes había medio ancho vacío a la derecha del formulario. Aquí van los
        motivos para elegir Evetev, todos verdaderos (perfil corporativo + marca).
        Mascota decorativa servida por jsDelivr fijada a un commit. -->
-  <aside class="por-que" aria-label="Por qué elegir Evetev">
-    <video class="por-que-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-      <source src="./files/mascota_saludando.mp4" type="video/mp4">
-    </video>
-    <h3>¿Por qué elegir Evetev?</h3>
-    <ul>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span><b>Tarifas transparentes.</b> Publicadas y predecibles, sin letra menuda.</span></li>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span><b>Tu dinero, directo a tu banco.</b> Somos gateway puro: no pasa por nuestra tesorería.</span></li>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span><b>Seguridad de nivel bancario.</b> Nunca tocamos el número de tu tarjeta.</span></li>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span><b>Construido por ingenieros,</b> no por vendedores de humo.</span></li>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span><b>Sin permanencia.</b> Preferimos que te quedes por el producto.</span></li>
-    </ul>
-  </aside>
-  </div>
-</section>
+        <aside class="por-que" aria-label="Por qué elegir Evetev">
+          <video
+            class="por-que-video"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            aria-hidden="true"
+          >
+            <source src="./files/mascota_saludando.mp4" type="video/mp4" />
+          </video>
+          <h3>¿Por qué elegir Evetev?</h3>
+          <ul>
+            <li>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M20 6 9 17l-5-5"></path></svg
+              ><span
+                ><b>Tarifas transparentes.</b> Publicadas y predecibles, sin letra menuda.</span
+              >
+            </li>
+            <li>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M20 6 9 17l-5-5"></path></svg
+              ><span
+                ><b>Tu dinero, directo a tu banco.</b> Somos gateway puro: no pasa por nuestra
+                tesorería.</span
+              >
+            </li>
+            <li>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M20 6 9 17l-5-5"></path></svg
+              ><span
+                ><b>Seguridad de nivel bancario.</b> Nunca tocamos el número de tu tarjeta.</span
+              >
+            </li>
+            <li>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M20 6 9 17l-5-5"></path></svg
+              ><span><b>Construido por ingenieros,</b> no por vendedores de humo.</span>
+            </li>
+            <li>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M20 6 9 17l-5-5"></path></svg
+              ><span><b>Sin permanencia.</b> Preferimos que te quedes por el producto.</span>
+            </li>
+          </ul>
+        </aside>
+      </div>
+    </section>
 
-<section id="faq" class="wrap" style="max-width:700px;padding-top:0">
-  <div class="sec-h"><h2>Preguntas frecuentes</h2></div>
-  <details><summary>¿Ya puedo usar EvePay?</summary><p>Todavía no en producción. Estamos en etapa de fundación: el núcleo de pagos ya está construido —cobros idempotentes, libro de movimientos, webhooks y conciliación— y en paralelo corre la habilitación con la adquirencia, que no es un trámite automático y toma semanas. Si quieres entrar como piloto, escríbenos y te contamos en qué punto vamos, sin adornos.</p></details>
-  <details><summary>¿Cómo cobran exactamente?</summary><p>Un porcentaje por transacción aprobada más un componente fijo, y una suscripción mensual por el software. Todo publicado, sin escalas escondidas. Las cifras que manejamos hoy son <b>de referencia</b>; las definitivas se cierran contigo antes de firmar.</p></details>
-  <details><summary>¿Dónde queda mi dinero mientras tanto?</summary><p>En ningún lado nuestro. Somos gateway puro: el dinero fluye directo del banco de tu cliente a tu cuenta. Nosotros no somos tesorería, y esa decisión de arquitectura es también la que nos quita riesgo regulatorio de encima.</p></details>
-  <details><summary>¿Qué es EveConecta?</summary><p>Nuestra solución de gestión y recaudo para conjuntos residenciales: cuotas por coeficiente, estado de cuenta, pago en línea del residente y paz y salvo. Es también nuestro primer cliente — la usamos para probar EvePay cobrando dinero real antes de pedirle a nadie más que confíe en él.</p></details>
-  <details><summary>¿Qué hacen con los datos de las personas?</summary><p>Pedimos lo mínimo para prestar el servicio y nada más. Los datos de cada cliente están aislados a nivel de base de datos, no solo por una condición en el código. No guardamos números de tarjeta en ningún momento: el dato sensible lo captura el checkout embebido del proveedor. Y no publicamos listados de deudores.</p></details>
-  <details><summary>¿Puedo cancelar cuando quiera?</summary><p>Sí. Sin permanencia y sin penalidades: preferimos que te quedes por el producto y no por un contrato.</p></details>
-</section>
+    <section id="faq" class="wrap" style="max-width: 700px; padding-top: 0">
+      <div class="sec-h"><h2>Preguntas frecuentes</h2></div>
+      <details>
+        <summary>¿Ya puedo usar EvePay?</summary>
+        <p>
+          Todavía no en producción. Estamos en etapa de fundación: el núcleo de pagos ya está
+          construido —cobros idempotentes, libro de movimientos, webhooks y conciliación— y en
+          paralelo corre la habilitación con la adquirencia, que no es un trámite automático y toma
+          semanas. Si quieres entrar como piloto, escríbenos y te contamos en qué punto vamos, sin
+          adornos.
+        </p>
+      </details>
+      <details>
+        <summary>¿Cómo cobran exactamente?</summary>
+        <p>
+          Un porcentaje por transacción aprobada más un componente fijo, y una suscripción mensual
+          por el software. Todo publicado, sin escalas escondidas. Las cifras que manejamos hoy son
+          <b>de referencia</b>; las definitivas se cierran contigo antes de firmar.
+        </p>
+      </details>
+      <details>
+        <summary>¿Dónde queda mi dinero mientras tanto?</summary>
+        <p>
+          En ningún lado nuestro. Somos gateway puro: el dinero fluye directo del banco de tu
+          cliente a tu cuenta. Nosotros no somos tesorería, y esa decisión de arquitectura es
+          también la que nos quita riesgo regulatorio de encima.
+        </p>
+      </details>
+      <details>
+        <summary>¿Qué es EveConecta?</summary>
+        <p>
+          Nuestra solución de gestión y recaudo para conjuntos residenciales: cuotas por
+          coeficiente, estado de cuenta, pago en línea del residente y paz y salvo. Es también
+          nuestro primer cliente — la usamos para probar EvePay cobrando dinero real antes de
+          pedirle a nadie más que confíe en él.
+        </p>
+      </details>
+      <details>
+        <summary>¿Qué hacen con los datos de las personas?</summary>
+        <p>
+          Pedimos lo mínimo para prestar el servicio y nada más. Los datos de cada cliente están
+          aislados a nivel de base de datos, no solo por una condición en el código. No guardamos
+          números de tarjeta en ningún momento: el dato sensible lo captura el checkout embebido del
+          proveedor. Y no publicamos listados de deudores.
+        </p>
+      </details>
+      <details>
+        <summary>¿Puedo cancelar cuando quiera?</summary>
+        <p>
+          Sí. Sin permanencia y sin penalidades: preferimos que te quedes por el producto y no por
+          un contrato.
+        </p>
+      </details>
+    </section>
 
-<!-- Adelanto de Nosotros: la página completa vive en nosotros.html para no
+    <!-- Adelanto de Nosotros: la página completa vive en nosotros.html para no
      alargar la portada, que tiene que seguir enfocada en el producto. -->
-<section class="precios" style="padding:56px 0">
-  <div class="wrap">
-    <div class="sec-h" style="margin-bottom:18px">
-      <h2>Construido por ingenieros</h2>
-      <p style="max-width:60ch">Somos una compañía colombiana de tecnología, constituida en Bogotá en 2026. Un equipo pequeño que cubre el ciclo completo: ingeniería, operaciones y comercial. Creemos que la tecnología avanzada solo vale si resuelve un problema común de forma simple y a un costo justo.</p>
+    <section class="precios" style="padding: 56px 0">
+      <div class="wrap">
+        <div class="sec-h" style="margin-bottom: 18px">
+          <h2>Construido por ingenieros</h2>
+          <p style="max-width: 60ch">
+            Somos una compañía colombiana de tecnología, constituida en Bogotá en 2026. Un equipo
+            pequeño que cubre el ciclo completo: ingeniería, operaciones y comercial. Creemos que la
+            tecnología avanzada solo vale si resuelve un problema común de forma simple y a un costo
+            justo.
+          </p>
+        </div>
+        <a class="btn btn-sec" href="nosotros.html">Sobre Nosotros</a>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <div class="foot-top">
+          <div class="foot-marca">
+            <img
+              src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-cian.svg"
+              alt=""
+              width="40"
+              height="28"
+            />
+            <span class="brand">Evetev</span>
+            <p>
+              Pagos e inteligencia artificial para la empresa latinoamericana. Construido por
+              ingenieros.
+            </p>
+          </div>
+          <div class="foot-col">
+            <h4>Productos</h4>
+            <a href="#servicios">EvePay</a>
+            <a href="#servicios">EveConecta</a>
+          </div>
+          <div class="foot-col">
+            <h4>Empresa</h4>
+            <a href="nosotros.html">Nosotros</a>
+            <!-- <a href="nosotros.html#equipo">Equipo</a> -->
+            <!-- oculto con la sección «El equipo» de nosotros.html (19-ago-2026) -->
+            <a href="#contacto">Contacto</a>
+            <a href="nosotros.html#trabaja">Trabaja con nosotros</a>
+          </div>
+          <div class="foot-col">
+            <h4>Recursos</h4>
+            <a href="#desarrolladores">Documentación API</a>
+            <a href="#faq">Preguntas frecuentes</a>
+            <a href="mailto:contacto@evetev.com">contacto@evetev.com</a>
+          </div>
+        </div>
+        <div class="suscribe">
+          <p>Novedades de producto, una vez al mes. Sin spam.</p>
+          <div class="sus-row">
+            <input
+              type="email"
+              id="susEmail"
+              placeholder="tu@empresa.co"
+              aria-label="Correo para novedades"
+            />
+            <button class="btn btn-cta" onclick="suscribir()">Suscribirme</button>
+          </div>
+        </div>
+        <div class="foot-base">
+          <span
+            >© 2026 Evetev S.A.S. · Bogotá, Colombia · Términos · Privacidad · Tratamiento de
+            datos</span
+          >
+          <div class="redes">
+            <a href="#" aria-label="LinkedIn"
+              ><svg viewBox="0 0 24 24">
+                <path
+                  d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V23h-4V8zm7.5 0h3.8v2.05h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V23h-4v-7.9c0-1.88-.03-4.3-2.62-4.3-2.63 0-3.03 2.05-3.03 4.17V23H8V8z"
+                ></path></svg
+            ></a>
+            <a href="#" aria-label="X"
+              ><svg viewBox="0 0 24 24">
+                <path
+                  d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.4l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.6l5.24 6.93 6.06-6.93zm-1.29 19.5h2.04L6.49 3.24H4.3l13.31 17.41z"
+                ></path></svg
+            ></a>
+            <a href="#" aria-label="Instagram"
+              ><svg viewBox="0 0 24 24">
+                <path
+                  d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.21 8.8 2.2 12 2.2zm0 2.2c-3.15 0-3.5.01-4.74.07-1.08.05-1.67.23-2.06.38-.52.2-.89.44-1.28.83-.39.39-.63.76-.83 1.28-.15.39-.33.98-.38 2.06-.06 1.23-.07 1.59-.07 4.74s.01 3.5.07 4.74c.05 1.08.23 1.67.38 2.06.2.52.44.89.83 1.28.39.39.76.63 1.28.83.39.15.98.33 2.06.38 1.23.06 1.59.07 4.74.07s3.5-.01 4.74-.07c1.08-.05 1.67-.23 2.06-.38.52-.2.89-.44 1.28-.83.39-.39.76-.63.83-1.28.15-.39.33-.98.38-2.06.06-1.23.07-1.59.07-4.74s-.01-3.5-.07-4.74c-.05-1.08-.23-1.67-.38-2.06-.2-.52-.44-.89-.83-1.28a3.06 3.06 0 0 0-1.28-.83c-.39-.15-.98-.33-2.06-.38-1.23-.06-1.59-.07-4.74-.07zm0 3.74a5.86 5.86 0 1 1 0 11.72 5.86 5.86 0 0 1 0-11.72zm0 2.2a3.66 3.66 0 1 0 0 7.32 3.66 3.66 0 0 0 0-7.32zm6.1-2.46a1.37 1.37 0 1 1-2.74 0 1.37 1.37 0 0 1 2.74 0z"
+                ></path></svg
+            ></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+      <div class="modal">
+        <img
+          src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg"
+          alt=""
+          width="52"
+          height="37"
+        />
+        <h3 id="modalTitulo">Cuenta creada (demo)</h3>
+        <p>Así se sentiría la confirmación: silenciosa, clara y sin pasos de más.</p>
+        <button class="btn btn-sec" style="width: 100%" onclick="cerrarModal()">Entendido</button>
+      </div>
     </div>
-    <a class="btn btn-sec" href="nosotros.html">Sobre Nosotros</a>
-  </div>
-</section>
 
-<footer>
-  <div class="wrap">
-    <div class="foot-top">
-      <div class="foot-marca">
-        <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-cian.svg" alt="" width="40" height="28">
-        <span class="brand">Evetev</span>
-        <p>Pagos e inteligencia artificial para la empresa latinoamericana. Construido por ingenieros.</p>
-      </div>
-      <div class="foot-col">
-        <h4>Productos</h4>
-        <a href="#servicios">EvePay</a>
-        <a href="#servicios">EveConecta</a>
-      </div>
-      <div class="foot-col">
-        <h4>Empresa</h4>
-        <a href="nosotros.html">Nosotros</a>
-        <!-- <a href="nosotros.html#equipo">Equipo</a> --> <!-- oculto con la sección «El equipo» de nosotros.html (19-ago-2026) -->
-        <a href="#contacto">Contacto</a>
-        <a href="nosotros.html#trabaja">Trabaja con nosotros</a>
-      </div>
-      <div class="foot-col">
-        <h4>Recursos</h4>
-        <a href="#desarrolladores">Documentación API</a>
-        <a href="#faq">Preguntas frecuentes</a>
-        <a href="mailto:contacto@evetev.com">contacto@evetev.com</a>
-      </div>
+    <button
+      class="eve-fab"
+      onclick="toggleEve()"
+      aria-label="Abrir asistente Eve"
+      aria-expanded="false"
+      aria-controls="eveBurbuja"
+    >
+      <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/mascota/mascota.webp" alt="" />
+    </button>
+    <div class="eve-burbuja" id="eveBurbuja" role="dialog" aria-label="Mensaje de Eve">
+      <p>
+        <b>¡Hola! Soy Eve.</b> Cuido que tus pagos lleguen y tus preguntas no se queden sin
+        respuesta. ¿Hablamos?
+      </p>
+      <a
+        class="btn btn-sec"
+        href="#contacto"
+        onclick="toggleEve()"
+        style="display: block; font-size: 0.8rem; padding: 9px 16px"
+        >Ir al formulario</a
+      >
     </div>
-    <div class="suscribe">
-      <p>Novedades de producto, una vez al mes. Sin spam.</p>
-      <div class="sus-row">
-        <input type="email" id="susEmail" placeholder="tu@empresa.co" aria-label="Correo para novedades">
-        <button class="btn btn-cta" onclick="suscribir()">Suscribirme</button>
-      </div>
+
+    <div class="toast" id="toast" role="status">
+      <svg
+        class="t-ico-ok"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8 12.5l2.5 2.5L16 9.5"></path>
+      </svg>
+      <svg
+        class="t-ico-err"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        style="display: none"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 8v4"></path>
+        <path d="M12 16h.01"></path>
+      </svg>
+      <span id="toastTxt">Mensaje enviado.</span>
     </div>
-    <div class="foot-base">
-      <span>© 2026 Evetev S.A.S. · Bogotá, Colombia · Términos · Privacidad · Tratamiento de datos</span>
-      <div class="redes">
-        <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V23h-4V8zm7.5 0h3.8v2.05h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V23h-4v-7.9c0-1.88-.03-4.3-2.62-4.3-2.63 0-3.03 2.05-3.03 4.17V23H8V8z"></path></svg></a>
-        <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.4l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.6l5.24 6.93 6.06-6.93zm-1.29 19.5h2.04L6.49 3.24H4.3l13.31 17.41z"></path></svg></a>
-        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.21 8.8 2.2 12 2.2zm0 2.2c-3.15 0-3.5.01-4.74.07-1.08.05-1.67.23-2.06.38-.52.2-.89.44-1.28.83-.39.39-.63.76-.83 1.28-.15.39-.33.98-.38 2.06-.06 1.23-.07 1.59-.07 4.74s.01 3.5.07 4.74c.05 1.08.23 1.67.38 2.06.2.52.44.89.83 1.28.39.39.76.63 1.28.83.39.15.98.33 2.06.38 1.23.06 1.59.07 4.74.07s3.5-.01 4.74-.07c1.08-.05 1.67-.23 2.06-.38.52-.2.89-.44 1.28-.83.39-.39.76-.63.83-1.28.15-.39.33-.98.38-2.06.06-1.23.07-1.59.07-4.74s-.01-3.5-.07-4.74c-.05-1.08-.23-1.67-.38-2.06-.2-.52-.44-.89-.83-1.28a3.06 3.06 0 0 0-1.28-.83c-.39-.15-.98-.33-2.06-.38-1.23-.06-1.59-.07-4.74-.07zm0 3.74a5.86 5.86 0 1 1 0 11.72 5.86 5.86 0 0 1 0-11.72zm0 2.2a3.66 3.66 0 1 0 0 7.32 3.66 3.66 0 0 0 0-7.32zm6.1-2.46a1.37 1.37 0 1 1-2.74 0 1.37 1.37 0 0 1 2.74 0z"></path></svg></a>
-      </div>
-    </div>
-  </div>
-</footer>
 
-<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
-  <div class="modal">
-    <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg" alt="" width="52" height="37">
-    <h3 id="modalTitulo">Cuenta creada (demo)</h3>
-    <p>Así se sentiría la confirmación: silenciosa, clara y sin pasos de más.</p>
-    <button class="btn btn-sec" style="width:100%" onclick="cerrarModal()">Entendido</button>
-  </div>
-</div>
+    <script src="formularios.js"></script>
+    <script>
+      const burger = document.getElementById("burger"),
+        menu = document.getElementById("menu");
+      burger.addEventListener("click", () => {
+        menu.classList.toggle("open");
+        burger.setAttribute("aria-expanded", menu.classList.contains("open"));
+      });
+      menu
+        .querySelectorAll("a")
+        .forEach((a) => a.addEventListener("click", () => menu.classList.remove("open")));
 
-<button class="eve-fab" onclick="toggleEve()" aria-label="Abrir asistente Eve" aria-expanded="false" aria-controls="eveBurbuja">
-  <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/mascota/mascota.webp" alt="">
-</button>
-<div class="eve-burbuja" id="eveBurbuja" role="dialog" aria-label="Mensaje de Eve">
-  <p><b>¡Hola! Soy Eve.</b> Cuido que tus pagos lleguen y tus preguntas no se queden sin respuesta. ¿Hablamos?</p>
-  <a class="btn btn-sec" href="#contacto" onclick="toggleEve()" style="display:block;font-size:.8rem;padding:9px 16px">Ir al formulario</a>
-</div>
+      const drop = document.getElementById("drop1");
+      const dropBtn = drop.querySelector("button");
+      dropBtn.addEventListener("click", () => {
+        drop.classList.toggle("open");
+        dropBtn.setAttribute("aria-expanded", drop.classList.contains("open"));
+      });
+      document.addEventListener("click", (e) => {
+        if (!drop.contains(e.target)) {
+          drop.classList.remove("open");
+          dropBtn.setAttribute("aria-expanded", "false");
+        }
+        if (!menu.contains(e.target) && !burger.contains(e.target)) menu.classList.remove("open");
+      });
 
-<div class="toast" id="toast" role="status">
-  <svg class="t-ico-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M8 12.5l2.5 2.5L16 9.5"></path></svg>
-  <svg class="t-ico-err" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
-  <span id="toastTxt">Mensaje enviado.</span>
-</div>
+      document.querySelectorAll(".tab").forEach((t) =>
+        t.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach((x) => {
+            x.classList.remove("act");
+            x.setAttribute("aria-selected", "false");
+          });
+          document.querySelectorAll(".tab-body").forEach((x) => x.classList.remove("act"));
+          t.classList.add("act");
+          t.setAttribute("aria-selected", "true");
+          document.getElementById(t.dataset.t).classList.add("act");
+        })
+      );
 
-<script src="formularios.js"></script>
-<script>
-const burger = document.getElementById('burger'), menu = document.getElementById('menu');
-burger.addEventListener('click', () => {
-  menu.classList.toggle('open');
-  burger.setAttribute('aria-expanded', menu.classList.contains('open'));
-});
-menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('open')));
-
-const drop = document.getElementById('drop1');
-const dropBtn = drop.querySelector('button');
-dropBtn.addEventListener('click', () => {
-  drop.classList.toggle('open');
-  dropBtn.setAttribute('aria-expanded', drop.classList.contains('open'));
-});
-document.addEventListener('click', e => {
-  if(!drop.contains(e.target)) { drop.classList.remove('open'); dropBtn.setAttribute('aria-expanded','false'); }
-  if(!menu.contains(e.target) && !burger.contains(e.target)) menu.classList.remove('open');
-});
-
-document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
-  document.querySelectorAll('.tab').forEach(x => { x.classList.remove('act'); x.setAttribute('aria-selected','false'); });
-  document.querySelectorAll('.tab-body').forEach(x => x.classList.remove('act'));
-  t.classList.add('act');
-  t.setAttribute('aria-selected','true');
-  document.getElementById(t.dataset.t).classList.add('act');
-}));
-
-/* CALCULADOR DEL COTIZADOR — desactivado junto con su sección (jul-2026).
+      /* CALCULADOR DEL COTIZADOR — desactivado junto con su sección (jul-2026).
    Sin la sección, estos getElementById devuelven null y romperían el resto del
    script. Reactivar junto con la sección #precios de arriba.
 const txs = document.getElementById('txs'), anual = document.getElementById('anual');
@@ -449,112 +924,140 @@ function precio(){
 txs.addEventListener('input', precio); anual.addEventListener('change', precio); precio();
 */
 
-const overlay = document.getElementById('overlay');
-function abrirModal(){ overlay.classList.add('open'); }
-function cerrarModal(){ overlay.classList.remove('open'); }
-overlay.addEventListener('click', e => { if(e.target === overlay) cerrarModal(); });
-document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarModal(); });
+      const overlay = document.getElementById("overlay");
+      function abrirModal() {
+        overlay.classList.add("open");
+      }
+      function cerrarModal() {
+        overlay.classList.remove("open");
+      }
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) cerrarModal();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") cerrarModal();
+      });
 
-function mostrarToast(msj, tipo){
-  const t = document.getElementById('toast');
-  document.getElementById('toastTxt').textContent = msj || 'Mensaje enviado.';
-  t.querySelector('.t-ico-ok').style.display = tipo === 'error' ? 'none' : '';
-  t.querySelector('.t-ico-err').style.display = tipo === 'error' ? '' : 'none';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
-}
-function enviarForm(){
-  const n = document.getElementById('fNombre'), errN = document.getElementById('errNombre');
-  const c = document.getElementById('fEmail'), errC = document.getElementById('errEmail');
+      function mostrarToast(msj, tipo) {
+        const t = document.getElementById("toast");
+        document.getElementById("toastTxt").textContent = msj || "Mensaje enviado.";
+        t.querySelector(".t-ico-ok").style.display = tipo === "error" ? "none" : "";
+        t.querySelector(".t-ico-err").style.display = tipo === "error" ? "" : "none";
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2600);
+      }
+      function enviarForm() {
+        const n = document.getElementById("fNombre"),
+          errN = document.getElementById("errNombre");
+        const c = document.getElementById("fEmail"),
+          errC = document.getElementById("errEmail");
 
-  const faltaNombre = marcarCampo(n, errN, !n.value.trim());
-  const correoMal   = marcarCampo(c, errC, !correoPlausible(c.value.trim()));
-  if(faltaNombre){ n.focus(); return; }
-  if(correoMal){ c.focus(); return; }
+        const faltaNombre = marcarCampo(n, errN, !n.value.trim());
+        const correoMal = marcarCampo(c, errC, !correoPlausible(c.value.trim()));
+        if (faltaNombre) {
+          n.focus();
+          return;
+        }
+        if (correoMal) {
+          c.focus();
+          return;
+        }
 
-  const interes = [...document.querySelectorAll('.checks input:checked')]
-    .map(i => i.nextElementSibling.textContent.trim()).join(', ');
+        const interes = [...document.querySelectorAll(".checks input:checked")]
+          .map((i) => i.nextElementSibling.textContent.trim())
+          .join(", ");
 
-  enviarAlServidor({
-    tipo: 'contacto',
-    nombre: n.value.trim(),
-    correo: c.value.trim(),
-    empresa: document.getElementById('fTam').value,
-    interes,
-    mensaje: document.getElementById('fMensaje').value.trim(),
-    origen: 'evetev.com — formulario de contacto',
-    sitio: document.getElementById('fSitio').value
-  }, document.getElementById('btnContacto'), res => {
-    if(res.ok){
-      const nombre = n.value.trim();
-      ['fNombre','fEmail','fMensaje'].forEach(id => { document.getElementById(id).value = ''; });
-      mostrarToast('Gracias, ' + nombre + '. Te respondemos en un día hábil.');
-    } else {
-      mostrarToast(mensajeDeError(res.error), 'error');
-    }
-  });
-}
-['fNombre','fEmail'].forEach(id => {
-  const campo = document.getElementById(id);
-  campo.addEventListener('input', () => {
-    document.getElementById(id === 'fNombre' ? 'errNombre' : 'errEmail').classList.remove('show');
-    campo.removeAttribute('aria-invalid');
-  });
-});
-/* Mascota Eve.
+        enviarAlServidor(
+          {
+            tipo: "contacto",
+            nombre: n.value.trim(),
+            correo: c.value.trim(),
+            empresa: document.getElementById("fTam").value,
+            interes,
+            mensaje: document.getElementById("fMensaje").value.trim(),
+            origen: "evetev.com — formulario de contacto",
+            sitio: document.getElementById("fSitio").value
+          },
+          document.getElementById("btnContacto"),
+          (res) => {
+            if (res.ok) {
+              const nombre = n.value.trim();
+              ["fNombre", "fEmail", "fMensaje"].forEach((id) => {
+                document.getElementById(id).value = "";
+              });
+              mostrarToast("Gracias, " + nombre + ". Te respondemos en un día hábil.");
+            } else {
+              mostrarToast(mensajeDeError(res.error), "error");
+            }
+          }
+        );
+      }
+      ["fNombre", "fEmail"].forEach((id) => {
+        const campo = document.getElementById(id);
+        campo.addEventListener("input", () => {
+          document
+            .getElementById(id === "fNombre" ? "errNombre" : "errEmail")
+            .classList.remove("show");
+          campo.removeAttribute("aria-invalid");
+        });
+      });
+      /* Mascota Eve.
    La burbuja ya no arranca abierta: en móvil se comía la banda de video, que
    ahora va justo debajo del hero. Saluda una sola vez, cuando la persona
    empieza a bajar —ahí ya está mirando la página, no recién aterrizando— y se
    retira sola a los 3 s. Después queda a un toque de la mascota. */
-const eveBurbuja = document.getElementById('eveBurbuja');
-const eveFab = document.querySelector('.eve-fab');
-let eveTemporizador = null;
+      const eveBurbuja = document.getElementById("eveBurbuja");
+      const eveFab = document.querySelector(".eve-fab");
+      let eveTemporizador = null;
 
-function eveMostrar(abierta){
-  eveBurbuja.classList.toggle('open', abierta);
-  eveFab.setAttribute('aria-expanded', String(abierta));
-}
+      function eveMostrar(abierta) {
+        eveBurbuja.classList.toggle("open", abierta);
+        eveFab.setAttribute("aria-expanded", String(abierta));
+      }
 
-function toggleEve(){
-  clearTimeout(eveTemporizador);   // un toque manda sobre el cierre automático
-  eveTemporizador = null;
-  eveMostrar(!eveBurbuja.classList.contains('open'));
-}
-
-(function saludoUnico(){
-  let ultimaY = window.scrollY;
-  let yaSaludo = false;
-
-  function alHacerScroll(){
-    if(yaSaludo) return;
-    const y = window.scrollY;
-    // Solo bajando, y con recorrido real: evita dispararlo por el rebote del
-    // scroll o por un salto de anclaje.
-    if(y > ultimaY && y > 140){
-      yaSaludo = true;
-      window.removeEventListener('scroll', alHacerScroll);
-      eveMostrar(true);
-      eveTemporizador = setTimeout(() => {
-        // Si la persona está usando la burbuja, no se la cerramos en la cara.
-        if(eveBurbuja.contains(document.activeElement)) return;
-        eveMostrar(false);
+      function toggleEve() {
+        clearTimeout(eveTemporizador); // un toque manda sobre el cierre automático
         eveTemporizador = null;
-      }, 3000);
-    }
-    ultimaY = y;
-  }
+        eveMostrar(!eveBurbuja.classList.contains("open"));
+      }
 
-  window.addEventListener('scroll', alHacerScroll, { passive: true });
-})();
-function suscribir(){
-  const e = document.getElementById('susEmail').value.trim();
-  if(!e || !e.includes('@')){ mostrarToast('Escribe un correo válido para suscribirte.', 'error'); return; }
-  document.getElementById('susEmail').value = '';
-  mostrarToast('¡Listo! Te llegará una novedad al mes.');
-}
-</script>
+      (function saludoUnico() {
+        let ultimaY = window.scrollY;
+        let yaSaludo = false;
 
-<!-- ====== FONDO DE PARTÍCULAS — red conectada (tsParticles v3) ======
+        function alHacerScroll() {
+          if (yaSaludo) return;
+          const y = window.scrollY;
+          // Solo bajando, y con recorrido real: evita dispararlo por el rebote del
+          // scroll o por un salto de anclaje.
+          if (y > ultimaY && y > 140) {
+            yaSaludo = true;
+            window.removeEventListener("scroll", alHacerScroll);
+            eveMostrar(true);
+            eveTemporizador = setTimeout(() => {
+              // Si la persona está usando la burbuja, no se la cerramos en la cara.
+              if (eveBurbuja.contains(document.activeElement)) return;
+              eveMostrar(false);
+              eveTemporizador = null;
+            }, 3000);
+          }
+          ultimaY = y;
+        }
+
+        window.addEventListener("scroll", alHacerScroll, { passive: true });
+      })();
+      function suscribir() {
+        const e = document.getElementById("susEmail").value.trim();
+        if (!e || !e.includes("@")) {
+          mostrarToast("Escribe un correo válido para suscribirte.", "error");
+          return;
+        }
+        document.getElementById("susEmail").value = "";
+        mostrarToast("¡Listo! Te llegará una novedad al mes.");
+      }
+    </script>
+
+    <!-- ====== FONDO DE PARTÍCULAS — red conectada (tsParticles v3) ======
      Constelación a pantalla completa: los nodos derivan y se unen con líneas
      cuando se acercan; el puntero entra como un nodo más y teje enlaces.
 
@@ -571,64 +1074,69 @@ function suscribir(){
        y sacaría el fondo de la paleta (incluido el coral, C2).
      · Enlaces en azul de marca: el #f0f0f0 del ejemplo era para fondo negro
        y sobre nuestro fondo claro sería invisible. -->
-<script src="https://cdn.jsdelivr.net/npm/@tsparticles/slim@3/tsparticles.slim.bundle.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@tsparticles/interaction-external-particle@3/tsparticles.interaction.external.particle.min.js" defer></script>
-<script>
-window.addEventListener('load', async () => {
-  if (typeof tsParticles === 'undefined') return;   // CDN caído: la página sigue igual
+    <script
+      src="https://cdn.jsdelivr.net/npm/@tsparticles/slim@3/tsparticles.slim.bundle.min.js"
+      defer
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@tsparticles/interaction-external-particle@3/tsparticles.interaction.external.particle.min.js"
+      defer
+    ></script>
+    <script>
+      window.addEventListener("load", async () => {
+        if (typeof tsParticles === "undefined") return; // CDN caído: la página sigue igual
 
-  // Aquí el movimiento es continuo, así que con "reduced motion" la red se
-  // congela por completo y se queda como grafo estático.
-  const animar = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // Aquí el movimiento es continuo, así que con "reduced motion" la red se
+        // congela por completo y se queda como grafo estático.
+        const animar = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  try {
-    await loadSlim(tsParticles);
-    // Si falla, se pierde el nodo del cursor pero la red sigue dibujándose.
-    if (typeof loadExternalParticleInteraction === 'function') {
-      await loadExternalParticleInteraction(tsParticles);
-    }
-    await tsParticles.load({
-      id: 'eve-particulas',   // el div de la banda; sin fullScreen el lienzo lo rellena
-      options: {
-        fullScreen: { enable: false },
-        detectRetina: true,
-        fpsLimit: 60,
-        particles: {
-          // La densidad se mide contra un área de referencia, no en absoluto:
-          // el número real sale de escalar este valor por el área del lienzo.
-          // Ojo al tocar el alto del hero: al pasarlo a pantalla completa el
-          // área casi se duplicó y las partículas subieron solas de 38 a 71,
-          // que era demasiado. 30 sobre 1200x500 deja unas 47 en escritorio:
-          // se lee como red conectada sin tapar el titular.
-          number: { value: 30, density: { enable: true, width: 1200, height: 500 } },
-          color: { value: '#1E6FEB' },
-          shape: { type: 'circle' },
-          opacity: { value: 0.8 },
-          size: { value: 2 },
-          // Dos desvíos del ejemplo: su #f0f0f0 era para fondo negro y sobre
-          // blanco es invisible (en azul, por debajo de ~0.4 la línea de 1px se
-          // desvanece); y su radio de 200 era para una pantalla entera — en una
-          // banda baja conecta casi todo con todo y tapa el titular.
-          links: { enable: true, distance: 150, color: '#1E6FEB', opacity: 0.4, width: 1 },
-          // El 6 del ejemplo es para un lienzo de escaparate; detrás de texto
-          // corrido esa velocidad se lleva la mirada. Sube el número si la
-          // quieres más viva.
-          move: { enable: animar, speed: 1.6 }
-        },
-        interactivity: {
-          // "window": el lienzo va detrás del contenido y no recibe eventos,
-          // así que el puntero se rastrea a nivel de ventana.
-          detectsOn: 'window',
-          events: { onHover: { enable: animar, mode: 'particle' } },
-          modes: { particle: { replaceCursor: false, pauseOnStop: false } }
+        try {
+          await loadSlim(tsParticles);
+          // Si falla, se pierde el nodo del cursor pero la red sigue dibujándose.
+          if (typeof loadExternalParticleInteraction === "function") {
+            await loadExternalParticleInteraction(tsParticles);
+          }
+          await tsParticles.load({
+            id: "eve-particulas", // el div de la banda; sin fullScreen el lienzo lo rellena
+            options: {
+              fullScreen: { enable: false },
+              detectRetina: true,
+              fpsLimit: 60,
+              particles: {
+                // La densidad se mide contra un área de referencia, no en absoluto:
+                // el número real sale de escalar este valor por el área del lienzo.
+                // Ojo al tocar el alto del hero: al pasarlo a pantalla completa el
+                // área casi se duplicó y las partículas subieron solas de 38 a 71,
+                // que era demasiado. 30 sobre 1200x500 deja unas 47 en escritorio:
+                // se lee como red conectada sin tapar el titular.
+                number: { value: 30, density: { enable: true, width: 1200, height: 500 } },
+                color: { value: "#1E6FEB" },
+                shape: { type: "circle" },
+                opacity: { value: 0.8 },
+                size: { value: 2 },
+                // Dos desvíos del ejemplo: su #f0f0f0 era para fondo negro y sobre
+                // blanco es invisible (en azul, por debajo de ~0.4 la línea de 1px se
+                // desvanece); y su radio de 200 era para una pantalla entera — en una
+                // banda baja conecta casi todo con todo y tapa el titular.
+                links: { enable: true, distance: 150, color: "#1E6FEB", opacity: 0.4, width: 1 },
+                // El 6 del ejemplo es para un lienzo de escaparate; detrás de texto
+                // corrido esa velocidad se lleva la mirada. Sube el número si la
+                // quieres más viva.
+                move: { enable: animar, speed: 1.6 }
+              },
+              interactivity: {
+                // "window": el lienzo va detrás del contenido y no recibe eventos,
+                // así que el puntero se rastrea a nivel de ventana.
+                detectsOn: "window",
+                events: { onHover: { enable: animar, mode: "particle" } },
+                modes: { particle: { replaceCursor: false, pauseOnStop: false } }
+              }
+            }
+          });
+        } catch (e) {
+          console.warn("No se pudo iniciar el fondo de partículas:", e);
         }
-      }
-    });
-  } catch (e) {
-    console.warn('No se pudo iniciar el fondo de partículas:', e);
-  }
-});
-</script>
-
-</body>
+      });
+    </script>
+  </body>
 </html>

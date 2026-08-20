@@ -157,12 +157,33 @@ jobs:
   # ── El único check que debe exigir la protección de rama ───────────────────
   # Corre siempre, y solo se pone en rojo si algo falló o se canceló. Un job
   # omitido no es un fallo: es que ese área no se tocó.
+  #
+  # Aquí vive también el formato. Prettier mira TODO el repo —código, docs,
+  # specs y landings—, así que no cabe en ningún job por área: esos se omiten
+  # cuando el cambio no los toca, y un check de formato omitido es un check
+  # que no sirve. Este es el único job que corre siempre.
   resultado:
     name: CI completo
     runs-on: ubuntu-latest
     if: always()
     needs: [cambios, landings, shared, api, eveconecta]
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      # Antes del recuento a propósito: un job en rojo ya se ve en su propia
+      # casilla, pero el formato solo se ve aquí.
+      - name: Formato (Prettier)
+        run: pnpm format:check
+
       - name: Comprobar los resultados
         run: |
           resultados="${{ join(needs.*.result, ' ') }}"

@@ -5,8 +5,8 @@ LangGraph, con **Kimi (Moonshot)** como motor. Lee los activos de marca del
 repositorio `Evetev-Dev/brand` y el código de este monorepo, ambos en GitHub y
 en solo lectura, para partir de lo que ya existe en vez de reescribirlo.
 
-La constitución (§8) dice: *"Servicio de IA en Python: cuando aparezca, entra
-como `apps/ai` en el mismo monorepo."* Se respeta el fondo —vive en el monorepo,
+La constitución (§8) dice: _"Servicio de IA en Python: cuando aparezca, entra
+como `apps/ai` en el mismo monorepo."_ Se respeta el fondo —vive en el monorepo,
 como una app más— pero se usa el nombre del producto en lugar de `ai`, que es
 genérico y quedaría ocupado por un solo agente si mañana hay más. La estructura
 sigue plana, igual que el resto de apps. **Conviene actualizar esa línea de la
@@ -50,6 +50,7 @@ Chat a la izquierda; a la derecha, cuatro pestañas:
 **La preview de Vercel no se puede incrustar:** responde 302 al SSO y manda
 `X-Frame-Options: DENY`. Por eso va como enlace y no como iframe, y por eso la
 vista previa se reconstruye aquí.
+
 - El HTML generado se inyecta en un `<iframe>` con `srcdoc` y **`sandbox`**: se
   renderiza aislado y no puede tocar la página que lo contiene.
 - **El token se pide una vez** y se guarda en `localStorage` del navegador. Sin
@@ -86,19 +87,19 @@ uvicorn api.index:app --reload --port 3003
 ## Desplegar en Vercel
 
 Es un **proyecto de Vercel aparte**, apuntando al mismo repositorio. En
-*Settings → General*:
+_Settings → General_:
 
 - **Root Directory:** `apps/eve-studio`
 
-En *Settings → Environment Variables* (nunca en el repo, §4):
+En _Settings → Environment Variables_ (nunca en el repo, §4):
 
-| Variable | Para qué |
-|---|---|
-| `MOONSHOT_API_KEY` | motor del agente |
-| `GITHUB_TOKEN` | leer los activos de marca (solo lectura) |
-| `GITHUB_TOKEN_CODIGO` | leer el monorepo — **opcional hoy**, ver abajo |
+| Variable                 | Para qué                                         |
+| ------------------------ | ------------------------------------------------ |
+| `MOONSHOT_API_KEY`       | motor del agente                                 |
+| `GITHUB_TOKEN`           | leer los activos de marca (solo lectura)         |
+| `GITHUB_TOKEN_CODIGO`    | leer el monorepo — **opcional hoy**, ver abajo   |
 | `GITHUB_TOKEN_ESCRITURA` | abrir PRs — **no la pongas sin proteger `main`** |
-| `AGENTE_API_TOKEN` | protege el endpoint — `openssl rand -hex 32` |
+| `AGENTE_API_TOKEN`       | protege el endpoint — `openssl rand -hex 32`     |
 
 ### Verificar el primer despliegue
 
@@ -149,7 +150,7 @@ que devuelve GitHub con credencial y sin ella. Y comprueba el permiso de
 escritura leyendo `permissions` del repositorio, **sin escribir nada**: crear una
 rama de prueba ensuciaría el repositorio y, con el arnés, ni siquiera podría
 borrarla después. Es el que dice si el token
-*funciona*, no solo si está puesto. Va aparte del health porque gasta cuota, y
+_funciona_, no solo si está puesto. Va aparte del health porque gasta cuota, y
 pide token porque revela con qué credencial funciona cada repositorio.
 
 ## Lo que genera encaja en el repositorio
@@ -205,15 +206,15 @@ Vercel, que es la landing real funcionando: revisar deja de ser leer un diff.
 El arnés vive **en código, no en el prompt** — a un modelo se le puede convencer
 de saltarse una instrucción; a un `if` no:
 
-| Límite | Valor |
-|---|---|
-| Carpetas | `apps/evepay/`, `apps/eveconecta-landing/` |
-| Extensiones | `.html`, `.css` |
-| Prohibidos | `base.css` (generado desde `packages/brand`) |
-| Archivos por PR | 5 |
-| Tamaño por archivo | 100 KB |
-| Propuestas por petición | 3 |
-| Operaciones | crear y actualizar; **nunca** borrar ni renombrar |
+| Límite                  | Valor                                             |
+| ----------------------- | ------------------------------------------------- |
+| Carpetas                | `apps/evepay/`, `apps/eveconecta-landing/`        |
+| Extensiones             | `.html`, `.css`                                   |
+| Prohibidos              | `base.css` (generado desde `packages/brand`)      |
+| Archivos por PR         | 5                                                 |
+| Tamaño por archivo      | 100 KB                                            |
+| Propuestas por petición | 3                                                 |
+| Operaciones             | crear y actualizar; **nunca** borrar ni renombrar |
 
 Dos exclusiones importan especialmente: **`base.css`**, porque editarlo ahí lo
 revierte el siguiente `pnpm landings:sync` y rompe el job de CI; y **`apps/eve-studio`**,
@@ -257,7 +258,7 @@ Hoy, si la herramienta no devolvió PR, no hay PR:
   la procedencia de una URL: eso es justo lo que falló.
 
 Los fallos de la herramienta se apuntan además en `registro["fallos"]`, que el
-modelo no puede tocar. Lo que la herramienta *devuelve* lo lee el modelo y puede
+modelo no puede tocar. Lo que la herramienta _devuelve_ lo lee el modelo y puede
 reinterpretarlo; lo que apunta en el registro es lo que permite desmentirlo.
 
 Tres avisos distintos, porque no significan lo mismo: que la herramienta falle es
@@ -270,11 +271,11 @@ no cambia archivos no tiene por qué abrir nada— y por eso ese caso no avisa.
 Lo de arriba hace **visible** el fallo. La causa se encontró después, en los logs
 de Vercel, comparando las dos peticiones de aquella tarde:
 
-| | la que abrió el PR #57 | la que mintió |
-|---|---|---|
-| duración | 3 m 30 s | 36,5 s |
-| llamadas al modelo | 6 | 3 |
-| hueco entre llamadas | **2 m 02 s** | 4 s y 15 s |
+|                      | la que abrió el PR #57 | la que mintió |
+| -------------------- | ---------------------- | ------------- |
+| duración             | 3 m 30 s               | 36,5 s        |
+| llamadas al modelo   | 6                      | 3             |
+| hueco entre llamadas | **2 m 02 s**           | 4 s y 15 s    |
 
 Las llamadas a GitHub no salen en el log, pero su duración sí deja huella:
 `proponer_cambios` tarda unos dos minutos —blobs, árbol, commit, rama, PR— y el
@@ -314,12 +315,12 @@ Dos decisiones sobre el disparador:
 **Requisitos antes de darle el token:**
 
 1. **Protección de rama en `main`.** El código dice «nunca escribas en main»,
-   pero un token con permiso de escritura *puede* si hay un fallo. La protección
+   pero un token con permiso de escritura _puede_ si hay un fallo. La protección
    lo vuelve imposible desde la plataforma, que es donde debe estar la última
    línea. Exige el check **«CI completo»** y ningún otro.
 2. **`GITHUB_TOKEN_ESCRITURA`**: alcance fino, dueño `EveTevSas`, solo
-   `evetevbrain`, con *Contents: Read and write* y *Pull requests: Read and
-   write*. Separado de los de lectura: si se filtra, se revoca solo ese.
+   `evetevbrain`, con _Contents: Read and write_ y _Pull requests: Read and
+   write_. Separado de los de lectura: si se filtra, se revoca solo ese.
 
 Sin la variable configurada la herramienta responde que no hay credencial y el
 agente entrega el código por el chat, como antes.
@@ -328,10 +329,10 @@ agente entrega el código por el chat, como antes.
 
 Dos repositorios, ambos de solo lectura:
 
-| Repositorio | Para qué | Herramientas |
-|---|---|---|
-| `Evetev-Dev/brand` | manual, tokens, logos, mascota | `obtener_activo_github`, `listar_carpeta_de_marca` |
-| `EveTevSas/evetevbrain` | el código tal como está hoy | `leer_archivo_del_repo`, `listar_carpeta_del_repo` |
+| Repositorio             | Para qué                       | Herramientas                                       |
+| ----------------------- | ------------------------------ | -------------------------------------------------- |
+| `Evetev-Dev/brand`      | manual, tokens, logos, mascota | `obtener_activo_github`, `listar_carpeta_de_marca` |
+| `EveTevSas/evetevbrain` | el código tal como está hoy    | `leer_archivo_del_repo`, `listar_carpeta_del_repo` |
 
 ### Las imágenes se listan, no se recuerdan
 
@@ -378,8 +379,8 @@ Cada activo nuevo hay que publicarlo a mano y etiquetar una `v1.x`; hasta que
 eso pase, el agente dirá que no está, que es lo correcto, en vez de enlazarlo
 roto.
 
-Lo segundo es lo que permite pedirle *"cámbiale el titular a la portada de
-EvePay"*: lee `apps/evepay/index.html` y parte de ahí, en vez de generar una
+Lo segundo es lo que permite pedirle _"cámbiale el titular a la portada de
+EvePay"_: lee `apps/evepay/index.html` y parte de ahí, en vez de generar una
 página nueva desde cero. Puede listar carpetas antes de leer, para no adivinar
 rutas.
 
@@ -403,7 +404,7 @@ compartidas: el agente puede quedarse sin cuota por tráfico ajeno. Con un token
 propio son 5 000 por hora.
 
 El token correcto es uno de alcance fino con **dueño `EveTevSas`**, repositorio
-`evetevbrain`, permiso *Contents: Read-only*. Se crea aparte del de marca —no se
+`evetevbrain`, permiso _Contents: Read-only_. Se crea aparte del de marca —no se
 puede ampliar el existente, porque un token no cruza organizaciones.
 
 Los archivos que lee entran como **material de referencia, no como
@@ -449,16 +450,16 @@ el build se queja, la palanca es `excludeFiles` en `vercel.json`.
 `studio.evetev.com` cualquiera con la URL ve la interfaz. Se estudió cerrarla y
 las opciones eran:
 
-- *Deployment Protection* de Vercel. La modalidad **Standard Protection deja
+- _Deployment Protection_ de Vercel. La modalidad **Standard Protection deja
   fuera los dominios personalizados de producción**, justo el que importa; para
-  cubrirlo hace falta *All Deployments*, que exige Pro con Advanced Deployment
+  cubrirlo hace falta _All Deployments_, que exige Pro con Advanced Deployment
   Protection: **150 USD al mes**. Descartado por desproporcionado.
-- *Cloudflare Access*, gratis hasta 50 personas, pero obliga a mover el DNS de
+- _Cloudflare Access_, gratis hasta 50 personas, pero obliga a mover el DNS de
   `evetev.com` desde name.com, con los MX de Google Workspace y los registros de
   Resend de por medio. Riesgo sobre el correo de la empresa, no compensa.
 - **Google Sign-In propio:** botón de Google en la página, y la función verifica
   la firma del token y que el correo sea del dominio. Gratis y encaja bien
-  porque el backend ya autentica, solo cambiaría *qué* comprueba. **Es el camino
+  porque el backend ya autentica, solo cambiaría _qué_ comprueba. **Es el camino
   cuando el token compartido se vuelva incómodo de repartir.**
 
 Se mantiene el token porque protege lo único que cuesta dinero: sin él no se

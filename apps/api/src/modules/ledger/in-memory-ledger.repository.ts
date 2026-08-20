@@ -27,7 +27,8 @@ export class InMemoryLedgerRepository implements LedgerRepository {
     if (
       args.paymentId &&
       this.entries.some(
-        (e) => e.tenantId === args.tenantId && e.paymentId === args.paymentId && e.kind === args.kind
+        (e) =>
+          e.tenantId === args.tenantId && e.paymentId === args.paymentId && e.kind === args.kind
       )
     ) {
       return { posted: false };

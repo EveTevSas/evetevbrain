@@ -18,12 +18,12 @@ files/            # video de fondo e imagen de portada
 formularios y envía el correo a **contacto@evetev.com** con `reply_to` en la
 dirección de quien escribe, para poder responderle dando a "Responder":
 
-| Formulario | Dónde vive | Asunto que llega |
-|---|---|---|
-| Contacto | `index.html` | `Contacto: nombre — tamaño` |
-| Postulación | `nosotros.html` | `Postulación: nombre — área` |
-| Demo de EvePay | `apps/evepay` | `EvePay · Demo: nombre` |
-| Demo de EveConecta | `apps/eveconecta-landing` | `EveConecta · Demo: nombre` |
+| Formulario         | Dónde vive                | Asunto que llega             |
+| ------------------ | ------------------------- | ---------------------------- |
+| Contacto           | `index.html`              | `Contacto: nombre — tamaño`  |
+| Postulación        | `nosotros.html`           | `Postulación: nombre — área` |
+| Demo de EvePay     | `apps/evepay`             | `EvePay · Demo: nombre`      |
+| Demo de EveConecta | `apps/eveconecta-landing` | `EveConecta · Demo: nombre`  |
 
 Los dos últimos son otros dominios y llegan aquí **por CORS**. Están en una
 lista de orígenes al principio de la función, junto con las previews de Vercel
@@ -64,8 +64,8 @@ cambia de proveedor:
    > para los rebotes, y el raíz ya tiene el MX de **Google Workspace**
    > (`smtp.google.com`), que es donde se recibe `contacto@evetev.com`.
    > Ponerlos juntos puede dejar a la empresa sin recibir correo.
-3. En el proyecto de Vercel de `apps/website` → *Settings → Environment
-   Variables*, agregar `RESEND_API_KEY`. Opcionalmente `CONTACTO_DESTINO` y
+3. En el proyecto de Vercel de `apps/website` → _Settings → Environment
+   Variables_, agregar `RESEND_API_KEY`. Opcionalmente `CONTACTO_DESTINO` y
    `CONTACTO_REMITENTE`. **La llave nunca va al repo (§4).** Va solo en este
    proyecto: las landings no la necesitan, llaman a esta función.
 4. Volver a desplegar para que la función tome la variable.
