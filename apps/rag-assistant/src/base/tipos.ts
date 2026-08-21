@@ -1,7 +1,13 @@
 /** Tipos de la base documental. El contrato del frontmatter vive en
  *  `base/_reglas.json`; aquí solo su forma en TypeScript. */
 
-export const PRODUCTOS = ["empresa", "evepay", "eveconecta", "legales"] as const;
+export const PRODUCTOS = [
+  "empresa",
+  "evepay",
+  "eveconecta",
+  "eve-intelligence",
+  "legales"
+] as const;
 export type Producto = (typeof PRODUCTOS)[number];
 
 export const AUDIENCIAS = [

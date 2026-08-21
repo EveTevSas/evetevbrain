@@ -92,10 +92,16 @@
 
   "frontmatter": {
     "obligatorios": ["id", "titulo", "producto", "audiencia", "vigencia", "fuente", "confianza"],
-    "producto": ["empresa", "evepay", "eveconecta", "legales"],
+    "producto": ["empresa", "evepay", "eveconecta", "eve-intelligence", "legales"],
     "audiencia": ["general", "comercio", "residente", "desarrollador", "candidato"],
     "confianza": ["alta", "media"],
-    "fuente": ["sitio-web", "manual-de-marca", "constitucion", "decision-john-2026-08-19"]
+    "fuente": [
+      "sitio-web",
+      "manual-de-marca",
+      "constitucion",
+      "decision-john-2026-08-19",
+      "decision-john-2026-08-20"
+    ]
   },
 
   "configuracion": {

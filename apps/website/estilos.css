@@ -129,10 +129,19 @@ nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(
 /* Sin retícula de líneas: separa el aire, no los bordes. Es lo que pide el
    manual —"la jerarquía se logra con espacio", nunca con adornos— y evita que
    esta sección contradiga la amplitud del hero que tiene justo encima. */
-.prod{display:grid;grid-template-columns:1fr 1fr;gap:clamp(34px,6vw,84px)}
+/* Tres productos desde ago-2026: la rejilla se adapta en vez de fijar dos
+   columnas, así el tercero no queda solo en una fila. El gap baja un poco
+   porque con tres columnas el aire de antes dejaba las tarjetas muy estrechas. */
+.prod{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:clamp(30px,4.5vw,56px)}
 .prod>article{padding:0}
 .prod h3{font-size:1.12rem;font-weight:600;margin:16px 0 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.prod .sub{font-size:.74rem;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--p)}
+/* El rótulo hereda el color de la línea, pero admite un tono aparte para
+   texto: el violeta base sobre blanco no llega al contraste AA (regla C7),
+   así que Eve Intelligence pasa su --p-texto. Los demás no declaran nada y
+   siguen usando --p, que en azul sí contrasta. */
+.prod .sub{font-size:.74rem;font-weight:600;letter-spacing:.4px;text-transform:uppercase;
+  color:var(--p-texto,var(--p))}
 .prod p{font-size:.85rem;color:var(--eve-pizarra);margin-bottom:14px;max-width:44ch}
 .prod ul{list-style:none;margin:0 0 16px}
 .prod li{font-size:.8rem;color:var(--eve-pizarra);padding:4px 0;display:flex;gap:9px;align-items:flex-start}

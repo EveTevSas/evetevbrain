@@ -57,6 +57,40 @@ EvePay es la pasarela de pagos de Evetev…
   «comisión» además de «tarifa». La búsqueda léxica premia las palabras que la
   persona realmente escribe.
 
+## 2 bis. Escribe con las palabras de quien pregunta
+
+**La regla que más veces ha fallado.** Un documento escrito en el vocabulario de
+la empresa no lo encuentra quien pregunta con el suyo.
+
+Dos casos reales, los dos detectados por los tests y no razonando:
+
+| La gente pregunta                             | El documento decía                     | Qué pasaba                                       |
+| --------------------------------------------- | -------------------------------------- | ------------------------------------------------ |
+| «¿qué pasa si mi **cliente paga** dos veces?» | «reintentar nunca **cobra** dos veces» | Se abstenía, o traía el documento equivocado     |
+| «¿cuánto **cobran** por el asistente?»        | «cómo se **cobra** el asistente»       | Se abstenía con el documento correcto ya escrito |
+
+La búsqueda léxica no conjuga verbos ni adivina sinónimos, y hacerlo con
+agresividad rompe más de lo que arregla —confundiría «pasarela» con «pasar»—. La
+salida no es forzar el buscador: **es escribir la frase también como la dice la
+gente**, aunque suene redundante.
+
+```markdown
+Reintentar nunca cobra dos veces: el reintento devuelve el cobro que ya existía.
+
+Dicho como lo pregunta un comercio: **si tu cliente paga dos veces, o le da al
+botón dos veces, no se le cobra dos veces.**
+```
+
+Ese segundo párrafo no es relleno: es lo que hace que la pregunta encuentre la
+respuesta.
+
+**Cómo se detecta:** cada vez que se agregan documentos, **cambia el peso de las
+palabras en todo el corpus** y preguntas que antes funcionaban pueden dejar de
+hacerlo. Pasó al añadir la línea de Eve Intelligence: dieciocho fragmentos nuevos
+bastaron para que «paga dos veces» dejara de encontrar el documento de
+idempotencia. Por eso los conjuntos de evaluación corren en cada cambio de la
+base — sin ellos, esa regresión sale a la luz cuando la encuentra un cliente.
+
 ## 3. Las seis reglas de contenido
 
 Están en `_reglas.json` y **se comprueban al compilar**. No son recomendaciones:
