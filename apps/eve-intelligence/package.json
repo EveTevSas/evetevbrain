@@ -1,0 +1,15 @@
+{
+  "name": "@evetev/eve-intelligence",
+  "version": "0.0.0",
+  "private": true,
+  "description": "eveintelligence.evetev.com — landing de Eve Intelligence, la línea de IA empresarial. Estático (HTML/CSS), se despliega en Vercel.",
+  "scripts": {
+    "dev": "python3 -m http.server 3006",
+    "lint": "echo \"(eve-intelligence) sitio estático, sin lint\" && exit 0",
+    "typecheck": "echo \"(eve-intelligence) sitio estático, sin typecheck\" && exit 0",
+    "test": "echo \"(eve-intelligence) sitio estático, sin tests\" && exit 0"
+  },
+  "evetev": {
+    "landing": true
+  }
+}

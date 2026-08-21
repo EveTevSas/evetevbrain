@@ -43,18 +43,23 @@ const ORIGENES = new Set([
   "https://evetev.com",
   "https://www.evetev.com",
   "https://evepay.evetev.com",
-  "https://eveconecta.evetev.com"
+  "https://eveconecta.evetev.com",
+  "https://eveintelligence.evetev.com"
 ]);
 /* Previews de Vercel de las dos landings, para poder probar el formulario en
    el despliegue de un PR. El correo que llega lleva el host real en «Enviado
    desde», así que una prueba nunca se confunde con un cliente. */
-const ORIGEN_PREVIEW = /^https:\/\/(evepay|eveconecta-landing)-[a-z0-9-]+\.vercel\.app$/;
+const ORIGEN_PREVIEW = /^https:\/\/(evepay|eveconecta-landing|eve-intelligence)-[a-z0-9-]+\.vercel\.app$/;
 /* Desarrollo local: `pnpm dev` sirve las landings en localhost. */
 const ORIGEN_LOCAL = /^http:\/\/localhost:\d{2,5}$/;
 
 /** Rótulo del producto. Lista blanca a propósito: el asunto del correo no lo
  *  escribe el cliente, solo elige entre estas dos claves. */
-const PRODUCTOS = { evepay: "EvePay", eveconecta: "EveConecta" };
+const PRODUCTOS = {
+  evepay: "EvePay",
+  eveconecta: "EveConecta",
+  eveintelligence: "Eve Intelligence"
+};
 
 const LIMITES = { nombre: 120, correo: 160, texto: 4000, campo: 240 };
 
@@ -123,6 +128,13 @@ const CAMPOS = {
     ["Teléfono", "telefono"],
     ["Ventas mensuales", "volumen"],
     ["Cómo cobra hoy", "cobro"],
+    ["Cuándo quiere empezar", "plazo"]
+  ],
+  "demo:eveintelligence": [
+    ["Empresa", "empresa"],
+    ["Teléfono", "telefono"],
+    ["Para quién sería", "uso"],
+    ["Documentación que tiene", "documentos"],
     ["Cuándo quiere empezar", "plazo"]
   ],
   "demo:eveconecta": [
