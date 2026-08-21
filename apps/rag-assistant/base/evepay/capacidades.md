@@ -13,6 +13,9 @@ confianza: alta
 Cada cobro lleva una clave de idempotencia y una máquina de estados explícita.
 Reintentar nunca cobra dos veces: el reintento devuelve el cobro que ya existía.
 
+Dicho como lo pregunta un comercio: **si tu cliente paga dos veces, o le da al
+botón dos veces, no se le cobra dos veces.**
+
 ## La plata cuadra o se nota
 
 El libro de movimientos es **inmutable y en doble partida**: la verdad contable de

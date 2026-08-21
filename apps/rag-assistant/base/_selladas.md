@@ -27,11 +27,11 @@ paso con una persona.
 
 **Variantes:** qué productos tiene evetev · qué venden · qué ofrecen · cuáles son sus productos · qué servicios tienen
 **Respuesta:**
-Dos con página propia: EvePay, la pasarela de pagos, y EveConecta, la gestión y
-recaudo para conjuntos residenciales. Los dos están en construcción todavía. La
-compañía además opera inteligencia artificial empresarial y comercio electrónico,
-sin ficha de producto publicada — si te interesa alguno, escríbenos y te cuenta
-una persona del equipo.
+Tres: EvePay, la pasarela de pagos; EveConecta, la gestión y recaudo para
+conjuntos residenciales; y Eve Intelligence, asistentes que responden con la
+documentación de tu empresa. Los dos primeros están en construcción todavía. La
+compañía además hace comercio electrónico y desarrollo de aplicaciones, sin ficha
+publicada — si te interesa, escríbenos y te cuenta una persona del equipo.
 
 ## ¿Cómo los contacto?
 
@@ -67,6 +67,15 @@ EveConecta es nuestra solución de gestión y recaudo para conjuntos residencial
 cuotas por coeficiente, pago en línea del residente, estado de cuenta, paz y salvo
 y un panel para administrar finanzas, reservas, PQRS y asambleas. Es además
 nuestro primer cliente: con ella probamos EvePay cobrando dinero real.
+
+## ¿Montan asistentes de IA?
+
+**Variantes:** hacen asistentes · chatbot para mi empresa · qué es eve intelligence · asistente con mis documentos · inteligencia artificial para empresas
+**Respuesta:**
+Sí, es Eve Intelligence: le montamos a una empresa un asistente que responde con
+su propia documentación y solo con ella, citando de dónde salió cada respuesta.
+Cuando no lo sabe, lo dice y pasa a una persona. Sirve para el equipo interno o
+de cara a los clientes.
 
 ## ¿Ya puedo usar EvePay?
 
