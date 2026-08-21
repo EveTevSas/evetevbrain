@@ -22,18 +22,30 @@ export interface Entorno {
 }
 
 export function leerEntorno(env: Record<string, string | undefined>): Entorno {
-  // Los dominios propios van **en el código**, no solo en la variable de
-  // entorno. Depender de que alguien se acuerde de editarla es el modo de fallo
-  // que ya conocemos: si una web estrena dominio y no se agrega, el navegador
-  // bloquea la petición y el asistente deja de responder **sin que nada se
-  // ponga rojo**. La variable sigue mandando cuando está puesta —hace falta
-  // para los clientes—, pero un despliegue limpio nuestro ya funciona solo.
-  const ORIGENES_PROPIOS =
-    "https://evetev.com,https://www.evetev.com,https://eveintelligence.evetev.com";
-  const origenes = (env["FLUXI_ORIGENES"] ?? ORIGENES_PROPIOS)
+  // Los dominios propios van **en el código y se SUMAN**, no se reemplazan.
+  //
+  // La versión anterior los ponía como valor por defecto de `FLUXI_ORIGENES`, y
+  // eso no sirve de nada: en cuanto la variable existe —y existe— el valor por
+  // defecto no se aplica. Se comprobó del peor modo posible: la landing de Eve
+  // Intelligence salió a producción con su propio asistente respondiendo
+  // «ahora mismo no puedo responder», porque su dominio no estaba en la
+  // variable y el respaldo del código nunca entró en juego.
+  //
+  // Sumar es lo correcto además de lo seguro: los dominios de Evetev jamás
+  // aparecerán como origen en la instalación de un cliente, así que permitirlos
+  // no le abre nada; y a nosotros nos garantiza que un despliegue nuestro
+  // funciona aunque nadie toque la variable.
+  const ORIGENES_PROPIOS = [
+    "https://evetev.com",
+    "https://www.evetev.com",
+    "https://eveintelligence.evetev.com"
+  ];
+  const deLaVariable = (env["FLUXI_ORIGENES"] ?? "")
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean);
+  const origenes = [...new Set([...ORIGENES_PROPIOS, ...deLaVariable])];
+
   return {
     origenes,
     // Sin `FLUXI_SECRETO` se cae a un valor **aleatorio, generado al arrancar el

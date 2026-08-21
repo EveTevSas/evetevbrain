@@ -25,6 +25,28 @@ const sesion = () => emitirSesion(entorno.secreto);
 
 beforeEach(reiniciarCupos);
 
+describe("lista de orígenes", () => {
+  it("permite los dominios propios aunque la variable no los nombre", () => {
+    // Regresión con nombre: la landing de Eve Intelligence salió a producción
+    // con su propio asistente diciendo «ahora mismo no puedo responder», porque
+    // su dominio no estaba en FLUXI_ORIGENES y el valor por defecto del código
+    // nunca se aplica cuando la variable existe.
+    const e = leerEntorno({ FLUXI_ORIGENES: "https://solo-esto.com" });
+    expect(e.origenes).toContain("https://eveintelligence.evetev.com");
+    expect(e.origenes).toContain("https://evetev.com");
+    expect(e.origenes).toContain("https://solo-esto.com");
+  });
+
+  it("sin variable, los propios bastan", () => {
+    expect(leerEntorno({}).origenes).toContain("https://evetev.com");
+  });
+
+  it("no repite un dominio que esté en los dos sitios", () => {
+    const e = leerEntorno({ FLUXI_ORIGENES: "https://evetev.com" });
+    expect(e.origenes.filter((o) => o === "https://evetev.com")).toHaveLength(1);
+  });
+});
+
 describe("secreto de firma", () => {
   it("sin FLUXI_SECRETO usa un valor aleatorio, no una constante del repositorio", () => {
     // La version anterior caia a una cadena escrita en el codigo. Como el
