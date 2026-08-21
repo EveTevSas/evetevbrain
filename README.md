@@ -11,6 +11,7 @@ vertical: la cuña con la que validamos la plataforma cobrando dinero real.
 > Cómo desplegar (Vercel + DNS): [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md).
 > Plan de desarrollo de EvePay (SDD + Akua): [`docs/PLAN_DESARROLLO_EVEPAY.md`](docs/PLAN_DESARROLLO_EVEPAY.md).
 > Plan del asistente RAG (Fluxi): [`docs/PLAN_ASISTENTE_FLUXI.md`](docs/PLAN_ASISTENTE_FLUXI.md).
+> Implantar el asistente en un cliente: [`docs/PLAYBOOK_ASISTENTE_RAG.md`](docs/PLAYBOOK_ASISTENTE_RAG.md) · [`docs/MODELO_DE_NEGOCIO_ASISTENTE.md`](docs/MODELO_DE_NEGOCIO_ASISTENTE.md).
 
 ## Estructura (arranque mínimo, §8)
 
