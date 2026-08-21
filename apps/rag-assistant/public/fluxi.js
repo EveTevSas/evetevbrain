@@ -33,20 +33,26 @@
      * CTA global del nav (C2) y la portada ya tiene uno. Así es atmósfera, no un
      * segundo botón compitiendo por la mirada. */
     ".bruma{position:absolute;inset:0;border-radius:50%;overflow:hidden;z-index:0}",
-    '.bruma::before,.bruma::after{content:"";position:absolute;width:78%;height:78%;',
-    "border-radius:50%;filter:blur(11px);will-change:transform}",
-    ".bruma::before{background:#1E6FEB;opacity:.26;animation:fluxi-bruma-a 7.5s ease-in-out infinite}",
-    ".bruma::after{background:#EE3D22;opacity:.13;animation:fluxi-bruma-b 9.5s ease-in-out infinite}",
+    '.bruma::before,.bruma::after{content:"";position:absolute;width:88%;height:88%;',
+    "border-radius:50%;filter:blur(13px);will-change:transform,opacity}",
+    ".bruma::before{background:#1E6FEB;opacity:.30;animation:fluxi-bruma-a 5.5s ease-in-out infinite}",
+    ".bruma::after{background:#EE3D22;opacity:.16;animation:fluxi-bruma-b 7s ease-in-out infinite}",
+    /* El recorrido tiene que ser MAYOR que el desenfoque o no se percibe: con
+     * manchas de 53 px difuminadas 13 px, moverlas 7 px era invisible. Ahora
+     * barren un tercio del círculo y además laten en opacidad, que es lo que de
+     * verdad se lee como «hay algo vivo» — el ojo detecta antes un cambio de
+     * brillo que un desplazamiento lento. La mascota tapa el centro, así que el
+     * movimiento tiene que entrar y salir del anillo visible. */
     "@keyframes fluxi-bruma-a{",
-    "0%{transform:translate(-16%,10%) scale(1)}",
-    "33%{transform:translate(14%,-12%) scale(1.14)}",
-    "66%{transform:translate(6%,16%) scale(.94)}",
-    "100%{transform:translate(-16%,10%) scale(1)}}",
+    "0%{transform:translate(-34%,18%) scale(.92);opacity:.22}",
+    "30%{transform:translate(26%,-24%) scale(1.32);opacity:.42}",
+    "60%{transform:translate(14%,30%) scale(.86);opacity:.26}",
+    "100%{transform:translate(-34%,18%) scale(.92);opacity:.22}}",
     "@keyframes fluxi-bruma-b{",
-    "0%{transform:translate(18%,-8%) scale(1.06)}",
-    "40%{transform:translate(-12%,14%) scale(.9)}",
-    "70%{transform:translate(-4%,-16%) scale(1.16)}",
-    "100%{transform:translate(18%,-8%) scale(1.06)}}",
+    "0%{transform:translate(32%,-16%) scale(1.1);opacity:.12}",
+    "35%{transform:translate(-28%,26%) scale(.82);opacity:.26}",
+    "70%{transform:translate(-8%,-32%) scale(1.34);opacity:.16}",
+    "100%{transform:translate(32%,-16%) scale(1.1);opacity:.12}}",
     ".fab:hover{transform:translateY(-2px)}",
     ".fab:focus-visible{outline:3px solid #1E6FEB;outline-offset:3px}",
     ".panel{position:fixed;right:18px;bottom:88px;width:min(370px,calc(100vw - 36px));",
