@@ -69,11 +69,29 @@ registrados: empresa, teléfono, para quién sería, documentación y plazo.
 pnpm --filter @evetev/eve-intelligence dev   # http://localhost:3006
 ```
 
-## Desplegar
+## Desplegado
 
-Proyecto de Vercel aparte, **Root Directory `apps/eve-intelligence`**, dominio
-`eveintelligence.evetev.com` con su CNAME en name.com. Sin variables de entorno:
-esta landing no tiene secretos.
+Proyecto de Vercel **`eve-intelligence`**, creado el 20 de agosto de 2026 sobre
+este repositorio.
+
+| Ajuste               | Valor                                        |
+| -------------------- | -------------------------------------------- |
+| Root Directory       | `apps/eve-intelligence`                      |
+| Framework Preset     | Other (lo fija `vercel.json`)                |
+| Producción           | `eve-intelligence.vercel.app`                |
+| Dominio              | `eveintelligence.evetev.com` — **pendiente** |
+| Variables de entorno | ninguna: esta landing no tiene secretos      |
+
+> **El primer despliegue se canceló solo, y estuvo bien.** El `ignoreCommand`
+> vio que el commit no tocaba esta carpeta y abortó antes de construir, que es
+> exactamente su trabajo. Un proyecto nuevo no tiene producción hasta que un
+> commit toque su carpeta.
+
+Falta, y las dos cosas van juntas:
+
+1. Añadir `eveintelligence.evetev.com` en _Settings → Domains_ del proyecto.
+2. Crear el `CNAME` que Vercel indique en name.com — ese panel entra por
+   email y contraseña.
 
 > La página nace con `noindex`. Quitarlo cuando la oferta esté en firme: una
 > página a medias posicionando por «asistente documental» hace más daño que no
