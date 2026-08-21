@@ -21,7 +21,32 @@
     "clip:rect(0 0 0 0);white-space:nowrap;border:0}",
     ".fab{position:fixed;right:18px;bottom:18px;width:60px;height:60px;border-radius:50%;",
     "border:0;background:#FDFEFF;box-shadow:0 6px 24px rgba(10,37,64,.22);cursor:pointer;",
-    "display:grid;place-items:center;z-index:2147483000;transition:transform .18s ease}",
+    "display:grid;place-items:center;z-index:2147483000;transition:transform .18s ease;",
+    "overflow:hidden;isolation:isolate}",
+    ".fab img{position:relative;z-index:1}",
+    /* Bruma dentro del círculo: dice «aquí hay algo vivo» sin pedir nada. Son
+     * dos manchas desenfocadas que se mueven despacio, animadas con `transform`
+     * —que va en la GPU— y no con posiciones, que obligan al navegador a
+     * recalcular la página en cada fotograma.
+     *
+     * El coral va a opacidad muy baja y difuminado: el manual lo reserva para el
+     * CTA global del nav (C2) y la portada ya tiene uno. Así es atmósfera, no un
+     * segundo botón compitiendo por la mirada. */
+    ".bruma{position:absolute;inset:0;border-radius:50%;overflow:hidden;z-index:0}",
+    '.bruma::before,.bruma::after{content:"";position:absolute;width:78%;height:78%;',
+    "border-radius:50%;filter:blur(11px);will-change:transform}",
+    ".bruma::before{background:#1E6FEB;opacity:.26;animation:fluxi-bruma-a 7.5s ease-in-out infinite}",
+    ".bruma::after{background:#EE3D22;opacity:.13;animation:fluxi-bruma-b 9.5s ease-in-out infinite}",
+    "@keyframes fluxi-bruma-a{",
+    "0%{transform:translate(-16%,10%) scale(1)}",
+    "33%{transform:translate(14%,-12%) scale(1.14)}",
+    "66%{transform:translate(6%,16%) scale(.94)}",
+    "100%{transform:translate(-16%,10%) scale(1)}}",
+    "@keyframes fluxi-bruma-b{",
+    "0%{transform:translate(18%,-8%) scale(1.06)}",
+    "40%{transform:translate(-12%,14%) scale(.9)}",
+    "70%{transform:translate(-4%,-16%) scale(1.16)}",
+    "100%{transform:translate(18%,-8%) scale(1.06)}}",
     ".fab:hover{transform:translateY(-2px)}",
     ".fab:focus-visible{outline:3px solid #1E6FEB;outline-offset:3px}",
     ".panel{position:fixed;right:18px;bottom:88px;width:min(370px,calc(100vw - 36px));",
@@ -80,8 +105,11 @@
     ".panel{right:0;left:0;bottom:0;width:100%;max-height:82vh;border-radius:16px 16px 0 0}",
     ".fab{right:14px;bottom:14px}",
     ".saludo{right:14px;left:14px;bottom:84px;width:auto}}",
+    /* Quien pidió menos movimiento no ve nada moverse. La bruma se queda, pero
+     * quieta: sigue dando el matiz de color sin agitarse. */
     "@media (prefers-reduced-motion:reduce){.fab{transition:none}.fab:hover{transform:none}",
-    ".saludo{animation:none}}"
+    ".saludo{animation:none}",
+    ".bruma::before,.bruma::after{animation:none}}"
   ].join("");
 
   var guion = document.currentScript;
@@ -121,6 +149,7 @@
     '  <button class="saludo-x" type="button"><span class="sr">Descartar el mensaje</span>&times;</button>',
     "</aside>",
     '<button class="fab" type="button" aria-expanded="false" aria-controls="panel">',
+    '  <span class="bruma" aria-hidden="true"></span>',
     '  <img alt="" src="' + cfg.mascota + '" width="40" height="40">',
     '  <span class="sr">Abrir el asistente ' + cfg.nombre + "</span>",
     "</button>",
