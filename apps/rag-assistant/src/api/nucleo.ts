@@ -22,7 +22,15 @@ export interface Entorno {
 }
 
 export function leerEntorno(env: Record<string, string | undefined>): Entorno {
-  const origenes = (env["FLUXI_ORIGENES"] ?? "https://evetev.com,https://www.evetev.com")
+  // Los dominios propios van **en el código**, no solo en la variable de
+  // entorno. Depender de que alguien se acuerde de editarla es el modo de fallo
+  // que ya conocemos: si una web estrena dominio y no se agrega, el navegador
+  // bloquea la petición y el asistente deja de responder **sin que nada se
+  // ponga rojo**. La variable sigue mandando cuando está puesta —hace falta
+  // para los clientes—, pero un despliegue limpio nuestro ya funciona solo.
+  const ORIGENES_PROPIOS =
+    "https://evetev.com,https://www.evetev.com,https://eveintelligence.evetev.com";
+  const origenes = (env["FLUXI_ORIGENES"] ?? ORIGENES_PROPIOS)
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean);
