@@ -24,7 +24,8 @@ export const POR_DEFECTO = {
  *  —el navegador bloquea la petición— y **nada se ponía rojo**. Es el mismo modo
  *  de fallo silencioso que ya conocemos de la lista de orígenes de los
  *  formularios, y se arregla antes de que muerda, no después. */
-const ORIGEN_PREVIEW = /^https:\/\/(rag-assistant|website)-[a-z0-9-]+\.vercel\.app$/;
+const ORIGEN_PREVIEW =
+  /^https:\/\/(rag-assistant|website|eve-intelligence)-[a-z0-9-]+\.vercel\.app$/;
 const ORIGEN_LOCAL = /^http:\/\/localhost:\d{2,5}$/;
 
 /** **El punto fragil de todo esto**, y ya nos mordio una vez con los

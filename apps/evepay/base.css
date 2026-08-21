@@ -28,6 +28,12 @@
   --eve-coral-hover:#CF3016;
   --eve-electrico:#1E6FEB;
   --eve-mezclado:#144A96;
+  --eve-cian:#22D3EE;
+  /* Violeta Eve — identificador de la línea Eve Intelligence. Nunca en botones
+     (C3), y sobre blanco se usa el oscuro porque el base no da contraste (C7). */
+  --eve-violeta:#8B5CF6;
+  --eve-violeta-texto:#6D28D9;
+  --eve-violeta-tinte:#EDE9FE;
   --eve-exito:#16A34A;
   --eve-alerta:#D97706;
   --eve-error:#B91C1C;
