@@ -12,21 +12,49 @@
 .cta{margin-top:34px}
 .cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-azul-noche)}
 
-/* ── Portada ─────────────────────────────────────────────────────────────
-   **Sin ilustración de escena, a propósito.** Esta hoja se calcó de la landing
-   de EvePay y venía con su dibujo de tarjetas, datáfono y caja fuerte, que aquí
-   no dice nada: se quitó.
+/* ── Ilustración de portada ──────────────────────────────────────────────
+   Un robot ordenando documentos en una bandeja: el tema de la línea contado
+   sin metáforas. Comparte estilo con las otras dos escenas —trazo técnico,
+   halo azul, luz en dos elementos— pero no tema, que es la regla del manual.
 
-   La ilustración de esta línea **está pendiente y no se dibuja a mano**. Las
-   ilustraciones de escena se generan con el prompt del manual (§4) y se
-   publican en el repositorio de marca; un dibujo programático sale con todos
-   los ángulos iguales y ninguna irregularidad, y en una página de producto eso
-   no se lee como minimalismo.
+   Se monta con las mismas decisiones que EvePay y EveConecta, explicadas allá.
+   En corto:
 
-   Mientras tanto manda el degradado radial de base.css, que ya deja la portada
-   limpia. Cuando exista `ilustraciones/asistente-documental.webp`, se enchufa
-   aquí con el mismo patrón que usan las otras dos landings. */
+   - Va como ::after y NO como background de .portada, porque base.css ya usa
+     ese background para el degradado radial.
+   - `contain` y bajada un tramo bajo la base, para que la escena respire por
+     debajo del texto en vez de cruzarlo.
+   - El hueco radial deja limpio el bloque de texto. Aquí el bloque es del
+     tamaño del de EvePay —chip, titular de dos líneas, entrada de cuatro,
+     botón y nota— así que se reutiliza su hueco tal cual.
+   - La URL es del CDN de marca (T1), fijada a @1. WebP de 233 KB, 2048 px de
+     ancho, con el blanco convertido a transparencia. **El alfa no es
+     opcional**: con `contain` sobra ancho a los lados y un fondo blanco opaco
+     dibujaría el rectángulo de la imagen recortado contra el degradado. La
+     primera versión subida no lo tenía y por eso se rehízo.
+   - La ilustración se generó con el prompt del manual (§4). No se dibuja a
+     mano: un dibujo programático sale con todos los ángulos iguales y en una
+     página de producto eso no se lee como minimalismo. */
+.portada{position:relative;isolation:isolate;overflow:hidden;
+  padding-bottom:clamp(150px,20vw,260px)}
+.portada::after{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.2;
+  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/asistente-documental.webp")
+    center calc(100% + clamp(28px,4.5vw,60px))/contain no-repeat;
+  /* Con prefijo -webkit- además del estándar: sin él Safari ignora la máscara
+     y el dibujo vuelve a cruzar el titular. */
+  -webkit-mask-image:radial-gradient(52% 46% at 50% 40%,
+     transparent 0 46%,#000 100%);
+          mask-image:radial-gradient(52% 46% at 50% 40%,
+     transparent 0 46%,#000 100%)}
 
+/* La entrada de portada va en azul noche, no en el gris pizarra de base.css.
+   Con el dibujo detrás compuesto al 20 %, pizarra da 4,71 sobre blanco puro y
+   menos aún sobre el dibujo: se queda por debajo del 4,5 que exige AA. El
+   titular y la nota ya estaban en azul noche; a la entrada le faltaba, porque
+   esta regla vivía dentro del bloque de ilustración que se borró al quitar el
+   dibujo prestado de EvePay, y volvió a hacer falta al poner el propio. */
+.portada .entrada{color:var(--eve-azul-noche)}
 
 /* ── Secciones ───────────────────────────────────────────────────────────
    Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
