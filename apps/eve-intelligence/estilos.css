@@ -48,10 +48,34 @@
    - La ilustración se generó con el prompt del manual (§4). No se dibuja a
      mano: un dibujo programático sale con todos los ángulos iguales y en una
      página de producto eso no se lee como minimalismo. */
-.portada{position:relative;isolation:isolate;overflow:hidden;
+.portada{position:relative;overflow:hidden;padding-bottom:0}
+
+/* El dibujo cuelga de `.portada-cuerpo`, no de la sección, y esa es toda la
+   diferencia: **empieza donde empieza el texto de entrada, por debajo del
+   titular**. Antes cubría la sección entera y pasaba por detrás del titular,
+   que es lo que ensuciaba la lectura de lo primero que se lee.
+
+   Por qué un envoltorio y no un `top` en la sección: el titular no mide lo
+   mismo en todas partes —dos líneas en escritorio, hasta cuatro en móvil—, así
+   que cualquier número fijo acierta en una pantalla y falla en las demás. Un
+   elemento que empieza donde tiene que empezar acierta en todas sin medir nada.
+
+   El ancho sí se escapa del `wrap`: el bloque de texto está limitado a la
+   columna de lectura y el dibujo tiene que respirar de borde a borde, de ahí
+   el `100vw` centrado. Lo recorta el `overflow:hidden` de la sección, que
+   además evita la barra horizontal que causaría el ancho del scrollbar.
+
+   El respiro inferior se le quita a la sección y se le da a este bloque
+   (`.portada{padding-bottom:0}`). Si se dejaran los dos, el dibujo terminaría
+   donde termina el bloque y quedarían 88 px de blanco hasta el borde de la
+   sección: el dibujo flotando en lugar de apoyarse en el corte. Poniendo aquí
+   todo el espacio, el bloque acaba exactamente donde acaba la portada y la
+   escena vuelve a llegar al borde, que es donde llegaba antes. */
+.portada-cuerpo{position:relative;isolation:isolate;
   padding-bottom:clamp(200px,26vw,340px)}
-.portada::after{
-  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.2;
+.portada-cuerpo::after{
+  content:"";position:absolute;z-index:-1;pointer-events:none;opacity:.2;
+  top:0;bottom:0;left:50%;width:100vw;transform:translateX(-50%);
   background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1.14.0/ilustraciones/asistente-documental.webp")
     center calc(100% + clamp(8px,1.2vw,20px))/contain no-repeat;
   /* **Sin hueco de máscara, a diferencia de EvePay y EveConecta.** Allá el
