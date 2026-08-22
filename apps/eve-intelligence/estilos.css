@@ -31,7 +31,16 @@
    - El hueco radial deja limpio el bloque de texto. Aquí el bloque es del
      tamaño del de EvePay —chip, titular de dos líneas, entrada de cuatro,
      botón y nota— así que se reutiliza su hueco tal cual.
-   - La URL es del CDN de marca (T1), fijada a @1. WebP de 233 KB, 2048 px de
+   - La URL es del CDN de marca (T1), pero **fijada a la versión exacta y no a
+     `@1`**, que es lo que hacen las otras dos landings. El motivo no es
+     capricho: `@1` funciona para un activo que nace, no para uno que se
+     sustituye. jsDelivr sirve las imágenes con `max-age=604800`, así que quien
+     ya cargó la página se queda **siete días** con el archivo viejo aunque se
+     purgue el CDN —la purga limpia el borde, no el navegador de nadie—. Pasó:
+     se cambió la escena y seguía viéndose la anterior. Con la versión en la
+     URL, cambiar la imagen cambia la dirección y ningún caché puede servir lo
+     de antes. El precio es tener que tocar este archivo al publicar una
+     versión nueva, que es justo el momento en que uno quiere enterarse. WebP de 233 KB, 2048 px de
      ancho, con el blanco convertido a transparencia. **El alfa no es
      opcional**: con `contain` sobra ancho a los lados y un fondo blanco opaco
      dibujaría el rectángulo de la imagen recortado contra el degradado. La
@@ -43,7 +52,7 @@
   padding-bottom:clamp(200px,26vw,340px)}
 .portada::after{
   content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.2;
-  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/asistente-documental.webp")
+  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1.14.0/ilustraciones/asistente-documental.webp")
     center calc(100% + clamp(8px,1.2vw,20px))/contain no-repeat;
   /* **Sin hueco de máscara, a diferencia de EvePay y EveConecta.** Allá el
      hueco radial existe porque su texto de portada va en gris pizarra y
