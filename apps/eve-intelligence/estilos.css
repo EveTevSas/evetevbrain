@@ -23,7 +23,11 @@
    - Va como ::after y NO como background de .portada, porque base.css ya usa
      ese background para el degradado radial.
    - `contain` y bajada un tramo bajo la base, para que la escena respire por
-     debajo del texto en vez de cruzarlo.
+     debajo del texto en vez de cruzarlo. **El empujón es mucho menor que el de
+     EvePay** (hasta 20 px, no 60): su dibujo tiene un andén vacío abajo que
+     absorbe el recorte, y este se recortó justo bajo el canto de la mesa para
+     quitarle las patas, así que solo le quedan unos 45 px de franja. Con el
+     empujón de allá, el canto de la mesa se cortaba.
    - El hueco radial deja limpio el bloque de texto. Aquí el bloque es del
      tamaño del de EvePay —chip, titular de dos líneas, entrada de cuatro,
      botón y nota— así que se reutiliza su hueco tal cual.
@@ -36,17 +40,19 @@
      mano: un dibujo programático sale con todos los ángulos iguales y en una
      página de producto eso no se lee como minimalismo. */
 .portada{position:relative;isolation:isolate;overflow:hidden;
-  padding-bottom:clamp(150px,20vw,260px)}
+  padding-bottom:clamp(200px,26vw,340px)}
 .portada::after{
   content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.2;
   background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/asistente-documental.webp")
-    center calc(100% + clamp(28px,4.5vw,60px))/contain no-repeat;
-  /* Con prefijo -webkit- además del estándar: sin él Safari ignora la máscara
-     y el dibujo vuelve a cruzar el titular. */
-  -webkit-mask-image:radial-gradient(52% 46% at 50% 40%,
-     transparent 0 46%,#000 100%);
-          mask-image:radial-gradient(52% 46% at 50% 40%,
-     transparent 0 46%,#000 100%)}
+    center calc(100% + clamp(8px,1.2vw,20px))/contain no-repeat;
+  /* **Sin hueco de máscara, a diferencia de EvePay y EveConecta.** Allá el
+     hueco radial existe porque su texto de portada va en gris pizarra y
+     necesita fondo limpio. Aquí el titular, la entrada y la nota están los
+     tres en azul noche —15,39 de contraste sobre blanco, y con el dibujo al
+     20% detrás sigue muy por encima de AA—, así que el hueco no hace falta.
+     Y estorbaba: centrado al 40% de la sección se comía justo la cabeza del
+     robot y la burbuja, que es lo que la escena quiere que se mire. Se
+     comprobó en el navegador, no se dedujo. */}
 
 /* La entrada de portada va en azul noche, no en el gris pizarra de base.css.
    Con el dibujo detrás compuesto al 20 %, pizarra da 4,71 sobre blanco puro y
