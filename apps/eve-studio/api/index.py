@@ -63,7 +63,11 @@ CDN_MARCA = f"https://cdn.jsdelivr.net/gh/{REPO_MARCA}@{VERSION_MARCA}"
 TOKEN_ESCRITURA = os.getenv("GITHUB_TOKEN_ESCRITURA")
 
 RAMA_BASE = "main"
-CARPETAS_ESCRIBIBLES = ("apps/evepay/", "apps/eveconecta-landing/")
+CARPETAS_ESCRIBIBLES = (
+    "apps/evepay/",
+    "apps/eveconecta-landing/",
+    "apps/eve-intelligence/",
+)
 EXTENSIONES_ESCRIBIBLES = (".html", ".css")
 # base.css y formularios.js son copias GENERADAS desde packages/brand: editarlas
 # aquí las revierte el siguiente `pnpm landings:sync` y además rompe el job de CI
@@ -348,7 +352,8 @@ def crear_herramienta_escritura(registro: dict):
 
         Úsala cuando el cambio deba quedar en el repositorio. Manda el contenido
         COMPLETO de cada archivo, no un fragmento. Solo puedes tocar las landings
-        (apps/evepay, apps/eveconecta-landing) y solo archivos .html y .css.
+        (apps/evepay, apps/eveconecta-landing, apps/eve-intelligence) y solo
+        archivos .html y .css.
 
         Devuelve la URL del PR, que debes incluir en tu respuesta.
         """
@@ -472,8 +477,8 @@ REGLAS DE COMPORTAMIENTO:
 4. Devuelve ÚNICAMENTE código HTML, listo para ser renderizado. No agregues explicaciones fuera del bloque de código.
 
 GENERAR PARA UNA LANDING DEL MONOREPO:
-Cuando lo que te piden es una página de `apps/evepay`, `apps/eveconecta-landing`
-o cualquier otra landing, NO devuelvas una página autocontenida: devuelve el
+Cuando lo que te piden es una página de `apps/evepay`, `apps/eveconecta-landing`,
+`apps/eve-intelligence` o cualquier otra landing, NO devuelvas una página autocontenida: devuelve el
 archivo tal como tiene que quedar en el repositorio.
 
 A. Lee primero el `index.html` actual de esa carpeta y respeta su cabecera: el
@@ -508,6 +513,12 @@ TRABAJAR SOBRE CÓDIGO QUE YA EXISTE:
    - 'apps/website' — sitio corporativo evetev.com (index.html, nosotros.html, estilos.css)
    - 'apps/evepay' — landing de evepay.evetev.com
    - 'apps/eveconecta-landing' — landing de eveconecta.evetev.com
+   - 'apps/eve-intelligence' — landing de eveintelligence.evetev.com, la línea
+     de IA empresarial. Su color identificador es el violeta (--eve-violeta),
+     que va SOLO en iconos y chips: nunca en botones (regla C3), y sobre blanco
+     se usa --eve-violeta-texto porque el violeta base no da contraste (C7).
+     Esta landing lleva instalado el asistente con una etiqueta <script> a
+     fluxi.evetev.com; no la quites al reescribir la página.
    Las landings comparten 'base.css', que es una copia GENERADA de
    'packages/brand/landing/base.css'. Si hay que cambiar el armazón común, el
    cambio va en el original, nunca en la copia; lo propio de una landing va en
@@ -524,8 +535,8 @@ DEJAR EL CAMBIO EN EL REPOSITORIO:
    cambiaste y por qué, no repitas el código.
 10. Manda SIEMPRE el contenido completo de cada archivo. La herramienta
     sustituye archivos enteros, no aplica parches.
-11. Solo puedes escribir en apps/evepay y apps/eveconecta-landing, y solo
-    archivos .html y .css. Si necesitas tocar otra cosa —el CI, packages/,
+11. Solo puedes escribir en apps/evepay, apps/eveconecta-landing y
+    apps/eve-intelligence, y solo archivos .html y .css. Si necesitas tocar otra cosa —el CI, packages/,
     base.css, la configuración— NO lo intentes: explícalo en tu respuesta para
     que lo haga una persona.
 12. Si la herramienta rechaza la propuesta, lee el motivo y corrige. No

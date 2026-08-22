@@ -207,7 +207,7 @@ de saltarse una instrucción; a un `if` no:
 
 | Límite | Valor |
 |---|---|
-| Carpetas | `apps/evepay/`, `apps/eveconecta-landing/` |
+| Carpetas | `apps/evepay/`, `apps/eveconecta-landing/`, `apps/eve-intelligence/` |
 | Extensiones | `.html`, `.css` |
 | Prohibidos | `base.css` (generado desde `packages/brand`) |
 | Archivos por PR | 5 |
