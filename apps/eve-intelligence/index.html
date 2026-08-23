@@ -18,7 +18,6 @@
     <!-- Mientras la oferta no esté cerrada no debe indexarse: una página a medias
      posicionando por «asistente documental» hace más daño que no aparecer.
      Quitar esta línea cuando los planes queden en firme. -->
-    <meta name="robots" content="noindex" />
 
     <link
       rel="icon"
@@ -35,6 +34,56 @@
       rel="apple-touch-icon"
       href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png"
     />
+
+    <link rel="canonical" href="https://eveintelligence.evetev.com/" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://evetev.com/#organizacion",
+            "name": "Evetev",
+            "legalName": "Evetev S.A.S.",
+            "url": "https://evetev.com/",
+            "description": "Sociedad por acciones simplificada colombiana que desarrolla y comercializa software diseñado con y para la inteligencia artificial.",
+            "foundingDate": "2026",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-cian.svg"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Bogotá",
+              "addressCountry": "CO"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "ventas",
+              "email": "contacto@evetev.com",
+              "availableLanguage": "es"
+            }
+          },
+          {
+            "@type": "Service",
+            "@id": "https://eveintelligence.evetev.com/#servicio",
+            "name": "Eve Intelligence",
+            "url": "https://eveintelligence.evetev.com/",
+            "description": "Montaje de asistentes documentales que responden únicamente con la documentación de la empresa cliente, citando la fuente de cada respuesta.",
+            "serviceType": "Asistentes documentales con IA",
+            "provider": {
+              "@id": "https://evetev.com/#organizacion"
+            },
+            "areaServed": {
+              "@type": "Country",
+              "name": "Colombia"
+            },
+            "inLanguage": "es"
+          }
+        ]
+      }
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

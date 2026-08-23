@@ -34,6 +34,107 @@
     <meta name="theme-color" content="#0A2540" />
 
     <!-- Tipografía oficial (§3): Baloo 2 (marca/titulares) + Inter (UI) + JetBrains Mono (técnico) -->
+    <link rel="canonical" href="https://evetev.com/" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://evetev.com/#organizacion",
+            "name": "Evetev",
+            "legalName": "Evetev S.A.S.",
+            "url": "https://evetev.com/",
+            "description": "Sociedad por acciones simplificada colombiana que desarrolla y comercializa software diseñado con y para la inteligencia artificial.",
+            "foundingDate": "2026",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-cian.svg"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Bogotá",
+              "addressCountry": "CO"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "ventas",
+              "email": "contacto@evetev.com",
+              "availableLanguage": "es"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://evetev.com/#sitio",
+            "url": "https://evetev.com/",
+            "name": "Evetev",
+            "inLanguage": "es-CO",
+            "publisher": {
+              "@id": "https://evetev.com/#organizacion"
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://evetev.com/#faq",
+            "isPartOf": {
+              "@id": "https://evetev.com/#sitio"
+            },
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "¿Ya puedo usar EvePay?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Todavía no en producción. Estamos en etapa de fundación: el núcleo de pagos ya está construido —cobros idempotentes, libro de movimientos, webhooks y conciliación— y en paralelo corre la habilitación con la adquirencia, que no es un trámite automático y toma semanas. Si quieres entrar como piloto, escríbenos y te contamos en qué punto vamos, sin adornos."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Cómo cobran exactamente?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Un porcentaje por transacción aprobada más un componente fijo, y una suscripción mensual por el software. Todo publicado, sin escalas escondidas. Las cifras que manejamos hoy son de referencia ; las definitivas se cierran contigo antes de firmar."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Dónde queda mi dinero mientras tanto?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "En ningún lado nuestro. Somos gateway puro: el dinero fluye directo del banco de tu cliente a tu cuenta. Nosotros no somos tesorería, y esa decisión de arquitectura es también la que nos quita riesgo regulatorio de encima."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Qué es EveConecta?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Nuestra solución de gestión y recaudo para conjuntos residenciales: cuotas por coeficiente, estado de cuenta, pago en línea del residente y paz y salvo. Es también nuestro primer cliente — la usamos para probar EvePay cobrando dinero real antes de pedirle a nadie más que confíe en él."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Qué hacen con los datos de las personas?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Pedimos lo mínimo para prestar el servicio y nada más. Los datos de cada cliente están aislados a nivel de base de datos, no solo por una condición en el código. No guardamos números de tarjeta en ningún momento: el dato sensible lo captura el checkout embebido del proveedor. Y no publicamos listados de deudores."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Puedo cancelar cuando quiera?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Sí. Sin permanencia y sin penalidades: preferimos que te quedes por el producto y no por un contrato."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

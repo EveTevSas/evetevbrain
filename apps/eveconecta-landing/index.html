@@ -20,7 +20,6 @@
 
     <!-- Mientras la landing no esté terminada no debe indexarse: una página a
      medias posicionando por «EveConecta» hace más daño que no aparecer. -->
-    <meta name="robots" content="noindex" />
 
     <!-- Favicon desde el CDN de marca (§4) -->
     <link
@@ -46,6 +45,56 @@
     <meta name="theme-color" content="#0A2540" />
 
     <!-- Tipografía oficial (§3): Baloo 2 (titulares) + Inter (interfaz) -->
+    <link rel="canonical" href="https://eveconecta.evetev.com/" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://evetev.com/#organizacion",
+            "name": "Evetev",
+            "legalName": "Evetev S.A.S.",
+            "url": "https://evetev.com/",
+            "description": "Sociedad por acciones simplificada colombiana que desarrolla y comercializa software diseñado con y para la inteligencia artificial.",
+            "foundingDate": "2026",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-cian.svg"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Bogotá",
+              "addressCountry": "CO"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "ventas",
+              "email": "contacto@evetev.com",
+              "availableLanguage": "es"
+            }
+          },
+          {
+            "@type": "Service",
+            "@id": "https://eveconecta.evetev.com/#servicio",
+            "name": "EveConecta",
+            "url": "https://eveconecta.evetev.com/",
+            "description": "Gestión y recaudo para conjuntos residenciales: cuotas por coeficiente, estado de cuenta, pago en línea del residente y paz y salvo.",
+            "serviceType": "Software de propiedad horizontal",
+            "provider": {
+              "@id": "https://evetev.com/#organizacion"
+            },
+            "areaServed": {
+              "@type": "Country",
+              "name": "Colombia"
+            },
+            "inLanguage": "es"
+          }
+        ]
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
