@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/lib/ui";
+import { Button, cn } from "@/lib/ui";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
@@ -11,7 +11,8 @@ export function Modal({
   title,
   description,
   children,
-  footer
+  footer,
+  size = "md"
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -19,12 +20,20 @@ export function Modal({
   description: string;
   children: ReactNode;
   footer?: ReactNode;
+  size?: "md" | "lg" | "xl";
 }) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[90] bg-[rgba(10,37,64,.35)] backdrop-blur-sm data-[state=open]:animate-in" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-[91] max-h-[90vh] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[var(--eve-radio-lg)] border border-[var(--line)] bg-white shadow-[0_12px_28px_rgba(10,37,64,.14)]">
+        <Dialog.Content
+          className={cn(
+            "fixed left-1/2 top-1/2 z-[91] max-h-[90vh] w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[var(--eve-radio-lg)] border border-[var(--line)] bg-white shadow-[0_12px_28px_rgba(10,37,64,.14)]",
+            size === "md" && "max-w-xl",
+            size === "lg" && "max-w-3xl",
+            size === "xl" && "max-w-6xl"
+          )}
+        >
           <div className="flex items-start justify-between gap-4 border-b border-[var(--line)] p-5 sm:p-6">
             <div>
               <Dialog.Title className="font-brand text-xl font-semibold tracking-[-0.025em] text-[var(--ink)]">

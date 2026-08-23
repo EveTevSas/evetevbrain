@@ -15,14 +15,33 @@ export function createResidentSnapshot(
 
   snapshot.fees = snapshot.fees.filter((item) => matchesUnit(item.unit));
   snapshot.people = snapshot.people.filter((item) => matchesUnit(item.unit));
+  snapshot.pets = (snapshot.pets ?? []).filter((item) => matchesUnit(item.unit));
   snapshot.cases = snapshot.cases.filter((item) => matchesUnit(item.unit));
   snapshot.reservations = snapshot.reservations.filter((item) => matchesUnit(item.unit));
   snapshot.visitors = snapshot.visitors.filter((item) => matchesUnit(item.unit));
+  snapshot.parkingSpots = (snapshot.parkingSpots ?? []).filter(
+    (item) => matchesUnit(item.linkedUnit ?? "") || matchesUnit(item.assignedUnit ?? "")
+  );
+  snapshot.vehicles = (snapshot.vehicles ?? []).filter((item) => matchesUnit(item.unit));
+  snapshot.vehicleAccessEvents = (snapshot.vehicleAccessEvents ?? []).filter((item) =>
+    matchesUnit(item.unit ?? "")
+  );
   snapshot.workOrders = [];
   snapshot.expenses = [];
   snapshot.audit = [];
   snapshot.portfolio = [];
   snapshot.documents = snapshot.documents.filter((item) => item.visibility === "residents");
+  snapshot.assemblies = snapshot.assemblies.map((assembly) => ({
+    ...assembly,
+    dossier: assembly.dossier
+      ? {
+          ...assembly.dossier,
+          documents: assembly.dossier.documents.filter(
+            (document) => document.status === "published"
+          )
+        }
+      : undefined
+  }));
 
   const balanceMinor = snapshot.fees.reduce((total, fee) => total + fee.balanceMinor, 0);
   const nextDueDate = snapshot.fees

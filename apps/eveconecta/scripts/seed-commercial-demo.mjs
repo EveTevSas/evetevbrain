@@ -84,17 +84,102 @@ function iso(day, hour = "09:00:00") {
   return `2026-07-${String(day).padStart(2, "0")}T${hour}-05:00`;
 }
 
+const demoIdentificationTypes = ["cc", "cc", "ti", "ce"];
+
+function demoIdentificationNumber(digit, index) {
+  return `${digit}0${String(index + 1).padStart(7, "0")}`;
+}
+
+function parkingDemoFor(conjunto) {
+  const { digit, residents } = conjunto;
+  const definitions = [
+    [`L${digit}-5`, "zone", `L${digit}`, "5", null, 0],
+    ["M2-3", "zone", "M2", "3", null, 1],
+    ["A1", "zone", "A", "1", null, null],
+    ["C18-1", "unit", null, "1", residents[3][1], 3]
+  ];
+  return definitions.map(([code, kind, sector, number, linkedUnit, vehicleIndex], index) => ({
+    id: stableId(digit, 9, index + 1),
+    code,
+    kind,
+    sector,
+    number,
+    linkedUnit,
+    assignedUnit: vehicleIndex === null ? null : residents[vehicleIndex][1],
+    assignedVehicleId: vehicleIndex === null ? null : stableId(digit, 10, Number(vehicleIndex) + 1),
+    status: vehicleIndex === null ? "available" : "assigned"
+  }));
+}
+
+function vehicleDemoFor(conjunto, parkingSpots) {
+  const { digit, residents } = conjunto;
+  const prefixes = ["EVT", "MIR", "BHV"];
+  return residents.map(([name, unit], index) => {
+    const parkingSpot = parkingSpots.find(
+      (candidate) => candidate.assignedVehicleId === stableId(digit, 10, index + 1)
+    );
+    return {
+      id: stableId(digit, 10, index + 1),
+      plate: `${prefixes[Number(digit) - 1]}${digit}${String(index + 1).padStart(2, "0")}`,
+      kind: index === 2 ? "motorcycle" : "car",
+      brand: ["Renault", "Mazda", "Yamaha", "Chevrolet"][index],
+      color: ["Gris", "Azul", "Negro", "Blanco"][index],
+      personId: stableId(digit, 2, index + 1),
+      resident: name,
+      unit,
+      parkingSpotId: parkingSpot?.id ?? null,
+      parkingCode: parkingSpot?.code ?? null,
+      accessStatus: index === 2 ? "suspended" : "authorized",
+      validFrom: iso(1, "00:00:00"),
+      validUntil: null
+    };
+  });
+}
+
+function petDemoFor(conjunto) {
+  const { digit, residents } = conjunto;
+  const definitions = [
+    [0, "dog", 2021, "medium", "Milo", "active"],
+    [2, "cat", 2020, "small", "Luna", "active"],
+    [2, "cat", 2023, "small", "Simba", "active"],
+    [3, "dog", 2019, "large", "Bruno", "active"],
+    [3, "cat", 2015, "small", "Nala", "inactive"]
+  ];
+  return definitions.map(([personIndex, type, birthYear, size, name, status], index) => ({
+    id: stableId(digit, 13, index + 1),
+    personId: stableId(digit, 2, Number(personIndex) + 1),
+    resident: residents[personIndex][0],
+    unit: residents[personIndex][1],
+    type,
+    birthYear,
+    size,
+    name,
+    status,
+    photoPath: null,
+    createdAt: iso(12 + index, "10:00:00")
+  }));
+}
+
 function snapshotFor(conjunto) {
   const { digit, residents } = conjunto;
   const amount = 48500000 + Number(digit) * 1500000;
-  const people = residents.map(([name, unit, email, phone, vehicles, pets], index) => ({
-    id: stableId(digit, 20, index + 1),
+  const parkingSpots = parkingDemoFor(conjunto);
+  const vehicles = vehicleDemoFor(conjunto, parkingSpots);
+  const pets = petDemoFor(conjunto);
+  const people = residents.map(([name, unit, email, phone], index) => ({
+    id: stableId(digit, 2, index + 1),
     name,
+    identificationType: demoIdentificationTypes[index],
+    identificationNumber: demoIdentificationNumber(digit, index),
     unit,
     kind: index === 2 ? "tenant" : index === 3 ? "resident" : "owner",
     contact: `${email}@demo.evetev.invalid · ${phone}`,
-    vehicles,
-    pets,
+    email: `${email}@demo.evetev.invalid`,
+    phone,
+    vehicles: 1,
+    pets: pets.filter(
+      (pet) => pet.personId === stableId(digit, 2, index + 1) && pet.status === "active"
+    ).length,
     status: index === 3 ? "invited" : "active"
   }));
   const fees = residents.map(([name, unit], index) => ({
@@ -104,8 +189,8 @@ function snapshotFor(conjunto) {
     concept: "Administración julio 2026",
     dueDate: "2026-07-10",
     amountMinor: amount + index * 250000,
-    balanceMinor: index === 0 ? 0 : index === 3 ? amount + index * 250000 : amount,
-    status: index === 0 ? "paid" : index === 3 ? "overdue" : "pending"
+    balanceMinor: index === 1 ? 0 : index === 3 ? amount + index * 250000 : amount,
+    status: index === 1 ? "paid" : index === 3 ? "overdue" : "pending"
   }));
   fees.push({
     id: stableId(digit, 21, 5),
@@ -170,6 +255,7 @@ function snapshotFor(conjunto) {
     ],
     fees,
     people,
+    pets,
     cases: [
       {
         id: stableId(digit, 22, 1),
@@ -316,6 +402,43 @@ function snapshotFor(conjunto) {
         offlineCreated: false
       }
     ],
+    parkingSpots,
+    vehicles,
+    vehicleAccessEvents: [
+      {
+        id: stableId(digit, 11, 1),
+        plate: vehicles[0].plate,
+        direction: "entry",
+        decision: "authorized",
+        reason: "registered_vehicle",
+        source: "permanent",
+        unit: vehicles[0].unit,
+        parkingCode: vehicles[0].parkingCode,
+        occurredAt: iso(28, "07:35:00")
+      },
+      {
+        id: stableId(digit, 11, 2),
+        plate: vehicles[2].plate,
+        direction: "entry",
+        decision: "denied",
+        reason: "suspended_vehicle",
+        source: "permanent",
+        unit: vehicles[2].unit,
+        parkingCode: null,
+        occurredAt: iso(28, "08:12:00")
+      },
+      {
+        id: stableId(digit, 11, 3),
+        plate: `XYZ${digit}9`,
+        direction: "entry",
+        decision: "denied",
+        reason: "unknown_vehicle",
+        source: "unknown",
+        unit: null,
+        parkingCode: null,
+        occurredAt: iso(28, "09:04:00")
+      }
+    ],
     workOrders: conjunto.assets.map((asset, index) => ({
       id: stableId(digit, 25, index + 1),
       code: `OT-2026-${digit}0${index + 1}`,
@@ -339,6 +462,7 @@ function snapshotFor(conjunto) {
         id: stableId(digit, 26, 1),
         concept: "Reparación urgente de motobomba",
         provider: "Hidrosistemas Ltda.",
+        providerIdentification: "900.000.101-1",
         budgetLine: "Mantenimiento",
         amountMinor: 485000000,
         requestedBy: "Administración",
@@ -351,6 +475,7 @@ function snapshotFor(conjunto) {
         id: stableId(digit, 26, 2),
         concept: "Renovación póliza áreas comunes",
         provider: "Aseguradora Solidaria",
+        providerIdentification: "900.000.102-2",
         budgetLine: "Seguros",
         amountMinor: 1280000000,
         requestedBy: "Consejo",
@@ -363,6 +488,7 @@ function snapshotFor(conjunto) {
         id: stableId(digit, 26, 3),
         concept: "Insumos de aseo julio",
         provider: "Suministros Verdes",
+        providerIdentification: "900.000.103-3",
         budgetLine: "Servicios generales",
         amountMinor: 235000000,
         requestedBy: "Administración",
@@ -375,6 +501,7 @@ function snapshotFor(conjunto) {
         id: stableId(digit, 26, 4),
         concept: "Iluminación LED zonas peatonales",
         provider: "Lumen Colombia",
+        providerIdentification: "900.000.104-4",
         budgetLine: "Mejoras",
         amountMinor: 690000000,
         requestedBy: "Comité ambiental",
@@ -388,6 +515,8 @@ function snapshotFor(conjunto) {
       {
         id: stableId(digit, 27, 1),
         title: "Mantenimiento programado de red hidráulica",
+        message:
+          "El servicio de agua tendrá una interrupción programada mientras se realiza mantenimiento preventivo a la red hidráulica.",
         audience: "Todos los residentes",
         channel: "App + correo + WhatsApp",
         publishedAt: iso(28, "07:30:00"),
@@ -397,6 +526,8 @@ function snapshotFor(conjunto) {
       {
         id: stableId(digit, 27, 2),
         title: "Convocatoria asamblea extraordinaria",
+        message:
+          "Invitamos a los propietarios a consultar el orden del día y participar en la asamblea extraordinaria de la copropiedad.",
         audience: "Propietarios",
         channel: "App + correo certificado",
         publishedAt: iso(29, "08:00:00"),
@@ -406,6 +537,8 @@ function snapshotFor(conjunto) {
       {
         id: stableId(digit, 27, 3),
         title: "Jornada de vacunación de mascotas",
+        message:
+          "Registra previamente a tu mascota para participar en la jornada de vacunación organizada en la zona social.",
         audience: "Residentes con mascotas",
         channel: "App",
         publishedAt: iso(25, "11:00:00"),
@@ -415,6 +548,8 @@ function snapshotFor(conjunto) {
       {
         id: stableId(digit, 27, 4),
         title: "Encuesta de satisfacción de portería",
+        message:
+          "Cuéntanos cómo ha sido tu experiencia con el servicio de portería y ayúdanos a priorizar mejoras.",
         audience: "Todos los residentes",
         channel: "App",
         publishedAt: iso(30, "10:00:00"),
@@ -422,12 +557,32 @@ function snapshotFor(conjunto) {
         status: "draft"
       }
     ],
+    assemblySettings: {
+      capabilities: {
+        document_repository: true,
+        delivery_tracking: true,
+        proxy_management: true,
+        identity_accreditation: true,
+        continuous_quorum: true,
+        unit_voting: true,
+        coefficient_voting: true,
+        qualified_majorities: true,
+        secret_ballots: true,
+        hybrid_participation: true,
+        resident_questions: true,
+        minutes_workflow: true,
+        decision_tracking: true
+      }
+    },
     assemblies: [
       {
         id: stableId(digit, 28, 1),
         title: "Asamblea extraordinaria de presupuesto",
         date: "2026-08-12",
         mode: "Híbrida",
+        type: "extraordinary",
+        location: "Salón social y videoconferencia",
+        agenda: "Verificación del quórum, presentación del presupuesto y votación de la propuesta.",
         quorumPercent: 62,
         representedUnits: Math.round(conjunto.units * 0.62),
         totalUnits: conjunto.units,
@@ -439,6 +594,9 @@ function snapshotFor(conjunto) {
         title: "Asamblea ordinaria 2026",
         date: "2026-03-21",
         mode: "Virtual",
+        type: "ordinary",
+        location: "https://asambleas.demo.evetev.invalid/ordinaria-2026",
+        agenda: "Informe de gestión, estados financieros, elección de órganos y proposiciones.",
         quorumPercent: 78,
         representedUnits: Math.round(conjunto.units * 0.78),
         totalUnits: conjunto.units,
@@ -450,6 +608,9 @@ function snapshotFor(conjunto) {
         title: "Reunión informativa de seguridad",
         date: "2026-07-30",
         mode: "Presencial",
+        type: "informative",
+        location: "Salón social principal",
+        agenda: "Presentación del plan de seguridad y espacio de preguntas de la comunidad.",
         quorumPercent: 35,
         representedUnits: Math.round(conjunto.units * 0.35),
         totalUnits: conjunto.units,
@@ -458,19 +619,55 @@ function snapshotFor(conjunto) {
       }
     ],
     documents: [
-      ["Reglamento de propiedad horizontal.pdf", "Gobierno", 4, "residents", "current"],
-      ["Manual de convivencia 2026.pdf", "Convivencia", 2, "residents", "current"],
-      ["Póliza de áreas comunes.pdf", "Seguros", 3, "council", "expiring"],
-      ["Presupuesto aprobado 2026.xlsx", "Finanzas", 1, "administration", "current"],
-      ["Acta asamblea ordinaria 2026.pdf", "Asambleas", 1, "residents", "current"]
-    ].map(([name, category, version, visibility, status], index) => ({
+      [
+        "Reglamento de propiedad horizontal.pdf",
+        "Gobierno",
+        4,
+        "residents",
+        "current",
+        "/demo/documentos/reglamento-propiedad-horizontal.pdf"
+      ],
+      [
+        "Manual de convivencia 2026.pdf",
+        "Convivencia",
+        2,
+        "residents",
+        "current",
+        "/demo/documentos/manual-convivencia-2026.pdf"
+      ],
+      [
+        "Póliza de áreas comunes.pdf",
+        "Seguros",
+        3,
+        "council",
+        "expiring",
+        "/demo/documentos/poliza-areas-comunes.pdf"
+      ],
+      [
+        "Presupuesto aprobado 2026.pdf",
+        "Finanzas",
+        1,
+        "administration",
+        "current",
+        "/demo/documentos/presupuesto-aprobado-2026.pdf"
+      ],
+      [
+        "Acta asamblea ordinaria 2026.pdf",
+        "Asambleas",
+        1,
+        "residents",
+        "current",
+        "/demo/documentos/acta-asamblea-ordinaria-2026.pdf"
+      ]
+    ].map(([name, category, version, visibility, status, downloadPath], index) => ({
       id: stableId(digit, 29, index + 1),
       name,
       category,
       version,
       updatedAt: iso(23 + index, "12:00:00"),
       visibility,
-      status
+      status,
+      downloadPath
     })),
     audit: [
       ["auth.inicio_sesion", "Sesión", "Inicio de sesión con MFA validado"],
@@ -616,6 +813,7 @@ async function main() {
   );
 
   for (const conjunto of conjuntos) {
+    const demoSnapshot = snapshotFor(conjunto);
     const units = conjunto.residents.map((resident, index) => ({
       id: stableId(conjunto.digit, 1, index + 1),
       conjunto_id: conjunto.id,
@@ -631,6 +829,8 @@ async function main() {
         conjunto_id: conjunto.id,
         auth_usuario_id: index === 0 ? residentAccount.id : null,
         nombre: resident[0],
+        tipo_identificacion: demoIdentificationTypes[index],
+        numero_identificacion: demoIdentificationNumber(conjunto.digit, index),
         email: index === 0 ? residentAccount.email : `${resident[2]}@demo.evetev.invalid`,
         telefono: resident[3],
         autorizacion_tratamiento_en: iso(10 + index, "09:00:00"),
@@ -646,6 +846,114 @@ async function main() {
       responsable_pago: index !== 2,
       vigente_desde: "2026-01-01"
     }));
+    const petSnapshot = petDemoFor(conjunto);
+    const petRows = petSnapshot.map((pet) => ({
+      id: pet.id,
+      conjunto_id: conjunto.id,
+      persona_id: pet.personId,
+      unidad_id: units.find((unit) => unit.codigo === pet.unit)?.id,
+      tipo: pet.type === "dog" ? "perro" : "gato",
+      anio_nacimiento: pet.birthYear,
+      tamano: pet.size === "large" ? "grande" : pet.size === "medium" ? "mediano" : "pequeno",
+      nombre: pet.name,
+      estado: pet.status === "active" ? "activo" : "inactivo",
+      foto_path: pet.photoPath,
+      creado_en: pet.createdAt
+    }));
+    const parkingSnapshot = parkingDemoFor(conjunto);
+    const vehicleSnapshot = vehicleDemoFor(conjunto, parkingSnapshot);
+    const parkingRows = parkingSnapshot.map((parkingSpot) => ({
+      id: parkingSpot.id,
+      conjunto_id: conjunto.id,
+      codigo: parkingSpot.code,
+      codigo_normalizado: parkingSpot.code.toUpperCase().replace(/[^A-Z0-9]/g, ""),
+      tipo: parkingSpot.kind === "zone" ? "zona" : "unidad",
+      sector: parkingSpot.sector,
+      numero: parkingSpot.number,
+      unidad_base_id: parkingSpot.linkedUnit
+        ? units.find((unit) => unit.codigo === parkingSpot.linkedUnit)?.id
+        : null,
+      estado: parkingSpot.status === "assigned" ? "asignado" : "disponible"
+    }));
+    const vehicleRows = vehicleSnapshot.map((vehicle) => ({
+      id: vehicle.id,
+      conjunto_id: conjunto.id,
+      persona_id: vehicle.personId,
+      unidad_id: units.find((unit) => unit.codigo === vehicle.unit)?.id,
+      placa: vehicle.plate,
+      placa_normalizada: vehicle.plate,
+      clase:
+        vehicle.kind === "car"
+          ? "automovil"
+          : vehicle.kind === "motorcycle"
+            ? "motocicleta"
+            : "otro",
+      marca: vehicle.brand,
+      color: vehicle.color,
+      estado_acceso: vehicle.accessStatus === "authorized" ? "autorizado" : "suspendido",
+      vigente_desde: vehicle.validFrom,
+      vigente_hasta: vehicle.validUntil
+    }));
+    const parkingAssignments = parkingSnapshot
+      .filter((parkingSpot) => parkingSpot.assignedVehicleId)
+      .map((parkingSpot, index) => {
+        const vehicle = vehicleSnapshot.find(
+          (candidate) => candidate.id === parkingSpot.assignedVehicleId
+        );
+        return {
+          id: stableId(conjunto.digit, 12, index + 1),
+          conjunto_id: conjunto.id,
+          parqueadero_id: parkingSpot.id,
+          unidad_id: units.find((unit) => unit.codigo === vehicle.unit)?.id,
+          vehiculo_id: vehicle.id,
+          vigente_desde: "2026-07-01",
+          activa: true
+        };
+      });
+    const vehicleAccessEvents = [
+      {
+        id: stableId(conjunto.digit, 11, 1),
+        conjunto_id: conjunto.id,
+        vehiculo_id: vehicleSnapshot[0].id,
+        placa_normalizada: vehicleSnapshot[0].plate,
+        direccion: "ingreso",
+        decision: "autorizado",
+        motivo: "registered_vehicle",
+        origen: "permanente",
+        unidad_id: units[0].id,
+        parqueadero_id: vehicleSnapshot[0].parkingSpotId,
+        actor_usuario_id: admin.id,
+        ocurrido_en: iso(28, "07:35:00")
+      },
+      {
+        id: stableId(conjunto.digit, 11, 2),
+        conjunto_id: conjunto.id,
+        vehiculo_id: vehicleSnapshot[2].id,
+        placa_normalizada: vehicleSnapshot[2].plate,
+        direccion: "ingreso",
+        decision: "denegado",
+        motivo: "suspended_vehicle",
+        origen: "permanente",
+        unidad_id: units[2].id,
+        parqueadero_id: null,
+        actor_usuario_id: admin.id,
+        ocurrido_en: iso(28, "08:12:00")
+      },
+      {
+        id: stableId(conjunto.digit, 11, 3),
+        conjunto_id: conjunto.id,
+        vehiculo_id: null,
+        placa_normalizada: `XYZ${conjunto.digit}9`,
+        direccion: "ingreso",
+        decision: "denegado",
+        motivo: "unknown_vehicle",
+        origen: "desconocido",
+        unidad_id: null,
+        parqueadero_id: null,
+        actor_usuario_id: admin.id,
+        ocurrido_en: iso(28, "09:04:00")
+      }
+    ];
     const generation = {
       id: stableId(conjunto.digit, 4, 1),
       conjunto_id: conjunto.id,
@@ -679,7 +987,7 @@ async function main() {
         motivo: "Generación de cuota para demostración comercial",
         metadata: { demo: true }
       };
-      if (index !== 0) return [base];
+      if (index !== 1) return [base];
       return [
         base,
         {
@@ -710,19 +1018,80 @@ async function main() {
       datos: { demo: true, source: "seed-commercial-demo" },
       ocurrido_en: iso(28, `${String(8 + index).padStart(2, "0")}:00:00`)
     }));
+    const communicationRows = demoSnapshot.announcements.map((announcement) => ({
+      id: announcement.id,
+      conjunto_id: conjunto.id,
+      titulo: announcement.title,
+      mensaje: announcement.message,
+      audiencia:
+        announcement.audience === "Propietarios"
+          ? "owners"
+          : announcement.audience === "Residentes con mascotas"
+            ? "residents_with_pets"
+            : "all_residents",
+      canales: [
+        announcement.channel.includes("App") ? "app" : null,
+        announcement.channel.toLowerCase().includes("correo") ? "email" : null,
+        announcement.channel.includes("WhatsApp") ? "whatsapp" : null
+      ].filter(Boolean),
+      publicado_en: announcement.publishedAt,
+      entrega_porcentaje: announcement.deliveryRate,
+      estado:
+        announcement.status === "published"
+          ? "publicado"
+          : announcement.status === "scheduled"
+            ? "programado"
+            : "borrador",
+      creado_por_usuario_id: admin.id
+    }));
+    const assemblyRows = demoSnapshot.assemblies.map((assembly) => ({
+      id: assembly.id,
+      conjunto_id: conjunto.id,
+      titulo: assembly.title,
+      tipo:
+        assembly.type === "ordinary"
+          ? "ordinaria"
+          : assembly.type === "extraordinary"
+            ? "extraordinaria"
+            : "informativa",
+      modalidad:
+        assembly.mode === "Presencial"
+          ? "presencial"
+          : assembly.mode === "Virtual"
+            ? "virtual"
+            : "hibrida",
+      inicia_en: assembly.date,
+      ubicacion: assembly.location,
+      orden_del_dia: assembly.agenda,
+      estado:
+        assembly.status === "closed"
+          ? "cerrada"
+          : assembly.status === "in_progress"
+            ? "en_curso"
+            : "programada",
+      creado_por_usuario_id: admin.id
+    }));
 
     await upsert("unidades", units);
     await upsert("personas", people);
     await upsert("personas_unidades", links);
+    await upsert("mascotas", petRows);
+    await upsert("parqueaderos", parkingRows);
+    await upsert("vehiculos", vehicleRows);
+    await upsert("asignaciones_parqueadero", parkingAssignments);
+    await upsert("eventos_acceso_vehicular", vehicleAccessEvents, {
+      onConflict: "id",
+      ignoreDuplicates: true
+    });
     await upsert("generaciones_cuotas", [generation], { onConflict: "id", ignoreDuplicates: true });
     await upsert("cuotas", fees, { onConflict: "id", ignoreDuplicates: true });
     await upsert("movimientos_cuenta", movements, { onConflict: "id", ignoreDuplicates: true });
+    await upsert("comunicados", communicationRows);
+    await upsert("asambleas", assemblyRows);
     await upsert("eventos_auditoria", audit, { onConflict: "id", ignoreDuplicates: true });
-    await upsert(
-      "escenarios_demo",
-      [{ conjunto_id: conjunto.id, snapshot: snapshotFor(conjunto) }],
-      { onConflict: "conjunto_id" }
-    );
+    await upsert("escenarios_demo", [{ conjunto_id: conjunto.id, snapshot: demoSnapshot }], {
+      onConflict: "conjunto_id"
+    });
   }
 
   console.log(

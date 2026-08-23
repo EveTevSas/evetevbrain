@@ -5,6 +5,7 @@ out
 coverage
 pnpm-lock.yaml
 packages/brand/**/*.svg
+**/supabase/.temp/
 
 # Índice compilado de Fluxi: lo escribe `pnpm --filter @evetev/rag-assistant
 # compilar` con un formato estable. Si Prettier lo reformatea, cada compilación

@@ -1,7 +1,16 @@
 "use client";
 
-import { formatCop, type CaseItem, type FeeItem } from "@/lib/contracts";
+import {
+  formatCop,
+  identificationTypeLabels,
+  type CaseItem,
+  type CommunityPerson,
+  type FeeItem,
+  type IdentificationType
+} from "@/lib/contracts";
+import { canInitiatePayment } from "@/lib/auth/permissions";
 import { Badge, Button, Card, EmptyState, Progress, cn } from "@/lib/ui";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   AlertCircle,
   ArrowRight,
@@ -17,13 +26,13 @@ import {
   Clock3,
   CloudOff,
   Download,
+  Eye,
   FileCheck2,
   FileClock,
   FileText,
   Filter,
   Fingerprint,
   Gauge,
-  History,
   Inbox,
   KeyRound,
   Landmark,
@@ -32,7 +41,9 @@ import {
   MessageCircleQuestion,
   MoreHorizontal,
   PackageCheck,
+  Paperclip,
   PawPrint,
+  Pencil,
   Plus,
   RefreshCw,
   Search,
@@ -57,12 +68,16 @@ import {
   YAxis
 } from "recharts";
 import Link from "next/link";
+import { CaseImagePicker } from "./case-image-picker";
+import { AssemblyManagement } from "./assembly-management";
 import { useAuthUser } from "./auth-user-provider";
 import { useData } from "./data-provider";
 import { Field, SelectInput, TextInput } from "./form-field";
 import { Modal } from "./modal";
 import { PageHeader } from "./page-header";
+import { PetManagement } from "./pet-management";
 import { StatusBadge } from "./status-badge";
+import { VehicleGatehousePanel, VehicleParkingManagement } from "./vehicle-access-management";
 
 const dateFormatter = new Intl.DateTimeFormat("es-CO", {
   day: "numeric",
@@ -78,11 +93,40 @@ const dateTimeFormatter = new Intl.DateTimeFormat("es-CO", {
 });
 
 function formatDate(value: string): string {
-  return dateFormatter.format(new Date(value));
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00`) : new Date(value);
+  return dateFormatter.format(date);
 }
 
 function formatDateTime(value: string): string {
   return dateTimeFormatter.format(new Date(value));
+}
+
+function datetimeLocalValue(value: Date): string {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  const hours = String(value.getHours()).padStart(2, "0");
+  const minutes = String(value.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function nextVisitorWindow(): { from: string; until: string } {
+  const from = new Date();
+  from.setSeconds(0, 0);
+  from.setMinutes(Math.ceil(from.getMinutes() / 15) * 15);
+  const until = new Date(from);
+  until.setHours(until.getHours() + 8);
+  return { from: datetimeLocalValue(from), until: datetimeLocalValue(until) };
+}
+
+function nextReservationSlot(): { date: string; time: string } {
+  const slot = new Date();
+  slot.setDate(slot.getDate() + 1);
+  slot.setHours(15, 0, 0, 0);
+  return {
+    date: datetimeLocalValue(slot).slice(0, 10),
+    time: datetimeLocalValue(slot).slice(11)
+  };
 }
 
 function formValue(form: FormData, name: string): string {
@@ -617,7 +661,12 @@ export function FinancesPage() {
           </div>
         </div>
         {tab === "portfolio" ? (
-          <FeesTable fees={snapshot.fees} busy={busy} onPay={payFee} />
+          <FeesTable
+            fees={snapshot.fees}
+            busy={busy}
+            canPay={canInitiatePayment(user.role)}
+            onPay={payFee}
+          />
         ) : tab === "payments" ? (
           <PaymentsPanel fees={snapshot.fees} />
         ) : (
@@ -654,10 +703,12 @@ function TabButton({
 function FeesTable({
   fees,
   busy,
+  canPay,
   onPay
 }: {
   fees: FeeItem[];
   busy: string | null;
+  canPay: boolean;
   onPay: (fee: FeeItem) => Promise<unknown>;
 }) {
   if (!fees.length)
@@ -697,7 +748,7 @@ function FeesTable({
                 <StatusBadge status={fee.status} />
               </td>
               <td className="px-5 py-4 text-right">
-                {fee.balanceMinor > 0 ? (
+                {fee.balanceMinor > 0 && canPay ? (
                   <Button
                     size="sm"
                     onClick={() => void onPay(fee)}
@@ -706,8 +757,10 @@ function FeesTable({
                     <CircleDollarSign size={15} />{" "}
                     {busy === `fee-${fee.id}` ? "Procesando" : "Pagar sandbox"}
                   </Button>
-                ) : (
+                ) : fee.balanceMinor <= 0 ? (
                   <span className="text-xs font-bold text-emerald-700">Aplicado</span>
+                ) : (
+                  <span className="text-xs font-semibold text-[var(--muted)]">—</span>
                 )}
               </td>
             </tr>
@@ -828,14 +881,35 @@ function SummaryCard({
 }
 
 export function BudgetPage() {
-  const { snapshot, approveExpense, busy } = useData();
+  const { snapshot, createExpense, approveExpense, busy } = useData();
+  const [open, setOpen] = useState(false);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const result = await createExpense({
+      concept: formValue(form, "concept"),
+      provider: formValue(form, "provider"),
+      providerIdentification: formValue(form, "providerIdentification"),
+      budgetLine: formValue(form, "budgetLine") as
+        | "Servicios generales"
+        | "Mantenimiento"
+        | "Seguridad"
+        | "Seguros"
+        | "Mejoras"
+        | "Imprevistos",
+      amountMinor: Math.round(Number(formValue(form, "amount")) * 100)
+    });
+    if (result) setOpen(false);
+  }
+
   return (
     <div className="page-enter">
       <PageHeader
         eyebrow="Control y segregación"
         title="Presupuesto y gastos"
         description="Ejecución visible, soportes completos y aprobaciones según la matriz de autoridad."
-        action={{ label: "Registrar gasto", icon: Plus, onClick: () => undefined }}
+        action={{ label: "Registrar gasto", icon: Plus, onClick: () => setOpen(true) }}
       />
       <div className="grid gap-5 xl:grid-cols-[1fr_1.6fr]">
         <Card className="p-5 sm:p-6">
@@ -874,6 +948,9 @@ export function BudgetPage() {
                     <td className="px-5 py-4">
                       <p className="font-extrabold">{expense.concept}</p>
                       <p className="mt-1 text-xs text-[var(--muted)]">{expense.provider}</p>
+                      <p className="mt-1 text-xs text-[var(--muted)]">
+                        NIT/ID: {expense.providerIdentification ?? "No registrado"}
+                      </p>
                     </td>
                     <td className="px-4 py-4 text-[var(--muted)]">{expense.budgetLine}</td>
                     <td className="px-4 py-4 text-right font-extrabold">
@@ -910,6 +987,80 @@ export function BudgetPage() {
           </TableShell>
         </Card>
       </div>
+      <Modal
+        open={open}
+        onOpenChange={setOpen}
+        title="Registrar gasto"
+        description="La solicitud quedará pendiente hasta completar las dos aprobaciones requeridas."
+      >
+        <form className="grid gap-4" onSubmit={(event) => void submit(event)}>
+          <Field label="Concepto">
+            <TextInput
+              name="concept"
+              required
+              minLength={5}
+              placeholder="Ej. Reparación de la puerta vehicular"
+            />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Proveedor">
+              <TextInput
+                name="provider"
+                required
+                minLength={3}
+                placeholder="Nombre del proveedor"
+              />
+            </Field>
+            <Field
+              label="NIT/Identificación"
+              hint="Código de identificación tributaria o personal del proveedor."
+            >
+              <TextInput
+                name="providerIdentification"
+                required
+                minLength={3}
+                maxLength={30}
+                placeholder="Ej. 900.123.456-7"
+              />
+            </Field>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Rubro presupuestal">
+              <SelectInput name="budgetLine" required>
+                <option>Servicios generales</option>
+                <option>Mantenimiento</option>
+                <option>Seguridad</option>
+                <option>Seguros</option>
+                <option>Mejoras</option>
+                <option>Imprevistos</option>
+              </SelectInput>
+            </Field>
+            <Field label="Valor (COP)" hint="Ingresa el valor total en pesos, sin decimales.">
+              <TextInput
+                name="amount"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                max="20000000"
+                step="1"
+                placeholder="4850000"
+                required
+              />
+            </Field>
+          </div>
+          <div className="rounded-xl bg-[var(--wash)] p-3 text-sm text-[var(--muted)]">
+            Registrar la solicitud no ejecuta el pago. Se requieren 2 aprobaciones para autorizarla.
+          </div>
+          <div className="mt-2 flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={busy === "expense-create"}>
+              {busy === "expense-create" ? "Registrando…" : "Registrar gasto"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
@@ -927,18 +1078,54 @@ function BudgetLine({ label, used, value }: { label: string; used: number; value
 }
 
 export function CommunityPage() {
-  const { snapshot } = useData();
+  const { snapshot, updatePerson, busy } = useData();
+  const { user } = useAuthUser();
+  const [selectedPerson, setSelectedPerson] = useState<CommunityPerson | null>(null);
+  const [personMode, setPersonMode] = useState<"view" | "edit">("view");
+  const canManagePeople = user.role === "super_admin" || user.role === "admin_conjunto";
+
+  function openPerson(person: CommunityPerson, mode: "view" | "edit") {
+    setSelectedPerson(person);
+    setPersonMode(mode);
+  }
+
+  async function submitPerson(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedPerson) return;
+    const form = new FormData(event.currentTarget);
+    const result = await updatePerson(selectedPerson.id, {
+      name: formValue(form, "name"),
+      identificationType: formValue(form, "identificationType") as IdentificationType,
+      identificationNumber: formValue(form, "identificationNumber"),
+      unit: formValue(form, "unit"),
+      kind: formValue(form, "kind") as "owner" | "tenant" | "resident",
+      contact: formValue(form, "contact"),
+      vehicles: Number(formValue(form, "vehicles")),
+      status: formValue(form, "status") as "active" | "invited"
+    });
+    if (result) {
+      setSelectedPerson(result);
+      setPersonMode("view");
+    }
+  }
+
   return (
     <div className="page-enter">
       <PageHeader
         eyebrow="Censo vivo"
         title="Comunidad"
         description="Personas, ocupaciones, vehículos y mascotas vinculados a su unidad y vigencia."
-        action={{ label: "Invitar residente", icon: UserCheck, onClick: () => undefined }}
+        action={
+          canManagePeople
+            ? { label: "Invitar residente", icon: UserCheck, onClick: () => undefined }
+            : undefined
+        }
         secondaryAction={
-          <Button variant="secondary">
-            <Download size={16} /> Importar CSV
-          </Button>
+          canManagePeople ? (
+            <Button variant="secondary">
+              <Download size={16} /> Importar CSV
+            </Button>
+          ) : undefined
         }
       />
       <div className="mb-5 grid gap-4 sm:grid-cols-3">
@@ -952,14 +1139,14 @@ export function CommunityPage() {
         <SummaryCard
           icon={Car}
           label="Vehículos"
-          value="126"
-          detail="8 cupos de visitante disponibles"
+          value={String(snapshot.vehicles?.length ?? 0)}
+          detail={`${snapshot.parkingSpots?.filter((item) => item.status === "available").length ?? 0} parqueaderos disponibles`}
         />
         <SummaryCard
           icon={PawPrint}
           label="Mascotas"
-          value="74"
-          detail="96% con registro vigente"
+          value={String(snapshot.pets?.filter((item) => item.status === "active").length ?? 0)}
+          detail={`${snapshot.pets?.filter((item) => item.status === "inactive").length ?? 0} registros inactivos`}
         />
       </div>
       <Card className="overflow-hidden">
@@ -1014,9 +1201,7 @@ export function CommunityPage() {
                     <StatusBadge status={person.status} />
                   </td>
                   <td className="px-5 py-4 text-right">
-                    <IconButton label={`Opciones para ${person.name}`}>
-                      <MoreHorizontal size={17} />
-                    </IconButton>
+                    {canManagePeople ? <PersonActions person={person} onOpen={openPerson} /> : null}
                   </td>
                 </tr>
               ))}
@@ -1024,19 +1209,239 @@ export function CommunityPage() {
           </table>
         </TableShell>
       </Card>
+      <PetManagement />
+      <VehicleParkingManagement />
+      <Modal
+        open={selectedPerson !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedPerson(null);
+        }}
+        title={personMode === "edit" ? "Editar persona" : "Ficha de la persona"}
+        description={
+          personMode === "edit"
+            ? "Actualiza la información operativa vinculada a esta ocupación."
+            : "Información registrada para esta persona y su ocupación actual."
+        }
+      >
+        {selectedPerson ? (
+          personMode === "edit" ? (
+            <form className="grid gap-4" onSubmit={(event) => void submitPerson(event)}>
+              <Field label="Nombre completo">
+                <TextInput name="name" defaultValue={selectedPerson.name} minLength={3} required />
+              </Field>
+              <Field label="Contacto" hint="Correo electrónico y/o teléfono de contacto.">
+                <TextInput
+                  name="contact"
+                  defaultValue={selectedPerson.contact}
+                  minLength={5}
+                  required
+                />
+              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Tipo de identificación">
+                  <SelectInput
+                    name="identificationType"
+                    defaultValue={selectedPerson.identificationType}
+                    required
+                  >
+                    {Object.entries(identificationTypeLabels).map(([value, label]) => (
+                      <option value={value} key={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </Field>
+                <Field
+                  label="Número de identificación"
+                  hint="Sin espacios; puede incluir puntos o guion."
+                >
+                  <TextInput
+                    name="identificationNumber"
+                    defaultValue={selectedPerson.identificationNumber}
+                    minLength={4}
+                    maxLength={30}
+                    pattern="[A-Za-z0-9][A-Za-z0-9.\-]*"
+                    required
+                  />
+                </Field>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Unidad">
+                  <TextInput name="unit" defaultValue={selectedPerson.unit} required />
+                </Field>
+                <Field label="Relación">
+                  <SelectInput name="kind" defaultValue={selectedPerson.kind}>
+                    <option value="owner">Propietario</option>
+                    <option value="tenant">Arrendatario</option>
+                    <option value="resident">Residente</option>
+                  </SelectInput>
+                </Field>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Vehículos">
+                  <TextInput
+                    name="vehicles"
+                    type="number"
+                    min="0"
+                    max="20"
+                    defaultValue={selectedPerson.vehicles}
+                    required
+                  />
+                </Field>
+                <Field label="Estado">
+                  <SelectInput name="status" defaultValue={selectedPerson.status}>
+                    <option value="active">Activo</option>
+                    <option value="invited">Invitado</option>
+                  </SelectInput>
+                </Field>
+              </div>
+              <div className="mt-2 flex justify-end gap-2">
+                <Button variant="secondary" onClick={() => setPersonMode("view")}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={busy === `person-${selectedPerson.id}`}>
+                  {busy === `person-${selectedPerson.id}` ? "Guardando…" : "Guardar cambios"}
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <PersonDetail label="Nombre" value={selectedPerson.name} />
+                <PersonDetail label="Unidad" value={selectedPerson.unit} />
+                <PersonDetail
+                  label="Tipo de identificación"
+                  value={
+                    identificationTypeLabels[selectedPerson.identificationType] ?? "No registrado"
+                  }
+                />
+                <PersonDetail
+                  label="Número de identificación"
+                  value={selectedPerson.identificationNumber ?? "No registrado"}
+                />
+                <PersonDetail label="Contacto" value={selectedPerson.contact} />
+                <PersonDetail
+                  label="Relación"
+                  value={
+                    selectedPerson.kind === "owner"
+                      ? "Propietario"
+                      : selectedPerson.kind === "tenant"
+                        ? "Arrendatario"
+                        : "Residente"
+                  }
+                />
+                <PersonDetail label="Vehículos" value={String(selectedPerson.vehicles)} />
+                <PersonDetail label="Mascotas" value={String(selectedPerson.pets)} />
+              </div>
+              <div className="mt-5 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-5">
+                <StatusBadge status={selectedPerson.status} />
+                <Button onClick={() => setPersonMode("edit")}>
+                  <Pencil size={16} /> Editar información
+                </Button>
+              </div>
+            </div>
+          )
+        ) : null}
+      </Modal>
+    </div>
+  );
+}
+
+function PersonActions({
+  person,
+  onOpen
+}: {
+  person: CommunityPerson;
+  onOpen: (person: CommunityPerson, mode: "view" | "edit") => void;
+}) {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger
+        aria-label={`Opciones para ${person.name}`}
+        className="focus-ring inline-grid size-9 place-items-center rounded-full border border-[#D7E3F0] bg-white text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--ink)]"
+      >
+        <MoreHorizontal size={17} />
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          align="end"
+          className="z-[80] min-w-48 rounded-xl border border-[var(--line)] bg-white p-1.5 shadow-[0_12px_28px_rgba(10,37,64,.14)]"
+          sideOffset={6}
+        >
+          <DropdownMenu.Item
+            className="focus-ring flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-[var(--ink)] outline-none hover:bg-[var(--wash)] focus:bg-[var(--wash)]"
+            onSelect={() => onOpen(person, "view")}
+          >
+            <Eye size={16} /> Ver ficha
+          </DropdownMenu.Item>
+          <DropdownMenu.Item
+            className="focus-ring flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-[var(--ink)] outline-none hover:bg-[var(--wash)] focus:bg-[var(--wash)]"
+            onSelect={() => onOpen(person, "edit")}
+          >
+            <Pencil size={16} /> Editar información
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+
+function PersonDetail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-[var(--wash)] p-3.5">
+      <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">{label}</p>
+      <p className="mt-1.5 break-words text-sm font-semibold text-[var(--ink)]">{value}</p>
     </div>
   );
 }
 
 export function CommunicationsPage() {
-  const { snapshot } = useData();
+  const { snapshot, createAnnouncement, busy } = useData();
+  const { user } = useAuthUser();
+  const [announcementOpen, setAnnouncementOpen] = useState(false);
+  const [publicationMode, setPublicationMode] = useState<"publish_now" | "schedule" | "draft">(
+    "publish_now"
+  );
+  const canCreateAnnouncement = user.role === "super_admin" || user.role === "admin_conjunto";
+
+  async function submitAnnouncement(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const scheduledAt = formValue(form, "scheduledAt");
+    const result = await createAnnouncement({
+      title: formValue(form, "title"),
+      message: formValue(form, "message"),
+      audience: formValue(form, "audience") as "all_residents" | "owners" | "residents_with_pets",
+      channels: form
+        .getAll("channels")
+        .filter((channel): channel is "app" | "email" | "whatsapp" =>
+          ["app", "email", "whatsapp"].includes(String(channel))
+        ),
+      publicationMode,
+      scheduledAt:
+        publicationMode === "schedule" && scheduledAt ? new Date(scheduledAt).toISOString() : null
+    });
+    if (result) {
+      setAnnouncementOpen(false);
+      setPublicationMode("publish_now");
+    }
+  }
+
   return (
     <div className="page-enter">
       <PageHeader
         eyebrow="Entrega verificable"
         title="Comunicaciones"
         description="Publica una vez, entrega por varios canales y conserva evidencia de cada envío."
-        action={{ label: "Nuevo comunicado", icon: Plus, onClick: () => undefined }}
+        action={
+          canCreateAnnouncement
+            ? {
+                label: "Nuevo comunicado",
+                icon: Plus,
+                onClick: () => setAnnouncementOpen(true)
+              }
+            : undefined
+        }
       />
       <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
         <Card className="p-5 sm:p-6">
@@ -1056,12 +1461,15 @@ export function CommunicationsPage() {
                     <p className="mt-2 text-sm text-[var(--muted)]">
                       {item.audience} · {item.channel}
                     </p>
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--ink)]/80">
+                      {item.message}
+                    </p>
                   </div>
                   <span className="text-xs font-semibold text-[var(--muted)]">
                     {formatDate(item.publishedAt)}
                   </span>
                 </div>
-                {item.status === "published" ? (
+                {item.status === "published" && item.deliveryRate > 0 ? (
                   <div className="mt-4">
                     <div className="mb-1.5 flex justify-between text-xs font-bold text-[var(--muted)]">
                       <span>Entrega confirmada</span>
@@ -1069,6 +1477,10 @@ export function CommunicationsPage() {
                     </div>
                     <Progress label={`Entrega de ${item.title}`} value={item.deliveryRate} />
                   </div>
+                ) : item.status === "published" ? (
+                  <p className="mt-4 rounded-xl bg-[var(--wash)] px-3 py-2 text-xs font-semibold text-[var(--muted)]">
+                    Entrega iniciada · la evidencia por canal aparecerá al procesar los envíos.
+                  </p>
                 ) : null}
               </div>
             ))}
@@ -1092,6 +1504,100 @@ export function CommunicationsPage() {
           </Card>
         </div>
       </div>
+
+      <Modal
+        open={announcementOpen}
+        onOpenChange={setAnnouncementOpen}
+        title="Nuevo comunicado"
+        description="Define la audiencia, los canales y el momento de publicación."
+      >
+        <form className="grid gap-4" onSubmit={(event) => void submitAnnouncement(event)}>
+          <Field label="Título">
+            <TextInput
+              name="title"
+              required
+              minLength={5}
+              maxLength={120}
+              placeholder="Ej. Mantenimiento programado del ascensor"
+            />
+          </Field>
+          <Field label="Mensaje" hint="Entre 10 y 2.000 caracteres.">
+            <textarea
+              className={cn(
+                "focus-ring min-h-32 w-full resize-y rounded-[9px] border border-[#DCE7F2] bg-white px-3.5 py-3 text-sm leading-6 text-[var(--ink)] placeholder:text-[var(--eve-muted)]"
+              )}
+              name="message"
+              required
+              minLength={10}
+              maxLength={2000}
+              placeholder="Escribe la información que recibirán los destinatarios."
+            />
+          </Field>
+          <Field label="Audiencia">
+            <SelectInput name="audience" defaultValue="all_residents">
+              <option value="all_residents">Todos los residentes</option>
+              <option value="owners">Propietarios</option>
+              <option value="residents_with_pets">Residentes con mascotas</option>
+            </SelectInput>
+          </Field>
+          <fieldset>
+            <legend className="text-sm font-bold text-[var(--ink)]">Canales</legend>
+            <div className="mt-2 grid gap-2 sm:grid-cols-3">
+              {[
+                ["app", "App"],
+                ["email", "Correo"],
+                ["whatsapp", "WhatsApp"]
+              ].map(([value, label], index) => (
+                <label
+                  className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--line)] bg-white px-3 py-3 text-sm font-semibold"
+                  key={value}
+                >
+                  <input
+                    className="size-4 accent-[var(--accent)]"
+                    defaultChecked={index === 0}
+                    name="channels"
+                    type="checkbox"
+                    value={value}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <Field label="Publicación">
+            <SelectInput
+              name="publicationMode"
+              value={publicationMode}
+              onChange={(event) =>
+                setPublicationMode(event.target.value as "publish_now" | "schedule" | "draft")
+              }
+            >
+              <option value="publish_now">Publicar ahora</option>
+              <option value="schedule">Programar publicación</option>
+              <option value="draft">Guardar como borrador</option>
+            </SelectInput>
+          </Field>
+          {publicationMode === "schedule" ? (
+            <Field label="Fecha y hora de publicación">
+              <TextInput name="scheduledAt" type="datetime-local" required />
+            </Field>
+          ) : null}
+          <div className="mt-2 flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => setAnnouncementOpen(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={busy === "announcement-create"}>
+              {busy === "announcement-create"
+                ? "Guardando…"
+                : publicationMode === "publish_now"
+                  ? "Publicar comunicado"
+                  : publicationMode === "schedule"
+                    ? "Programar comunicado"
+                    : "Guardar borrador"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
@@ -1108,17 +1614,27 @@ function Channel({ label, value }: { label: string; value: string }) {
 export function CasesPage() {
   const { snapshot, createCase, busy } = useData();
   const [open, setOpen] = useState(false);
+  const [caseImages, setCaseImages] = useState<File[]>([]);
+
+  function closeCaseForm() {
+    setOpen(false);
+    setCaseImages([]);
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const result = await createCase({
-      title: formValue(form, "title"),
-      category: formValue(form, "category"),
-      requester: formValue(form, "requester"),
-      unit: formValue(form, "unit"),
-      priority: formValue(form, "priority") as "low" | "medium" | "high"
-    });
-    if (result) setOpen(false);
+    const result = await createCase(
+      {
+        title: formValue(form, "title"),
+        category: formValue(form, "category"),
+        requester: formValue(form, "requester"),
+        unit: formValue(form, "unit"),
+        priority: formValue(form, "priority") as "low" | "medium" | "high"
+      },
+      caseImages
+    );
+    if (result) closeCaseForm();
   }
   return (
     <div className="page-enter">
@@ -1171,7 +1687,7 @@ export function CasesPage() {
       </Card>
       <Modal
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={(nextOpen) => (nextOpen ? setOpen(true) : closeCaseForm())}
         title="Nuevo caso"
         description="El SLA se asignará según la prioridad y quedará visible para el solicitante."
       >
@@ -1209,8 +1725,18 @@ export function CasesPage() {
               <TextInput name="unit" placeholder="T1 · 301" required />
             </Field>
           </div>
+          <Field
+            label="Imágenes del caso"
+            hint="Opcional. Anexa hasta 3 imágenes JPG, PNG o WebP de máximo 5 MB cada una."
+          >
+            <CaseImagePicker
+              disabled={busy === "case"}
+              files={caseImages}
+              onChange={setCaseImages}
+            />
+          </Field>
           <div className="mt-2 flex justify-end gap-2">
-            <Button variant="secondary" onClick={() => setOpen(false)}>
+            <Button variant="secondary" onClick={closeCaseForm}>
               Cancelar
             </Button>
             <Button type="submit" disabled={busy === "case"}>
@@ -1247,6 +1773,13 @@ function CaseRow({ item }: { item: CaseItem }) {
         <p className="mt-1 text-xs text-[var(--muted)]">
           {item.requester} · {item.unit} · {item.category}
         </p>
+        {item.imagePaths?.length ? (
+          <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-[var(--accent)]">
+            <Paperclip size={14} />
+            {item.imagePaths.length}{" "}
+            {item.imagePaths.length === 1 ? "imagen anexa" : "imágenes anexas"}
+          </p>
+        ) : null}
       </div>
       <div className="w-full lg:w-44">
         <div className="mb-1.5 flex justify-between text-xs font-bold text-[var(--muted)]">
@@ -1266,7 +1799,18 @@ function CaseRow({ item }: { item: CaseItem }) {
 
 export function ReservationsPage() {
   const { snapshot, createReservation, busy } = useData();
+  const { user } = useAuthUser();
   const [open, setOpen] = useState(false);
+  const [reservationSlot, setReservationSlot] = useState(nextReservationSlot);
+  const residentProfile = user.role === "residente" ? snapshot.people[0] : undefined;
+  const residentName = residentProfile?.name ?? "Laura Mendoza";
+  const residentUnit = residentProfile?.unit ?? "T1 · 301";
+
+  function openReservation() {
+    setReservationSlot(nextReservationSlot());
+    setOpen(true);
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -1285,7 +1829,11 @@ export function ReservationsPage() {
         eyebrow="Zonas comunes"
         title="Reservas"
         description="Disponibilidad, reglas, depósitos y cobros en un solo recorrido sin traslapes."
-        action={{ label: "Nueva reserva", icon: Plus, onClick: () => setOpen(true) }}
+        action={
+          user.role === "consejo"
+            ? undefined
+            : { label: "Nueva reserva", icon: Plus, onClick: openReservation }
+        }
       />
       <div className="mb-5 grid gap-4 md:grid-cols-3">
         <AmenityCard
@@ -1368,21 +1916,31 @@ export function ReservationsPage() {
               <TextInput
                 name="date"
                 type="date"
-                min="2026-07-19"
-                defaultValue="2026-07-26"
+                min={datetimeLocalValue(new Date()).slice(0, 10)}
+                defaultValue={reservationSlot.date}
                 required
               />
             </Field>
             <Field label="Hora">
-              <TextInput name="time" type="time" defaultValue="15:00" required />
+              <TextInput name="time" type="time" defaultValue={reservationSlot.time} required />
             </Field>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Residente">
-              <TextInput name="resident" defaultValue="Laura Mendoza" required />
+              <TextInput
+                name="resident"
+                defaultValue={residentName}
+                readOnly={user.role === "residente"}
+                required
+              />
             </Field>
             <Field label="Unidad">
-              <TextInput name="unit" defaultValue="T1 · 301" required />
+              <TextInput
+                name="unit"
+                defaultValue={residentUnit}
+                readOnly={user.role === "residente"}
+                required
+              />
             </Field>
           </div>
           <div className="mt-2 flex justify-end gap-2">
@@ -1429,6 +1987,13 @@ export function GatehousePage() {
   const { snapshot, createVisitor, syncGatehouse, busy, connection } = useData();
   const [open, setOpen] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
+  const [visitorWindow, setVisitorWindow] = useState({ from: "", until: "" });
+
+  function openVisitorModal() {
+    setVisitorWindow(nextVisitorWindow());
+    setOpen(true);
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -1451,7 +2016,7 @@ export function GatehousePage() {
         eyebrow="Operación resiliente"
         title="Portería"
         description="Visitantes, accesos y turnos siguen funcionando con conectividad intermitente."
-        action={{ label: "Autorizar visitante", icon: Plus, onClick: () => setOpen(true) }}
+        action={{ label: "Autorizar visitante", icon: Plus, onClick: openVisitorModal }}
         secondaryAction={
           <Button
             variant={offlineMode ? "primary" : "secondary"}
@@ -1500,6 +2065,7 @@ export function GatehousePage() {
           Sincronizar
         </Button>
       </div>
+      <VehicleGatehousePanel />
       <div className="grid gap-5 xl:grid-cols-[1.55fr_1fr]">
         <Card className="overflow-hidden">
           <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -1606,7 +2172,7 @@ export function GatehousePage() {
               <TextInput
                 name="from"
                 type="datetime-local"
-                defaultValue="2026-07-19T14:00"
+                defaultValue={visitorWindow.from}
                 required
               />
             </Field>
@@ -1614,7 +2180,7 @@ export function GatehousePage() {
               <TextInput
                 name="until"
                 type="datetime-local"
-                defaultValue="2026-07-19T20:00"
+                defaultValue={visitorWindow.until}
                 required
               />
             </Field>
@@ -1793,117 +2359,176 @@ export function MaintenancePage() {
 }
 
 export function AssembliesPage() {
-  const { snapshot } = useData();
+  const {
+    snapshot,
+    scheduleAssembly,
+    updateAssemblyCapabilities,
+    updateAssemblyChecklist,
+    sendAssemblyEmailConvocation,
+    uploadAssemblySupport,
+    updateAssemblySupportStatus,
+    downloadAssemblySupport,
+    busy
+  } = useData();
+  const { user } = useAuthUser();
+  const [assemblyOpen, setAssemblyOpen] = useState(false);
+  const [assemblyMode, setAssemblyMode] = useState<"in_person" | "virtual" | "hybrid">("in_person");
+  const canScheduleAssembly = user.role === "super_admin" || user.role === "admin_conjunto";
+
+  function closeAssemblyForm() {
+    setAssemblyOpen(false);
+    setAssemblyMode("in_person");
+  }
+
+  async function submitAssembly(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const startsAt = formValue(form, "startsAt");
+    const result = await scheduleAssembly({
+      title: formValue(form, "title"),
+      type: formValue(form, "type") as "ordinary" | "extraordinary" | "informative",
+      mode: assemblyMode,
+      callType: formValue(form, "callType") as "first" | "second",
+      propertyUse: formValue(form, "propertyUse") as "residential" | "mixed",
+      startsAt: new Date(startsAt).toISOString(),
+      location: formValue(form, "location"),
+      agenda: formValue(form, "agenda")
+    });
+    if (result) closeAssemblyForm();
+  }
+
   return (
     <div className="page-enter">
       <PageHeader
         eyebrow="Gobierno reproducible"
         title="Asambleas"
         description="Convocatorias, poderes, quórum por coeficiente, votaciones y actas verificables."
-        action={{ label: "Programar asamblea", icon: Plus, onClick: () => undefined }}
+        action={
+          canScheduleAssembly
+            ? {
+                label: "Programar asamblea",
+                icon: Plus,
+                onClick: () => setAssemblyOpen(true)
+              }
+            : undefined
+        }
       />
-      <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
-        <div className="space-y-4">
-          {snapshot.assemblies.map((assembly) => (
-            <Card className="p-5 sm:p-6" key={assembly.id}>
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge status={assembly.status} />
-                    <Badge tone="info">{assembly.mode}</Badge>
-                  </div>
-                  <h2 className="mt-3 text-lg font-extrabold">{assembly.title}</h2>
-                  <p className="mt-1.5 flex items-center gap-2 text-sm text-[var(--muted)]">
-                    <CalendarDays size={15} />
-                    {formatDateTime(assembly.date)}
-                  </p>
-                </div>
-                <Button size="sm" variant="secondary">
-                  Abrir expediente <ArrowRight size={15} />
-                </Button>
-              </div>
-              <div className="mt-5 grid gap-4 border-t border-[var(--line)] pt-5 sm:grid-cols-3">
-                <div>
-                  <p className="text-xs font-bold uppercase text-[var(--muted)]">Quórum</p>
-                  <p className="mt-1 text-xl font-extrabold">{assembly.quorumPercent}%</p>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase text-[var(--muted)]">Representación</p>
-                  <p className="mt-1 text-xl font-extrabold">
-                    {assembly.representedUnits} / {assembly.totalUnits}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase text-[var(--muted)]">
-                    Votaciones abiertas
-                  </p>
-                  <p className="mt-1 text-xl font-extrabold">{assembly.openVotes}</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <Progress label={`Quórum de ${assembly.title}`} value={assembly.quorumPercent} />
-              </div>
-            </Card>
-          ))}
-        </div>
-        <div className="space-y-5">
-          <Card className="p-5">
-            <SectionTitle title="Integridad de decisión" />
-            <div className="space-y-4">
-              <TrustItem
-                icon={Fingerprint}
-                title="Un voto por unidad"
-                detail="Coeficiente versionado al momento del voto."
-              />
-              <TrustItem
-                icon={History}
-                title="Historia inmutable"
-                detail="Poderes, quórum y decisiones como eventos."
-              />
-              <TrustItem
-                icon={FileCheck2}
-                title="Acta reproducible"
-                detail="Resultado reconstruible desde la evidencia."
-              />
-            </div>
-          </Card>
-          <Card className="bg-[var(--ink)] p-5 text-white">
-            <Vote size={24} className="text-[var(--eve-cian)]" />
-            <h3 className="mt-4 font-extrabold">Próxima convocatoria</h3>
-            <p className="mt-2 text-sm leading-6 text-white/65">
-              Faltan 98 unidades por confirmar para la asamblea extraordinaria.
-            </p>
-            <Button
-              className="mt-4 bg-white text-[var(--ink)] hover:bg-[var(--eve-hielo)]"
-              size="sm"
-            >
-              Revisar entregas
-            </Button>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
+      <AssemblyManagement
+        assemblies={snapshot.assemblies}
+        busy={busy}
+        canManage={canScheduleAssembly}
+        canManageSupports={canScheduleAssembly}
+        onDownloadSupport={downloadAssemblySupport}
+        onSendEmailConvocation={sendAssemblyEmailConvocation}
+        onSupportStatusChange={updateAssemblySupportStatus}
+        onToggleChecklist={updateAssemblyChecklist}
+        onUpdateCapabilities={updateAssemblyCapabilities}
+        onUploadSupport={uploadAssemblySupport}
+        people={snapshot.people}
+        settings={snapshot.assemblySettings}
+      />
 
-function TrustItem({
-  icon: Icon,
-  title,
-  detail
-}: {
-  icon: typeof Fingerprint;
-  title: string;
-  detail: string;
-}) {
-  return (
-    <div className="flex gap-3">
-      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
-        <Icon size={17} />
-      </span>
-      <div>
-        <p className="text-sm font-extrabold">{title}</p>
-        <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{detail}</p>
-      </div>
+      <Modal
+        open={assemblyOpen}
+        onOpenChange={(nextOpen) => (nextOpen ? setAssemblyOpen(true) : closeAssemblyForm())}
+        title="Programar asamblea"
+        description="Registra la convocatoria y deja preparada su trazabilidad desde el inicio."
+      >
+        <form className="grid gap-4" onSubmit={(event) => void submitAssembly(event)}>
+          <Field label="Nombre de la asamblea">
+            <TextInput
+              name="title"
+              required
+              minLength={5}
+              maxLength={140}
+              placeholder="Ej. Asamblea extraordinaria de presupuesto"
+            />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Tipo">
+              <SelectInput name="type" defaultValue="ordinary">
+                <option value="ordinary">Ordinaria</option>
+                <option value="extraordinary">Extraordinaria</option>
+                <option value="informative">Informativa</option>
+              </SelectInput>
+            </Field>
+            <Field label="Modalidad">
+              <SelectInput
+                name="mode"
+                value={assemblyMode}
+                onChange={(event) =>
+                  setAssemblyMode(event.target.value as "in_person" | "virtual" | "hybrid")
+                }
+              >
+                <option value="in_person">Presencial</option>
+                <option value="virtual">Virtual</option>
+                <option value="hybrid">Híbrida</option>
+              </SelectInput>
+            </Field>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Convocatoria">
+              <SelectInput name="callType" defaultValue="first">
+                <option value="first">Primera convocatoria</option>
+                <option value="second">Segunda convocatoria</option>
+              </SelectInput>
+            </Field>
+            <Field label="Uso de la copropiedad">
+              <SelectInput name="propertyUse" defaultValue="residential">
+                <option value="residential">Residencial</option>
+                <option value="mixed">Mixto</option>
+              </SelectInput>
+            </Field>
+          </div>
+          <Field label="Fecha y hora">
+            <TextInput name="startsAt" type="datetime-local" required />
+          </Field>
+          <Field
+            label={
+              assemblyMode === "virtual"
+                ? "Enlace de reunión"
+                : assemblyMode === "hybrid"
+                  ? "Lugar y enlace"
+                  : "Lugar"
+            }
+            hint={
+              assemblyMode === "virtual" ? "Usa un enlace HTTPS para la sesión virtual." : undefined
+            }
+          >
+            <TextInput
+              name="location"
+              required
+              minLength={3}
+              maxLength={240}
+              placeholder={
+                assemblyMode === "virtual"
+                  ? "https://reunion.ejemplo.com/asamblea"
+                  : assemblyMode === "hybrid"
+                    ? "Salón social · https://reunion.ejemplo.com/asamblea"
+                    : "Salón social de la copropiedad"
+              }
+            />
+          </Field>
+          <Field label="Orden del día" hint="Resume los asuntos que serán tratados.">
+            <textarea
+              className="focus-ring min-h-28 w-full resize-y rounded-[9px] border border-[#DCE7F2] bg-white px-3.5 py-3 text-sm leading-6 text-[var(--ink)] placeholder:text-[var(--eve-muted)]"
+              name="agenda"
+              required
+              minLength={10}
+              maxLength={3000}
+              placeholder="1. Verificación del quórum. 2. Presentación de propuestas. 3. Votaciones."
+            />
+          </Field>
+          <div className="mt-2 flex justify-end gap-2">
+            <Button variant="secondary" onClick={closeAssemblyForm}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={busy === "assembly-schedule"}>
+              {busy === "assembly-schedule" ? "Programando…" : "Programar asamblea"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
@@ -1990,9 +2615,21 @@ export function DocumentsPage() {
                     <StatusBadge status={document.status} />
                   </td>
                   <td className="px-5 py-4 text-right">
-                    <IconButton label={`Descargar ${document.name}`}>
-                      <Download size={17} />
-                    </IconButton>
+                    {document.downloadPath ? (
+                      <a
+                        aria-label={`Descargar ${document.name}`}
+                        className="focus-ring ml-auto grid size-9 place-items-center rounded-full border border-[var(--border)] bg-white text-[var(--muted)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+                        download
+                        href={document.downloadPath}
+                        title={`Descargar ${document.name}`}
+                      >
+                        <Download size={17} />
+                      </a>
+                    ) : (
+                      <IconButton label={`Descargar ${document.name}`}>
+                        <Download size={17} />
+                      </IconButton>
+                    )}
                   </td>
                 </tr>
               ))}

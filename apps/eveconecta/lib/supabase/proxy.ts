@@ -40,12 +40,13 @@ export async function refreshSessionAndAuthorize(request: NextRequest): Promise<
     }
   });
 
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const claims = claimsData?.claims;
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
   const pathname = request.nextUrl.pathname;
   const isAuthRoute = pathname.startsWith("/auth/");
 
-  if (!claims) {
+  if (!user) {
     if (pathname === "/login" || isAuthRoute) {
       response.headers.set("Cache-Control", "private, no-store");
       return response;
@@ -70,15 +71,11 @@ export async function refreshSessionAndAuthorize(request: NextRequest): Promise<
     return response;
   }
 
-  if (typeof claims.sub !== "string") {
-    return responseWithAuthCookies(response, redirectTo(request, "/login"));
-  }
-
   const { data: membership, error } = await supabase
     .schema("conjuntos")
     .from("miembros_conjunto")
     .select("rol")
-    .eq("usuario_id", claims.sub)
+    .eq("usuario_id", user.id)
     .eq("activo", true)
     .order("creado_en", { ascending: true })
     .limit(1)
