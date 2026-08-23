@@ -14,7 +14,8 @@
     "test": "echo \"(eve-store) sin tests todavía\" && exit 0",
     "dev": "next dev --port 3003",
     "build": "next build",
-    "start": "next start --port 3003"
+    "start": "next start --port 3003",
+    "creds": "node scripts/comprobar-credenciales.mjs"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
