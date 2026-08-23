@@ -64,8 +64,20 @@ export class AdminService {
     await this.db.transaction(async (tx) => {
       await tx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
       await tx.insert(merchantApiKeys).values([
-        { tenantId, keyHash: live.hash, keyPrefix: live.prefix, environment: "live", label: "Producción" },
-        { tenantId, keyHash: test.hash, keyPrefix: test.prefix, environment: "test", label: "Sandbox" }
+        {
+          tenantId,
+          keyHash: live.hash,
+          keyPrefix: live.prefix,
+          environment: "live",
+          label: "Producción"
+        },
+        {
+          tenantId,
+          keyHash: test.hash,
+          keyPrefix: test.prefix,
+          environment: "test",
+          label: "Sandbox"
+        }
       ]);
     });
 

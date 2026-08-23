@@ -2,48 +2,48 @@
    Paleta votada por socios (Manual de marca v2.0)
    Uso: @import url("https://cdn.jsdelivr.net/gh/EveTev/brand@1/tokens/colores.css"); */
 
-:root{
+:root {
   /* Base */
-  --eve-azul-noche:#0A2540;
-  --eve-azul-noche-profundo:#081D33;  /* fondo modo oscuro */
-  --eve-hielo:#EAF2FB;
-  --eve-tinte:#F4F9FD;
-  --eve-linea:#EDF3FA;
-  --eve-pizarra:#64748B;
-  --eve-muted:#94A3B8;
+  --eve-azul-noche: #0a2540;
+  --eve-azul-noche-profundo: #081d33; /* fondo modo oscuro */
+  --eve-hielo: #eaf2fb;
+  --eve-tinte: #f4f9fd;
+  --eve-linea: #edf3fa;
+  --eve-pizarra: #64748b;
+  --eve-muted: #94a3b8;
 
   /* Acción — exclusivo de CTAs. Un botón coral por pantalla. */
-  --eve-coral:#EE3D22;
-  --eve-coral-hover:#CF3016;
+  --eve-coral: #ee3d22;
+  --eve-coral-hover: #cf3016;
 
   /* Azules funcionales */
-  --eve-electrico:#1E6FEB;   /* enlaces, foco */
-  --eve-mezclado:#144A96;    /* secundario: botones 2os, sliders, switches, gráficos */
-  --eve-cian:#22D3EE;        /* realce sobre oscuro */
-  --eve-teal:#3BAEC2;        /* herencia del isotipo, ilustración */
+  --eve-electrico: #1e6feb; /* enlaces, foco */
+  --eve-mezclado: #144a96; /* secundario: botones 2os, sliders, switches, gráficos */
+  --eve-cian: #22d3ee; /* realce sobre oscuro */
+  --eve-teal: #3baec2; /* herencia del isotipo, ilustración */
 
   /* Violeta Eve — territorio de Eve Intelligence. No usar en botones. */
-  --eve-violeta:#8B5CF6;
-  --eve-violeta-texto:#6D28D9;
-  --eve-violeta-tinte:#EDE9FE;
+  --eve-violeta: #8b5cf6;
+  --eve-violeta-texto: #6d28d9;
+  --eve-violeta-tinte: #ede9fe;
 
   /* Semánticos — el error SIEMPRE con ícono + texto, nunca solo color */
-  --eve-exito:#16A34A;
-  --eve-alerta:#D97706;
-  --eve-error:#B91C1C;
+  --eve-exito: #16a34a;
+  --eve-alerta: #d97706;
+  --eve-error: #b91c1c;
 
   /* Degradados */
-  --eve-grad-corporativo:linear-gradient(90deg,#0A2540 0%,#1E6FEB 55%,#22D3EE 100%);
-  --eve-grad-ia:linear-gradient(90deg,#8B5CF6 0%,#6366F1 50%,#22D3EE 100%);
+  --eve-grad-corporativo: linear-gradient(90deg, #0a2540 0%, #1e6feb 55%, #22d3ee 100%);
+  --eve-grad-ia: linear-gradient(90deg, #8b5cf6 0%, #6366f1 50%, #22d3ee 100%);
 
   /* Forma */
-  --eve-radio-sm:8px;
-  --eve-radio-md:12px;
-  --eve-radio-lg:16px;
-  --eve-radio-pill:999px;
+  --eve-radio-sm: 8px;
+  --eve-radio-md: 12px;
+  --eve-radio-lg: 16px;
+  --eve-radio-pill: 999px;
 
   /* Tipografía */
-  --eve-font-marca:'Baloo 2',sans-serif;
-  --eve-font-ui:'Inter',sans-serif;
-  --eve-font-mono:'JetBrains Mono',monospace;
+  --eve-font-marca: "Baloo 2", sans-serif;
+  --eve-font-ui: "Inter", sans-serif;
+  --eve-font-mono: "JetBrains Mono", monospace;
 }

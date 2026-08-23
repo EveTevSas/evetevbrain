@@ -5,12 +5,12 @@
 - `evepay.merchants` (ya existe): + columna `provider_merchant_id text`.
 - Estados: `pendiente | en_revision | aprobado | rechazado`.
 - Función `SECURITY DEFINER evepay.merchant_by_provider(text)` → `(merchant_id,
-  tenant_id, status)` para el webhook (resolución cross-tenant). Grant a `evepay_api`.
+tenant_id, status)` para el webhook (resolución cross-tenant). Grant a `evepay_api`.
 
 ## Contrato (shared)
 
 - `CrearMerchantInputSchema { legalName }`; `EstadoMerchant`; `ProviderMerchant
-  { providerMerchantId, estado }`; `PaymentProvider.crearMerchant`.
+{ providerMerchantId, estado }`; `PaymentProvider.crearMerchant`.
 
 ## Repositorio (MerchantsRepository, global)
 

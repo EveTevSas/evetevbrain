@@ -1,6 +1,6 @@
 # Estándares de ingeniería — EveConecta
 
-*Estándares de la vertical **EveConecta** (`apps/eveconecta`): gestión y recaudo para conjuntos residenciales en propiedad horizontal. Es la primera vertical de **EvePay**, la plataforma de pagos de **Evetev SAS**.*
+_Estándares de la vertical **EveConecta** (`apps/eveconecta`): gestión y recaudo para conjuntos residenciales en propiedad horizontal. Es la primera vertical de **EvePay**, la plataforma de pagos de **Evetev SAS**._
 
 > **Este documento es subordinado.** La constitución del equipo es [`ESTANDARES_INGENIERIA.md`](./ESTANDARES_INGENIERIA.md) y aplica **completa** a EveConecta: stack (§2), código y Git (§3), seguridad (§4), accesibilidad (§5), Definition of Done (§6), repositorio (§8), SDD (§9) y despliegue (§10).
 >
@@ -25,15 +25,15 @@ Si alguna vez esos dos trabajos entran en conflicto, gana el segundo. EveConecta
 
 ### Alcance del MVP
 
-| Dentro | Fuera (por ahora) |
-|---|---|
+| Dentro                                    | Fuera (por ahora)                               |
+| ----------------------------------------- | ----------------------------------------------- |
 | Cargar y generar cuotas de administración | Contabilidad y estados financieros del conjunto |
-| Estado de cuenta por unidad | Reservas de zonas comunes |
-| Pago en línea del residente (vía EvePay) | Chat / cartelera / PQRS |
-| Recordatorios automáticos de cobranza | Asambleas y votaciones digitales |
-| Panel de morosidad para el administrador | Gestión de proveedores y gastos |
-| Cuotas extraordinarias y multas | Nómina de empleados del conjunto |
-| Certificado de paz y salvo | App móvil nativa (usamos web mobile-first) |
+| Estado de cuenta por unidad               | Reservas de zonas comunes                       |
+| Pago en línea del residente (vía EvePay)  | Chat / cartelera / PQRS                         |
+| Recordatorios automáticos de cobranza     | Asambleas y votaciones digitales                |
+| Panel de morosidad para el administrador  | Gestión de proveedores y gastos                 |
+| Cuotas extraordinarias y multas           | Nómina de empleados del conjunto                |
+| Certificado de paz y salvo                | App móvil nativa (usamos web mobile-first)      |
 
 ---
 
@@ -66,7 +66,7 @@ EveConecta                                  EvePay
 
 **Quién es el tenant:** el **conjunto** es un tenant de EveConecta. En EvePay, el tenant es el **comercio** — y hoy ese comercio somos nosotros (Evetev), o el conjunto si se le da su propia cuenta de comercio. Son dos conceptos distintos con nombres parecidos: **no los mezclen en el código**. `conjunto_id` ≠ `comercio_id`.
 
-**Regla de decisión:** ante cualquier duda sobre dónde va algo, aplica el test de la constitución (§8): *¿le entregaría esto tal cual a un ecommerce que compre EvePay?* Si menciona "cuota", "torre", "coeficiente" o "administrador" → es de EveConecta.
+**Regla de decisión:** ante cualquier duda sobre dónde va algo, aplica el test de la constitución (§8): _¿le entregaría esto tal cual a un ecommerce que compre EvePay?_ Si menciona "cuota", "torre", "coeficiente" o "administrador" → es de EveConecta.
 
 ---
 
@@ -74,21 +74,21 @@ EveConecta                                  EvePay
 
 Usamos **el vocabulario legal y cotidiano de la propiedad horizontal en Colombia**, no inventamos términos. Estos nombres se usan igual en el código, en la base de datos, en la UI y en las specs.
 
-| Término | Qué es | Ojo con |
-|---|---|---|
-| **Conjunto** | La copropiedad. Es el tenant. | Puede tener varias torres/etapas. |
-| **Unidad** | Apartamento, casa, local o parqueadero con matrícula propia. | La deuda es **de la unidad**, no de la persona. |
-| **Coeficiente de copropiedad** | Porcentaje de participación de cada unidad. Base del reparto de gastos. | Definido en el reglamento de PH. La suma debe dar 100%. |
-| **Propietario** | Dueño de la unidad. **Es el obligado a pagar.** | Puede no vivir ahí. |
-| **Residente** | Quien habita la unidad (propietario o arrendatario). | Un arrendatario **no** es el deudor de la cuota de administración. |
-| **Administrador** | Representante legal de la copropiedad. Nuestro usuario principal. | Es quien firma y quien nos paga. |
-| **Consejo de administración** | Órgano de control. | Solo lectura en el MVP. |
-| **Cuota de administración** | Cobro ordinario periódico (normalmente mensual). | Se calcula por coeficiente sobre el presupuesto. |
-| **Cuota extraordinaria** | Cobro aprobado por asamblea para un gasto puntual. | Requiere respaldo del acta. |
-| **Multa / sanción** | Cobro por incumplimiento del reglamento. | Tiene proceso propio; en el MVP solo se registra. |
-| **Interés de mora** | Recargo por pago tardío. | **Tiene tope legal** — ver §4. |
-| **Paz y salvo** | Certificación de que una unidad no debe nada. | Se pide al vender o traspasar. |
-| **Estado de cuenta** | Saldo y movimientos de una unidad. | Es lo que el residente abre primero. |
+| Término                        | Qué es                                                                  | Ojo con                                                            |
+| ------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **Conjunto**                   | La copropiedad. Es el tenant.                                           | Puede tener varias torres/etapas.                                  |
+| **Unidad**                     | Apartamento, casa, local o parqueadero con matrícula propia.            | La deuda es **de la unidad**, no de la persona.                    |
+| **Coeficiente de copropiedad** | Porcentaje de participación de cada unidad. Base del reparto de gastos. | Definido en el reglamento de PH. La suma debe dar 100%.            |
+| **Propietario**                | Dueño de la unidad. **Es el obligado a pagar.**                         | Puede no vivir ahí.                                                |
+| **Residente**                  | Quien habita la unidad (propietario o arrendatario).                    | Un arrendatario **no** es el deudor de la cuota de administración. |
+| **Administrador**              | Representante legal de la copropiedad. Nuestro usuario principal.       | Es quien firma y quien nos paga.                                   |
+| **Consejo de administración**  | Órgano de control.                                                      | Solo lectura en el MVP.                                            |
+| **Cuota de administración**    | Cobro ordinario periódico (normalmente mensual).                        | Se calcula por coeficiente sobre el presupuesto.                   |
+| **Cuota extraordinaria**       | Cobro aprobado por asamblea para un gasto puntual.                      | Requiere respaldo del acta.                                        |
+| **Multa / sanción**            | Cobro por incumplimiento del reglamento.                                | Tiene proceso propio; en el MVP solo se registra.                  |
+| **Interés de mora**            | Recargo por pago tardío.                                                | **Tiene tope legal** — ver §4.                                     |
+| **Paz y salvo**                | Certificación de que una unidad no debe nada.                           | Se pide al vender o traspasar.                                     |
+| **Estado de cuenta**           | Saldo y movimientos de una unidad.                                      | Es lo que el residente abre primero.                               |
 
 **Nota legal:** la propiedad horizontal en Colombia se rige por la **Ley 675 de 2001** y por el reglamento de PH de cada conjunto. El reglamento **varía entre conjuntos** (periodicidad, sanciones, quórums), así que el sistema debe permitir configurar esas reglas por conjunto en vez de asumirlas. Los detalles legales se confirman con asesoría; este documento no es asesoría jurídica.
 
@@ -139,12 +139,12 @@ Nunca se implementa una regla de aplicación de pagos "como salga". Es una decis
 
 Sobre el RBAC de la constitución (§4), esta vertical concreta así:
 
-| Rol | Puede | No puede |
-|---|---|---|
-| `super_admin` (Evetev) | Soporte y operación multi-conjunto | Ver PII sin registro de acceso |
-| `admin_conjunto` | Generar cuotas, ver morosidad, emitir paz y salvo, hacer ajustes (auditados) | Ver datos de otro conjunto |
-| `consejo` | Lectura de reportes agregados | Ver el detalle de deuda por unidad identificada, salvo que el reglamento lo permita |
-| `residente` | Ver **su** estado de cuenta y pagar | Ver el estado de cuenta de otra unidad |
+| Rol                    | Puede                                                                        | No puede                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `super_admin` (Evetev) | Soporte y operación multi-conjunto                                           | Ver PII sin registro de acceso                                                      |
+| `admin_conjunto`       | Generar cuotas, ver morosidad, emitir paz y salvo, hacer ajustes (auditados) | Ver datos de otro conjunto                                                          |
+| `consejo`              | Lectura de reportes agregados                                                | Ver el detalle de deuda por unidad identificada, salvo que el reglamento lo permita |
+| `residente`            | Ver **su** estado de cuenta y pagar                                          | Ver el estado de cuenta de otra unidad                                              |
 
 **Reglas duras:**
 
@@ -217,21 +217,25 @@ Lo demás (pantallas presentacionales, ajustes de copy, reportes simples) va con
 Además del checklist de la constitución (§6), un PR de EveConecta no está listo si no cumple:
 
 **Frontera**
+
 - [ ] No importa código de `apps/api` (EvePay); la comunicación es por HTTP/SDK.
 - [ ] No consulta el schema `evepay`.
 - [ ] No introdujo conceptos de conjuntos dentro de EvePay.
 
 **Dominio**
+
 - [ ] Los montos son enteros en centavos; ninguna operación usa `float`.
 - [ ] Si toca cuotas, intereses o aplicación de pagos: hay spec con criterios EARS y tests derivados de ellos.
 - [ ] Los movimientos quedan auditados (quién, cuándo, por qué).
 
 **Privacidad**
+
 - [ ] No expone datos de una unidad a quien no le corresponde (test incluido).
 - [ ] No hay PII en logs ni en eventos de analítica.
 - [ ] No genera listados públicos de morosos.
 
 **Experiencia**
+
 - [ ] El texto está en español claro, sin jerga contable.
 - [ ] Probado en pantalla de celular, con una mano.
 - [ ] Si notifica: idempotente, con tope de frecuencia y dentro de la ventana horaria.

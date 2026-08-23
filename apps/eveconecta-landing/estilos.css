@@ -9,8 +9,14 @@
 /* ── CTA de la portada ───────────────────────────────────────────────────
    El único botón coral de la página (C2). base.css no lo posiciona, así que
    aquí le damos aire y su nota honesta debajo. */
-.cta{margin-top:34px}
-.cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-azul-noche)}
+.cta {
+  margin-top: 34px;
+}
+.cta-nota {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  color: var(--eve-azul-noche);
+}
 
 /* ── Ilustración de portada ──────────────────────────────────────────────
    El conjunto residencial en trazo técnico, de fondo, entero.
@@ -52,7 +58,11 @@
      se lee como minimalismo. La norma vigente (§4 del manual) es generar
      siempre y arreglar el peso en la conversión. El SVG sigue publicado, porque
      lo publicado no se retira, pero no se usa. */
-.portada{position:relative;overflow:hidden;padding-bottom:0}
+.portada {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 0;
+}
 
 /* El dibujo cuelga de `.portada-cuerpo`, no de la sección, y esa es toda la
    diferencia: **empieza donde empieza el texto de entrada, por debajo del
@@ -82,13 +92,25 @@
    —proporción 2,02, bastante más cuadrada que el 2,37 de Eve Intelligence— y
    llevarla al ancho completo pediría 442 px de respiro: la portada crecería
    250 px y el resto de la página se iría a empujones hacia abajo. Así crece 90. */
-.portada-cuerpo{position:relative;isolation:isolate;
-  padding-bottom:clamp(200px,27vw,350px)}
-.portada-cuerpo::after{
-  content:"";position:absolute;z-index:-1;pointer-events:none;opacity:.2;
-  top:0;bottom:0;left:50%;width:100vw;transform:translateX(-50%);
-  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial-calle.webp")
-    center bottom/contain no-repeat}
+.portada-cuerpo {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: clamp(200px, 27vw, 350px);
+}
+.portada-cuerpo::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.2;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial-calle.webp")
+    center bottom/contain no-repeat;
+}
 
 /* **Ya no hay hueco radial.** Existía por una sola razón —«el dibujo se abre en
    el centro en vez de pasar por detrás del texto»— y el envoltorio resuelve eso
@@ -112,50 +134,121 @@
    ya estaba en 4,76, así que no había margen que gastar. El azul noche aguanta
    13:1 con el dibujo detrás, y eso es lo que permite que el fondo exista.
    Si algún día se quita la ilustración, esto puede volver a --eve-pizarra. */
-.portada .entrada{color:var(--eve-azul-noche)}
+.portada .entrada {
+  color: var(--eve-azul-noche);
+}
 
 /* ── Secciones ───────────────────────────────────────────────────────────
    Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
    claro, un solo bloque de peso (el del CTA final) en azul noche. */
-.seccion{padding:84px 0}
-.seccion-tinte{background:var(--eve-tinte)}
-.seccion h2{font-size:clamp(1.3rem,2.6vw,1.6rem);text-align:center}
-.seccion-intro{margin:12px auto 0;max-width:560px;text-align:center;
-  color:var(--eve-pizarra);font-size:clamp(.9rem,1.6vw,.98rem)}
+.seccion {
+  padding: 84px 0;
+}
+.seccion-tinte {
+  background: var(--eve-tinte);
+}
+.seccion h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+  text-align: center;
+}
+.seccion-intro {
+  margin: 12px auto 0;
+  max-width: 560px;
+  text-align: center;
+  color: var(--eve-pizarra);
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
 
 /* ── El dolor (tres puntos) ──────────────────────────────────────────────
    Sin icono de producto: aquí el protagonista es el texto, no la marca.
    Jerarquía por espacio, según la variante minimalista del manual (§6). */
-.dolores{list-style:none;margin:48px auto 0;padding:0;max-width:960px;
-  display:grid;grid-template-columns:repeat(3,1fr);gap:36px}
-.dolor h3{font-size:1.02rem;font-weight:600}
-.dolor p{margin-top:8px;font-size:.9rem;color:var(--eve-pizarra)}
+.dolores {
+  list-style: none;
+  margin: 48px auto 0;
+  padding: 0;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+}
+.dolor h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.dolor p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
 
 /* ── Bloque a dos columnas (recaudo + mascota) ───────────────────────────
    Texto a la izquierda, mascota a la derecha; una columna en móvil. */
-.split{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;
-  align-items:center;max-width:980px;margin:0 auto}
-.split-texto .p-ico{margin-bottom:16px}
-.split-texto h2{text-align:left}
-.split-texto > p{margin-top:16px;color:var(--eve-pizarra);
-  font-size:clamp(.9rem,1.6vw,.98rem)}
+.split {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.split-texto .p-ico {
+  margin-bottom: 16px;
+}
+.split-texto h2 {
+  text-align: left;
+}
+.split-texto > p {
+  margin-top: 16px;
+  color: var(--eve-pizarra);
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
 
 /* Lista de verificación con tilde en el color de marca, nunca coral (C2). */
-.ticks{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:12px}
-.ticks li{position:relative;padding-left:28px;font-size:.93rem}
-.ticks li::before{content:"";position:absolute;left:0;top:5px;width:15px;height:15px;
-  background-color:var(--eve-mezclado);
-  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat;
-  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat}
+.ticks {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.ticks li {
+  position: relative;
+  padding-left: 28px;
+  font-size: 0.93rem;
+}
+.ticks li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 15px;
+  height: 15px;
+  background-color: var(--eve-mezclado);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+}
 
-.split-figura{text-align:center}
+.split-figura {
+  text-align: center;
+}
 /* Tope en 160 px, la mitad de lo que ocupaba: a 320 px el WebP de la mascota
    se veía blando, así que va pequeña a propósito y nítida. Si algún día se
    publica una versión del activo con más resolución, este tope se puede
    revisar; hasta entonces no se sube. */
-.mascota{width:min(160px,70%);height:auto;margin:0 auto;display:block;
-  filter:drop-shadow(0 18px 30px rgba(10,37,64,.12))}
-.figura-nota{margin-top:16px;font-size:.84rem;color:var(--eve-pizarra)}
+.mascota {
+  width: min(160px, 70%);
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  filter: drop-shadow(0 18px 30px rgba(10, 37, 64, 0.12));
+}
+.figura-nota {
+  margin-top: 16px;
+  font-size: 0.84rem;
+  color: var(--eve-pizarra);
+}
 
 /* ── Vídeo del dashboard ─────────────────────────────────────────────────
    Una captura de pantalla de una app dentro de una página es un rectángulo
@@ -169,95 +262,266 @@
 
    `background` en azul noche para el instante entre la portada y el primer
    fotograma: en blanco ese parpadeo se ve como un destello. */
-.video-demo{margin:44px auto 0;max-width:980px}
-.video-demo-el{display:block;width:100%;height:auto;aspect-ratio:1600/826;
-  background:var(--eve-azul-noche);
-  border:1px solid var(--eve-linea);border-radius:var(--eve-radio-lg);
-  box-shadow:0 18px 40px rgba(10,37,64,.10)}
-.video-demo-pie{margin-top:14px;font-size:.84rem;color:var(--eve-pizarra);
-  text-align:center;text-wrap:balance}
+.video-demo {
+  margin: 44px auto 0;
+  max-width: 980px;
+}
+.video-demo-el {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1600/826;
+  background: var(--eve-azul-noche);
+  border: 1px solid var(--eve-linea);
+  border-radius: var(--eve-radio-lg);
+  box-shadow: 0 18px 40px rgba(10, 37, 64, 0.1);
+}
+.video-demo-pie {
+  margin-top: 14px;
+  font-size: 0.84rem;
+  color: var(--eve-pizarra);
+  text-align: center;
+  text-wrap: balance;
+}
 
 /* ── Características (módulos del dashboard) ─────────────────────────────
    Variante minimalista del manual (§6): sin fondo ni sombra, la jerarquía la
    da el espacio y el icono de producto teñido con --p. */
-.caracts-grid{list-style:none;margin:48px auto 0;padding:0;max-width:980px;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:40px 36px}
-.caract .p-ico{margin-bottom:16px}
-.caract h3{font-size:1.02rem;font-weight:600}
-.caract p{margin-top:8px;font-size:.9rem;color:var(--eve-pizarra)}
+.caracts-grid {
+  list-style: none;
+  margin: 48px auto 0;
+  padding: 0;
+  max-width: 980px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px 36px;
+}
+.caract .p-ico {
+  margin-bottom: 16px;
+}
+.caract h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.caract p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
 
 /* ── Pasos numerados ─────────────────────────────────────────────────────
    El número es Baloo 700 (cifra protagonista, §3) en un círculo hielo;
    nunca coral: aquí no hay acción que pedir. */
-.pasos{list-style:none;margin:48px auto 0;padding:0;max-width:960px;
-  display:grid;grid-template-columns:repeat(3,1fr);gap:36px}
-.paso{text-align:center}
-.paso-num{display:flex;align-items:center;justify-content:center;
-  width:44px;height:44px;margin:0 auto 16px;border-radius:999px;
-  background:var(--eve-hielo);color:var(--eve-mezclado);
-  font-family:'Baloo 2',system-ui,sans-serif;font-weight:700;font-size:1.1rem}
-.paso h3{font-size:1.02rem;font-weight:600}
-.paso p{margin-top:8px;font-size:.9rem;color:var(--eve-pizarra)}
+.pasos {
+  list-style: none;
+  margin: 48px auto 0;
+  padding: 0;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+}
+.paso {
+  text-align: center;
+}
+.paso-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: var(--eve-hielo);
+  color: var(--eve-mezclado);
+  font-family: "Baloo 2", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.paso h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.paso p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
 
 /* ── Asamblea (texto de peso, sin botón) ─────────────────────────────────
    No compite con el coral: es un cierre de argumento, no una acción (C2). */
-.asamblea{max-width:640px;margin:0 auto;text-align:center}
-.asamblea h2{font-size:clamp(1.3rem,2.6vw,1.6rem)}
-.asamblea p{margin-top:14px;color:var(--eve-pizarra);
-  font-size:clamp(.9rem,1.6vw,.98rem)}
+.asamblea {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+.asamblea h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+}
+.asamblea p {
+  margin-top: 14px;
+  color: var(--eve-pizarra);
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
 
 /* ── FAQ (acordeón) ──────────────────────────────────────────────────────
    Patrón <details>/<summary> del manual (§6): divisor fino y marcador +/–
    en azul eléctrico. Nativo, así que ya es navegable por teclado. */
-.faq{max-width:720px;margin:40px auto 0}
-.faq details{border-bottom:1px solid var(--eve-linea)}
-.faq details:first-child{border-top:1px solid var(--eve-linea)}
-.faq summary{display:flex;align-items:center;justify-content:space-between;
-  gap:16px;padding:18px 4px;cursor:pointer;list-style:none;
-  font-weight:600;font-size:.98rem;color:var(--eve-azul-noche)}
-.faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:"+";flex:none;font-family:'Baloo 2',system-ui,sans-serif;
-  font-size:1.3rem;font-weight:600;color:var(--eve-electrico);line-height:1}
-.faq details[open] summary::after{content:"–"}
-.faq-cuerpo{padding:0 4px 20px}
-.faq-cuerpo p{font-size:.9rem;color:var(--eve-pizarra)}
+.faq {
+  max-width: 720px;
+  margin: 40px auto 0;
+}
+.faq details {
+  border-bottom: 1px solid var(--eve-linea);
+}
+.faq details:first-child {
+  border-top: 1px solid var(--eve-linea);
+}
+.faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 4px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--eve-azul-noche);
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq summary::after {
+  content: "+";
+  flex: none;
+  font-family: "Baloo 2", system-ui, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--eve-electrico);
+  line-height: 1;
+}
+.faq details[open] summary::after {
+  content: "–";
+}
+.faq-cuerpo {
+  padding: 0 4px 20px;
+}
+.faq-cuerpo p {
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
 /* Hasta ahora toda respuesta cabía en un párrafo, así que dos seguidos salían
    pegados y se leían como uno solo mal partido. */
-.faq-cuerpo p+p{margin-top:12px}
+.faq-cuerpo p + p {
+  margin-top: 12px;
+}
 
 /* ── Demo final (formulario sobre azul noche) ────────────────────────────
    El bloque de peso de la página (§2). El botón es secundario (mezclado)
    porque el único coral de la vista ya se usó en la portada.
    La tarjeta del formulario (.demo-form) está en base.css, compartida. */
-.demo{padding:88px 0;background:var(--eve-azul-noche);color:#fff}
-.demo-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;
-  align-items:start;max-width:980px;margin:0 auto}
-.demo-texto h2{font-size:clamp(1.3rem,2.6vw,1.6rem);text-align:left}
-.demo-texto > p{margin-top:14px;color:#B9CCE0;font-size:clamp(.9rem,1.6vw,.98rem)}
-.demo-puntos{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:14px}
-.demo-puntos li{position:relative;padding-left:26px;font-size:.9rem;color:#B9CCE0}
-.demo-puntos li::before{content:"";position:absolute;left:2px;top:8px;
-  width:8px;height:8px;border-radius:999px;background:var(--eve-cian)}
+.demo {
+  padding: 88px 0;
+  background: var(--eve-azul-noche);
+  color: #fff;
+}
+.demo-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: start;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.demo-texto h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+  text-align: left;
+}
+.demo-texto > p {
+  margin-top: 14px;
+  color: #b9cce0;
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+.demo-puntos {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.demo-puntos li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 0.9rem;
+  color: #b9cce0;
+}
+.demo-puntos li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--eve-cian);
+}
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
-@media (max-width:1024px){
-  .split,.demo-grid{gap:40px}
+@media (max-width: 1024px) {
+  .split,
+  .demo-grid {
+    gap: 40px;
+  }
 }
 
-@media (max-width:760px){
-  .seccion{padding:64px 0}
-  .dolores{grid-template-columns:1fr;gap:28px;max-width:420px}
-  .split{grid-template-columns:1fr;gap:36px}
-  .split-texto h2{text-align:center}
-  .split-texto .p-ico{margin-left:auto;margin-right:auto}
-  .ticks{max-width:420px;margin-left:auto;margin-right:auto}
-  .pasos{grid-template-columns:1fr;gap:32px;max-width:420px}
-  .demo{padding:64px 0}
-  .demo-grid{grid-template-columns:1fr}
-  .demo-texto h2{text-align:center}
+@media (max-width: 760px) {
+  .seccion {
+    padding: 64px 0;
+  }
+  .dolores {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    max-width: 420px;
+  }
+  .split {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .split-texto h2 {
+    text-align: center;
+  }
+  .split-texto .p-ico {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .ticks {
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .pasos {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    max-width: 420px;
+  }
+  .demo {
+    padding: 64px 0;
+  }
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+  .demo-texto h2 {
+    text-align: center;
+  }
 }
 
-@media (min-width:1440px){
-  .dolores,.split,.caracts-grid,.pasos,.demo-grid{max-width:1060px}
+@media (min-width: 1440px) {
+  .dolores,
+  .split,
+  .caracts-grid,
+  .pasos,
+  .demo-grid {
+    max-width: 1060px;
+  }
 }

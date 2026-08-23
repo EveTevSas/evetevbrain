@@ -54,14 +54,14 @@ El envío lo hace `formularios.js`, compartido con las demás landings. El marca
 declara el producto y nada más:
 
 ```html
-<form class="demo-form" data-demo="evepay">
+<form class="demo-form" data-demo="evepay"></form>
 ```
 
 > **Un campo nuevo no basta con ponerlo aquí.** El endpoint solo limpia e
 > imprime lo que está en su tabla `CAMPOS` (hoy, para esta landing: `empresa`, `telefono`, `volumen`, `cobro`, `plazo`,
 > más nombre, correo y mensaje, que son comunes). Lo que mande el marcado y no
 > esté en esa tabla **se descarta sin avisar**: la respuesta es `200` y el
-> correo llega sin el dato. Añadir un campo es tocar el marcado *y*
+> correo llega sin el dato. Añadir un campo es tocar el marcado _y_
 > `apps/website/api/contacto.js`, en el mismo PR o en uno previo.
 
 ## El CSS y el JS no se editan aquí

@@ -9,5 +9,6 @@
 - [ ] **T7 — Validar** typecheck·lint·test·build.
 
 ## Definition of Done (además de §6)
+
 - [ ] 4 criterios EARS con test, en verde.
 - [ ] RLS por tenant; alta en proveedor detrás de la interfaz; secretos fuera del repo.

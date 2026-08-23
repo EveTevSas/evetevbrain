@@ -147,7 +147,12 @@ export class InMemoryPagosRepository implements PagosRepository {
     items.sort((a, b) => b.creadoEn.localeCompare(a.creadoEn));
     const total = items.length;
     const offset = (filtros.page - 1) * filtros.limit;
-    return { items: items.slice(offset, offset + filtros.limit).map((f) => this.aCobro(f)), total, page: filtros.page, limit: filtros.limit };
+    return {
+      items: items.slice(offset, offset + filtros.limit).map((f) => this.aCobro(f)),
+      total,
+      page: filtros.page,
+      limit: filtros.limit
+    };
   }
 
   async stats(tenantId: string, desde?: string, hasta?: string): Promise<StatsCobros> {

@@ -122,7 +122,11 @@ export class DrizzlePagosRepository implements PagosRepository {
       });
     } catch (error) {
       // 23505 = unique_violation → otra transacción ganó la carrera.
-      if (typeof error === "object" && error !== null && (error as { code?: string }).code === "23505") {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        (error as { code?: string }).code === "23505"
+      ) {
         return { creado: false };
       }
       throw error;
@@ -151,7 +155,11 @@ export class DrizzlePagosRepository implements PagosRepository {
     if (!row) {
       return null;
     }
-    return { paymentId: row.payment_id, tenantId: row.tenant_id, estado: row.status as EstadoCobro };
+    return {
+      paymentId: row.payment_id,
+      tenantId: row.tenant_id,
+      estado: row.status as EstadoCobro
+    };
   }
 
   async registrarEventoIdempotente(args: RegistrarEventoArgs): Promise<boolean> {
@@ -198,7 +206,10 @@ export class DrizzlePagosRepository implements PagosRepository {
       if (filtros.desde) conditions.push(gte(payments.createdAt, new Date(filtros.desde)));
       if (filtros.hasta) conditions.push(lte(payments.createdAt, new Date(filtros.hasta)));
 
-      const totales = await tx.select({ total: count() }).from(payments).where(and(...conditions));
+      const totales = await tx
+        .select({ total: count() })
+        .from(payments)
+        .where(and(...conditions));
       const total = totales[0]?.total ?? 0;
       const offset = (filtros.page - 1) * filtros.limit;
       const rows = await tx
@@ -209,7 +220,12 @@ export class DrizzlePagosRepository implements PagosRepository {
         .limit(filtros.limit)
         .offset(offset);
 
-      return { items: rows.map((r) => this.aCobro(r)), total: Number(total ?? 0), page: filtros.page, limit: filtros.limit };
+      return {
+        items: rows.map((r) => this.aCobro(r)),
+        total: Number(total ?? 0),
+        page: filtros.page,
+        limit: filtros.limit
+      };
     });
   }
 
@@ -227,13 +243,22 @@ export class DrizzlePagosRepository implements PagosRepository {
         .where(and(...conditions))
         .groupBy(payments.status);
 
-      let aprobados = 0, fallidos = 0, pendientes = 0, montoAprobadoMinor = 0, total = 0;
+      let aprobados = 0,
+        fallidos = 0,
+        pendientes = 0,
+        montoAprobadoMinor = 0,
+        total = 0;
       for (const r of rows) {
         const n = Number(r.cantidad);
         total += n;
-        if (r.status === "aprobado") { aprobados = n; montoAprobadoMinor = Number(r.monto ?? 0); }
-        else if (r.status === "fallido") { fallidos = n; }
-        else { pendientes += n; }
+        if (r.status === "aprobado") {
+          aprobados = n;
+          montoAprobadoMinor = Number(r.monto ?? 0);
+        } else if (r.status === "fallido") {
+          fallidos = n;
+        } else {
+          pendientes += n;
+        }
       }
       return { total, aprobados, fallidos, pendientes, montoAprobadoMinor };
     });

@@ -33,7 +33,8 @@ async function enviarAlServidor(datos, boton, alTerminar) {
     } catch {
       /* respuesta sin JSON: se trata como fallo genérico */
     }
-    resultado = r.ok && cuerpo.ok ? { ok: true } : { ok: false, error: cuerpo.error || "envio_fallido" };
+    resultado =
+      r.ok && cuerpo.ok ? { ok: true } : { ok: false, error: cuerpo.error || "envio_fallido" };
   } catch {
     resultado = { ok: false, error: "sin_red" };
   }
