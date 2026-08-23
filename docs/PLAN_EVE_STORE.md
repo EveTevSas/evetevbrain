@@ -20,9 +20,10 @@ marca, el teal, que sigue sin usarse en ninguna otra vertical.
 
 **No es** un constructor de tiendas ni una alternativa a Shopify. No vendemos
 software de tienda: vendemos el montaje de una tienda que funciona en el canal
-que los demás todavía no atienden. La diferencia importa para el alcance: no
-hay panel de administración multi-inquilino, no hay temas, no hay tiendas de
-terceros corriendo sobre nuestra infraestructura.
+que los demás todavía no atienden. La diferencia importa para el alcance: no hay
+**multi-inquilino**, no hay temas, no hay tiendas de terceros corriendo sobre
+nuestra infraestructura. Sí hay panel de administración —uno, el de esta
+tienda—; ver §7 bis.
 
 **Por qué la propia primero.** Es el mismo patrón que ya funcionó dos veces:
 EveConecta es «nuestro primer cliente» de EvePay, y Fluxi es a la vez producto
@@ -236,12 +237,55 @@ Es una decisión comercial, no técnica.
 
 ---
 
+## 7 bis. El panel de administración
+
+Encargo de John, y cambia una decisión que este plan daba por hecha.
+
+**El catálogo deja de vivir en un archivo.** Hoy es `catalogo.json`, que
+regenera un script de Python. Eso sirvió para importar, y no sirve para que una
+persona edite: un panel que escriba en un JSON versionado en git es un panel que
+no se puede usar sin hacer commit. La fuente de verdad pasa a ser el schema
+`tienda` en Postgres, y `catalogo.json` queda como **artefacto de importación**,
+no como fuente. Es una puerta de un solo sentido y conviene atravesarla ahora,
+antes de que haya pedidos.
+
+**Su primera pantalla no es «agregar producto».** El catálogo ya está importado;
+lo que no está es revisado. Los 25 productos llegaron de Mercado Libre con 45
+avisos —descripciones sin confirmar, contenido ausente, GTIN en conflicto,
+afirmaciones terapéuticas retiradas— y **ninguno debería salir a la tienda sin
+que alguien los mire**. La pantalla de inicio del panel es esa cola de trabajo.
+Agregar productos importa después: es lo que se usa una vez al mes, no lo que
+desbloquea la apertura.
+
+**La regla de publicación vive en la base, no en la aplicación.** Un producto
+con avisos bloqueantes sin resolver no se puede marcar como publicado; lo impide
+un disparador de Postgres. Se hace ahí a propósito, por la misma disciplina que
+gobierna a Fluxi: ningún requisito se da por cumplido porque el código «debería»
+cumplirlo. Un import, un script de migración o un panel futuro pueden saltarse
+una validación de aplicación; no pueden saltarse un disparador.
+
+**Las estadísticas que sí tienen dato hoy** —y no las que suenan bien—: unidades
+por producto y valor del inventario ($9.455.200 COP), productos publicados
+frente a bloqueados, avisos pendientes por tipo, y el histórico de ventas de
+Mercado Libre que viaja en `origen_publicacion`. Las de conversión y carrito
+abandonado no existen hasta que haya tráfico y pedidos; inventarlas en el panel
+sería decorar.
+
+**El dinero se guarda como EvePay lo guarda:** entero en la unidad mínima. Para
+COP la unidad mínima es el valor face —$52.000 se guarda como `52000`—, tal como
+dice el comentario de `montoMinor` en la API. Si la tienda guardara pesos×100,
+cada pedido enviado a EvePay valdría cien veces más. Es exactamente el tipo de
+frontera que la regla de hablar por HTTP obliga a mirar.
+
+---
+
 ## 8. Lo que hoy bloquea, dicho claro
 
-1. **No sé qué vende Eve-Store.** El canal opera en Mercado Libre y el catálogo
-   no está en el repo. Sin catálogo real no hay ficha, no hay feed y no hay
-   medición honesta de velocidad. Es la primera entrada de la fase 1 y es
-   información que solo tiene la compañía.
+1. ~~No sé qué vende Eve-Store.~~ **Resuelto.** 25 productos importados desde el
+   reporte de Mercado Libre y el inventario físico, con descripciones escritas y
+   pendientes de confirmar. Quedan dos decisiones que solo tiene la compañía: el
+   reparto de las cinco unidades del serum con vitamina C entre Botanikalia y
+   Dermanat, y el contenido de nueve productos que no lo declaran.
 2. **EvePay no cobra todavía** (§7).
 3. **Vercel Hobby.** Una app más es un proyecto más, y el límite de 100
    despliegues por 24 h ya nos frenó dos veces esta semana. Conviene contarlo
@@ -270,6 +314,7 @@ En `specs/eve-store/`, con criterios de aceptación en EARS (§9 de la
 constitución):
 
 - `catalogo-y-ficha` — modelo, renderizado en servidor, JSON-LD
+- `panel-de-administracion` — cola de avisos, edición, alta, estadísticas
 - `busqueda-en-espanol` — tsvector, unaccent, sinónimos
 - `feed-de-producto` — generación desde la fuente única, ventana de 15 min
 - `carrito-y-checkout` — pasos contados, sin registro obligatorio
@@ -315,8 +360,9 @@ primera entrada ya está: **no construir contra ACP en 2026** (§2.3).
 
 ## 13. Lo que NO se construye todavía
 
-Panel de administración para terceros · temas · multi-tienda · integración ACP
-o UCP · aplicación móvil · recomendador · reseñas · programa de puntos.
+Panel para **terceros** —el nuestro sí se construye, §7 bis— · temas ·
+multi-tienda · integración ACP o UCP · aplicación móvil · recomendador ·
+reseñas · programa de puntos.
 
 Aparecen cuando un cliente los pida y pague, no antes. La misma disciplina que
 mantuvo a EvePay en `pagos` y evitó que se llenara de cuotas y residentes.
