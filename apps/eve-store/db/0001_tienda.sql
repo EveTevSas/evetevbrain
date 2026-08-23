@@ -87,6 +87,16 @@ returns trigger language plpgsql as $$
 declare pendientes integer;
 begin
   if new.publicado and not coalesce(old.publicado, false) then
+    -- Se recalculan los avisos automáticos ANTES de contar. Sin esto el
+    -- guardia confía en un recuento que puede estar rancio: bastaba marcar los
+    -- avisos como resueltos a mano y publicar sin tocar ninguna columna
+    -- vigilada por el otro disparador. Comprobado — se publicó un producto sin
+    -- GTIN, sin imagen y sin descripción. La regla se verifica en el instante
+    -- en que se aplica, no en el último momento en que alguien tocó el dato.
+    if to_regprocedure('tienda.recalcular_avisos(text)') is not null then
+      perform tienda.recalcular_avisos(new.slug);
+    end if;
+
     select count(*) into pendientes
       from tienda.aviso
      where producto_slug = new.slug and bloqueante and resuelto_en is null;

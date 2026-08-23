@@ -120,6 +120,11 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
               <span className="flex-1 leading-relaxed">{a.texto}</span>
               {a.resueltoEn ? (
                 <span className="shrink-0 text-xs text-exito">resuelto</span>
+              ) : a.origen === "automatico" ? (
+                /* Los avisos automáticos no se resuelven a mano: se retiran
+                   cuando el dato se arregla. Ofrecer un botón aquí sería
+                   ofrecer una forma de publicar un producto sin GTIN. */
+                <span className="shrink-0 text-xs text-pizarra">se retira al corregir el dato</span>
               ) : (
                 <form action={resolverAviso} className="shrink-0">
                   <input type="hidden" name="id" value={a.id} />

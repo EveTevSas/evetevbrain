@@ -58,6 +58,38 @@ ERROR:  No se puede publicar «dermanat-glow-tonic-…»: tiene 2 aviso(s)
 Tras resolver esos dos avisos, la misma sentencia pasa. Un guardia que no se
 puede hacer fallar no comprueba nada.
 
+## Los avisos automáticos, y el agujero que cerraron
+
+Hay dos clases de aviso, y la diferencia importa:
+
+- **`importacion`** — lo que solo sabe el origen: que el texto traía afirmaciones
+  terapéuticas, que dos productos venían agrupados, que hay dos GTIN en
+  conflicto. Se resuelven a mano porque son decisiones.
+- **`automatico`** — lo que se deduce del dato: descripción corta o sin
+  confirmar, sin contenido, sin GTIN, sin imagen. Los calcula
+  `tienda.recalcular_avisos` y **no se resuelven: desaparecen cuando el dato
+  deja de faltar**. El panel ni siquiera ofrece el botón.
+
+El motivo de que los calcule la base y no quien escribe es que hay más de una
+puerta de entrada —la importación, el panel, y pronto la API de Mercado Libre—.
+Si cada una decidiera qué es un producto incompleto, el listón dependería de por
+dónde entró, y el panel acabaría siendo el agujero por el que se cuela lo que el
+importador sí rechazaba.
+
+**Dos agujeros reales que aparecieron al probarlo, y cómo se cerraron:**
+
+1. Un aviso automático marcado como resuelto sobrevivía al recálculo. Ahora
+   `recalcular_avisos` borra **todos** los automáticos, resueltos incluidos: no
+   son tareas que se cierran, son síntomas.
+2. Peor: bastaba marcar los avisos a mano y publicar **sin tocar ninguna columna
+   vigilada**, porque el guardia contaba un recuento rancio. Comprobado — se
+   publicó un producto sin GTIN, sin imagen y sin descripción. Ahora el guardia
+   **recalcula antes de contar**: la regla se verifica en el instante en que se
+   aplica, no en el último momento en que alguien tocó el dato.
+
+Probado después del arreglo: con los cinco avisos marcados a mano, publicar
+falla; completando el dato, publica.
+
 ## Estado del catálogo al importar
 
 **Los 25 productos están bloqueados** por 45 avisos pendientes. Eso no es

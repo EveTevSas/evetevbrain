@@ -85,6 +85,8 @@ export const aviso = tiendaSchema.table(
       .references(() => producto.slug, { onDelete: "cascade" }),
     texto: text("texto").notNull(),
     bloqueante: boolean("bloqueante").notNull().default(true),
+    /** `automatico` lo deduce la base del dato; `importacion` lo aporta el origen. */
+    origen: text("origen").notNull().default("importacion"),
     resueltoEn: timestamp("resuelto_en", { withTimezone: true }),
     resueltoPor: text("resuelto_por"),
     creadoEn: timestamp("creado_en", { withTimezone: true }).notNull().defaultNow()
