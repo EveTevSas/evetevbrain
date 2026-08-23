@@ -19,10 +19,10 @@ apps/eveconecta-landing/
 
 ## Los dos dominios
 
-| Dominio | Qué sirve | App |
-|---|---|---|
-| `eveconecta.evetev.com` | landing pública | esta |
-| `conecta.evetev.com` | portal de residentes (redirige a `/login`) | `apps/eveconecta` |
+| Dominio                 | Qué sirve                                  | App               |
+| ----------------------- | ------------------------------------------ | ----------------- |
+| `eveconecta.evetev.com` | landing pública                            | esta              |
+| `conecta.evetev.com`    | portal de residentes (redirige a `/login`) | `apps/eveconecta` |
 
 Se parecen, y es un riesgo asumido a conciencia. El reparto natural sería el
 contrario —dominio corto y memorable para lo público, portal detrás de un
@@ -59,14 +59,14 @@ lo hace `formularios.js`, compartido con las demás landings; el marcado declara
 el producto y nada más:
 
 ```html
-<form class="demo-form" data-demo="eveconecta">
+<form class="demo-form" data-demo="eveconecta"></form>
 ```
 
 > **Un campo nuevo no basta con ponerlo aquí.** El endpoint solo limpia e
 > imprime lo que está en su tabla `CAMPOS` (hoy, para esta landing: `conjunto`, `telefono`, `rol`, `unidades`, `ciudad`, `plazo`,
 > más nombre, correo y mensaje, que son comunes). Lo que mande el marcado y no
 > esté en esa tabla **se descarta sin avisar**: la respuesta es `200` y el
-> correo llega sin el dato. Añadir un campo es tocar el marcado *y*
+> correo llega sin el dato. Añadir un campo es tocar el marcado _y_
 > `apps/website/api/contacto.js`, en el mismo PR o en uno previo.
 
 ## Correr en local

@@ -49,7 +49,8 @@ const ORIGENES = new Set([
 /* Previews de Vercel de las dos landings, para poder probar el formulario en
    el despliegue de un PR. El correo que llega lleva el host real en «Enviado
    desde», así que una prueba nunca se confunde con un cliente. */
-const ORIGEN_PREVIEW = /^https:\/\/(evepay|eveconecta-landing|eve-intelligence)-[a-z0-9-]+\.vercel\.app$/;
+const ORIGEN_PREVIEW =
+  /^https:\/\/(evepay|eveconecta-landing|eve-intelligence)-[a-z0-9-]+\.vercel\.app$/;
 /* Desarrollo local: `pnpm dev` sirve las landings en localhost. */
 const ORIGEN_LOCAL = /^http:\/\/localhost:\d{2,5}$/;
 
@@ -304,8 +305,9 @@ module.exports = async function handler(req, res) {
       e.message,
       e.detalle || ""
     );
-    return res
-      .status(e.codigo || 500)
-      .json({ ok: false, error: e.message === "sin_proveedor" ? "sin_proveedor" : "envio_fallido" });
+    return res.status(e.codigo || 500).json({
+      ok: false,
+      error: e.message === "sin_proveedor" ? "sin_proveedor" : "envio_fallido"
+    });
   }
 };

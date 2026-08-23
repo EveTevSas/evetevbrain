@@ -9,7 +9,9 @@
     "./colores.css": "./assets/colores.css",
     "./tokens/*": "./assets/tokens/*"
   },
-  "files": ["assets"],
+  "files": [
+    "assets"
+  ],
   "scripts": {
     "lint": "echo \"(brand) sin lint\" && exit 0",
     "typecheck": "echo \"(brand) sin typecheck\" && exit 0",

@@ -49,11 +49,7 @@ export class InMemoryMerchantsRepository implements MerchantsRepository {
     return null;
   }
 
-  async aplicarEstado(
-    tenantId: string,
-    merchantId: string,
-    estado: EstadoMerchant
-  ): Promise<void> {
+  async aplicarEstado(tenantId: string, merchantId: string, estado: EstadoMerchant): Promise<void> {
     const row = this.merchants.get(merchantId);
     if (row && row.tenantId === tenantId) {
       row.estado = estado;

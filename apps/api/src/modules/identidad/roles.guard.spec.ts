@@ -31,9 +31,9 @@ describe("RolesGuard — RBAC y tenant (§4)", () => {
 
   it("rol no autorizado → 403", () => {
     const guard = guardWith([Role.SUPER_ADMIN]);
-    expect(() =>
-      run({ tenantId: TENANT, actor: "a", role: Role.ADMIN_COMERCIO }, guard)
-    ).toThrow(ForbiddenException);
+    expect(() => run({ tenantId: TENANT, actor: "a", role: Role.ADMIN_COMERCIO }, guard)).toThrow(
+      ForbiddenException
+    );
   });
 
   it("rol autorizado → permite", () => {

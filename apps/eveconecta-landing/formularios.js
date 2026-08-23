@@ -24,43 +24,43 @@
    el correo directo de la empresa, que funciona aunque el backend no. */
 
 (function () {
-  var ENDPOINT = 'https://evetev.com/api/contacto';
-  var CORREO_EMPRESA = 'contacto@evetev.com';
+  var ENDPOINT = "https://evetev.com/api/contacto";
+  var CORREO_EMPRESA = "contacto@evetev.com";
 
   function mensajeDeError(error) {
-    if (error === 'falta_nombre') return 'Cuéntanos tu nombre para responderte.';
-    if (error === 'correo_invalido') return 'Revisa el correo: no parece válido.';
-    if (error === 'sin_red') return 'Sin conexión. Escríbenos a ' + CORREO_EMPRESA + '.';
+    if (error === "falta_nombre") return "Cuéntanos tu nombre para responderte.";
+    if (error === "correo_invalido") return "Revisa el correo: no parece válido.";
+    if (error === "sin_red") return "Sin conexión. Escríbenos a " + CORREO_EMPRESA + ".";
     // Incluye "sin_proveedor": el buzón todavía no está configurado. No se le
     // cuenta eso a la persona; se le da el camino que sí funciona.
-    return 'No pudimos enviarlo. Escríbenos directo a ' + CORREO_EMPRESA + '.';
+    return "No pudimos enviarlo. Escríbenos directo a " + CORREO_EMPRESA + ".";
   }
 
   function mostrarEstado(estado, texto, tipo) {
     if (!estado) return;
     estado.textContent = texto;
-    estado.className = 'demo-estado ' + tipo;
+    estado.className = "demo-estado " + tipo;
   }
 
   function preparar(form) {
-    var estado = form.querySelector('[data-estado]');
+    var estado = form.querySelector("[data-estado]");
     var boton = form.querySelector('button[type="submit"]');
 
-    form.addEventListener('submit', async function (ev) {
+    form.addEventListener("submit", async function (ev) {
       ev.preventDefault();
 
       // Candado de reentrada. Deshabilitar el botón no basta: un Enter en un
       // campo vuelve a entrar y manda el correo dos veces. El rótulo original
       // se guarda UNA sola vez, porque al reentrar se guardaría "Enviando…" y
       // el botón se quedaría con ese texto para siempre.
-      if (form.dataset.enviando === '1') return;
-      form.dataset.enviando = '1';
+      if (form.dataset.enviando === "1") return;
+      form.dataset.enviando = "1";
       if (boton) {
         if (!boton.dataset.textoOriginal) boton.dataset.textoOriginal = boton.textContent;
         boton.disabled = true;
-        boton.textContent = 'Enviando…';
+        boton.textContent = "Enviando…";
       }
-      mostrarEstado(estado, '', '');
+      mostrarEstado(estado, "", "");
 
       /* Los campos viajan tal cual los nombra el marcado: el servidor tiene su
          propia lista blanca, así que añadir un campo a una landing no obliga a
@@ -69,17 +69,17 @@
       new FormData(form).forEach(function (valor, clave) {
         datos[clave] = valor;
       });
-      datos.tipo = 'demo';
+      datos.tipo = "demo";
       datos.producto = form.dataset.demo;
       /* El host real, no una etiqueta fija: así un envío desde una preview de
          Vercel o desde localhost se distingue de uno de un cliente. */
-      datos.origen = window.location.host + ' — formulario de demo';
+      datos.origen = window.location.host + " — formulario de demo";
 
       var resultado;
       try {
         var r = await fetch(ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(datos)
         });
         var cuerpo = {};
@@ -89,30 +89,30 @@
           /* respuesta sin JSON: se trata como fallo genérico */
         }
         resultado =
-          r.ok && cuerpo.ok ? { ok: true } : { ok: false, error: cuerpo.error || 'envio_fallido' };
+          r.ok && cuerpo.ok ? { ok: true } : { ok: false, error: cuerpo.error || "envio_fallido" };
       } catch (e) {
-        resultado = { ok: false, error: 'sin_red' };
+        resultado = { ok: false, error: "sin_red" };
       }
 
-      form.dataset.enviando = '0';
+      form.dataset.enviando = "0";
       if (boton) {
         boton.disabled = false;
         boton.textContent = boton.dataset.textoOriginal;
       }
 
       if (resultado.ok) {
-        var nombre = (datos.nombre || '').trim().split(' ')[0];
+        var nombre = (datos.nombre || "").trim().split(" ")[0];
         form.reset();
         mostrarEstado(
           estado,
-          'Gracias' + (nombre ? ', ' + nombre : '') + '. Te respondemos en un día hábil.',
-          'ok'
+          "Gracias" + (nombre ? ", " + nombre : "") + ". Te respondemos en un día hábil.",
+          "ok"
         );
       } else {
-        mostrarEstado(estado, mensajeDeError(resultado.error), 'error');
+        mostrarEstado(estado, mensajeDeError(resultado.error), "error");
       }
     });
   }
 
-  document.querySelectorAll('form[data-demo]').forEach(preparar);
+  document.querySelectorAll("form[data-demo]").forEach(preparar);
 })();

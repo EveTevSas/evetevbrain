@@ -11,18 +11,18 @@ Es un **monorepo → dos proyectos en Vercel**, ambos apuntando al mismo repo
 `vercel.json`, así que la config ya está versionada; en el dashboard solo fijas el
 Root Directory y el dominio.
 
-| App | Root Directory | Dominio | Hosting |
-|---|---|---|---|
-| `website` | `apps/website` | `evetev.com` (+ `www`) | Vercel (estático) |
-| `eveconecta` | `apps/eveconecta` | `conecta.evetev.com` | Vercel (Next.js) |
-| `api` (EvePay) | `apps/api` | `api.evetev.com` | Railway *(cuando se requiera)* |
+| App            | Root Directory    | Dominio                | Hosting                        |
+| -------------- | ----------------- | ---------------------- | ------------------------------ |
+| `website`      | `apps/website`    | `evetev.com` (+ `www`) | Vercel (estático)              |
+| `eveconecta`   | `apps/eveconecta` | `conecta.evetev.com`   | Vercel (Next.js)               |
+| `api` (EvePay) | `apps/api`        | `api.evetev.com`       | Railway _(cuando se requiera)_ |
 
 ---
 
 ## 1. Website → `evetev.com`
 
 1. Vercel → **Add New → Project** → importa `EveTevSas/evetevbrain`.
-2. **Root Directory:** `apps/website` (botón *Edit*).
+2. **Root Directory:** `apps/website` (botón _Edit_).
 3. Framework/build: los deja como están — `apps/website/vercel.json` ya define
    que es estático (sin build, sirve la carpeta) más la función serverless del
    formulario (`api/contacto.js`).
@@ -66,10 +66,10 @@ Root Directory y el dominio.
 
 Al agregar cada dominio, **Vercel muestra los registros exactos**. Los típicos:
 
-| Tipo | Host | Valor |
-|---|---|---|
-| `A` | `@` | `76.76.21.21` |
-| `CNAME` | `www` | `cname.vercel-dns.com` |
+| Tipo    | Host      | Valor                  |
+| ------- | --------- | ---------------------- |
+| `A`     | `@`       | `76.76.21.21`          |
+| `CNAME` | `www`     | `cname.vercel-dns.com` |
 | `CNAME` | `conecta` | `cname.vercel-dns.com` |
 
 Se ponen en el panel DNS de **name.com** (login `contacto@evetev.com`). Propaga en
@@ -92,7 +92,7 @@ compila todo el workspace pnpm de forma determinista (build de `@evetev/shared` 
 
 1. Railway → **New Project → Deploy from GitHub repo** → `EveTevSas/evetevbrain`.
 2. En el servicio → **Settings**:
-   - **Root Directory:** *(vacío / raíz)* — el contexto de build debe ser la raíz
+   - **Root Directory:** _(vacío / raíz)_ — el contexto de build debe ser la raíz
      del monorepo para resolver el workspace.
    - **Build → Dockerfile Path:** `apps/api/Dockerfile`.
    - Railway detecta el `Dockerfile` y lo usa (ignora Nixpacks).
@@ -112,9 +112,10 @@ compila todo el workspace pnpm de forma determinista (build de `@evetev/shared` 
    `*.up.railway.app`) para probar, y luego **Custom Domain** → `api.evetev.com`
    (agrega el CNAME que muestre Railway en **name.com**).
 5. **Health check:** `GET /v1/health` → `{"status":"ok","service":"evepay-api"}`.
-   Opcional: fijarlo como *Healthcheck Path* en Railway.
+   Opcional: fijarlo como _Healthcheck Path_ en Railway.
 
 ### Notas
+
 - La DB de EvePay vive en su **propio** proyecto Supabase (separada de la vertical
   EveConecta, §8). El `DATABASE_URL` usa el rol `evepay_api` (respeta RLS; NO owner
   ni BYPASSRLS).

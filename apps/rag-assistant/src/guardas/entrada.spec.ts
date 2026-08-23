@@ -20,7 +20,9 @@ describe("guarda de origen", () => {
   });
 
   it("deja pasar la preview de la landing que instala el widget", () => {
-    expect(origenPermitido("https://eve-intelligence-4k2-evetev.vercel.app", PERMITIDOS)).toBe(true);
+    expect(origenPermitido("https://eve-intelligence-4k2-evetev.vercel.app", PERMITIDOS)).toBe(
+      true
+    );
   });
 
   it("no deja pasar una preview de un proyecto ajeno", () => {

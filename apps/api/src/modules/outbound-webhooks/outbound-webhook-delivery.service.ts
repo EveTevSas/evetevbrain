@@ -71,7 +71,9 @@ export class OutboundWebhookDeliveryService {
       }
     }
 
-    this.logger.error(`Webhook a ${url} falló después de ${MAX_RETRIES} intentos para delivery ${deliveryId}`);
+    this.logger.error(
+      `Webhook a ${url} falló después de ${MAX_RETRIES} intentos para delivery ${deliveryId}`
+    );
   }
 
   private firmar(secret: string, timestamp: string, body: string): string {

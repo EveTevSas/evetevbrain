@@ -30,24 +30,24 @@ embebido** de Akua; EvePay solo maneja tokens e IDs.
 
 ### Recursos de Akua ↔ módulos de EvePay
 
-| Recurso / evento de Akua | Módulo EvePay | Uso |
-|---|---|---|
-| `POST /v1/payments` (+ `Idempotency-Key`) | `pagos` | Crear cobro. EvePay guarda su propio agregado y máquina de estados. |
-| `/v1/tokens` (tokenización de tarjeta) | `pagos` | Cobrar sin tocar PAN (checkout/token de Akua). |
-| webhook `payment.purchase.succeeded` / `.failed` | `webhooks` → `pagos` | Transición de estado del cobro. |
-| webhook `payment.refunded` (+ refunds) | `webhooks` → `ledger` | Reverso contable. |
-| `/v1/merchants` + webhook `merchant.approved` | `merchants` | Onboarding y KYC/KYB de comercios. |
-| `/v1/settlements` + webhook `payout.completed` | `conciliacion` | Cuadrar lo cobrado con lo liquidado. |
-| webhook `dispute.created` | `webhooks` → `ledger` | Registrar disputa/contracargo. |
-| API key `ak_test_`/`ak_live_`, firma de webhook | `identidad` / infra | Secretos por entorno (§4), nunca en el repo. |
-| MCP server de Akua | `ia` (a futuro) | Snippets/consultas asistidas por agente. |
+| Recurso / evento de Akua                         | Módulo EvePay         | Uso                                                                 |
+| ------------------------------------------------ | --------------------- | ------------------------------------------------------------------- |
+| `POST /v1/payments` (+ `Idempotency-Key`)        | `pagos`               | Crear cobro. EvePay guarda su propio agregado y máquina de estados. |
+| `/v1/tokens` (tokenización de tarjeta)           | `pagos`               | Cobrar sin tocar PAN (checkout/token de Akua).                      |
+| webhook `payment.purchase.succeeded` / `.failed` | `webhooks` → `pagos`  | Transición de estado del cobro.                                     |
+| webhook `payment.refunded` (+ refunds)           | `webhooks` → `ledger` | Reverso contable.                                                   |
+| `/v1/merchants` + webhook `merchant.approved`    | `merchants`           | Onboarding y KYC/KYB de comercios.                                  |
+| `/v1/settlements` + webhook `payout.completed`   | `conciliacion`        | Cuadrar lo cobrado con lo liquidado.                                |
+| webhook `dispute.created`                        | `webhooks` → `ledger` | Registrar disputa/contracargo.                                      |
+| API key `ak_test_`/`ak_live_`, firma de webhook  | `identidad` / infra   | Secretos por entorno (§4), nunca en el repo.                        |
+| MCP server de Akua                               | `ia` (a futuro)       | Snippets/consultas asistidas por agente.                            |
 
 ---
 
 ## 1. Metodología (cómo se construye cada pieza)
 
 Seguimos el loop de SDD (§9): **Constitución → Especificar → Clarificar → Plan →
-Tareas → Implementar → Validar**. Nivel: *spec-anchored* (la spec ancla la
+Tareas → Implementar → Validar**. Nivel: _spec-anchored_ (la spec ancla la
 intención; el código y los tests son la verdad ejecutable).
 
 - **Spec obligatoria** para todo lo de EvePay: pagos, ledger, conciliación,
@@ -103,43 +103,56 @@ no-reescribibles (§1): multi-tenant e idempotencia/auditoría/conciliación van
 sólidos desde el inicio; lo demás puede ser provisional.
 
 ### Fase 0 — Cimientos (antes del primer cobro)
+
 **Objetivo:** que todo lo que se construya encima nazca aislado y auditable.
+
 - `specs/evepay/multi-tenancy-rls/` — RLS en schema `evepay`, `tenant_id` + `SET LOCAL app.tenant_id`. **Test obligatorio:** tenant A jamás ve datos de B.
 - `specs/evepay/identidad-rbac/` — auth Supabase, roles (`super_admin`, `admin_comercio`), cada endpoint declara su rol.
 - Contrato `PaymentProvider` (ya en `@evetev/shared`) + `FakePaymentProvider` (ya) + esqueleto `AkuaPaymentProvider`.
-**Validación:** typecheck/lint/test verdes; test de aislamiento pasa.
+  **Validación:** typecheck/lint/test verdes; test de aislamiento pasa.
 
 ### Fase 1 — Cobro idempotente + máquina de estados (MVP núcleo)
+
 **Objetivo:** crear cobros de verdad y no cobrar dos veces nunca.
+
 - `specs/evepay/create-payment-idempotency/` — crear cobro, `Idempotency-Key`, estados `creado → pendiente → aprobado/fallido → conciliado`. **(spec exemplar ya escrita).**
 - Persistencia (`evepay.payments`, Drizzle), máquina de estados, auditoría inmutable de transiciones.
 - `AkuaPaymentProvider.crearCobro` contra sandbox `ak_test_`.
 - **Dogfooding:** EveConecta crea un cobro vía HTTP y guarda `cuota.evepay_cobro_id`.
-**Validación:** EARS de idempotencia en test; cobro real en sandbox de Akua.
+  **Validación:** EARS de idempotencia en test; cobro real en sandbox de Akua.
 
 ### Fase 2 — Webhooks normalizados
+
 **Objetivo:** que el estado del cobro lo mueva la realidad, no un polling frágil.
+
 - `specs/evepay/provider-webhooks/` — verificar **firma**, procesar **idempotente** (un webhook repetido no duplica efecto), mapear `payment.purchase.succeeded→aprobado`, `payment.purchase.failed→fallido`, `payment.refunded→reverso`.
 - Ingesta con Inngest (reintentos), normalización a eventos EvePay.
-**Validación:** replay de webhook no duplica; firma inválida se rechaza.
+  **Validación:** replay de webhook no duplica; firma inválida se rechaza.
 
 ### Fase 3 — Ledger inmutable + estado de cuenta
+
 **Objetivo:** la verdad contable de cada peso.
+
 - `specs/evepay/ledger-posting/` — doble partida, asientos **inmutables** (sin edición/borrado), ligados a cada transición. Saldo **reconstruible** desde movimientos, no un campo suelto.
-**Validación:** débitos = créditos siempre; el saldo se reconstruye.
+  **Validación:** débitos = créditos siempre; el saldo se reconstruye.
 
 ### Fase 4 — Conciliación
+
 **Objetivo:** lo cobrado cuadra con lo liquidado por Akua.
+
 - `specs/evepay/reconciliation/` — cruzar ledger de EvePay contra `/v1/settlements` y `payout.completed`; reportar diferencias y pagos huérfanos.
 - Job periódico en Inngest.
-**Validación:** con datos sembrados, 0 diferencias; una diferencia inyectada se detecta.
+  **Validación:** con datos sembrados, 0 diferencias; una diferencia inyectada se detecta.
 
 ### Fase 5 — Onboarding de comercios (merchants)
+
 **Objetivo:** dar de alta comercios (incluida la vertical como primer comercio).
+
 - `specs/evepay/merchant-onboarding/` — `POST /v1/merchants`, estados de KYC/KYB, webhook `merchant.approved`.
-**Validación:** alta de comercio de prueba aprobado en sandbox.
+  **Validación:** alta de comercio de prueba aprobado en sandbox.
 
 ### Fase 6+ — Cuando el negocio lo pida (no antes, §1)
+
 - Refunds y disputas (`payment.refunded`, `dispute.created`) con su reverso en ledger.
 - Payouts / split payments / liquidación a beneficiarios.
 - `apps/checkout` (elements white-label) y `packages/evepay-sdk` (primer consumidor externo o 2.ª vertical).
@@ -149,6 +162,7 @@ sólidos desde el inicio; lo demás puede ser provisional.
 ## 4. Track paralelo — habilitación de Akua
 
 Corre **en paralelo** al desarrollo (no bloquea Fase 0–1 gracias al fake):
+
 1. Contactar **partnerships** (info@akua.la / akua.la/es/contacto) — no es self-service; toma semanas.
 2. Definir modelo comercial (revenue sharing, Full Stack AaaS).
 3. Obtener **sandbox keys** (`ak_test_`) → fijar los contratos exactos de campos en las specs de Fase 1–2.
@@ -159,21 +173,22 @@ Corre **en paralelo** al desarrollo (no bloquea Fase 0–1 gracias al fake):
 
 ## 5. Lista maestra de specs
 
-| Spec | Fase | Cimiento tocado | Estado |
-|---|---|---|---|
-| `multi-tenancy-rls` | 0 | multi-tenant | por escribir |
-| `identidad-rbac` | 0 | RBAC | por escribir |
-| `create-payment-idempotency` | 1 | idempotencia/auditoría | **exemplar escrita** |
-| `provider-webhooks` | 2 | auditoría | por escribir |
-| `ledger-posting` | 3 | ledger | por escribir |
-| `reconciliation` | 4 | conciliación | por escribir |
-| `merchant-onboarding` | 5 | — | por escribir |
+| Spec                         | Fase | Cimiento tocado        | Estado               |
+| ---------------------------- | ---- | ---------------------- | -------------------- |
+| `multi-tenancy-rls`          | 0    | multi-tenant           | por escribir         |
+| `identidad-rbac`             | 0    | RBAC                   | por escribir         |
+| `create-payment-idempotency` | 1    | idempotencia/auditoría | **exemplar escrita** |
+| `provider-webhooks`          | 2    | auditoría              | por escribir         |
+| `ledger-posting`             | 3    | ledger                 | por escribir         |
+| `reconciliation`             | 4    | conciliación           | por escribir         |
+| `merchant-onboarding`        | 5    | —                      | por escribir         |
 
 ---
 
 ## 6. Definición de "listo" (por fase)
 
 Además del Definition of Done de la constitución (§6):
+
 - La feature tiene `spec.md` con criterios **EARS** y tests derivados de ellos.
 - Si toca dinero: montos en **enteros/centavos**, idempotente, auditado, sin PAN.
 - Aislamiento por tenant verificado con test.

@@ -21,6 +21,7 @@ jerarquía por espacio y no por adornos. Un solo llamado a la acción por pantal
 Referencias del sector: Anthropic y Apple en sobriedad; nunca recargado ni "corporativo genérico".
 
 **Producto y líneas de negocio:**
+
 - **EvePay** — plataforma/pasarela de pagos (el producto principal). Identificador: azul eléctrico.
 - **Eve Intelligence** — soluciones de IA (RAG, asistentes). Identificador: violeta.
 - **Tienda** — comercio electrónico. Identificador: teal.
@@ -31,61 +32,62 @@ Referencias del sector: Anthropic y Apple en sobriedad; nunca recargado ni "corp
 ## 2. Tokens de color (valores exactos, no aproximar)
 
 ```css
-:root{
+:root {
   /* Base */
-  --eve-azul-noche:#0A2540;          /* texto principal, fondos de peso, footer */
-  --eve-azul-noche-profundo:#081D33; /* fondo de modo oscuro (NUNCA negro puro) */
-  --eve-hielo:#EAF2FB;               /* superficies claras, tarjetas */
-  --eve-tinte:#F4F9FD;               /* secciones alternas suaves */
-  --eve-linea:#EDF3FA;               /* bordes y divisores */
-  --eve-pizarra:#64748B;             /* texto secundario */
-  --eve-muted:#94A3B8;               /* metadatos, placeholders */
-  --eve-blanco:#FDFEFF;              /* fondo de página */
+  --eve-azul-noche: #0a2540; /* texto principal, fondos de peso, footer */
+  --eve-azul-noche-profundo: #081d33; /* fondo de modo oscuro (NUNCA negro puro) */
+  --eve-hielo: #eaf2fb; /* superficies claras, tarjetas */
+  --eve-tinte: #f4f9fd; /* secciones alternas suaves */
+  --eve-linea: #edf3fa; /* bordes y divisores */
+  --eve-pizarra: #64748b; /* texto secundario */
+  --eve-muted: #94a3b8; /* metadatos, placeholders */
+  --eve-blanco: #fdfeff; /* fondo de página */
 
   /* Acción */
-  --eve-coral:#EE3D22;               /* CTA primario — EXCLUSIVO */
-  --eve-coral-hover:#CF3016;
+  --eve-coral: #ee3d22; /* CTA primario — EXCLUSIVO */
+  --eve-coral-hover: #cf3016;
 
   /* Azules funcionales */
-  --eve-electrico:#1E6FEB;           /* enlaces, anillo de foco */
-  --eve-mezclado:#144A96;            /* secundario: botones 2os, sliders, switches, gráficos */
-  --eve-cian:#22D3EE;                /* realce sobre fondos oscuros */
-  --eve-teal:#3BAEC2;                /* ilustración, línea Tienda */
+  --eve-electrico: #1e6feb; /* enlaces, anillo de foco */
+  --eve-mezclado: #144a96; /* secundario: botones 2os, sliders, switches, gráficos */
+  --eve-cian: #22d3ee; /* realce sobre fondos oscuros */
+  --eve-teal: #3baec2; /* ilustración, línea Tienda */
 
   /* Violeta Eve — línea Eve Intelligence */
-  --eve-violeta:#8B5CF6;
-  --eve-violeta-texto:#6D28D9;
-  --eve-violeta-tinte:#EDE9FE;
+  --eve-violeta: #8b5cf6;
+  --eve-violeta-texto: #6d28d9;
+  --eve-violeta-tinte: #ede9fe;
 
   /* Semánticos */
-  --eve-exito:#16A34A;
-  --eve-alerta:#D97706;
-  --eve-error:#B91C1C;
+  --eve-exito: #16a34a;
+  --eve-alerta: #d97706;
+  --eve-error: #b91c1c;
 }
 ```
 
 **Atajo:** puedes importar los tokens en vez de copiarlos:
+
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css" />
 ```
 
 ### Reglas de color (obligatorias)
 
-| # | Regla |
-|---|---|
-| C1 | **Proporción 60/20/10/5/5**: 60% superficies claras · 20% azul noche · 10% azules funcionales · 5% coral · 5% cian/teal/violeta. |
-| C2 | **El coral es exclusivo de acciones.** Máximo **un botón coral por pantalla/vista**. PROHIBIDO usar coral en fondos grandes, textos largos, bordes decorativos o iconografía. |
-| C3 | **El violeta nunca va en botones.** Solo identifica Eve Intelligence: iconos, chips, ilustración, degradado IA. |
-| C4 | **Modo oscuro sobre `#081D33`**, jamás negro puro (`#000`). |
-| C5 | **Errores siempre con ícono + texto**, nunca comunicados solo por color (el coral de acción y el rojo de error deben distinguirse). |
-| C6 | **Degradados solo en piezas expresivas** (hero, portadas, isotipo). PROHIBIDO en botones, texto o componentes funcionales. |
-| C7 | Cian y violeta base **nunca como texto sobre fondo blanco** (contraste insuficiente). Usa `--eve-violeta-texto` o azul noche. |
+| #   | Regla                                                                                                                                                                         |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C1  | **Proporción 60/20/10/5/5**: 60% superficies claras · 20% azul noche · 10% azules funcionales · 5% coral · 5% cian/teal/violeta.                                              |
+| C2  | **El coral es exclusivo de acciones.** Máximo **un botón coral por pantalla/vista**. PROHIBIDO usar coral en fondos grandes, textos largos, bordes decorativos o iconografía. |
+| C3  | **El violeta nunca va en botones.** Solo identifica Eve Intelligence: iconos, chips, ilustración, degradado IA.                                                               |
+| C4  | **Modo oscuro sobre `#081D33`**, jamás negro puro (`#000`).                                                                                                                   |
+| C5  | **Errores siempre con ícono + texto**, nunca comunicados solo por color (el coral de acción y el rojo de error deben distinguirse).                                           |
+| C6  | **Degradados solo en piezas expresivas** (hero, portadas, isotipo). PROHIBIDO en botones, texto o componentes funcionales.                                                    |
+| C7  | Cian y violeta base **nunca como texto sobre fondo blanco** (contraste insuficiente). Usa `--eve-violeta-texto` o azul noche.                                                 |
 
 ### Degradados
 
 ```css
---eve-grad-corporativo: linear-gradient(90deg,#0A2540 0%,#1E6FEB 55%,#22D3EE 100%);
---eve-grad-ia:          linear-gradient(90deg,#8B5CF6 0%,#6366F1 50%,#22D3EE 100%);
+--eve-grad-corporativo: linear-gradient(90deg, #0a2540 0%, #1e6feb 55%, #22d3ee 100%);
+--eve-grad-ia: linear-gradient(90deg, #8b5cf6 0%, #6366f1 50%, #22d3ee 100%);
 ```
 
 ---
@@ -93,26 +95,48 @@ Referencias del sector: Anthropic y Apple en sobriedad; nunca recargado ni "corp
 ## 3. Tipografía
 
 ```html
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+/>
 ```
 
-| Familia | Rol | Pesos | Dónde |
-|---|---|---|---|
-| **Baloo 2** | Marca y titulares | 600, 700 | Logotipo, `h1`–`h2`, cifras protagonistas (montos, métricas) |
-| **Inter** | Producto y cuerpo | 400, 500, 600 | Toda la UI: párrafos, botones, formularios, tablas, navegación |
-| **JetBrains Mono** | Técnico | 400, 500 | Código, referencias de transacción, documentación de API |
+| Familia            | Rol               | Pesos         | Dónde                                                          |
+| ------------------ | ----------------- | ------------- | -------------------------------------------------------------- |
+| **Baloo 2**        | Marca y titulares | 600, 700      | Logotipo, `h1`–`h2`, cifras protagonistas (montos, métricas)   |
+| **Inter**          | Producto y cuerpo | 400, 500, 600 | Toda la UI: párrafos, botones, formularios, tablas, navegación |
+| **JetBrains Mono** | Técnico           | 400, 500      | Código, referencias de transacción, documentación de API       |
 
 ```css
-h1,h2,.brand{font-family:'Baloo 2',sans-serif;font-weight:600}
-body{font-family:'Inter',sans-serif;line-height:1.65;color:#0A2540}
+h1,
+h2,
+.brand {
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 600;
+}
+body {
+  font-family: "Inter", sans-serif;
+  line-height: 1.65;
+  color: #0a2540;
+}
 ```
 
 **Escala fluida (usar `clamp` siempre):**
+
 ```css
-h1{font-size:clamp(1.9rem,4.6vw,2.6rem);line-height:1.16}
-h2{font-size:clamp(1.3rem,2.6vw,1.6rem)}
-p {font-size:clamp(.9rem,1.6vw,.98rem)}
-small{font-size:.82rem}
+h1 {
+  font-size: clamp(1.9rem, 4.6vw, 2.6rem);
+  line-height: 1.16;
+}
+h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+}
+p {
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+small {
+  font-size: 0.82rem;
+}
 ```
 
 Nunca menos de 12 px. Máximo dos familias visibles por pieza (la mono solo en contexto técnico).
@@ -126,11 +150,11 @@ Nunca menos de 12 px. Máximo dos familias visibles por pieza (la mono solo en c
 **REGLA T2 — La variante se elige por el fondo, no por gusto.** El criterio es
 el contraste, y es obligatorio:
 
-| Fondo | Isotipo | Unidad | Por qué |
-|---|---|---|---|
-| Claro (blanco, hielo, tinte) | `isotipo-azul-noche` o los de gradiente | `-negro` teñido, o las de degradado | el extremo oscuro asienta la figura |
-| **Oscuro** (azul noche, azul profundo, fotografía, video) | **`isotipo-blanco`** | **`-blanco`** | es la única que garantiza contraste; ninguna otra se sostiene |
-| Azul noche, buscando acento de color | `isotipo-cian` (plano) | **`-blanco`** | en unidades no hay plano de color: `-cian` es un degradado que **termina en noche** y ahí se partiría |
+| Fondo                                                     | Isotipo                                 | Unidad                              | Por qué                                                                                               |
+| --------------------------------------------------------- | --------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Claro (blanco, hielo, tinte)                              | `isotipo-azul-noche` o los de gradiente | `-negro` teñido, o las de degradado | el extremo oscuro asienta la figura                                                                   |
+| **Oscuro** (azul noche, azul profundo, fotografía, video) | **`isotipo-blanco`**                    | **`-blanco`**                       | es la única que garantiza contraste; ninguna otra se sostiene                                         |
+| Azul noche, buscando acento de color                      | `isotipo-cian` (plano)                  | **`-blanco`**                       | en unidades no hay plano de color: `-cian` es un degradado que **termina en noche** y ahí se partiría |
 
 **Mínimo 3:1 entre el trazo y su fondo** (WCAG 2.2, 1.4.11: elementos gráficos
 no textuales). El logo no es decoración: si no se distingue, no identifica.
@@ -149,19 +173,19 @@ la segunda, **qué color**; la tercera es la que más se olvida.
 
 #### 1. ¿Dónde va?
 
-| Situación | Activo | Por qué |
-|---|---|---|
-| Encabezado de web o app | `lockup-horizontal-corporativo` | símbolo + palabra, en el formato que cabe en una barra |
-| Firma de correo, membrete | `lockup-horizontal-corporativo` | igual, y sobrevive al reenvío |
-| Portada, red social, splash | `lockup-vertical-corporativo` | proporción retrato |
-| **Contrato, factura, papelería registral** | `lockup-*-sas-*` o `logotipo-sas-*` | ahí debe constar el **nombre legal** |
-| Avatar, sello, app icon, marca de agua | `isotipo` | solo el símbolo; no hay espacio para leer |
-| Ícono de línea de producto en interfaz | `unidad-LADO-negro` teñida con `mask` | un archivo, todos los colores (ver §12) |
-| Chip, tarjeta o pieza expresiva pequeña | `unidad` de color o de degradado | el color identifica la línea |
-| Pestaña del navegador | `favicon.svg` | trae su propio fondo, funciona en tema claro y oscuro |
-| Pantalla de inicio de iOS | `apple-touch-icon.png` | opaco; iOS pone su propia máscara |
-| Pestaña fijada de Safari | `mask-icon.svg` | monocromo, lo tiñe el navegador |
-| Buscadores, `webmanifest` | `icon-512.png` | |
+| Situación                                  | Activo                                | Por qué                                                |
+| ------------------------------------------ | ------------------------------------- | ------------------------------------------------------ |
+| Encabezado de web o app                    | `lockup-horizontal-corporativo`       | símbolo + palabra, en el formato que cabe en una barra |
+| Firma de correo, membrete                  | `lockup-horizontal-corporativo`       | igual, y sobrevive al reenvío                          |
+| Portada, red social, splash                | `lockup-vertical-corporativo`         | proporción retrato                                     |
+| **Contrato, factura, papelería registral** | `lockup-*-sas-*` o `logotipo-sas-*`   | ahí debe constar el **nombre legal**                   |
+| Avatar, sello, app icon, marca de agua     | `isotipo`                             | solo el símbolo; no hay espacio para leer              |
+| Ícono de línea de producto en interfaz     | `unidad-LADO-negro` teñida con `mask` | un archivo, todos los colores (ver §12)                |
+| Chip, tarjeta o pieza expresiva pequeña    | `unidad` de color o de degradado      | el color identifica la línea                           |
+| Pestaña del navegador                      | `favicon.svg`                         | trae su propio fondo, funciona en tema claro y oscuro  |
+| Pantalla de inicio de iOS                  | `apple-touch-icon.png`                | opaco; iOS pone su propia máscara                      |
+| Pestaña fijada de Safari                   | `mask-icon.svg`                       | monocromo, lo tiñe el navegador                        |
+| Buscadores, `webmanifest`                  | `icon-512.png`                        |                                                        |
 
 #### 2. ¿Sobre qué fondo?
 
@@ -178,8 +202,8 @@ membretes ilegibles.
 
 - **Razón social en producto o marketing.** `Evetev S.A.S.` alarga el logotipo y
   no aporta nada fuera de lo legal. En web y app va el lockup normal.
-- **Unidad en lugar del isotipo.** La media unidad identifica una *línea de
-  producto*, no a la empresa. Nunca sustituye al isotipo en la marca principal.
+- **Unidad en lugar del isotipo.** La media unidad identifica una _línea de
+  producto_, no a la empresa. Nunca sustituye al isotipo en la marca principal.
 - **Degradados fuera de piezas expresivas** (C6): prohibidos en botones, texto y
   componentes funcionales.
 - **Mascota en documentos legales, facturas o en el flujo de pago** de EvePay.
@@ -188,30 +212,31 @@ membretes ilegibles.
   color, se agrega al repositorio en vez de improvisarlo.
 
 ### Isotipo (el símbolo: dos rombos entrelazados)
-| Archivo | Cuándo |
-|---|---|
-| `isotipos/isotipo-azul-noche.svg` | **Por defecto**, sobre fondos claros |
-| `isotipos/isotipo-blanco.svg` | **Fondos oscuros o fotografía** — la única que asegura contraste ahí (T2) |
-| `isotipos/isotipo-cian.svg` | Sobre azul noche |
-| `isotipos/isotipo-teal.svg` | Color heredado |
-| `isotipos/isotipo-gradiente-corporativo.svg` | Hero, portadas, piezas expresivas |
-| `isotipos/isotipo-gradiente-ia.svg` | Piezas de Eve Intelligence |
+
+| Archivo                                      | Cuándo                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------- |
+| `isotipos/isotipo-azul-noche.svg`            | **Por defecto**, sobre fondos claros                                      |
+| `isotipos/isotipo-blanco.svg`                | **Fondos oscuros o fotografía** — la única que asegura contraste ahí (T2) |
+| `isotipos/isotipo-cian.svg`                  | Sobre azul noche                                                          |
+| `isotipos/isotipo-teal.svg`                  | Color heredado                                                            |
+| `isotipos/isotipo-gradiente-corporativo.svg` | Hero, portadas, piezas expresivas                                         |
+| `isotipos/isotipo-gradiente-ia.svg`          | Piezas de Eve Intelligence                                                |
 
 ### Unidades (media unidad = ícono de línea de producto)
 
 Cada variante existe en **izquierda** y **derecha**. El trazo es idéntico en
 todas: solo cambia el color, nunca el dibujo (T1).
 
-| Variante | Colores | Para qué |
-|---|---|---|
-| `-negro` | `#000000` | base para teñir con `mask` desde CSS |
-| `-blanco` | `#FFFFFF` | **obligatoria sobre fondos oscuros** (T2): asegura el contraste sin recolorear nada |
-| `-degradado` | noche → eléctrico → cian | corporativo, piezas expresivas |
-| `-coral` | noche ↔ `#EE3D22` | pieza expresiva |
-| `-cian` | noche ↔ `#22D3EE` | pieza expresiva |
-| `-electrico` | noche ↔ `#1E6FEB` | pieza expresiva |
-| `-violeta` | noche ↔ `#8B5CF6` | pieza expresiva |
-| `-ambar` | noche ↔ `#EB9A1E` | pieza expresiva; el ámbar es complementario del eléctrico, **no es color de marca** |
+| Variante     | Colores                  | Para qué                                                                            |
+| ------------ | ------------------------ | ----------------------------------------------------------------------------------- |
+| `-negro`     | `#000000`                | base para teñir con `mask` desde CSS                                                |
+| `-blanco`    | `#FFFFFF`                | **obligatoria sobre fondos oscuros** (T2): asegura el contraste sin recolorear nada |
+| `-degradado` | noche → eléctrico → cian | corporativo, piezas expresivas                                                      |
+| `-coral`     | noche ↔ `#EE3D22`        | pieza expresiva                                                                     |
+| `-cian`      | noche ↔ `#22D3EE`        | pieza expresiva                                                                     |
+| `-electrico` | noche ↔ `#1E6FEB`        | pieza expresiva                                                                     |
+| `-violeta`   | noche ↔ `#8B5CF6`        | pieza expresiva                                                                     |
+| `-ambar`     | noche ↔ `#EB9A1E`        | pieza expresiva; el ámbar es complementario del eléctrico, **no es color de marca** |
 
 Todas las de color degradan **contra azul noche `#0A2540`**, no contra negro
 puro: es lo que hace el degradado corporativo y lo que pide C4. Mezclar dos
@@ -233,6 +258,7 @@ Se usan como **iconos de producto** (EvePay, Eve Intelligence, Tienda). Tamaño 
 PROHIBIDO usarlas como marca principal o reemplazo del isotipo completo.
 
 ### Logotipo y lockups
+
 - `logotipos/logotipo-bicolor.svg` (Eve azul noche + tev eléctrico), `-azul-noche`, `-teal`, `-blanco`, `-negro-minuscula`
 - **Con razón social (`Evetev S.A.S.`):** `logotipo-sas-bicolor.svg` · `-sas-azul-noche` · `-sas-blanco` · `-sas-teal` · `-sas-negro-minuscula`. Cada una toma el color de su versión sin razón social, incluida la blanca — que sigue siendo la de fondo oscuro (T2).
 - `lockups/lockup-horizontal-negro.svg` · `-corporativo` → encabezados, membretes, firmas de correo
@@ -258,10 +284,10 @@ Los dos conservan el isotipo y el logotipo **exactos**, sin reescalar ni mover
 nada, y con los mismos márgenes que su versión sin razón social. Lo que cambia
 es el lienzo:
 
-| | Lienzo | Por qué |
-|---|---|---|
-| horizontal | 1300 → **2037** de ancho | el texto crece; los elementos no se tocan |
-| vertical | 1000×700 → **1000×634** | mantiene el formato retrato, así que el bloque de texto se reduce y se recorta el alto sobrante |
+|            | Lienzo                   | Por qué                                                                                         |
+| ---------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| horizontal | 1300 → **2037** de ancho | el texto crece; los elementos no se tocan                                                       |
+| vertical   | 1000×700 → **1000×634**  | mantiene el formato retrato, así que el bloque de texto se reduce y se recorta el alto sobrante |
 
 El «S.A.S.» se compuso con la **misma Baloo 2 600** del logotipo, trazada a
 curvas —no como `<text>`— para que no dependa de que la fuente esté instalada:
@@ -271,20 +297,36 @@ en un Word o un PDF ajeno se vería con otra tipografía justo donde más se not
 
 Juego completo (`favicon/`):
 
-| Archivo | Para qué | Fondo |
-|---|---|---|
-| `favicon.svg` | pestaña, por defecto | rombo redondeado azul noche |
-| `favicon-32.png` | respaldo para navegadores sin SVG | transparente en las esquinas |
-| `apple-touch-icon.png` 180×180 | pantalla de inicio de iOS | **opaco y a sangre** |
-| `icon-512.png` 512×512 | buscadores, y manifest cuando lo haya | **opaco y a sangre** |
-| `mask-icon.svg` | pestaña fijada de Safari | transparente, monocromo |
+| Archivo                        | Para qué                              | Fondo                        |
+| ------------------------------ | ------------------------------------- | ---------------------------- |
+| `favicon.svg`                  | pestaña, por defecto                  | rombo redondeado azul noche  |
+| `favicon-32.png`               | respaldo para navegadores sin SVG     | transparente en las esquinas |
+| `apple-touch-icon.png` 180×180 | pantalla de inicio de iOS             | **opaco y a sangre**         |
+| `icon-512.png` 512×512         | buscadores, y manifest cuando lo haya | **opaco y a sangre**         |
+| `mask-icon.svg`                | pestaña fijada de Safari              | transparente, monocromo      |
 
 ```html
-<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png">
-<link rel="mask-icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/mask-icon.svg" color="#0A2540">
-<meta name="theme-color" content="#0A2540">
+<link
+  rel="icon"
+  href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg"
+  type="image/svg+xml"
+/>
+<link
+  rel="icon"
+  href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png"
+  sizes="32x32"
+  type="image/png"
+/>
+<link
+  rel="apple-touch-icon"
+  href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png"
+/>
+<link
+  rel="mask-icon"
+  href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/mask-icon.svg"
+  color="#0A2540"
+/>
+<meta name="theme-color" content="#0A2540" />
 ```
 
 **El `apple-touch-icon` y el `icon-512` van opacos y sin esquinas redondeadas
@@ -395,6 +437,7 @@ Siete cosas del prompt no son adorno y conviene no editarlas a la ligera:
   con los elementos centrados y el color no se veía **ni subiendo la
   opacidad**. La imagen mental que hay que darle al modelo es «dos puntos de
   luz menudos en una escena clara, no dos bloques».
+
 - **Las reglas dicen cómo dibujar, nunca qué dibujar.** Va en su propio párrafo
   porque el modelo confunde las dos cosas. La versión anterior ilustraba el
   tamaño con una lista suelta —«un banco, una farola, un coche, una puerta, un
@@ -420,6 +463,7 @@ Siete cosas del prompt no son adorno y conviene no editarlas a la ligera:
   siga leyéndose. Se mide componiendo la imagen a la opacidad real sobre un
   lienzo y buscando el peor píxel de la banda del texto; en las portadas de hoy
   da 11:1, con holgura sobre el 4,5 que exige AA.
+
 - **Las esquinas redondeadas** son el otro puente con la mascota, que es toda
   curva y esquina blanda. Un wireframe de vértices en punta al lado de Eve
   parece de otra marca. Si el modelo se pasa y la escena queda de juguete, el
@@ -449,13 +493,13 @@ peso se arregla en la conversión, que es donde toca arreglarlo.
 
 **Antes de publicarla, conviértela a WebP con transparencia:**
 
-| | |
-|---|---|
-| formato | **WebP**, no PNG ni JPG |
-| ancho | 2048 px (basta de sobra; el sitio la muestra a ~1000) |
-| calidad | 80 |
-| calidad del alfa | 50 |
-| resultado | **~200 KB** |
+|                  |                                                       |
+| ---------------- | ----------------------------------------------------- |
+| formato          | **WebP**, no PNG ni JPG                               |
+| ancho            | 2048 px (basta de sobra; el sitio la muestra a ~1000) |
+| calidad          | 80                                                    |
+| calidad del alfa | 50                                                    |
+| resultado        | **~200 KB**                                           |
 
 Tres cosas de esa tabla no son intercambiables:
 
@@ -494,13 +538,19 @@ cachea la resolución del rango y la etiqueta sola no basta.
 > **hay que reemplazarlos por versiones generadas.**
 
 ### Snippet de logo en encabezado
+
 ```html
 <a class="logo" href="/" aria-label="Evetev inicio">
-  <img src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg"
-       alt="" width="32" height="23">
+  <img
+    src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg"
+    alt=""
+    width="32"
+    height="23"
+  />
   <span class="brand">Evetev</span>
 </a>
 ```
+
 Accesibilidad: si el texto "Evetev" acompaña al logo, la imagen es decorativa → `alt=""`.
 Si el logo va solo, `alt="Evetev"`.
 
@@ -510,10 +560,10 @@ Si el logo va solo, `alt="Evetev"`.
 
 ```css
 /* Radios */
---r-sm:8px;    /* inputs, chips */
---r-md:12px;   /* tarjetas, modales */
---r-lg:16px;   /* contenedores hero */
---r-pill:999px;/* botones y badges — SIEMPRE pill */
+--r-sm: 8px; /* inputs, chips */
+--r-md: 12px; /* tarjetas, modales */
+--r-lg: 16px; /* contenedores hero */
+--r-pill: 999px; /* botones y badges — SIEMPRE pill */
 ```
 
 - **Grilla base 4 px.** Espaciados: 8/12/16/24/32/48/64.
@@ -528,54 +578,137 @@ Si el logo va solo, `alt="Evetev"`.
 ## 6. Componentes (copiar estos patrones)
 
 ### Botones
+
 ```css
-.btn{border-radius:999px;font-weight:600;font-size:.85rem;padding:11px 24px;
-     transition:.15s;border:none;cursor:pointer;font-family:'Inter',sans-serif}
-.btn-cta{background:var(--eve-coral);color:#fff}          /* primario — uno por vista */
-.btn-cta:hover{background:var(--eve-coral-hover)}
-.btn-sec{background:var(--eve-mezclado);color:#fff}       /* secundario */
-.btn-ghost{background:none;border:1px solid #D7E3F0;color:var(--eve-azul-noche);font-weight:500}
+.btn {
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 11px 24px;
+  transition: 0.15s;
+  border: none;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+}
+.btn-cta {
+  background: var(--eve-coral);
+  color: #fff;
+} /* primario — uno por vista */
+.btn-cta:hover {
+  background: var(--eve-coral-hover);
+}
+.btn-sec {
+  background: var(--eve-mezclado);
+  color: #fff;
+} /* secundario */
+.btn-ghost {
+  background: none;
+  border: 1px solid #d7e3f0;
+  color: var(--eve-azul-noche);
+  font-weight: 500;
+}
 ```
+
 Jerarquía: **coral** (acción principal) → **mezclado** (secundaria) → **ghost** (terciaria) → **enlace** (`color:var(--eve-electrico)`).
 
 ### Tarjetas
+
 ```css
-.card{background:#fff;border:1px solid var(--eve-linea);border-radius:14px;overflow:hidden;transition:.2s}
-.card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(10,37,64,.09)}
-.card .cuerpo{padding:18px 22px 22px}
-.card h3{font-size:.95rem;font-weight:600;margin-bottom:5px}
-.card p{font-size:.82rem;color:var(--eve-pizarra)}
+.card {
+  background: #fff;
+  border: 1px solid var(--eve-linea);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: 0.2s;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(10, 37, 64, 0.09);
+}
+.card .cuerpo {
+  padding: 18px 22px 22px;
+}
+.card h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.card p {
+  font-size: 0.82rem;
+  color: var(--eve-pizarra);
+}
 ```
+
 Variante minimalista (preferida en listados de servicios): sin fondo ni sombra, separadas por
 `border-right:1px solid var(--eve-linea)` en grilla.
 
 ### Navegación
+
 ```css
-nav{position:sticky;top:0;background:rgba(253,254,255,.95);backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--eve-linea);z-index:50}
-.nav-in{display:flex;align-items:center;justify-content:space-between;height:60px}
-.menu{display:flex;gap:26px;font-size:.85rem;color:var(--eve-pizarra)}
+nav {
+  position: sticky;
+  top: 0;
+  background: rgba(253, 254, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--eve-linea);
+  z-index: 50;
+}
+.nav-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.menu {
+  display: flex;
+  gap: 26px;
+  font-size: 0.85rem;
+  color: var(--eve-pizarra);
+}
 ```
+
 Móvil (≤760px): menú hamburguesa de 3 líneas (20×2 px, gap 4 px), panel desplegable a ancho completo.
 
 ### Formularios
+
 ```css
-label{display:block;font-size:.82rem;font-weight:500;margin-bottom:6px}
-input,select,textarea{width:100%;padding:11px 14px;border:1px solid #DCE7F2;border-radius:9px;
-       font-size:.88rem;font-family:'Inter';background:#fff;color:var(--eve-azul-noche)}
-input:focus{outline:2px solid var(--eve-electrico);border-color:transparent}
+label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #dce7f2;
+  border-radius: 9px;
+  font-size: 0.88rem;
+  font-family: "Inter";
+  background: #fff;
+  color: var(--eve-azul-noche);
+}
+input:focus {
+  outline: 2px solid var(--eve-electrico);
+  border-color: transparent;
+}
 ```
+
 **Checkbox dentro de caja** (patrón oficial): `gap:14px`, casilla `17×17px`, `accent-color:var(--eve-electrico)`,
 contenedor con `padding:13px 16px;border:1px solid #DCE7F2;border-radius:9px`.
 `label` real siempre asociado; errores ligados con `aria-describedby`.
 
 ### Footer
+
 Fondo `--eve-azul-noche`, texto `#B9CCE0`, títulos de columna en blanco mayúsculas 0.8rem.
 4 columnas (marca + 3 de enlaces) → 2 en tablet → 1 en móvil. Enlaces `:hover{color:var(--eve-cian)}`.
 Incluir: bloque de suscripción con botón coral, barra base con © y enlaces legales
 (Términos · Privacidad · **Tratamiento de datos** — obligatorio en Colombia), redes en círculos con borde.
 
 ### Otros componentes
+
 - **Tabs:** contenedor pill `background:var(--eve-tinte);padding:4px`, pestaña activa `background:#fff` + sombra sutil.
 - **Acordeón (FAQ):** `<details>`/`<summary>` con `border-bottom:1px solid var(--eve-linea)`, marcador `+`/`–` en azul eléctrico.
 - **Modal:** overlay `rgba(10,37,64,.35)`, caja `border-radius:16px;padding:34px;max-width:400px`, cierre con Esc y clic fuera.
@@ -588,10 +721,29 @@ Incluir: bloque de suscripción con botón coral, barra base con © y enlaces le
 ## 7. Responsive (obligatorio en todo artefacto web)
 
 ```css
-/* Tablet */   @media(max-width:1024px){ /* grillas 3 → 2 columnas */ }
-/* Móvil */    @media(max-width:760px){  /* 1 columna · hamburguesa · botones a ancho completo · padding 26px */ }
-/* Amplio */   @media(min-width:1440px){ .wrap{max-width:1160px} }
-/* Ultra-wide */ @media(min-width:1900px){ html{font-size:17.5px} .wrap{max-width:1280px} }
+/* Tablet */
+@media (max-width: 1024px) {
+  /* grillas 3 → 2 columnas */
+}
+/* Móvil */
+@media (max-width: 760px) {
+  /* 1 columna · hamburguesa · botones a ancho completo · padding 26px */
+}
+/* Amplio */
+@media (min-width: 1440px) {
+  .wrap {
+    max-width: 1160px;
+  }
+}
+/* Ultra-wide */
+@media (min-width: 1900px) {
+  html {
+    font-size: 17.5px;
+  }
+  .wrap {
+    max-width: 1280px;
+  }
+}
 ```
 
 Reglas: mobile-first · tipografía fluida con `clamp` · áreas táctiles ≥44 px · sin scroll horizontal ·
@@ -618,7 +770,7 @@ en ultra-wide el contenido **no se estira**, respira.
 - **Cercano pero profesional.** Tuteo ("tu negocio", "cuéntanos"), sin informalidad excesiva ni emojis en UI.
 - **Frases cortas.** Un titular = una idea.
 - PROHIBIDO: "revolucionario", "líderes del mercado", "soluciones 360", "sinergia", exclamaciones múltiples.
-- Ejemplos de la voz correcta: *"Pagos e inteligencia artificial, sin complicaciones"* · *"Tarifas transparentes. Tecnología propia. Cero letra menuda."* · *"Construido por ingenieros."*
+- Ejemplos de la voz correcta: _"Pagos e inteligencia artificial, sin complicaciones"_ · _"Tarifas transparentes. Tecnología propia. Cero letra menuda."_ · _"Construido por ingenieros."_
 
 **Dato de negocio:** EvePay cobra **un porcentaje por transacción más un componente fijo**, más suscripción
 mensual del software. NUNCA escribir "tarifa fija sin porcentaje" (información obsoleta).
@@ -647,30 +799,84 @@ Antes de devolver cualquier artefacto, confirma:
 ```html
 <!DOCTYPE html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evetev — [título]</title>
-<link rel="icon" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0A2540">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;color:var(--eve-azul-noche);background:#FDFEFF;line-height:1.65}
-h1,h2{font-family:'Baloo 2',sans-serif;font-weight:600}
-.wrap{max-width:1040px;margin:0 auto;padding:0 clamp(24px,4.5vw,32px)}
-.btn{border-radius:999px;font-weight:600;font-size:.85rem;padding:11px 24px;border:none;cursor:pointer;transition:.15s}
-.btn-cta{background:var(--eve-coral);color:#fff}
-.btn-cta:hover{background:var(--eve-coral-hover)}
-:focus-visible{outline:2px solid var(--eve-electrico);outline-offset:2px}
-@media(max-width:760px){.wrap{padding:0 26px}}
-@media(min-width:1900px){html{font-size:17.5px}.wrap{max-width:1280px}}
-</style>
-</head>
-<body>
-<!-- contenido -->
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evetev — [título]</title>
+    <link
+      rel="icon"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg"
+      type="image/svg+xml"
+    />
+    <meta name="theme-color" content="#0A2540" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        color: var(--eve-azul-noche);
+        background: #fdfeff;
+        line-height: 1.65;
+      }
+      h1,
+      h2 {
+        font-family: "Baloo 2", sans-serif;
+        font-weight: 600;
+      }
+      .wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 0 clamp(24px, 4.5vw, 32px);
+      }
+      .btn {
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 11px 24px;
+        border: none;
+        cursor: pointer;
+        transition: 0.15s;
+      }
+      .btn-cta {
+        background: var(--eve-coral);
+        color: #fff;
+      }
+      .btn-cta:hover {
+        background: var(--eve-coral-hover);
+      }
+      :focus-visible {
+        outline: 2px solid var(--eve-electrico);
+        outline-offset: 2px;
+      }
+      @media (max-width: 760px) {
+        .wrap {
+          padding: 0 26px;
+        }
+      }
+      @media (min-width: 1900px) {
+        html {
+          font-size: 17.5px;
+        }
+        .wrap {
+          max-width: 1280px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- contenido -->
+  </body>
 </html>
 ```
 
@@ -678,18 +884,18 @@ h1,h2{font-family:'Baloo 2',sans-serif;font-weight:600}
 
 ## 12. Referencia rápida (tabla de decisión)
 
-| Necesito… | Uso |
-|---|---|
-| Botón de acción principal | `--eve-coral`, pill, uno por vista |
-| Botón secundario | `--eve-mezclado` |
-| Enlace de texto | `--eve-electrico` |
-| Fondo de sección alterna | `--eve-tinte` o `--eve-hielo` |
-| Sección de peso / footer | `--eve-azul-noche` |
-| Identificar EvePay | azul eléctrico + unidad izquierda |
-| Identificar Eve Intelligence | violeta + unidad derecha |
-| Identificar Tienda | teal + unidad izquierda |
-| Titular grande | Baloo 2 600, `clamp(1.9rem,4.6vw,2.6rem)` |
-| Cifra o monto destacado | Baloo 2 700 |
-| Texto de interfaz | Inter 400/500 |
-| Ícono de producto | unidad SVG del CDN, 30–34 px |
-| Marca en encabezado | isotipo azul noche 32 px + "Evetev" en Baloo 600 |
+| Necesito…                    | Uso                                              |
+| ---------------------------- | ------------------------------------------------ |
+| Botón de acción principal    | `--eve-coral`, pill, uno por vista               |
+| Botón secundario             | `--eve-mezclado`                                 |
+| Enlace de texto              | `--eve-electrico`                                |
+| Fondo de sección alterna     | `--eve-tinte` o `--eve-hielo`                    |
+| Sección de peso / footer     | `--eve-azul-noche`                               |
+| Identificar EvePay           | azul eléctrico + unidad izquierda                |
+| Identificar Eve Intelligence | violeta + unidad derecha                         |
+| Identificar Tienda           | teal + unidad izquierda                          |
+| Titular grande               | Baloo 2 600, `clamp(1.9rem,4.6vw,2.6rem)`        |
+| Cifra o monto destacado      | Baloo 2 700                                      |
+| Texto de interfaz            | Inter 400/500                                    |
+| Ícono de producto            | unidad SVG del CDN, 30–34 px                     |
+| Marca en encabezado          | isotipo azul noche 32 px + "Evetev" en Baloo 600 |

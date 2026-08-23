@@ -1,4 +1,12 @@
-import { BadRequestException, Body, Controller, Get, NotFoundException, Post, UseGuards } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Post,
+  UseGuards
+} from "@nestjs/common";
 import { CrearMerchantInputSchema, type Merchant } from "@evetev/shared";
 import { currentContext } from "../../common/request-context";
 import { Role } from "../identidad/roles";

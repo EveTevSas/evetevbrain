@@ -19,5 +19,8 @@ export interface NuevoWebhook {
 export interface OutboundWebhooksRepository {
   buscarPorTenant(tenantId: string): Promise<WebhookConfig | null>;
   registrar(data: NuevoWebhook): Promise<WebhookConfig>;
-  actualizar(tenantId: string, data: Partial<Pick<WebhookConfig, "url" | "events" | "activa">>): Promise<WebhookConfig | null>;
+  actualizar(
+    tenantId: string,
+    data: Partial<Pick<WebhookConfig, "url" | "events" | "activa">>
+  ): Promise<WebhookConfig | null>;
 }
