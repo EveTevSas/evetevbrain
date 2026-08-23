@@ -1,0 +1,20 @@
+{
+  "name": "@evetev/eve-store",
+  "private": true,
+  "version": "0.1.0",
+  "evetev": {
+    "vertical": true
+  },
+  "scripts": {
+    "db:migrar": "psql -v ON_ERROR_STOP=1 -d \"$DATABASE_URL\" -f db/0001_tienda.sql",
+    "db:importar": "node scripts/importar.mjs",
+    "db:comprobar": "node scripts/comprobar-schema.mjs",
+    "lint": "echo \"(eve-store) sin lint todavía\" && exit 0",
+    "typecheck": "echo \"(eve-store) sin typecheck todavía\" && exit 0",
+    "test": "echo \"(eve-store) sin tests todavía\" && exit 0"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
+  }
+}
