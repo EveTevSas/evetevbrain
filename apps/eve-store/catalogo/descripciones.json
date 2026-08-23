@@ -1,0 +1,130 @@
+{
+  "nota": "Texto escrito por Evetev. El normalizador NO lo genera ni lo sobrescribe: lo lee de aquí y lo mezcla. Redactado a partir del texto truncado que traía el reporte de Mercado Libre, sin trasladar afirmaciones terapéuticas.",
+  "descripciones": {
+    "allen-nutrition-pre-workout-450-gr": {
+      "texto": "Mezcla en polvo para preparar una bebida energizante antes de entrenar. Cada porción aporta 3.000 mg de beta-alanina y 4.000 mg de L-citrulina, dos ingredientes asociados al rendimiento y a la recuperación muscular. No lleva azúcares añadidos, así que acompaña el entrenamiento sin sumar calorías vacías. Rinde 30 servicios.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "bio-essens-aceite-de-ajonjoli-natural-250-ml": {
+      "texto": "Aceite de ajonjolí de sabor ligero, pensado para vinagretas, ensaladas y salteados de cualquier tipo de alimento. Aporta vitaminas, minerales, ácidos grasos omega 6 y 9, los antioxidantes sésamol y sesamolina, y fosfolípidos. Su versión tostada resalta más el sabor a ajonjolí en las comidas.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": true
+    },
+    "bio-essens-aceite-de-coco-convencional-400-ml": {
+      "texto": "Aceite de coco obtenido por primer prensado en frío de la pulpa deshidratada, sin aditivos ni conservantes: el proceso conserva su aroma y su sabor característicos. Elaborado únicamente con Cocos nucifera, sin mezclas. Sirve igual en la cocina que en el cuidado de la piel y del cabello.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "bio-essens-aceite-de-coco-organico-400-ml": {
+      "texto": "Aceite de coco con certificación USDA Organic, lo que asegura que su cultivo estuvo libre de pesticidas y fertilizantes químicos. Es rico en ácido láurico, caprílico y mirístico. Se usa tanto para cocinar como en el cuidado de la piel y del cabello.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": true
+    },
+    "bio-essens-aceite-de-coco-sin-olor-ni-sabor-200-ml": {
+      "texto": "Aceite de coco 100 % puro, sin olor ni sabor. Al no aportar aroma propio, sirve para cocinar, hornear, freír y saltear sin alterar el sabor de la receta. Su pureza lo hace también apto para el cuidado de la piel y del cabello. Presentación en frasco práctico de uso diario.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "bio-essens-aceite-de-higuerilla-ricino-250-ml": {
+      "texto": "Aceite de higuerilla —ricino— prensado en frío, usado tradicionalmente para el crecimiento y el brillo de pestañas y cabello. Contiene cerca de un 89 % de ácido ricinoleico, que retiene agua y le da una alta capacidad hidratante y emoliente, útil en zonas de resequedad como talones y codos. Vegano y libre de crueldad animal.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": true
+    },
+    "bio-essens-aceite-de-higuerilla-ricino-50-ml": {
+      "texto": "Aceite de higuerilla —ricino— prensado en frío, en presentación pequeña con gotero, para el crecimiento de pestañas y cabello. El gotero permite dosificar la cantidad justa sobre pestañas, cejas o puntas, sin desperdicio. Es la misma fórmula de la presentación grande en formato de viaje.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "bio-essens-aceite-de-linaza-250-ml": {
+      "texto": "Aceite de linaza, rica fuente de omega 3 —cerca del 55 % del aceite— y de omega 6, en torno al 15 %. Es un aceite de uso alimentario que aporta ácidos grasos esenciales a la dieta diaria. Bio Essens lo presenta prensado y envasado en Colombia.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": true
+    },
+    "bio-essens-aceite-de-oliva-prensado-en-frio-250-ml": {
+      "texto": "Aceite de oliva extra virgen prensado en frío, envasado en botella de vidrio, con un nivel de acidez de 0,3 %. Pensado para ensaladas, aderezos, marinados y cocina de todos los días. Se recomienda guardarlo en un lugar fresco y seco, lejos de la luz directa.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "botanikalia-serum-fac-con-vitamina-c-30-ml": {
+      "texto": "Serum facial con vitamina C enriquecido con aceites y vitamina E, de textura ligera y agradable al tacto. Nutre, humecta y suaviza el rostro y el cuello. De día se aplica sobre el rostro limpio antes del protector solar o del maquillaje con filtro; de noche, tres gotas sobre la piel limpia.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-aceite-coco-almond-210-ml": {
+      "texto": "Mezcla 99,7 % natural de aceite de coco, almendras y soya, enriquecida con vitamina E. Humecta y suaviza la piel, se absorbe rápido y no deja sensación grasosa. Sirve también para nutrir y reparar las puntas del cabello y para remover el maquillaje. Apto para todo tipo de piel, de día y de noche.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-concentrado-acido-hialuronico-15-ml": {
+      "texto": "Concentrado para el contorno de ojos con ácido hialurónico, enriquecido con aceite de argán, aceite de aguacate y cafeína. Hidrata, nutre y suaviza la zona del contorno y el rostro. Formulado para atender líneas de expresión, arrugas, ojeras, fatiga e hinchazón. Se entrega en su caja original sellada de fábrica.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-espuma-limpiadora-hidratante": {
+      "texto": "Espuma limpiadora facial formulada con extractos naturales: limpia e hidrata en el mismo paso y deja la piel con sensación de frescura. Apta para piel normal a grasa y de uso tanto de día como de noche. Su textura en espuma hace la limpieza diaria más cómoda que un gel denso. Libre de parabenos.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-exfoliante-con-carbon-activado-charcoal-scrub-120-g": {
+      "texto": "Exfoliante facial con carbón activado, aloe vera, colágeno hidrolizado y micropartículas de coco. El carbón purifica y desintoxica los poros, el aloe actúa como astringente e hidratante, el colágeno acompaña la elasticidad y la textura de la piel, y las micropartículas de coco hacen la exfoliación. Se entrega sellado de fábrica.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-gel-hidratante-facial": {
+      "texto": "Gel hidratante facial con extractos naturales que hidrata en profundidad sin dejar sensación grasosa ni brillo. Contiene dos tipos de ácido hialurónico, ceramidas, colágeno y extractos de centella asiática, aloe vera y té verde, con propiedades calmantes, antioxidantes, emolientes y sebo-reguladoras. Para rostro, cuello y escote.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-gel-limpiador-120-ml": {
+      "texto": "Gel limpiador suave con extractos naturales, formulado para todo tipo de piel y especialmente pensado para pieles sensibles o con tendencia al acné. Remueve impurezas y suciedad sin resecar, limpia e hidrata a la vez y refuerza el sistema antioxidante de la piel.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-glow-tonic-tonico-despigmentante": {
+      "texto": "Tónico despigmentante con efecto peeling gracias a su concentración de ácidos AHA (alfahidroxiácidos) y BHA (betahidroxiácidos). Unifica el tono, ilumina y mejora la textura y la apariencia de la piel. Ayuda además a controlar el exceso de grasa y a minimizar el tamaño de los poros. Apto para todo tipo de piel.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-mist-hidratante-facial-120-ml": {
+      "texto": "Bruma facial hidratante con extractos naturales de rosas, hamamelis, aloe vera, pepino y caléndula. Hidrata y calma la piel, refresca, tonifica e ilumina, y afina la textura preparándola para el maquillaje. También funciona como capa selladora al cerrar la rutina. Libre de crueldad animal.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-serum-bio-retinol": {
+      "texto": "Serum antiedad con bio-retinol, ácido hialurónico, extracto de azucena, té verde, aceite de jojoba, aceite de oliva y vitamina E. Actúa como tratamiento antiedad previniendo el fotoenvejecimiento y aportando elasticidad y firmeza, y suaviza la apariencia de las líneas de expresión y las manchas. Se entrega en su caja original sellada.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-serum-fac-con-vitamina-c-30-ml": {
+      "texto": "Serum facial con una fórmula concentrada de vitamina C y antioxidantes. Reduce de forma progresiva la apariencia de arrugas y líneas de expresión, ayuda a unificar el tono, mejora la apariencia de las manchas y protege frente al daño de los radicales libres. Apto para todo tipo de piel, vegano y libre de crueldad animal.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-serum-hidratante-hidrapeptidos": {
+      "texto": "Serum facial hidratante de textura en gel, ligero, formulado para piel mixta y de uso tanto de día como de noche. Trabaja sobre la deshidratación y la firmeza del rostro. Es hipoalergénico y libre de parabenos, lo que lo hace apto para pieles sensibles o con tendencia a irritarse.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-serum-reparador-nocturno-30-ml": {
+      "texto": "Serum de noche formulado con aceites de lavanda, sándalo, jojoba, oliva, romero, girasol, semilla de uva, rosa mosqueta y soya, más vitamina E. Afina la textura de la piel reduciendo imperfecciones y suaviza la apariencia de las líneas de expresión. Se entrega en su caja original sellada.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-tonico-equilibrante-bha": {
+      "texto": "Tónico con BHA que limpia los poros y retira el exceso de grasa, mientras la niacinamida unifica el tono de la piel y le aporta luminosidad. Enriquecido con extractos naturales que ayudan a reparar, calmar e hidratar. Pensado para piel normal a grasa.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "dermanat-tonico-iluminador": {
+      "texto": "Tónico facial con niacinamida, apto para todo tipo de piel. Trabaja sobre la hiperpigmentación y el tono desigual: ilumina el rostro, mejora la apariencia de las manchas, suaviza la piel y mejora su textura. Se usa después de la limpieza, antes del serum y del hidratante.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    },
+    "ilovepinch-tinta-para-labios-color-rojo": {
+      "texto": "Tinta para labios y mejillas en color rojo, de acabado natural y resistente al agua. Pensada para la técnica «makeup-no-makeup»: se aplican tres pequeños trazos sobre la manzana de la mejilla y se difuminan con la punta de los dedos en movimientos circulares. Su diseño compacto permite llevarla a cualquier parte.",
+      "por_confirmar": true,
+      "sin_afirmaciones_terapeuticas": false
+    }
+  }
+}

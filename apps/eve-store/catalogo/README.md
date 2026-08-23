@@ -6,7 +6,9 @@ de una sola vez del reporte de Mercado Libre (23-ago-2026) hecha por
 debería tener que preguntarse de dónde salió un precio.
 
 ```bash
-python3 apps/eve-store/catalogo/normalizar.py ~/Documents/Agente-Mercadolibre
+python3 apps/eve-store/catalogo/normalizar.py \
+  ~/Documents/Agente-Mercadolibre \
+  "~/Documents/Inventario Mercadolibre/Inventario_Completo.csv"
 ```
 
 El script no se vuelve a correr en cada despliegue ni es un sincronizador. El
@@ -18,7 +20,7 @@ día que haya que releer Mercado Libre se hará contra su API.
 | -------------------------- | -------------------------------------------------------------- |
 | Publicaciones en el origen | 46                                                             |
 | Productos tras normalizar  | **25**                                                         |
-| Con existencias hoy        | 11                                                             |
+| Con existencias hoy        | 24                                                             |
 | Marcas                     | Bio Essens, Dermanat, Botanikalia, Ilovepinch, Allen Nutrition |
 
 Casi la mitad de las publicaciones eran duplicados: cada producto está publicado
@@ -51,19 +53,47 @@ marcas.
 **Precio como cadena numérica** (`"52000"`) con la moneda ISO aparte, que es lo
 que exige `schema.org/Offer`. Nunca `"$52.000"`.
 
-## Lo que falta, y no lo puede resolver un script
+## Las existencias salen del inventario físico, no de Mercado Libre
 
-**Las 25 descripciones.** Ninguna del origen es publicable, por dos motivos
-independientes: vienen **cortadas a 503 caracteres** —el reporte las trunca, el
-texto completo está en Mercado Libre— y **doce contienen texto y enlaces a la
-eshop de Mercado Libre**. Copiarlas sería publicar un anuncio de otro canal en
-nuestra propia tienda, y además dejar contenido duplicado.
+Es la corrección más importante del catálogo. Las publicaciones pausadas
+muestran cero aunque haya producto en bodega: con el stock de Mercado Libre solo
+**11 de 25** productos tenían existencias; con el inventario real son **24**.
+Publicar catorce fichas agotadas que no lo están le enseña a los motores un
+catálogo muerto.
 
-Por eso `descripcion` viene en `null` y el texto original queda aparte, en
-`descripcion_origen_truncada`, solo como material de partida. **Rellenarlas
-automáticamente sería inventar**, que es exactamente lo que prohíbe el prompt de
-auditoría que escribimos: cada descripción necesita al menos 150 caracteres
-propios y los escribe una persona.
+El único producto en cero es el Serum Radiante de Botanikalia, y por un motivo
+que hay que resolver: **el inventario trae una sola línea de «Serum Fac con
+Vitamina C» bajo Dermanat**, y en Mercado Libre son dos productos de marcas
+distintas. Las cinco unidades se asignaron al de Dermanat porque es el que
+coincide con el proveedor; si en realidad están repartidas, hay que corregirlo.
+
+## Las descripciones
+
+Las escribe una persona y viven en `descripciones.json`, **no** en
+`catalogo.json`. El normalizador las lee y las mezcla; nunca las genera ni las
+pisa. Si vivieran en el archivo generado, la siguiente ejecución borraría el
+trabajo de redacción, que es la parte cara.
+
+Las 25 actuales se redactaron a partir del texto truncado del origen y **todas
+están marcadas `descripcion_por_confirmar: true`**. Ninguna debería publicarse
+sin que alguien de la compañía la lea.
+
+Dos reglas al redactarlas:
+
+**No se repite el volumen en el texto.** El origen se contradice consigo mismo:
+dice 420 ml donde el producto es de 400, 500 ml donde es de 250, y 120 ml en un
+producto que se vende por 120 g. El contenido es un campo estructurado; meterlo
+además en la prosa multiplica por dos las oportunidades de mentir.
+
+**No se trasladaron afirmaciones terapéuticas.** El texto de Mercado Libre decía
+cosas como «alcaliniza la sangre», «potencia la memoria», «previene enfermedades
+cardiovasculares», «alivia dolores de artritis» o «propiedades antibacterianas,
+antimicóticas y antivirales». En Colombia eso es terreno del INVIMA, y el riesgo
+lo absorbía Mercado Libre — en nuestra propia tienda lo asumimos nosotros. Los
+cuatro productos afectados llevan un aviso: recuperarlas es una decisión
+regulatoria, no de redacción.
+
+## Lo que sigue sin resolver
 
 **Nueve productos sin contenido declarado.** En cosmética el volumen no es un
 adorno: es lo que permite comparar precio entre presentaciones.
@@ -71,14 +101,11 @@ adorno: es lo que permite comparar precio entre presentaciones.
 **Un volumen contradictorio.** El Aceite de Coco Orgánico figura como 400 ml en
 una publicación y 420 ml en otra. Hay que mirar el envase.
 
-**Tres productos con dos GTIN sin resolver**, distintos del caso de la Espuma.
+**Tres productos con dos GTIN sin decidir**, distintos del caso de la Espuma.
 
-**Las existencias no cuadran con el inventario.** El propio resumen del origen
-compara su stock con el de Mercado Libre y catorce productos no coinciden; el
-Glow Tonic difiere en veinte unidades. El plan exige que el feed refleje
-existencias con quince minutos de retraso como máximo, y esa ventana no sirve de
-nada si el número de partida ya está mal. **Antes de la fase 2 hay que decidir
-qué sistema manda sobre el inventario.**
+**Treinta de las 46 publicaciones están pausadas en Mercado Libre.** No afecta a
+Eve-Store, pero conviene saber si es deliberado antes de abrir dos canales con
+inventario compartido.
 
 ## Campo por campo
 

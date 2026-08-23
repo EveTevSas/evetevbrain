@@ -57,10 +57,35 @@ MARCA = {
     "Demanat": "Dermanat",  # error de tecleo en MCO1942228977
     "Botanikalia": "Botanikalia",
     "Ilovepinch": "Ilovepinch",
+    "I Love Pinch": "Ilovepinch",  # así lo escribe el inventario físico
     "Allen Nutrition": "Allen Nutrition",
 }
 
 VACIO = {"N/A", "N/E", "Sin asignar", ""}
+
+# Relleno de Mercado Libre que no puede viajar a nuestra tienda: promete la
+# protección al comprador de ML y enlaza a su eshop. Publicarlo sería anunciar
+# otro canal dentro de la nuestra.
+# Relleno de Mercado Libre que no puede viajar a nuestra tienda: promete la
+# protección al comprador de ML y enlaza a su eshop. Publicarlo sería anunciar
+# otro canal dentro de la nuestra.
+#
+# Cada patrón lleva SUS PROPIAS banderas. Aplicar re.S a todos hacía que el
+# `.*$` de las líneas sueltas cruzara los saltos y se comiera la descripción
+# entera: «Marca: Dermanat» borraba los 479 caracteres siguientes.
+RELLENO = [
+    (r"COMPRANDO EN MERCADOLIBRE.*?PRODUCTO\.", re.S | re.I),
+    (r"En nuestra eshop.*?casos\.", re.S | re.I),
+    (r"https?://\S+", re.I),
+    (r"^[ \t]*Marca:.*$", re.M | re.I),
+    (r"^[ \t]*Origen:[ \t]*Colombia[ \t]*$", re.M | re.I),
+]
+
+
+def sin_relleno(t):
+    for patron, banderas in RELLENO:
+        t = re.sub(patron, "", t, flags=banderas)
+    return re.sub(r"\n{3,}", "\n\n", t).strip()
 
 
 def limpio(v):
@@ -74,8 +99,28 @@ def slug(s):
     return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", s)).strip("-")
 
 
-def main(fuente):
+def main(fuente, inventario=None):
     fuente = Path(fuente).expanduser()
+    # Las descripciones las escribe una persona y viven aparte, en
+    # descripciones.json. Este script las LEE y las mezcla; nunca las genera ni
+    # las pisa. Si vivieran en catalogo.json, la siguiente ejecución borraría el
+    # trabajo de redacción — que es la parte cara.
+    escritas = {}
+    ruta_desc = Path(__file__).parent / "descripciones.json"
+    if ruta_desc.exists():
+        escritas = json.load(io.open(ruta_desc, encoding="utf-8"))["descripciones"]
+    # El inventario físico manda sobre el stock de Mercado Libre: las
+    # publicaciones pausadas muestran cero y en la bodega sí hay unidades.
+    fisico = {}
+    if inventario:
+        for r in csv.DictReader(io.open(Path(inventario).expanduser(), encoding="utf-8-sig")):
+            if not limpio(r.get("Nombre del Producto")):
+                continue
+            m = MARCA.get(r["Proveedor"].strip(), r["Proveedor"].strip())
+            c = limpio(r["Contenido"]).lower()
+            fisico[(m, re.sub(r"\s+", " ", r["Nombre del Producto"].strip().lower()), c)] = int(
+                r["Cantidad en Stock"] or 0
+            )
     pubs = list(
         csv.DictReader(
             io.open(
@@ -144,7 +189,7 @@ def main(fuente):
         activas = [p for p in lista if p["Estado ML"] == "Activa"]
         canon = max(activas or lista, key=lambda p: int(p["Unidades Vendidas ML"] or 0))
         a = attrs.get(canon["ID Publicación ML"], {})
-        stock = sum(int(p["Stock Disponible ML"] or 0) for p in lista)
+        stock_ml = sum(int(p["Stock Disponible ML"] or 0) for p in lista)
         gtins = sorted(
             {
                 c.strip()
@@ -165,9 +210,24 @@ def main(fuente):
         ]
         marca = MARCA.get(canon["Marca"].strip(), canon["Marca"].strip())
         contenido = vols[0] if vols else limpio(canon["Contenido CSV"])
-        desc = canon["Descripción Resumen"].strip()
+        # La publicación canónica es la que más vende, no necesariamente la que
+        # mejor describe: varias activas traen dos líneas y una pausada del mismo
+        # producto trae el texto entero. Para redactar se toma la más rica —y se
+        # mide DESPUÉS de quitar el relleno de Mercado Libre, porque si no gana
+        # la que más promoción de ML tiene, que es la que menos producto describe.
+        desc = max((sin_relleno(p["Descripción Resumen"]) for p in lista), key=len)
+
+        clave_inv = (marca, re.sub(r"\s+", " ", canon["Producto CSV"].strip().lower()),
+                     contenido.lower())
+        stock = fisico.get(clave_inv, stock_ml)
+        origen_stock = "inventario propio" if clave_inv in fisico else "Mercado Libre"
 
         avisos = []
+        if clave_inv not in fisico and fisico:
+            avisos.append(
+                "no hay fila para este producto en el inventario físico; las existencias "
+                "salen de Mercado Libre y pueden no ser reales"
+            )
         if len(gtins) > 1:
             avisos.append(
                 f"el origen trae {len(gtins)} GTIN para este producto ({', '.join(gtins)}); "
@@ -204,6 +264,8 @@ def main(fuente):
                 "precio": str(int(float(canon["Precio ML ($)"]))),
                 "moneda": "COP",
                 "existencias": stock,
+                "existencias_origen": origen_stock,
+                "existencias_mercadolibre": stock_ml,
                 "disponibilidad": "https://schema.org/InStock"
                 if stock > 0
                 else "https://schema.org/OutOfStock",
@@ -224,7 +286,7 @@ def main(fuente):
                     }.items()
                     if v
                 },
-                "descripcion": None,  # la escribe una persona; ver decisión 7
+                "descripcion": None,  # se rellena abajo desde descripciones.json
                 "descripcion_origen_truncada": desc or None,
                 "origen": {
                     "publicaciones_ml": [p["ID Publicación ML"] for p in lista],
@@ -234,6 +296,24 @@ def main(fuente):
                 "avisos": avisos,
             }
         )
+
+    for p in catalogo:
+        e = escritas.get(p["slug"])
+        if e:
+            p["descripcion"] = e["texto"]
+            p["descripcion_por_confirmar"] = e.get("por_confirmar", True)
+            p["avisos"] = [a for a in p["avisos"] if "descripción" not in a.lower()]
+            p["avisos"].insert(
+                0, "descripción redactada a partir del texto truncado del origen; POR CONFIRMAR antes de publicar"
+            )
+            if e.get("sin_afirmaciones_terapeuticas"):
+                p["avisos"].insert(
+                    1,
+                    "el texto del origen hacía afirmaciones terapéuticas (curativas o preventivas) que NO se "
+                    "trasladaron; recuperarlas es una decisión regulatoria, no de redacción",
+                )
+        else:
+            p["avisos"].insert(0, "sin descripción escrita; no debe publicarse")
 
     catalogo.sort(key=lambda p: (p["marca"], p["nombre"], p["contenido"]))
 
@@ -262,4 +342,9 @@ def main(fuente):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "~/Documents/Agente-Mercadolibre")
+    main(
+        sys.argv[1] if len(sys.argv) > 1 else "~/Documents/Agente-Mercadolibre",
+        sys.argv[2]
+        if len(sys.argv) > 2
+        else "~/Documents/Inventario Mercadolibre/Inventario_Completo.csv",
+    )
