@@ -10,3 +10,16 @@ packages/brand/**/*.svg
 # compilar` con un formato estable. Si Prettier lo reformatea, cada compilación
 # produce un diff de miles de líneas que no dice nada.
 apps/rag-assistant/indice/
+
+# Copias generadas de las landings: las escribe `pnpm landings:sync` como
+# `aviso + fuente`, y el CI comprueba que no se hayan desviado. Si Prettier
+# también opinara sobre ellas, los dos se pelearían por el mismo archivo: basta
+# con que formatee la copia de un modo distinto a como quedó la concatenación
+# para que `landings:check` se ponga en rojo sin que nadie haya tocado nada.
+# La fuente —packages/brand/landing/— sí la formatea, que es donde se edita.
+apps/eve-intelligence/base.css
+apps/eve-intelligence/formularios.js
+apps/eveconecta-landing/base.css
+apps/eveconecta-landing/formularios.js
+apps/evepay/base.css
+apps/evepay/formularios.js
