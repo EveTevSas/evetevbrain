@@ -1,0 +1,719 @@
+{
+  "generado_de": "reporte de Mercado Libre exportado el 23-ago-2026",
+  "publicaciones_origen": 46,
+  "productos": [
+    {
+      "slug": "allen-nutrition-pre-workout-450-gr",
+      "nombre": "Pre Workout",
+      "marca": "Allen Nutrition",
+      "gtin": "7709291016525",
+      "gtin_historicos": null,
+      "precio": "135000",
+      "moneda": "COP",
+      "existencias": 3,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "450 gr",
+      "imagen": "https://http2.mlstatic.com/D_984760-MCO110673922787_042026-O.jpg",
+      "atributos": {
+        "linea": "PRE WORKOUT"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "MEZCLA EN POLVO PARA BEBIDA ENERGIZANTE\nPre Workout de Allen Nutrition es una mezcla en polvo diseñada para preparar una bebida energizante que potencia tu rendimiento durante el entrenamiento.\n\nINGREDIENTES CLAVE\nContiene 3000 mg de Beta Alanina y 4000 mg de L-Citrulina por porción, ingredientes reconocidos por su apoyo en la resistencia y recuperación muscular.\n\nSIN AZÚCARES AÑADIDOS\nEste suplemento no contiene azúcares añadidos, ideal para quienes buscan controlar su ingesta calórica.\n\nSABOR ...",
+      "origen": {
+        "publicaciones_ml": ["MCO1908283427"],
+        "estado_ml": ["Activa"],
+        "vendidas_historico": 0
+      },
+      "avisos": ["descripción cortada por el origen a 503 caracteres; hay que reescribirla"]
+    },
+    {
+      "slug": "bio-essens-aceite-de-ajonjoli-natural-250-ml",
+      "nombre": "Aceite de Ajonjolí Natural",
+      "marca": "Bio Essens",
+      "gtin": "7709433819786",
+      "gtin_historicos": null,
+      "precio": "37500",
+      "moneda": "COP",
+      "existencias": 2,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "250 ml",
+      "imagen": "https://http2.mlstatic.com/D_833539-MCO108324748594_032026-O.jpg",
+      "atributos": {},
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nEn nuestra eshop https://eshops.mercadolibre.com.co/skincareorigenes puedes encontrar todos nuestros productos, agregas lo que quieras al carrito y al final pagas un solo envío en la mayoría de los casos.\n\nProducto: Aceite de Ajonjolí Natural\nMarca: BioEssens\nOrigen: Colombia\nContenido: 250ml\nDimensiones: 21.5cm alto x 4.5cm ancho x 4.5cm largo.\n\nC...",
+      "origen": {
+        "publicaciones_ml": ["MCO807390110", "MCO3801192604", "MCO1882978285"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 132
+      },
+      "avisos": [
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "bio-essens-aceite-de-coco-convencional-400-ml",
+      "nombre": "Aceite de Coco Convencional",
+      "marca": "Bio Essens",
+      "gtin": "7709109482528",
+      "gtin_historicos": ["7709109482580"],
+      "precio": "50500",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "400 ml",
+      "imagen": "https://http2.mlstatic.com/D_945311-MCO109118013433_032026-O.jpg",
+      "atributos": {},
+      "descripcion": null,
+      "descripcion_origen_truncada": "¡Lleva a tu cocina y a tu cuidado personal el poder natural del coco!\n\nEl Aceite de Coco Bioessens es un producto versátil de la más alta calidad, obtenido mediante el primer prensado en frío de la pulpa de coco deshidratada. Este proceso garantiza que el aceite conserve su aroma y sabor característicos, sin necesidad de aditivos ni conservantes.\n\n¿Por qué elegir Aceite de Coco Bioessens?\n\n100% Puro y Natural: Sin mezclas, elaborado únicamente con Cocos nucifera.\n\nPrensado en Frío: No es sometid...",
+      "origen": {
+        "publicaciones_ml": ["MCO1363912730"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 78
+      },
+      "avisos": [
+        "el origen trae 2 GTIN para este producto (7709109482528, 7709109482580); un producto tiene uno solo y hay que decidir cuál",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla"
+      ]
+    },
+    {
+      "slug": "bio-essens-aceite-de-coco-organico-400-ml",
+      "nombre": "Aceite de Coco Orgánico",
+      "marca": "Bio Essens",
+      "gtin": "7708344723748",
+      "gtin_historicos": ["7709109482504"],
+      "precio": "54000",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "400 ml",
+      "imagen": "https://http2.mlstatic.com/D_629708-MCO109117140895_032026-O.jpg",
+      "atributos": {},
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nEn nuestra eshop https://eshops.mercadolibre.com.co/skincareorigenes puedes encontrar todos nuestros productos, agregas lo que quieras al carrito y al final pagas un solo envío en la mayoría de los casos.\n\nProducto: Aceite de Coco Orgánico\nMarca: BioEssens\nOrigen: Colombia\nContenido: 400ml\n\nCARACTERÍSTICAS:\nNuestro aceite de coco orgánico trae cert...",
+      "origen": {
+        "publicaciones_ml": ["MCO807389965", "MCO3907564940"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 110
+      },
+      "avisos": [
+        "el origen trae 2 GTIN para este producto (7708344723748, 7709109482504); un producto tiene uno solo y hay que decidir cuál",
+        "volumen contradictorio entre publicaciones: 400 ml, 420 ml",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "bio-essens-aceite-de-coco-sin-olor-ni-sabor-200-ml",
+      "nombre": "Aceite de Coco sin olor ni sabor",
+      "marca": "Bio Essens",
+      "gtin": "7708344723410",
+      "gtin_historicos": null,
+      "precio": "26500",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "200 ml",
+      "imagen": "https://http2.mlstatic.com/D_954714-MLA109127281618_042026-O.jpg",
+      "atributos": {},
+      "descripcion": null,
+      "descripcion_origen_truncada": null,
+      "origen": {
+        "publicaciones_ml": ["MCO3763507682", "MCO3866531774"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 5
+      },
+      "avisos": ["sin descripción en el origen"]
+    },
+    {
+      "slug": "bio-essens-aceite-de-higuerilla-ricino-250-ml",
+      "nombre": "Aceite de Higuerilla (Ricino)",
+      "marca": "Bio Essens",
+      "gtin": "614143813771",
+      "gtin_historicos": null,
+      "precio": "44500",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "250 ml",
+      "imagen": "https://http2.mlstatic.com/D_640047-MCO48126081872_112021-O.jpg",
+      "atributos": {
+        "linea": "Aceites",
+        "tipo_de_piel": "Todo tipo de piel",
+        "momento": "Día/Noche",
+        "formato": "Aceite",
+        "libre_de_crueldad": "Sí",
+        "dermatologicamente_testeado": "Sí",
+        "vegano": "Sí"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nEn nuestra eshop https://eshops.mercadolibre.com.co/skincareorigenes puedes encontrar todos nuestros productos, agregas lo que quieras al carrito y al final pagas un solo envío en la mayoría de los casos.\n\nProducto: Aceite de Higuerilla - Ricino Prensado en Frio - Crecimiento y brillo de Pestañas y Cabello 250ML\nMarca: Bioessens\nOrigen: Colombia\nCo...",
+      "origen": {
+        "publicaciones_ml": ["MCO1226394694", "MCO1372880663"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 80
+      },
+      "avisos": [
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "bio-essens-aceite-de-higuerilla-ricino-50-ml",
+      "nombre": "Aceite de Higuerilla (Ricino)",
+      "marca": "Bio Essens",
+      "gtin": "7709433819724",
+      "gtin_historicos": null,
+      "precio": "30000",
+      "moneda": "COP",
+      "existencias": 1,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "50 ml",
+      "imagen": "https://http2.mlstatic.com/D_622322-MCO48029093802_102021-O.jpg",
+      "atributos": {
+        "linea": "Aceites",
+        "formato": "Aceite (frasco con gotero)"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nEn nuestra eshop https://eshops.mercadolibre.com.co/skincareorigenes puedes encontrar todos nuestros productos, agregas lo que quieras al carrito y al final pagas un solo envío en la mayoría de los casos.\n\nProducto: Aceite de Higuerilla - Ricino Prensado en Frio - Crecimiento de Pestañas y Cabello\nMarca: Bioessens\nOrigen: Colombia\nContenido: 50ml\n\n...",
+      "origen": {
+        "publicaciones_ml": ["MCO825228279"],
+        "estado_ml": ["Activa"],
+        "vendidas_historico": 489
+      },
+      "avisos": [
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "bio-essens-aceite-de-linaza-250-ml",
+      "nombre": "Aceite de Linaza",
+      "marca": "Bio Essens",
+      "gtin": "7709109482535",
+      "gtin_historicos": ["7707339750110"],
+      "precio": "39200",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "250 ml",
+      "imagen": "https://http2.mlstatic.com/D_669150-MCO109047780521_032026-O.jpg",
+      "atributos": {},
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nEn nuestra eshop https://eshops.mercadolibre.com.co/skincareorigenes puedes encontrar todos nuestros productos, agregas lo que quieras al carrito y al final pagas un solo envío en la mayoría de los casos.\n\nProducto: Aceite de Linaza\nMarca: BioEssens\nOrigen: Colombia\nContenido: 250ml\n\n\nCARACTERÍSTICAS:\nEste aceite contiene una alta fuente de omega 3...",
+      "origen": {
+        "publicaciones_ml": ["MCO807351884", "MCO1372895197"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 483
+      },
+      "avisos": [
+        "el origen trae 2 GTIN para este producto (7707339750110, 7709109482535); un producto tiene uno solo y hay que decidir cuál",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "bio-essens-aceite-de-oliva-prensado-en-frio-250-ml",
+      "nombre": "Aceite de Oliva Prensado en Frío",
+      "marca": "Bio Essens",
+      "gtin": "7708344723861",
+      "gtin_historicos": null,
+      "precio": "35500",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "250 ml",
+      "imagen": "https://http2.mlstatic.com/D_940065-MLA109965320507_042026-O.jpg",
+      "atributos": {},
+      "descripcion": null,
+      "descripcion_origen_truncada": null,
+      "origen": {
+        "publicaciones_ml": ["MCO3763555092", "MCO3866528648"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 3
+      },
+      "avisos": ["sin descripción en el origen"]
+    },
+    {
+      "slug": "botanikalia-serum-fac-con-vitamina-c-30-ml",
+      "nombre": "Serum Fac con Vitamina C",
+      "marca": "Botanikalia",
+      "gtin": "7708378497783",
+      "gtin_historicos": null,
+      "precio": "54800",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "30 ml",
+      "imagen": "https://http2.mlstatic.com/D_999866-MLU74052804324_012024-O.jpg",
+      "atributos": {
+        "tipo_de_piel": "Todo tipo de piel",
+        "beneficios": "Nutrir,Humectar,Suavizar,Calmar,Reparación,Cicatrizar,Prevenir envejecimiento,Proteger de contaminación",
+        "zona": "Rostro,Cuello"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "Serum Radiante Con Vitamina C\n\nDescripción\nEnriquecido con aceites y vitamina E, este serum está diseñado para nutrir, humectar y suavizar la piel. Ofrece propiedades calmantes, reparadoras y cicatrizantes, ayudando a prevenir los signos del envejecimiento y a proteger la piel de la contaminación diaria. Su textura es ligera y agradable al tacto.\n\nModo de uso: Durante el día, aplicar sobre el rostro limpio antes del protector solar o maquillaje con filtro solar. Por la noche, aplicar 3 gotas sob...",
+      "origen": {
+        "publicaciones_ml": ["MCO1336578487", "MCO2257697882"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 1
+      },
+      "avisos": [
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "el origen agrupaba este producto con otro bajo el ítem 19; se separaron por tener GTIN distinto — conviene confirmarlo"
+      ]
+    },
+    {
+      "slug": "dermanat-aceite-coco-almond-210-ml",
+      "nombre": "Aceite Coco / Almond",
+      "marca": "Dermanat",
+      "gtin": "614143622403",
+      "gtin_historicos": null,
+      "precio": "24500",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "210 ml",
+      "imagen": "https://http2.mlstatic.com/D_879023-MCO106710369902_022026-O.jpg",
+      "atributos": {
+        "linea": "Corporal",
+        "tipo_de_piel": "Todo tipo de piel",
+        "momento": "Día/Noche",
+        "formato": "Aceite"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nEn nuestra eshop https://eshops.mercadolibre.com.co/skincareorigenes puedes encontrar todos nuestros productos, agregas lo que quieras al carrito y al final pagas un solo envío en la mayoría de los casos.\n\nProducto: Aceite de coco y almendras con vitamina E\nMarca: Dermanat\nOrigen: Colombia\nContenido: 210ml\nDimensiones: 18.5cm altura x 4,5cm Radio e...",
+      "origen": {
+        "publicaciones_ml": ["MCO2104728224", "MCO616254753"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 491
+      },
+      "avisos": [
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "dermanat-concentrado-acido-hialuronico-15-ml",
+      "nombre": "Concentrado Ácido Hialurónico",
+      "marca": "Dermanat",
+      "gtin": "614143622465",
+      "gtin_historicos": null,
+      "precio": "50000",
+      "moneda": "COP",
+      "existencias": 20,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "15 ml",
+      "imagen": "https://http2.mlstatic.com/D_708982-MLA107472834797_022026-O.jpg",
+      "atributos": {
+        "linea": "Facial",
+        "tipo_de_piel": "Todo tipo de piel",
+        "beneficios": "Antiedad; Hidratante; Reducción de bolsas; Reducción de ojeras",
+        "zona": "Contorno de ojos",
+        "momento": "Día/Noche",
+        "formato": "Sérum"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "SERUM ANTIEDAD CON ÁCIDO HIALURÓNICO CONTORNO DE OJOS DERMANAT\n\nORIGEN: COLOMBIA\n\nCONTENIDO: 15ML\n\nSE ENTREGA EN SU CAJA ORIGINAL SELLADA DE FÁBRICA.\n\nCARACTERÍSTICAS:\nHIDRATA, NUTRE Y SUAVIZA LA ZONA DEL CONTORNO DE OJOS Y ROSTRO CON ESTE CONCENTRADO CON ÁCIDO HIALURÓNICO ENRIQUECIDO CON ACEITE DE ARGÁN, ACEITE DE AGUACATE Y CAFEÍNA. FORMULADO PARA ATACAR LOS PRINCIPALES SÍNTOMAS DE ENVEJECIMIENTO Y EL CANSANCIO COMO LA APARICIÓN DE LÍNEAS DE EXPRESIÓN, ARRUGAS, OJERAS, FATIGA E HINCHAZÓN. ATEN...",
+      "origen": {
+        "publicaciones_ml": ["MCO585357521", "MCO3924156990"],
+        "estado_ml": ["Activa"],
+        "vendidas_historico": 365
+      },
+      "avisos": ["descripción cortada por el origen a 503 caracteres; hay que reescribirla"]
+    },
+    {
+      "slug": "dermanat-espuma-limpiadora-hidratante",
+      "nombre": "Espuma Limpiadora Hidratante",
+      "marca": "Dermanat",
+      "gtin": "7709555831185",
+      "gtin_historicos": ["760412931223"],
+      "precio": "36500",
+      "moneda": "COP",
+      "existencias": 7,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "",
+      "imagen": "https://http2.mlstatic.com/D_945091-MLA110125580575_042026-O.jpg",
+      "atributos": {
+        "tipo_de_piel": "Normal a grasa",
+        "beneficios": "Limpieza",
+        "zona": "Rostro",
+        "momento": "Día/Noche",
+        "formato": "Espuma",
+        "dermatologicamente_testeado": "No"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "La 'Espuma Limpiadora Hidratante Normal A Grasa Día/Noche' es la solución ideal para quienes buscan una limpieza suave y refrescante. Formulada con extractos naturales, esta espuma no solo limpia, sino que también hidrata profundamente, dejando la piel con una sensación de frescura inigualable. Su uso es recomendado tanto en el día como en la noche, lo que la convierte en un aliado versátil en tu rutina de cuidado facial. Es apta para pieles normales a grasas, asegurando que cada aplicación se s...",
+      "origen": {
+        "publicaciones_ml": ["MCO1873122697", "MCO1873178165", "MCO3978632748", "MCO1436296217"],
+        "estado_ml": ["Activa", "Pausada"],
+        "vendidas_historico": 26
+      },
+      "avisos": [
+        "el origen trae 2 GTIN para este producto (760412931223, 7709555831185); un producto tiene uno solo y hay que decidir cuál",
+        "sin contenido declarado; es obligatorio en cosmética",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla"
+      ]
+    },
+    {
+      "slug": "dermanat-exfoliante-con-carbon-activado-charcoal-scrub-120-g",
+      "nombre": "Exfoliante con Carbón Activado (Charcoal Scrub)",
+      "marca": "Dermanat",
+      "gtin": "614143622472",
+      "gtin_historicos": null,
+      "precio": "27700",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "120 g",
+      "imagen": "https://http2.mlstatic.com/D_987379-MCO43614880418_092020-O.jpg",
+      "atributos": {
+        "linea": "Facial"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "EXFOLIANTE CON CARBÓN ACTIVADO, ALOE VERA, COLÁGENO Y MICROPARTÍCULAS DE COCO.\n\nDERMANAT\n\nOrigen: Colombia\n\nContenido: 120ml\n\nSe entrega sellado de fábrica.\nDimensiones del empaque: 16 cm alto - 3.8cm diámetro de la tapa – 6cm acho parte superior.\n\nIngredientes Activos:\n\n•\tCarbón Activado: actúa purificando y desintoxicando los poros\n•\tExtracto de Aloe Vera: como astringente e hidratante.\n•\tColágeno Hidrolizado: ayuda a mantener la elasticidad y textura de la piel.\n•\tMicropartículas de Coco: exf...",
+      "origen": {
+        "publicaciones_ml": ["MCO585380437"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 140
+      },
+      "avisos": ["descripción cortada por el origen a 503 caracteres; hay que reescribirla"]
+    },
+    {
+      "slug": "dermanat-gel-hidratante-facial",
+      "nombre": "Gel Hidratante Facial",
+      "marca": "Dermanat",
+      "gtin": "760412931209",
+      "gtin_historicos": null,
+      "precio": "49900",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "",
+      "imagen": "https://http2.mlstatic.com/D_934242-MLA107415901701_022026-O.jpg",
+      "atributos": {
+        "linea": "Facial",
+        "tipo_de_piel": "Todo tipo de piel",
+        "beneficios": "Antienvejecimiento,Antioxidante,Calmante,Emoliente,Hidratación,Sebo-regulador",
+        "zona": "Cuello,Escote,Rostro",
+        "formato": "Gel",
+        "dermatologicamente_testeado": "Sí"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "Producto: GEL HIDRATANTE FACIAL\nMarca: Dermanat\nOrigen: Colombia\nContenido: 50ml\n\nEste gel hidratante facial de Dermanat, formulado con extractos naturales, hidrata profundamente tu piel y protege la barrera cutánea sin dejar sensación grasosa ni brillo. Contiene dos tipos de Ácido Hialurónico, Ceramidas, Colágeno y extractos naturales de Centella Asiática, Aloe Vera y Té Verde. Estos ingredientes tienen propiedades calmantes, antioxidantes, emolientes y sebo reguladoras que combaten el daño cau...",
+      "origen": {
+        "publicaciones_ml": ["MCO1229874977", "MCO1371568959"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 63
+      },
+      "avisos": [
+        "sin contenido declarado; es obligatorio en cosmética",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla"
+      ]
+    },
+    {
+      "slug": "dermanat-gel-limpiador-120-ml",
+      "nombre": "Gel Limpiador",
+      "marca": "Dermanat",
+      "gtin": "760412930882",
+      "gtin_historicos": null,
+      "precio": "36000",
+      "moneda": "COP",
+      "existencias": 12,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "120 ml",
+      "imagen": "https://http2.mlstatic.com/D_869297-MCO46115796418_052021-O.jpg",
+      "atributos": {
+        "linea": "Facial",
+        "tipo_de_piel": "Todo tipo de piel",
+        "beneficios": "Anti-envejecimiento,Hidrata,Limpia",
+        "formato": "Gel"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nEn nuestra eshop https://eshops.mercadolibre.com.co/skincareorigenes puedes encontrar todos nuestros productos, agregas lo que quieras al carrito y al final pagas un solo envío en la mayoría de los casos.\n\nProducto: Gel Limpiador\nMarca: Dermanat\nOrigen: Colombia\nContenido: 120ml\nDimensiones: 15cm alto, 3,7 diámetro base.\n\nCARACTERÍSTICAS:\nGel limpi...",
+      "origen": {
+        "publicaciones_ml": ["MCO625854104", "MCO2104663286"],
+        "estado_ml": ["Activa"],
+        "vendidas_historico": 122
+      },
+      "avisos": [
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "dermanat-glow-tonic-tonico-despigmentante",
+      "nombre": "Glow Tonic - Tónico Despigmentante",
+      "marca": "Dermanat",
+      "gtin": "760412931087",
+      "gtin_historicos": null,
+      "precio": "57000",
+      "moneda": "COP",
+      "existencias": 8,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "",
+      "imagen": "https://http2.mlstatic.com/D_965430-MCO106710733196_022026-O.jpg",
+      "atributos": {
+        "linea": "Despigmentante",
+        "tipo_de_piel": "Todo tipo de piel",
+        "beneficios": "Ayuda a controlar el exceso de grasa,Despigmentante,Minimiza el tamaño de los poros,Unifica el tono de la piel",
+        "formato": "Tónico"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nProducto: Glow Tonic – Tónico despigmentante\nMarca: Dermanat\nOrigen: Colombia\nContenido: 30ml\nDimensiones: 11 cm x 3.7 x 3.7\n\nCARACTERÍSTICAS:\nTónico despigmentante con efecto “peeling” gracias a su concentración de ácidos AHA (alfahidroxiácidos) y BHA (betahidroxiacidos). Unifica el tono, ilumina y mejora la textura y apariencia de la piel.\nFórmul...",
+      "origen": {
+        "publicaciones_ml": ["MCO1190380054", "MCO603039516"],
+        "estado_ml": ["Activa"],
+        "vendidas_historico": 255
+      },
+      "avisos": [
+        "sin contenido declarado; es obligatorio en cosmética",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "dermanat-mist-hidratante-facial-120-ml",
+      "nombre": "Mist Hidratante Facial",
+      "marca": "Dermanat",
+      "gtin": "614143622519",
+      "gtin_historicos": null,
+      "precio": "29600",
+      "moneda": "COP",
+      "existencias": 2,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "120 ml",
+      "imagen": "https://http2.mlstatic.com/D_887722-MCO107483791853_022026-O.jpg",
+      "atributos": {
+        "linea": "Facial",
+        "tipo_de_piel": "Todo tipo de piel",
+        "beneficios": "Refresca,Hidrata,Tonifica,Sellante para el maquillaje",
+        "zona": "Rostro",
+        "momento": "Día/Noche",
+        "formato": "Bruma",
+        "dermatologicamente_testeado": "No"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "TÓNICO MIST HIDRATANTE FACIAL\nDERMANAT\n\nCruelty Free\n\nOrigen: Colombia\n\nContenido: 120ml\n\nSe entrega en su caja original sellada.\nDimensiones de la caja: 14cm x 5cm x 5cm\n\nIngredientes Activos:\nMezcla hidratante y refrescante de extractos naturales de Rosas, Hamamelis, Aloe vera, Pepino y Caléndula.\n\nCARACTERÍSTICAS: \n-Fórmula con extractos naturales que hidrata y calma la piel.\n-Refresca, tonifica e ilumina.\n-Afina la textura de la piel, preparándola para el maquillaje.\n-Actúa como una capa sel...",
+      "origen": {
+        "publicaciones_ml": ["MCO585376302"],
+        "estado_ml": ["Activa"],
+        "vendidas_historico": 78
+      },
+      "avisos": ["descripción cortada por el origen a 503 caracteres; hay que reescribirla"]
+    },
+    {
+      "slug": "dermanat-serum-bio-retinol",
+      "nombre": "Serum Bio Retinol",
+      "marca": "Dermanat",
+      "gtin": "760412930899",
+      "gtin_historicos": null,
+      "precio": "53000",
+      "moneda": "COP",
+      "existencias": 2,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "",
+      "imagen": "https://http2.mlstatic.com/D_866485-MCO106711725020_022026-O.jpg",
+      "atributos": {
+        "linea": "FACIAL"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "SERUM ANTIEDAD CON BIO-RETINOL\nORIGEN: COLOMBIA\nCONTENIDO: 30ML\nSE ENTREGA EN SU CAJA ORIGINAL SELLADA.\nDIMENSIONES DE LA CAJA: 11 CM XCM 3.7 X 3.7CM\n\nCOMPONENTES ACTIVOS:\nBIORETINOL + ÁCIDO HIALURÓNICO + EXTRACTO DE AZUCENA + TÉ VERDE + ACEITE DE JOJOBA+ ACEITE DE OLIVA + VITAMINA E\n\nCARACTERÍSTICAS: \n-ACTÚA COMO TRATAMIENTO ANTIEDAD, PREVINIENDO EL FOTO-ENVEJECIMIENTO Y APORTANDO ELASTICIDAD Y FIRMEZA.\n-REDUCE LA APARIENCIA DE LOS SIGNOS DEL ENVEJECIMIENTO Y SUAVIZA LÍNEAS DE EXPRESIÓN, MANCHA...",
+      "origen": {
+        "publicaciones_ml": ["MCO585359198"],
+        "estado_ml": ["Activa"],
+        "vendidas_historico": 162
+      },
+      "avisos": [
+        "sin contenido declarado; es obligatorio en cosmética",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla"
+      ]
+    },
+    {
+      "slug": "dermanat-serum-fac-con-vitamina-c-30-ml",
+      "nombre": "Serum Fac con Vitamina C",
+      "marca": "Dermanat",
+      "gtin": "614143622441",
+      "gtin_historicos": null,
+      "precio": "52000",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "30 ml",
+      "imagen": "https://http2.mlstatic.com/D_624290-MLA107472870117_022026-O.jpg",
+      "atributos": {
+        "linea": "Facial",
+        "tipo_de_piel": "Todo tipo de piel",
+        "beneficios": "Antiedad; unifica el tono de la piel; suaviza la piel; reduce manchas",
+        "zona": "Rostro",
+        "formato": "Sérum",
+        "libre_de_crueldad": "Sí",
+        "dermatologicamente_testeado": "Sí",
+        "vegano": "Sí"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "SERUM FACIAL CON VITAMINA C\nDERMANAT\nOrigen: Colombia\nContenido: 30ml\nSe entrega en su caja original sellada.\nDimensiones de la caja: 11 cm x 3.7 x 3.7\n\nCOMPONENTES PRINCIPALES:\n\nÁcido ascórbico, silicio orgánico, aceite de oliva\n\nCARACTERÍSTICAS: \n-Reduce visiblemente y de forma progresiva la aparición de arrugas y líneas de expresión.\n-Ayuda a unificar el tono de la piel, mejorando la apariencia de manchas y despigmentaciones.\n-Mejora la textura y luminosidad de la piel.\n-Aporta elasticidad y ...",
+      "origen": {
+        "publicaciones_ml": ["MCO585362577", "MCO1942228977"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 455
+      },
+      "avisos": [
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "el origen agrupaba este producto con otro bajo el ítem 19; se separaron por tener GTIN distinto — conviene confirmarlo"
+      ]
+    },
+    {
+      "slug": "dermanat-serum-hidratante-hidrapeptidos",
+      "nombre": "Serum Hidratante Hidrapeptidos",
+      "marca": "Dermanat",
+      "gtin": "760412931278",
+      "gtin_historicos": null,
+      "precio": "54000",
+      "moneda": "COP",
+      "existencias": 4,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "",
+      "imagen": "https://http2.mlstatic.com/D_817969-MCO106710734292_022026-O.jpg",
+      "atributos": {
+        "linea": "Facial",
+        "tipo_de_piel": "Mixta",
+        "beneficios": "Ayuda la piel a la deshidratación,Firmeza de la piel,Humecta",
+        "zona": "Rostro",
+        "momento": "Día/Noche",
+        "formato": "Sérum",
+        "dermatologicamente_testeado": "Sí"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nEn nuestra eshop https://eshops.mercadolibre.com.co/skincareorigenes puedes encontrar todos nuestros productos, agregas lo que quieras al carrito y al final pagas un solo envío en la mayoría de los casos.\n\nProducto: Serum Hidratante Hidrapéptidos\nMarca: Dermanat\nOrigen: Colombia\nContenido: 30ml\n\nCaracterísticas:\nSuero en textura gel, ligero e hidra...",
+      "origen": {
+        "publicaciones_ml": ["MCO2447290244", "MCO1336593839"],
+        "estado_ml": ["Activa"],
+        "vendidas_historico": 24
+      },
+      "avisos": [
+        "sin contenido declarado; es obligatorio en cosmética",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "dermanat-serum-reparador-nocturno-30-ml",
+      "nombre": "Serum Reparador Nocturno",
+      "marca": "Dermanat",
+      "gtin": "614143622458",
+      "gtin_historicos": null,
+      "precio": "52500",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "30 ml",
+      "imagen": "https://http2.mlstatic.com/D_821859-MCO107483469439_022026-O.jpg",
+      "atributos": {
+        "linea": "Facial"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "SERUM REPARADOR NOCTURNO\nDERMANAT\n\nOrigen: Colombia\n\nContenido: 30ml\n\nSe entrega en su caja original sellada.\n\nDimensiones de la caja: 11cm x 3.7cm x 3.7cm\n\nIngredientes Activos:\n-Aceite de Lavanda\n-Aceite de Sándalo\n-Aceite de Jojoba\n-Aceite de Oliva\n-Aceite de Romero\n-Aceite de Girasol\n-Aceite de Oliva\n-Aceite de Semilla de Uva\n-Aceite de Rosa Mosqueta\n-Aceite de Soya\n-Vitamina E\n\nCARACTERÍSTICAS: \n\n-Afina la textura de la piel reduciendo imperfecciones.\n-Reduce la apariencia de líneas de expr...",
+      "origen": {
+        "publicaciones_ml": ["MCO585374655"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 84
+      },
+      "avisos": ["descripción cortada por el origen a 503 caracteres; hay que reescribirla"]
+    },
+    {
+      "slug": "dermanat-tonico-equilibrante-bha",
+      "nombre": "Tónico Equilibrante BHA",
+      "marca": "Dermanat",
+      "gtin": "760412931230",
+      "gtin_historicos": null,
+      "precio": "42000",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "",
+      "imagen": "https://http2.mlstatic.com/D_648561-MCO71605771787_092023-O.jpg",
+      "atributos": {
+        "linea": "Facial",
+        "tipo_de_piel": "Normal a grasa",
+        "beneficios": "Controla,Limpia,Regula",
+        "zona": "Rostro",
+        "formato": "Tónico"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "Descripción\nCOMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nEn nuestra eshop https://eshops.mercadolibre.com.co/skincareorigenes puedes encontrar todos nuestros productos, agregas lo que quieras al carrito y al final pagas un solo envío en la mayoría de los casos.\n\nProducto: Tónico Equilibrante\nMarca: Dermanat\nOrigen: Colombia\nContenido: 60ml\n\n\nCaracterísticas\n\nTónico Equilibrante que limpia a p...",
+      "origen": {
+        "publicaciones_ml": ["MCO1336544877", "MCO4156169560"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 25
+      },
+      "avisos": [
+        "sin contenido declarado; es obligatorio en cosmética",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "dermanat-tonico-iluminador",
+      "nombre": "Tónico Iluminador",
+      "marca": "Dermanat",
+      "gtin": "760412931186",
+      "gtin_historicos": null,
+      "precio": "51000",
+      "moneda": "COP",
+      "existencias": 0,
+      "disponibilidad": "https://schema.org/OutOfStock",
+      "contenido": "",
+      "imagen": "https://http2.mlstatic.com/D_989089-MCO50334247934_062022-O.jpg",
+      "atributos": {
+        "linea": "Facial",
+        "tipo_de_piel": "Todo tipo de piel",
+        "beneficios": "Combate la hiperpigmentación,ilumina_el_rostro,mejora_la_textura_de_la_piel,mejora_manchas,mejora tono de piel desigual,suaviza_la_piel",
+        "zona": "Rostro",
+        "formato": "Tónico",
+        "dermatologicamente_testeado": "Sí",
+        "vegano": "No"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nEn nuestra eshop https://eshops.mercadolibre.com.co/skincareorigenes puedes encontrar todos nuestros productos, agregas lo que quieras al carrito y al final pagas un solo envío en la mayoría de los casos.\n\nProducto: TÓNICO ILUMINADOR CON NIACINAMIDA\nMarca: Dermanat\nOrigen: Colombia\nContenido: 60ml\n\nCaracterísticas:\n\nMezcla poderosa de ingredientes ...",
+      "origen": {
+        "publicaciones_ml": ["MCO909895475", "MCO2200348528"],
+        "estado_ml": ["Pausada"],
+        "vendidas_historico": 118
+      },
+      "avisos": [
+        "sin contenido declarado; es obligatorio en cosmética",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    },
+    {
+      "slug": "ilovepinch-tinta-para-labios-color-rojo",
+      "nombre": "Tinta para Labios Color Rojo",
+      "marca": "Ilovepinch",
+      "gtin": "7709903583292",
+      "gtin_historicos": null,
+      "precio": "29900",
+      "moneda": "COP",
+      "existencias": 4,
+      "disponibilidad": "https://schema.org/InStock",
+      "contenido": "",
+      "imagen": "https://http2.mlstatic.com/D_742115-MLA107472439567_022026-O.jpg",
+      "atributos": {
+        "linea": "MAQUILLAJE"
+      },
+      "descripcion": null,
+      "descripcion_origen_truncada": "COMPRANDO EN MERCADOLIBRE TU DINERO ESTÁ SEGURO Y CUANDO COMPRAS ALGO NO SE ENTREGA EL PAGO AL VENDEDOR HASTA QUE RECIBAS A CONFORMIDAD TU PRODUCTO.\n\nProducto: Tinta para labios y mejillas\nMarca: ILOVEPINCH\nOrigen: Colombia\nContenido: 5 ml / 0.10 oz\nDimensiones de la caja: 10.5 x 2.3 x 2.3 \n\nColor rojo ¡Look natural, a prueba de agua, besos, y shots! \n\nTu mejor aliado para la técnica “makeup-no-makeup”.\n\nMaquillaje portable para cualquier ocasión: ¡Su diseño “petit” te permite llevarlo a todas p...",
+      "origen": {
+        "publicaciones_ml": ["MCO595969290", "MCO1372932559"],
+        "estado_ml": ["Activa"],
+        "vendidas_historico": 580
+      },
+      "avisos": [
+        "sin contenido declarado; es obligatorio en cosmética",
+        "descripción cortada por el origen a 503 caracteres; hay que reescribirla",
+        "la descripción del origen lleva texto y enlaces de Mercado Libre; no es publicable"
+      ]
+    }
+  ]
+}
