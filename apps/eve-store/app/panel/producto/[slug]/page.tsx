@@ -29,8 +29,8 @@ async function resolverAviso(datos: FormData) {
     .update(aviso)
     .set({ resueltoEn: new Date(), resueltoPor: "panel" })
     .where(eq(aviso.id, id));
-  revalidatePath(`/producto/${slug}`);
-  revalidatePath("/");
+  revalidatePath(`/panel/producto/${slug}`);
+  revalidatePath("/panel");
 }
 
 async function guardar(datos: FormData) {
@@ -56,8 +56,8 @@ async function guardar(datos: FormData) {
       descripcionPorConfirmar: datos.get("confirmada") !== "on"
     })
     .where(eq(producto.slug, slug));
-  revalidatePath(`/producto/${slug}`);
-  revalidatePath("/");
+  revalidatePath(`/panel/producto/${slug}`);
+  revalidatePath("/panel");
 }
 
 async function publicar(datos: FormData) {
@@ -70,8 +70,8 @@ async function publicar(datos: FormData) {
     // El disparador rechazó la publicación. No hace falta hacer nada: la
     // pantalla ya muestra los avisos pendientes, que son el motivo exacto.
   }
-  revalidatePath(`/producto/${slug}`);
-  revalidatePath("/");
+  revalidatePath(`/panel/producto/${slug}`);
+  revalidatePath("/panel");
 }
 
 export default async function Ficha({ params }: { params: Promise<{ slug: string }> }) {
@@ -91,7 +91,7 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
-      <a href="/" className="text-sm text-pizarra hover:underline">
+      <a href="/panel" className="text-sm text-pizarra hover:underline">
         ← Cola de trabajo
       </a>
 

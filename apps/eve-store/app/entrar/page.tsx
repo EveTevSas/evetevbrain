@@ -19,7 +19,7 @@ async function entrar(datos: FormData) {
   // El mensaje no distingue entre «no existe» y «clave incorrecta»: decirlo
   // convierte el formulario en un comprobador de qué correos tienen cuenta.
   if (error) redirect("/entrar?error=1");
-  redirect("/");
+  redirect("/panel");
 }
 
 export default async function Entrar({

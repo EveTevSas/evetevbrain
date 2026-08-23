@@ -42,7 +42,7 @@ async function crear(datos: FormData) {
   const existencias = Number(datos.get("existencias") ?? 0);
 
   if (!nombre || !marca || !Number.isInteger(precio) || precio <= 0) {
-    redirect("/nuevo?error=faltan");
+    redirect("/panel/nuevo?error=faltan");
   }
 
   const base = babosa(`${marca}-${nombre}-${contenido}`);
@@ -55,7 +55,7 @@ async function crear(datos: FormData) {
     .from(producto)
     .where(sql`slug = ${slug}`);
   if (choque) {
-    if (!contenido) redirect("/nuevo?error=choque");
+    if (!contenido) redirect("/panel/nuevo?error=choque");
     slug = `${base}-2`;
   }
 
@@ -74,8 +74,8 @@ async function crear(datos: FormData) {
       descripcionPorConfirmar: true
     });
 
-  revalidatePath("/");
-  redirect(`/producto/${slug}`);
+  revalidatePath("/panel");
+  redirect(`/panel/producto/${slug}`);
 }
 
 export default async function Nuevo({
@@ -87,7 +87,7 @@ export default async function Nuevo({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
-      <a href="/" className="text-sm text-pizarra hover:underline">
+      <a href="/panel" className="text-sm text-pizarra hover:underline">
         ← Cola de trabajo
       </a>
 

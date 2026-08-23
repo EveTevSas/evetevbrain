@@ -9,7 +9,10 @@ import { NextResponse, type NextRequest } from "next/server";
  * la hace el layout, que sí tiene base de datos. Dos capas, cada una donde
  * puede hacer su trabajo.
  */
-const PUBLICAS = ["/entrar", "/sin-acceso"];
+/* Solo `/panel` está cerrado. La raíz queda libre porque ahí irá la tienda, que
+   por definición es pública — y que llegue antes la restricción que la tienda
+   sería fácil de olvidar el día que se monte. */
+const PROTEGIDO = "/panel";
 
 export async function middleware(peticion: NextRequest) {
   let respuesta = NextResponse.next({ request: peticion });
@@ -35,7 +38,7 @@ export async function middleware(peticion: NextRequest) {
   } = await cliente.auth.getUser();
 
   const ruta = peticion.nextUrl.pathname;
-  if (!user && !PUBLICAS.some((p) => ruta.startsWith(p))) {
+  if (!user && ruta.startsWith(PROTEGIDO)) {
     const destino = peticion.nextUrl.clone();
     destino.pathname = "/entrar";
     return NextResponse.redirect(destino);

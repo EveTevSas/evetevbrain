@@ -73,7 +73,7 @@ export default async function Panel() {
           <h1 className="font-display text-3xl font-bold">Qué falta para abrir</h1>
         </div>
         <a
-          href="/nuevo"
+          href="/panel/nuevo"
           className="rounded-lg border border-linea bg-white px-4 py-2 text-sm font-semibold hover:bg-hielo"
         >
           Nuevo producto
@@ -109,7 +109,7 @@ export default async function Panel() {
           >
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <h3 className="font-semibold">
-                <a href={`/producto/${f.slug}`} className="hover:underline">
+                <a href={`/panel/producto/${f.slug}`} className="hover:underline">
                   {f.nombre}
                   {f.contenido ? (
                     <span className="font-normal text-pizarra"> · {f.contenido}</span>
