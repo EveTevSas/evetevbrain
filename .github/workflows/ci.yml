@@ -32,6 +32,39 @@ jobs:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: bash scripts/ci-areas.sh
 
+  # ── Formato: una sola forma de escribir, en todo el repo ───────────────────
+  # No lleva `if` de área a propósito. El formato es del repositorio entero, no
+  # de una app: un cambio en docs/ puede desalinear igual que uno en apps/, y
+  # gatearlo por área es justo cómo se acumuló la deriva que motivó este job —78
+  # archivos, hasta el punto de que reformatear una landing convertía un cambio
+  # de cuatro reglas en 1.693 líneas de diff y enterraba lo que de verdad
+  # cambiaba.
+  #
+  # Que sea rápido importa: sin `if`, corre en cada PR. Por eso instala solo la
+  # raíz (--filter . ) en vez del workspace entero, que es donde está el tiempo.
+  formato:
+    name: Formato
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Instalar solo la raíz
+        run: pnpm install --frozen-lockfile --filter .
+
+      # Prettier también valida la sintaxis al parsear. La primera vez que se
+      # corrió sobre todo el repo encontró una llave suelta en el CSS de
+      # eve-intelligence que llevaba ahí desde que se creó la landing: los
+      # navegadores se la tragaban en silencio y nadie la había visto.
+      - name: Formato al día
+        run: pnpm format:check
+
   # ── Landings: una sola fuente de lo compartido ─────────────────────────────
   # Las landings son estáticas y cada una lleva su copia de base.css y de
   # formularios.js, generadas desde packages/brand/landing/. Este job impide
@@ -161,7 +194,7 @@ jobs:
     name: CI completo
     runs-on: ubuntu-latest
     if: always()
-    needs: [cambios, landings, shared, api, eveconecta]
+    needs: [cambios, formato, landings, shared, api, eveconecta]
     steps:
       - name: Comprobar los resultados
         run: |

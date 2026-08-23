@@ -98,6 +98,8 @@ Esto es lo que evita que tres personas produzcan tres estilos distintos.
 ### Calidad automática (obligatoria en CI)
 
 - **ESLint + Prettier** con config compartida en el repo. Formateo automático; no se discute estilo en reviews.
+- **El formato lo exige el CI**, con `pnpm format:check` sobre el repo entero en cada PR. El job no está gateado por área a propósito: el formato es del repositorio, no de una app. Antes de existir se habían desviado 78 archivos, y la factura la pagaba quien tocara uno de ellos —reformatear una landing convertía un cambio de cuatro reglas en 1.693 líneas de diff—. Para arreglarlo: `pnpm format`.
+- **Lo generado no lo formatea Prettier.** Está en `.prettierignore`: el índice compilado de Fluxi y las copias de `base.css`/`formularios.js` de las landings. Cada archivo tiene un solo dueño; dos herramientas opinando sobre el mismo archivo es un rojo que aparece sin que nadie haya tocado nada.
 - **TypeScript en modo `strict`.** Nada de `any` sin comentario justificando.
 - El pipeline corre `lint`, `typecheck` y `test`. Rojo = no mergea.
 
