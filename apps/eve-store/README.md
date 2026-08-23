@@ -13,16 +13,28 @@ Las credenciales **no están en el repo y no deben pasar por un chat**: quedarí
 escritas en la transcripción. Se ponen a mano en `apps/eve-store/.env.local`,
 que `.gitignore` ya cubre (`.env.*`).
 
+El archivo lleva tres marcadores `PEGA_AQUI_…` y, encima de cada uno, de dónde
+sale su valor. En corto:
+
+| Variable                               | Dónde está en Supabase                                                                                                                        |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                         | Botón **Connect** (arriba a la derecha) → **Direct connection** u **ORMs**. Hay que sustituir `[YOUR-PASSWORD]` por la contraseña de la base. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | **Project Settings → API Keys**, la llave `publishable`. Es pública por diseño: viaja al navegador.                                           |
+| `SUPABASE_SECRET_KEY`                  | Misma pantalla, la llave `secret`. Hay que pulsar **Reveal**. Da acceso total saltándose las reglas de seguridad.                             |
+
+**La contraseña de la base no se puede consultar**: solo se muestra al crear el
+proyecto. Si no la tienes, se genera otra en _Project Settings → Database →
+Reset database password_, y hay que actualizarla donde ya estuviera en uso.
+
+Para saber si quedó bien, sin enseñarle las llaves a nadie:
+
 ```bash
-cp apps/eve-store/.env.example apps/eve-store/.env.local
-# y se rellenan los valores desde el panel de Supabase o desde Vercel
+pnpm --filter @evetev/eve-store creds
 ```
 
-El proyecto de Supabase es el mismo que usa EveConecta —`jmwiydbyngqbaieheeeh`,
-declarado en `apps/eveconecta/supabase/config.toml`—, con un schema aparte. Los
-valores salen de **Supabase → Project Settings → API** y de **Database → Connection
-string**; si ya están en Vercel, `vercel env pull apps/eve-store/.env.local` los
-baja sin teclearlos.
+Comprueba el formato, avisa si las dos llaves están cambiadas entre sí o si
+quedó el `[YOUR-PASSWORD]` sin sustituir, y termina conectándose de verdad. No
+imprime ni un carácter de ninguna llave.
 
 Después:
 
@@ -30,6 +42,7 @@ Después:
 pnpm --filter @evetev/eve-store db:migrar     # crea el schema `tienda`
 pnpm --filter @evetev/eve-store db:importar   # carga los 25 productos
 pnpm --filter @evetev/eve-store db:comprobar  # confronta base y aplicación
+pnpm --filter @evetev/eve-store dev           # el panel, en el puerto 3003
 ```
 
 ## Qué hay hoy
