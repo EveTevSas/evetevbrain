@@ -39,7 +39,16 @@ const ESPERADO = {
     "creado_en",
     "actualizado_en"
   ],
-  aviso: ["id", "producto_slug", "texto", "bloqueante", "resuelto_en", "resuelto_por", "creado_en"],
+  aviso: [
+    "id",
+    "producto_slug",
+    "texto",
+    "bloqueante",
+    "origen",
+    "resuelto_en",
+    "resuelto_por",
+    "creado_en"
+  ],
   origen_publicacion: ["producto_slug", "publicacion_ml", "estado_ml", "vendidas"]
 };
 

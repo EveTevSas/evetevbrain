@@ -53,10 +53,19 @@ for (const p of productos) {
   else actualizados++;
 
   // Los avisos ya resueltos no vuelven: resolverlos es trabajo hecho.
+  //
+  // Los que la base sabe deducir del dato —descripción corta o sin confirmar,
+  // falta de contenido, GTIN o imagen— NO bloquean desde aquí: los genera y los
+  // retira `tienda.recalcular_avisos` según el estado real del producto. Si
+  // bloquearan por duplicado, arreglar el dato dejaría el producto igual de
+  // bloqueado y la única salida sería marcar como resuelto algo que sigue mal.
+  // Lo que el importador aporta y la base no puede saber es la PROCEDENCIA, y
+  // eso se conserva como información, no como puerta.
+  const DEDUCIBLE = /POR CONFIRMAR|contenido declarado|150 caracteres/i;
   for (const texto of p.avisos ?? []) {
     await sql`
-      insert into tienda.aviso (producto_slug, texto)
-      select ${p.slug}, ${texto}
+      insert into tienda.aviso (producto_slug, texto, bloqueante)
+      select ${p.slug}, ${texto}, ${!DEDUCIBLE.test(texto)}
        where not exists (
          select 1 from tienda.aviso
           where producto_slug = ${p.slug} and texto = ${texto})`;

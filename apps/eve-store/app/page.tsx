@@ -72,6 +72,12 @@ export default async function Panel() {
           </p>
           <h1 className="font-display text-3xl font-bold">Qué falta para abrir</h1>
         </div>
+        <a
+          href="/nuevo"
+          className="rounded-lg border border-linea bg-white px-4 py-2 text-sm font-semibold hover:bg-hielo"
+        >
+          Nuevo producto
+        </a>
         <p className="max-w-md text-sm text-pizarra">
           El catálogo ya está importado. Lo que falta es revisarlo: ningún producto sale a la tienda
           con avisos bloqueantes sin resolver.
