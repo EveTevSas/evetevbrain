@@ -55,6 +55,33 @@ pnpm --filter @evetev/eve-store dev           # el panel, en el puerto 3003
 | `scripts/importar.mjs`         | Carga el JSON en la base. Idempotente.                        |
 | `scripts/comprobar-schema.mjs` | Falla si la base y la aplicación se separan.                  |
 
+## Quién puede entrar
+
+El panel exige sesión **y** estar en `tienda.administrador`. Son dos cosas
+distintas y hace falta comprobar las dos, porque **`auth.users` es compartido
+con EveConecta**: en esta misma base hay tres residentes de conjuntos
+residenciales. Si el panel se conformara con «¿inició sesión?», un residente
+podría entrar a cambiar los precios de la tienda.
+
+La comprobación está repartida en dos capas por una razón práctica:
+
+- **El middleware** exige sesión. Corre en el borde, sin conexión a Postgres, así
+  que no puede consultar la lista de acceso.
+- **El layout de `(panel)`** exige ser administrador. Sí tiene base de datos, y
+  al envolver todas las páginas del grupo, **una página nueva nace protegida**
+  sin que nadie tenga que acordarse.
+
+No se usa RLS, y no es un olvido: el panel se conecta como `postgres`, dueño de
+las tablas, así que se salta las políticas de fila. Una RLS aquí daría una
+sensación de seguridad que no se sostiene.
+
+Para dar acceso a alguien más:
+
+```sql
+insert into tienda.administrador (usuario_id, correo)
+select id, email from auth.users where email = 'quien@evetev.com';
+```
+
 ## Tres cosas que conviene no deshacer
 
 **El import no pisa el trabajo del panel.** Volver a correrlo refresca lo que
