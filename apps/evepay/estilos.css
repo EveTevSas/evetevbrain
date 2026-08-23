@@ -9,8 +9,14 @@
 /* ── CTA de la portada ───────────────────────────────────────────────────
    El único botón coral de la página (C2). base.css no lo posiciona, así que
    aquí le damos aire y su nota honesta debajo. */
-.cta{margin-top:34px}
-.cta-nota{margin-top:12px;font-size:.84rem;color:var(--eve-azul-noche)}
+.cta {
+  margin-top: 34px;
+}
+.cta-nota {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  color: var(--eve-azul-noche);
+}
 
 /* ── Ilustración de portada ──────────────────────────────────────────────
    El flujo del pago en trazo técnico, de fondo: la tarjeta del cliente, el
@@ -28,24 +34,24 @@
    - Va como ::after y NO como background de .portada, porque base.css ya usa
      ese background para el degradado radial.
    - `contain` y bajada un tramo bajo la base: el dibujo tiene el andén en su
-     borde inferior y antes iba apoyado en la base de la sección, pero así su
-     zona central caía justo detrás del bloque de texto y la máscara se lo
-     comía. Se baja con calc(100% + …) —de 28 a 60 px según viewport— para que
-     respire por debajo del texto; el recorte lo absorbe el andén, que es la
-     franja vacía del dibujo, y el overflow:hidden lo deja limpio.
-   - El hueco radial deja el texto limpio. Aquí es más alto que en EveConecta
-     porque el bloque de texto también lo es: titular, entrada, botón y nota
-     ocupan del 20 % al 63 % de la sección, medido en el navegador, frente al
-     20–37 % de allá. Un hueco copiado tal cual dejaba las cornisas cruzando
-     la entrada.
-   - La sección gana padding inferior por lo mismo que allá: sin él el dibujo
-     queda pegado al texto y no hay calle que mirar.
+     borde inferior y apoyarlo exacto en la base dejaba su zona central pegada
+     al texto. Se baja con calc(100% + …) —de 28 a 60 px según viewport— para
+     que respire; el recorte lo absorbe el andén, que es la franja vacía del
+     dibujo, y el overflow:hidden lo deja limpio.
+   - El bloque gana padding inferior por lo mismo que en EveConecta: sin él el
+     dibujo queda pegado al texto y no hay calle que mirar.
    - Luz en dos elementos y en los extremos —el chip de la tarjeta y el dial de
-     la caja—, porque el hueco se come el centro. Aquí eso cuadra solo: los dos
-     extremos del flujo son el que paga y el que recibe, que es justo lo que la
-     escena quiere que se mire. Medido sobre esta imagen: el chip cae al 10-15 %
-     del ancho y el dial al 85-90 %.
-   - La URL es del CDN de marca (T1), fijada a @1. Es un WebP de 199 KB, 2048 px
+     la caja—: los dos extremos del flujo son el que paga y el que recibe, que
+     es justo lo que la escena quiere que se mire. Medido sobre esta imagen: el
+     chip cae al 10-15 % del ancho y el dial al 85-90 %. Se eligieron así
+     cuando había un hueco radial que se comía el centro; ese hueco ya no está,
+     y la composición sigue funcionando porque los extremos nunca dependieron
+     de él.
+   - La URL es del CDN de marca (T1), fijada a @1, que sirve mientras esta
+     imagen no se sustituya: jsDelivr la manda con siete días de caché, así que
+     cambiar los bytes sin cambiar la ruta deja a los visitantes viendo la
+     anterior. Si algún día se reemplaza, hay que fijar la versión exacta como
+     hace apps/eve-intelligence/estilos.css. Es un WebP de 199 KB, 2048 px
      de ancho, con el blanco convertido a transparencia. El alfa no es opcional:
      con `contain` sobra ancho a los lados, y un fondo blanco opaco dibujaría el
      rectángulo de la imagen recortado contra el degradado.
@@ -55,18 +61,72 @@
      minimalismo. La norma vigente (§4 del manual) es generar siempre y arreglar
      el peso en la conversión. El SVG sigue publicado, porque lo publicado no se
      retira, pero no se usa. */
-.portada{position:relative;isolation:isolate;overflow:hidden;
-  padding-bottom:clamp(150px,20vw,260px)}
-.portada::after{
-  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.2;
-  background:url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/pasarela-de-pago.webp")
-    center calc(100% + clamp(28px,4.5vw,60px))/contain no-repeat;
-  /* Con prefijo -webkit- además del estándar: sin él Safari ignora la máscara
-     y el dibujo vuelve a cruzar el titular. */
-  -webkit-mask-image:radial-gradient(52% 46% at 50% 40%,
-     transparent 0 46%,#000 100%);
-          mask-image:radial-gradient(52% 46% at 50% 40%,
-     transparent 0 46%,#000 100%)}
+.portada {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+/* El dibujo cuelga de `.portada-cuerpo`, no de la sección, y esa es toda la
+   diferencia: **empieza donde empieza el texto de entrada, por debajo del
+   titular**. Antes cubría la portada entera y pasaba por detrás del titular,
+   que es lo primero que se lee y lo que menos conviene ensuciar.
+
+   Por qué un envoltorio y no un `top` en la sección: el titular no mide lo
+   mismo en todas partes —dos líneas en escritorio, cuatro en móvil—, así que
+   cualquier número fijo acierta en una pantalla y falla en las demás. Un
+   elemento que empieza donde tiene que empezar acierta en todas sin medir nada.
+
+   El ancho sí se escapa del `wrap`: el bloque de texto está limitado a la
+   columna de lectura y el dibujo tiene que respirar de borde a borde, de ahí
+   el `100vw` centrado. Lo recorta el `overflow:hidden` de la sección, que
+   además evita la barra horizontal que causaría el ancho del scrollbar.
+
+   El respiro inferior se le quita a la sección y se le da a este bloque
+   (`.portada{padding-bottom:0}`). Si se dejaran los dos, el dibujo terminaría
+   donde termina el bloque y quedaría una franja de blanco hasta el borde de la
+   sección: el dibujo flotando en lugar de apoyarse en el corte. */
+/* El respiro subió de clamp(150px,20vw,260px) al colgar el dibujo de aquí. No
+   es estética: `contain` encaja la escena en la caja, y esta caja es más baja
+   que la sección entera, así que la altura pasó a mandar y el dibujo se
+   quedaba al 71 % del ancho cuando antes llegaba de borde a borde. Con este
+   respiro vuelve al 85 %. No se sube más porque la ilustración es de 2048×1013
+   —proporción 2,02, bastante más cuadrada que el 2,37 de Eve Intelligence— y
+   llevarla al ancho completo pediría 442 px de respiro: la portada crecería
+   250 px y el resto de la página se iría a empujones hacia abajo. */
+.portada-cuerpo {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: clamp(200px, 27vw, 350px);
+}
+.portada-cuerpo::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.2;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/pasarela-de-pago.webp")
+    center calc(100% + clamp(28px, 4.5vw, 60px)) / contain no-repeat;
+}
+
+/* **Ya no hay hueco radial.** Existía por una sola razón —«el dibujo se abre en
+   el centro en vez de pasar por detrás del texto»— y el envoltorio resuelve eso
+   mismo de forma directa: el dibujo ya no llega al titular, así que no hay nada
+   que abrir. Mantenerlo era peor que quitarlo, porque el hueco estaba calibrado
+   contra la altura de la sección entera (50% 40% de ella) y al colgar de un
+   bloque más bajo caía sobre el centro del dibujo, justo lo que la escena
+   quiere que se mire.
+
+   Quitarlo es seguro en cuanto a contraste porque todo el texto de portada va
+   en azul noche, no en pizarra: las medidas de más abajo se tomaron con el
+   dibujo compuesto al 20% detrás **y sin contar con el hueco**, y ninguna baja
+   de 11:1. Si algún día el texto volviera a pizarra, habría que devolver el
+   hueco o quitar el dibujo. */
 
 /* El texto de portada va en azul noche, no en el gris pizarra de base.css:
    con el dibujo detrás, --eve-pizarra no llega al 4,5 que exige AA. Medido en
@@ -77,90 +137,239 @@
      la nota, en pizarra .............. 3,40:1   ← no pasa
      la nota, en azul noche ........... 11,10:1
 
-   La nota cae más abajo que el resto y ahí el hueco de la máscara ya se cerró,
-   así que tiene el dibujo entero detrás. Por eso su color se cambió arriba, en
-   su propia regla, en vez de sobrescribirlo aquí. EveConecta ya la tenía en
-   azul noche; esta landing se había quedado en pizarra.
+   Las tres bandas tienen el dibujo entero detrás —antes solo la nota, que caía
+   por debajo del hueco; ahora que el hueco no está, todas—. Por eso el color de
+   la nota se cambió arriba, en su propia regla, en vez de sobrescribirlo aquí.
+   EveConecta ya la tenía en azul noche; esta landing se había quedado en
+   pizarra. Las cifras de arriba se midieron sin contar con el hueco, así que
+   siguen valiendo tal cual.
    Si algún día se quita la ilustración, las dos pueden volver a --eve-pizarra. */
-.portada .entrada{color:var(--eve-azul-noche)}
+.portada .entrada {
+  color: var(--eve-azul-noche);
+}
 
 /* ── Secciones ───────────────────────────────────────────────────────────
    Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
    claro, un solo bloque de peso (el de la demo) en azul noche. */
-.seccion{padding:84px 0}
-.seccion-tinte{background:var(--eve-tinte)}
-.seccion h2{font-size:clamp(1.3rem,2.6vw,1.6rem);text-align:center}
-.seccion-intro{margin:12px auto 0;max-width:560px;text-align:center;
-  color:var(--eve-pizarra);font-size:clamp(.9rem,1.6vw,.98rem)}
+.seccion {
+  padding: 84px 0;
+}
+.seccion-tinte {
+  background: var(--eve-tinte);
+}
+.seccion h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+  text-align: center;
+}
+.seccion-intro {
+  margin: 12px auto 0;
+  max-width: 560px;
+  text-align: center;
+  color: var(--eve-pizarra);
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
 
 /* ── Pasos numerados ─────────────────────────────────────────────────────
    El número es Baloo 700 (cifra protagonista, §3) en un círculo hielo;
    nunca coral: aquí no hay acción que pedir. */
-.pasos{list-style:none;margin:48px auto 0;padding:0;max-width:960px;
-  display:grid;grid-template-columns:repeat(3,1fr);gap:36px}
-.paso{text-align:center}
-.paso-num{display:flex;align-items:center;justify-content:center;
-  width:44px;height:44px;margin:0 auto 16px;border-radius:999px;
-  background:var(--eve-hielo);color:var(--eve-mezclado);
-  font-family:'Baloo 2',system-ui,sans-serif;font-weight:700;font-size:1.1rem}
-.paso-num.sm{width:30px;height:30px;margin:0;font-size:.86rem;flex:none}
-.paso h3{font-size:1.02rem;font-weight:600}
-.paso p{margin-top:8px;font-size:.9rem;color:var(--eve-pizarra)}
+.pasos {
+  list-style: none;
+  margin: 48px auto 0;
+  padding: 0;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+}
+.paso {
+  text-align: center;
+}
+.paso-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: var(--eve-hielo);
+  color: var(--eve-mezclado);
+  font-family: "Baloo 2", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.paso-num.sm {
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  font-size: 0.86rem;
+  flex: none;
+}
+.paso h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.paso p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
 
 /* ── Características ─────────────────────────────────────────────────────
    Variante minimalista del manual (§6): sin fondo ni sombra, la jerarquía la
    da el espacio y el icono de producto teñido con --p. */
-.caracts-grid{list-style:none;margin:48px auto 0;padding:0;max-width:980px;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:40px 36px}
-.caract .p-ico{margin-bottom:16px}
-.caract h3{font-size:1.02rem;font-weight:600}
-.caract p{margin-top:8px;font-size:.9rem;color:var(--eve-pizarra)}
+.caracts-grid {
+  list-style: none;
+  margin: 48px auto 0;
+  padding: 0;
+  max-width: 980px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px 36px;
+}
+.caract .p-ico {
+  margin-bottom: 16px;
+}
+.caract h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.caract p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
 
 /* ── Link de pago por WhatsApp ───────────────────────────────────────────
    Dos columnas en escritorio (texto / pasos), una en móvil. Los pasos usan
    el mismo círculo numerado, en tamaño pequeño, alineado al texto. */
-.wa{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
-  max-width:980px;margin:0 auto}
-.wa-texto h2{text-align:left}
-.wa-texto p{margin-top:16px;color:var(--eve-pizarra);
-  font-size:clamp(.9rem,1.6vw,.98rem)}
-.wa-pasos{list-style:none;margin:0;padding:0;display:grid;gap:18px}
-.wa-pasos li{display:flex;align-items:flex-start;gap:14px}
-.wa-pasos p{font-size:.93rem;padding-top:3px}
+.wa {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.wa-texto h2 {
+  text-align: left;
+}
+.wa-texto p {
+  margin-top: 16px;
+  color: var(--eve-pizarra);
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+.wa-pasos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+.wa-pasos li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.wa-pasos p {
+  font-size: 0.93rem;
+  padding-top: 3px;
+}
 
 /* ── Demo (formulario sobre azul noche) ──────────────────────────────────
    El bloque de peso de la página (§2). El formulario va en tarjeta blanca
    para conservar el patrón de formularios del manual (§6) con su contraste. */
-.demo{padding:88px 0;background:var(--eve-azul-noche);color:#fff}
-.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;
-  align-items:start;max-width:980px;margin:0 auto}
-.demo-texto h2{font-size:clamp(1.3rem,2.6vw,1.6rem)}
-.demo-texto > p{margin-top:14px;color:#B9CCE0;font-size:clamp(.9rem,1.6vw,.98rem)}
-.demo-puntos{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:14px}
-.demo-puntos li{position:relative;padding-left:26px;font-size:.9rem;color:#B9CCE0}
-.demo-puntos li::before{content:"";position:absolute;left:2px;top:8px;
-  width:8px;height:8px;border-radius:999px;background:var(--eve-cian)}
+.demo {
+  padding: 88px 0;
+  background: var(--eve-azul-noche);
+  color: #fff;
+}
+.demo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.demo-texto h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+}
+.demo-texto > p {
+  margin-top: 14px;
+  color: #b9cce0;
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+.demo-puntos {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.demo-puntos li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 0.9rem;
+  color: #b9cce0;
+}
+.demo-puntos li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--eve-cian);
+}
 
 /* La tarjeta del formulario (.demo-form, .demo-legal) vive en base.css: la
    comparten las dos landings. Aquí solo queda la sección que la rodea. */
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
-@media (max-width:1024px){
-  .wa{gap:40px}
-  .demo-grid{gap:40px}
+@media (max-width: 1024px) {
+  .wa {
+    gap: 40px;
+  }
+  .demo-grid {
+    gap: 40px;
+  }
 }
 
-@media (max-width:760px){
-  .seccion{padding:64px 0}
-  .pasos{grid-template-columns:1fr;gap:32px;max-width:420px}
-  .wa{grid-template-columns:1fr;gap:32px}
-  .wa-texto h2{text-align:center}
-  .wa-pasos{max-width:420px;margin:0 auto}
-  .demo{padding:64px 0}
-  .demo-grid{grid-template-columns:1fr}
+@media (max-width: 760px) {
+  .seccion {
+    padding: 64px 0;
+  }
+  .pasos {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    max-width: 420px;
+  }
+  .wa {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .wa-texto h2 {
+    text-align: center;
+  }
+  .wa-pasos {
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .demo {
+    padding: 64px 0;
+  }
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-@media (min-width:1440px){
-  .pasos,.caracts-grid,.wa,.demo-grid{max-width:1060px}
+@media (min-width: 1440px) {
+  .pasos,
+  .caracts-grid,
+  .wa,
+  .demo-grid {
+    max-width: 1060px;
+  }
 }
