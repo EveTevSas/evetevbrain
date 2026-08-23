@@ -1,0 +1,25 @@
+# robots.txt de evetev.com
+#
+# Todo abierto, que es lo que ya había —no existía este archivo, y no existir
+# equivale a permitirlo todo—. Se escribe para dejar dicho el sitemap y para
+# que la decisión sobre los rastreadores de IA sea explícita y revisable, en
+# vez de un efecto secundario de no haber puesto nada.
+#
+# Sobre los rastreadores de IA: hay dos familias y conviene no confundirlas.
+#   · ENTRENAMIENTO — GPTBot, Google-Extended, Applebot-Extended, CCBot,
+#     anthropic-ai. Alimentan el modelo. Permitirlos hace que la compañía se
+#     conozca sin necesidad de que nadie recupere la página.
+#   · RECUPERACIÓN — OAI-SearchBot, ChatGPT-User, PerplexityBot, Claude-User.
+#     Leen la página en el momento de responder. Bloquear estos es salir de
+#     las respuestas de IA; es uno de los errores más caros y casi siempre se
+#     comete sin querer, al copiar una lista de bloqueo pensada para el otro
+#     grupo.
+#
+# Hoy se permiten los dos, que es coherente con ser una compañía IA first y
+# querer que los motores sepan quiénes somos. Si algún día se quiere cerrar el
+# entrenamiento sin perder visibilidad, se bloquea SOLO la primera familia.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://evetev.com/sitemap.xml
