@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Tokens de marca. El teal es el color de línea de Eve-Store: era el de la
+   Tienda antes de que saliera de la web, y sigue sin usarlo ninguna otra
+   vertical. El coral queda reservado a la acción (regla C2). */
+@theme {
+  --color-noche: #0a2540;
+  --color-pizarra: #64748b;
+  --color-hielo: #eaf2fb;
+  --color-tinte: #f4f9fd;
+  --color-linea: #e2ecf7;
+  --color-teal: #3baec2;
+  --color-coral: #ee3d22;
+  --color-alerta: #b06405;
+  --color-exito: #15803d;
+  --font-display: "Baloo 2", system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-tinte);
+  color: var(--color-noche);
+}

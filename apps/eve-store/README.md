@@ -65,7 +65,7 @@ nada se ponga en rojo.
 
 ## Estado
 
-**24 de 25 productos están bloqueados** por 43 avisos pendientes: descripciones
+**Los 25 productos están bloqueados** por 45 avisos pendientes: descripciones
 sin confirmar, contenido ausente, GTIN en conflicto. No es un defecto del
 import — es la cola de trabajo que el panel de administración existe para
 resolver, y su pantalla de inicio.

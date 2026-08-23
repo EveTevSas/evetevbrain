@@ -60,5 +60,5 @@ puede hacer fallar no comprueba nada.
 
 ## Estado del catálogo al importar
 
-**24 de los 25 productos están bloqueados** por 43 avisos pendientes. Eso no es
+**Los 25 productos están bloqueados** por 45 avisos pendientes. Eso no es
 un defecto del import: es el trabajo real que el panel existe para resolver.

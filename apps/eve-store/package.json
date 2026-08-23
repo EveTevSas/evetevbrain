@@ -10,11 +10,26 @@
     "db:importar": "node scripts/importar.mjs",
     "db:comprobar": "node scripts/comprobar-schema.mjs",
     "lint": "echo \"(eve-store) sin lint todavía\" && exit 0",
-    "typecheck": "echo \"(eve-store) sin typecheck todavía\" && exit 0",
-    "test": "echo \"(eve-store) sin tests todavía\" && exit 0"
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"(eve-store) sin tests todavía\" && exit 0",
+    "dev": "next dev --port 3003",
+    "build": "next build",
+    "start": "next start --port 3003"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
-    "postgres": "^3.4.9"
+    "postgres": "^3.4.9",
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3",
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/postcss": "4.3.3",
+    "postcss": "8.5.19"
   }
 }
