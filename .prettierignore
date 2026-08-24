@@ -23,3 +23,7 @@ apps/eveconecta-landing/base.css
 apps/eveconecta-landing/formularios.js
 apps/evepay/base.css
 apps/evepay/formularios.js
+
+# Enlace del CLI de Vercel al proyecto. Lo genera `vercel link` y lo ignora git;
+# que Prettier lo reformatee no rompe nada, pero es ruido en cada ejecución.
+.vercel/
