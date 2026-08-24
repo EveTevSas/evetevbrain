@@ -21,7 +21,7 @@
     "test": "echo \"(shared) sin tests todavía\" && exit 0"
   },
   "dependencies": {
-    "zod": "^3.24.1"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@evetev/config": "workspace:*",
