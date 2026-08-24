@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { administrador } from "@/lib/supabase";
+
+export const metadata: Metadata = { title: "Panel · Eve-Store" };
 
 /* El guardia de autorización del panel.
  *
