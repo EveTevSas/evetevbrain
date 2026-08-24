@@ -42,7 +42,7 @@ Después:
 pnpm --filter @evetev/eve-store db:migrar     # crea el schema `tienda`
 pnpm --filter @evetev/eve-store db:importar   # carga los 25 productos
 pnpm --filter @evetev/eve-store db:comprobar  # confronta base y aplicación
-pnpm --filter @evetev/eve-store dev           # el panel, en el puerto 3003
+pnpm --filter @evetev/eve-store dev           # arranca en el puerto 3003; el panel está en /panel
 ```
 
 ## Qué hay hoy
@@ -54,6 +54,8 @@ pnpm --filter @evetev/eve-store dev           # el panel, en el puerto 3003
 | `db/schema.ts`                 | El mismo schema en Drizzle, para darle tipos a la app.        |
 | `scripts/importar.mjs`         | Carga el JSON en la base. Idempotente.                        |
 | `scripts/comprobar-schema.mjs` | Falla si la base y la aplicación se separan.                  |
+| `app/page.tsx`                 | La raíz: reservada para la tienda, hoy una portada mínima.    |
+| `app/panel/`                   | El panel de administración, tras autenticación.               |
 
 ## Quién puede entrar
 
@@ -67,7 +69,7 @@ La comprobación está repartida en dos capas por una razón práctica:
 
 - **El middleware** exige sesión. Corre en el borde, sin conexión a Postgres, así
   que no puede consultar la lista de acceso.
-- **El layout de `(panel)`** exige ser administrador. Sí tiene base de datos, y
+- **El layout de `/panel`** exige ser administrador. Sí tiene base de datos, y
   al envolver todas las páginas del grupo, **una página nueva nace protegida**
   sin que nadie tenga que acordarse.
 
@@ -105,7 +107,13 @@ nada se ponga en rojo.
 
 ## Estado
 
-**Los 25 productos están bloqueados** por 45 avisos pendientes: descripciones
-sin confirmar, contenido ausente, GTIN en conflicto. No es un defecto del
-import — es la cola de trabajo que el panel de administración existe para
-resolver, y su pantalla de inicio.
+**Los 25 productos están bloqueados** por 78 avisos pendientes: 33 los deduce la
+base del propio dato —descripción corta o sin confirmar, sin contenido, sin
+GTIN, sin imagen— y se retiran solos al arreglarlo; los otros 45 vienen del
+origen y necesitan una decisión. No es un defecto del import: es la cola de
+trabajo que el panel existe para resolver, y su pantalla de inicio.
+
+Desplegado en <https://eve-store-one.vercel.app> — la raíz es pública y `/panel`
+pide sesión. **Falta conectar el repositorio en Vercel y poner el Root Directory
+en `apps/eve-store`**; hasta entonces los despliegues son manuales
+(`npx vercel deploy --prod` desde esta carpeta).
