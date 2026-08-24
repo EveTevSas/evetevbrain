@@ -3,8 +3,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Panel · Eve-Store",
-  // El panel no se indexa: es una herramienta interna, no una página.
+  title: "Eve-Store",
+  /* Nada se indexa todavía: la tienda no existe y el panel es una herramienta
+     interna. El día que la tienda ocupe la raíz, este `noindex` tiene que
+     bajar al layout de `/panel` — dejarlo aquí haría invisible la tienda, que
+     es justo el fallo que auditamos en las landings en agosto. */
   robots: { index: false, follow: false }
 };
 
