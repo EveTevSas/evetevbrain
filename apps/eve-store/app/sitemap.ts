@@ -8,7 +8,7 @@ import { urlBase } from "@/lib/url";
  * `lastmod` sale de `actualizado_en`, no de la fecha de generación: una fecha
  * que se mueve sola en cada despliegue deja de ser una señal y los buscadores
  * aprenden a ignorarla. */
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = urlBase();

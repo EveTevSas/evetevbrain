@@ -4,6 +4,29 @@ import { sql } from "drizzle-orm";
 
 import { db } from "@/db/connection";
 
+/* Ninguna consulta de la tienda puede colgar la página.
+ *
+ * Sin esto, un socket muerto —el que deja Vercel al congelar una instancia—
+ * hace que `postgres.js` espere para siempre y Vercel mate la petición a los
+ * 300 segundos. El visitante ve una pestaña cargando sin fin y ningún error en
+ * ninguna parte, que es exactamente lo que pasó.
+ *
+ * Con plazo, el fallo se convierte en un error normal: en las páginas con ISR,
+ * Next sirve la copia anterior y nadie se entera. */
+async function conPlazo<T>(promesa: Promise<T>, ms = 8000): Promise<T> {
+  let reloj: ReturnType<typeof setTimeout>;
+  try {
+    return await Promise.race([
+      promesa,
+      new Promise<never>((_, rechazar) => {
+        reloj = setTimeout(() => rechazar(new Error(`La consulta superó ${ms} ms`)), ms);
+      })
+    ]);
+  } finally {
+    clearTimeout(reloj!);
+  }
+}
+
 /** Lo que la tienda pública necesita de un producto. */
 export type Publico = {
   slug: string;
@@ -26,20 +49,24 @@ export type Publico = {
  * Si mañana hay una página de categoría, una búsqueda o un feed, todas pasan
  * por estas funciones y ninguna puede enseñar un producto bloqueado. */
 export async function publicados(): Promise<Publico[]> {
-  return db().execute<Publico>(sql`
+  return conPlazo(
+    db().execute<Publico>(sql`
     select slug, nombre, marca, gtin, precio_minor::int as precio_minor, moneda,
            contenido, imagen, descripcion, existencias, atributos, actualizado_en
       from tienda.producto
      where publicado
-     order by existencias = 0, marca, nombre`);
+     order by existencias = 0, marca, nombre`)
+  );
 }
 
 export async function publicado(slug: string): Promise<Publico | null> {
-  const filas = await db().execute<Publico>(sql`
-    select slug, nombre, marca, gtin, precio_minor::int as precio_minor, moneda,
-           contenido, imagen, descripcion, existencias, atributos, actualizado_en
-      from tienda.producto
-     where publicado and slug = ${slug}`);
+  const filas = await conPlazo(
+    db().execute<Publico>(sql`
+      select slug, nombre, marca, gtin, precio_minor::int as precio_minor, moneda,
+             contenido, imagen, descripcion, existencias, atributos, actualizado_en
+        from tienda.producto
+       where publicado and slug = ${slug}`)
+  );
   return filas[0] ?? null;
 }
 
@@ -54,13 +81,15 @@ export async function publicado(slug: string): Promise<Publico | null> {
 export async function buscar(consulta: string): Promise<Publico[]> {
   const limpia = consulta.trim();
   if (!limpia) return [];
-  return db().execute<Publico>(sql`
+  return conPlazo(
+    db().execute<Publico>(sql`
     select p.slug, p.nombre, p.marca, p.gtin, p.precio_minor::int as precio_minor, p.moneda,
            p.contenido, p.imagen, p.descripcion, p.existencias, p.atributos, p.actualizado_en
       from tienda.producto p, websearch_to_tsquery('tienda.espanol', ${limpia}) q
      where p.publicado and p.busqueda @@ q
      order by ts_rank(p.busqueda, q) desc, p.existencias = 0, p.nombre
-     limit 60`);
+     limit 60`)
+  );
 }
 
 export const pesos = new Intl.NumberFormat("es-CO", {

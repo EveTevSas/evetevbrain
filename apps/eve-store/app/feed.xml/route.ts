@@ -19,7 +19,7 @@
 import { publicados } from "@/lib/producto";
 import { urlBase } from "@/lib/url";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 /** Escapa lo que rompería el XML. Sin esto, un `&` en un nombre invalida el feed entero. */
 function xml(t: string | null | undefined) {

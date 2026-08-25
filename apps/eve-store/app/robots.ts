@@ -8,7 +8,7 @@ import { urlBase } from "@/lib/url";
  * Con el catálogo vacío se cierra entero: una tienda sin productos posicionando
  * hace más daño que no aparecer. Igual que el `noindex` de la portada, lo decide
  * el dato y no la memoria de nadie. */
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const hay = (await publicados()).length > 0;
