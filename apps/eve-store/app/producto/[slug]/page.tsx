@@ -9,8 +9,9 @@ import { notFound } from "next/navigation";
 
 import { Cabecera } from "@/app/cabecera";
 import { Pie } from "@/app/pie";
+import { Rejilla } from "@/app/rejilla";
 import { anadir } from "@/lib/acciones-carrito";
-import { jsonLd, pesos, publicado, publicados } from "@/lib/producto";
+import { hermanos, jsonLd, pesos, publicado, publicados, slugDeMarca } from "@/lib/producto";
 import { urlBase } from "@/lib/url";
 
 export const revalidate = 60;
@@ -83,6 +84,13 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
   const hay = p.existencias > 0;
   const atributos = Object.entries(p.atributos ?? {});
 
+  /* Sin esto, dos de las veinticuatro fichas son callejones sin salida: Allen
+   * Nutrition e Ilovepinch tienen un solo producto cada una, y quien entra por
+   * una búsqueda no encuentra ningún sitio al que seguir. `hermanos` pone
+   * delante los de la misma marca y completa con el resto del catálogo. */
+  const vecinos = await hermanos(p.slug, p.marca);
+  const mismaMarca = vecinos.length > 0 && vecinos.every((v) => v.marca === p.marca);
+
   return (
     <>
       <Cabecera />
@@ -107,8 +115,14 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
           </div>
 
           <div>
+            {/* La marca lleva a su página. Enlazar hacia dentro no es adorno:
+                es cómo se llega al resto del catálogo desde una ficha a la que
+                se entró por una búsqueda, y cómo un rastreador descubre que
+                hay más. */}
             <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">
-              {p.marca}
+              <a href={`/marca/${slugDeMarca(p.marca)}`} className="hover:underline">
+                {p.marca}
+              </a>
             </p>
             <h1 className="mt-1 font-display text-3xl font-bold leading-tight">
               {p.nombre}
@@ -164,6 +178,14 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
             )}
           </div>
         </div>
+        {vecinos.length > 0 && (
+          <section className="mt-16 border-t border-linea pt-10">
+            <h2 className="font-display text-2xl font-bold">
+              {mismaMarca ? `Más de ${p.marca}` : "Otros productos"}
+            </h2>
+            <Rejilla productos={vecinos} nivel={3} />
+          </section>
+        )}
       </main>
       <Pie />
     </>

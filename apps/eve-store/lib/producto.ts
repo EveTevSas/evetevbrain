@@ -78,6 +78,78 @@ export async function publicados(): Promise<Publico[]> {
   );
 }
 
+/* Lo mínimo para pintar una tarjeta.
+ *
+ * Las rejillas de marca y de relacionados no necesitan la descripción, y esa
+ * columna es con diferencia la más pesada de la tabla: pedirla veinticuatro
+ * veces al compilar, para no enseñarla, es más de un megabyte de texto movido
+ * en balde. */
+export type Tarjeta = Pick<
+  Publico,
+  "slug" | "nombre" | "marca" | "contenido" | "imagen" | "precio_minor" | "existencias"
+>;
+
+const COLUMNAS_TARJETA = sql`slug, nombre, marca, contenido, imagen,
+         precio_minor::int as precio_minor, existencias`;
+
+/** Las marcas con algo publicado, de más surtida a menos. */
+export async function marcas(): Promise<{ marca: string; cuantos: number }[]> {
+  return conPlazo(
+    db().execute<{ marca: string; cuantos: number }>(sql`
+      select marca, count(*)::int as cuantos
+        from tienda.producto
+       where publicado
+       group by marca
+       order by count(*) desc, marca`)
+  );
+}
+
+/* La marca en la URL.
+ *
+ * Se compara siempre en un solo sentido —de nombre a slug— y nunca al revés:
+ * deshacer un slug obliga a adivinar dónde iban los espacios y los acentos, y
+ * «bio-essens» tanto podría ser «Bio Essens» como «Bio-Essens». Al resolver una
+ * ruta se recorren las marcas que existen y se busca la que produce ese slug,
+ * que no puede equivocarse. */
+export function slugDeMarca(marca: string): string {
+  return marca
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export async function porMarca(marca: string): Promise<Tarjeta[]> {
+  return conPlazo(
+    db().execute<Tarjeta>(sql`
+      select ${COLUMNAS_TARJETA}
+        from tienda.producto
+       where publicado and marca = ${marca}
+       order by existencias = 0, nombre`)
+  );
+}
+
+/* Los vecinos de una ficha.
+ *
+ * Primero los de la misma marca; si no llegan, se completa con el resto del
+ * catálogo. Dos de los veinticuatro productos son marca de uno solo —Allen
+ * Nutrition e Ilovepinch—, y sin ese relleno sus fichas serían callejones sin
+ * salida: se entra desde una búsqueda y no hay ningún sitio al que seguir.
+ *
+ * El orden es fijo, sin `random()`, porque estas páginas se prerenderizan: una
+ * lista que cambia en cada regeneración invalida la caché sin aportar nada. */
+export async function hermanos(slug: string, marca: string, limite = 4): Promise<Tarjeta[]> {
+  return conPlazo(
+    db().execute<Tarjeta>(sql`
+      select ${COLUMNAS_TARJETA}
+        from tienda.producto
+       where publicado and slug <> ${slug}
+       order by (marca = ${marca}) desc, existencias = 0, nombre
+       limit ${limite}`)
+  );
+}
+
 export async function publicado(slug: string): Promise<Publico | null> {
   const filas = await conPlazo(
     db().execute<Publico>(sql`
