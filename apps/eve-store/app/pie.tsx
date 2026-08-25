@@ -21,6 +21,9 @@ export function Pie() {
           <a href="/buscar" className="hover:underline">
             Buscar
           </a>
+          <a href="/carrito" className="hover:underline">
+            Carrito
+          </a>
           <a href="/panel" className="hover:underline">
             Administración
           </a>
