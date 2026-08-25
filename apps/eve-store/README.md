@@ -147,6 +147,14 @@ origen y necesitan una decisión. No es un defecto del import: es la cola de
 trabajo que el panel existe para resolver, y su pantalla de inicio.
 
 Desplegado en <https://eve-store-one.vercel.app> — la raíz es pública y `/panel`
-pide sesión. **Falta conectar el repositorio en Vercel y poner el Root Directory
-en `apps/eve-store`**; hasta entonces los despliegues son manuales
-(`npx vercel deploy --prod` desde esta carpeta).
+pide sesión.
+
+**El despliegue es automático desde `main`.** El proyecto de Vercel está
+conectado al repositorio con Root Directory en `apps/eve-store`, y el
+`ignoreCommand` del `vercel.json` hace que solo compile cuando cambia algo de
+esta carpeta. Sin esa condición, cada cambio del monorepo dispararía un
+despliegue y el límite de 100 por 24 horas del plan Hobby se agota en una tarde
+— ya nos frenó dos veces.
+
+Para desplegar a mano, si hiciera falta:
+`npx vercel deploy --prod --yes` desde esta carpeta.
