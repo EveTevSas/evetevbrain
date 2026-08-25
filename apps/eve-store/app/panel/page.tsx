@@ -43,6 +43,7 @@ export default async function Panel() {
     avisos: number;
     inventario: number;
     unidades: number;
+    por_cobrar: number;
   }>(sql`
     select
       (select count(*)::int from tienda.producto)                                      as productos,
@@ -51,7 +52,8 @@ export default async function Panel() {
         where resuelto_en is null and bloqueante)                                      as bloqueados,
       (select count(*)::int from tienda.aviso where resuelto_en is null)               as avisos,
       (select coalesce(sum(precio_minor * existencias), 0)::bigint from tienda.producto) as inventario,
-      (select coalesce(sum(existencias), 0)::int from tienda.producto)                 as unidades`);
+      (select coalesce(sum(existencias), 0)::int from tienda.producto)                 as unidades,
+      (select count(*)::int from tienda.pedido where estado = 'pendiente_de_pago')     as por_cobrar`);
 
   const filas = await base.execute<Fila>(sql`
     select p.slug, p.nombre, p.marca, p.contenido, p.precio_minor::int as precio_minor,
