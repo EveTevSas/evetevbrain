@@ -40,6 +40,8 @@ async function guardar(datos: FormData) {
   const existencias = Number(datos.get("existencias"));
   const contenido = String(datos.get("contenido") ?? "").trim();
   const descripcion = String(datos.get("descripcion") ?? "").trim();
+  const gtin = String(datos.get("gtin") ?? "").trim();
+  const imagen = String(datos.get("imagen") ?? "").trim();
 
   // Se valida aquí y la base vuelve a validar con sus `check`. Dos capas a
   // propósito: esta da un mensaje útil, la otra hace la regla infranqueable.
@@ -53,6 +55,8 @@ async function guardar(datos: FormData) {
       existencias,
       contenido: contenido || null,
       descripcion: descripcion || null,
+      gtin: gtin || null,
+      imagen: imagen || null,
       descripcionPorConfirmar: datos.get("confirmada") !== "on"
     })
     .where(eq(producto.slug, slug));
@@ -101,6 +105,14 @@ export default async function Ficha({
     .orderBy(sql`resuelto_en is not null, id`);
 
   const pendientes = avisos.filter((a) => !a.resueltoEn);
+
+  /* Los GTIN entre los que elegir. Ya estaban en la base —el importador guarda
+   * el vigente y el histórico— pero no había dónde escogerlos: el aviso pedía
+   * decidir cuál y el formulario no tenía campo. Un aviso que pide una decisión
+   * que la pantalla no puede registrar solo se puede cerrar mintiendo. */
+  const candidatos = [
+    ...new Set([p.gtin, ...(p.gtinHistoricos ?? [])].filter(Boolean))
+  ] as string[];
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
@@ -187,6 +199,47 @@ export default async function Ficha({
             name="contenido"
             defaultValue={p.contenido ?? ""}
             placeholder="250 ml"
+            className="w-full rounded-lg border border-linea bg-white px-3 py-2"
+          />
+        </Campo>
+
+        <Campo
+          etiqueta="Código de barras (GTIN)"
+          nota={
+            candidatos.length > 1
+              ? "El origen trajo más de uno. Elige el del envase que tienes en la mano: es lo que permite que un agente cruce este producto con el mismo producto en otro sitio."
+              : "Si no lo tienes a mano, déjalo vacío. Un GTIN inventado es peor que ninguno, porque cruza este producto con otro distinto."
+          }
+        >
+          {candidatos.length > 1 ? (
+            <div className="flex flex-col gap-2">
+              {candidatos.map((c) => (
+                <label key={c} className="flex items-center gap-2 text-sm">
+                  <input type="radio" name="gtin" value={c} defaultChecked={c === p.gtin} />
+                  <span className="tabular-nums">{c}</span>
+                  {c === p.gtin && <span className="text-xs text-pizarra">(el actual)</span>}
+                </label>
+              ))}
+              <label className="flex items-center gap-2 text-sm">
+                <input type="radio" name="gtin" value="" defaultChecked={!p.gtin} />
+                <span className="text-pizarra">ninguno de los dos</span>
+              </label>
+            </div>
+          ) : (
+            <input
+              name="gtin"
+              inputMode="numeric"
+              defaultValue={p.gtin ?? ""}
+              className="w-full rounded-lg border border-linea bg-white px-3 py-2 tabular-nums"
+            />
+          )}
+        </Campo>
+
+        <Campo etiqueta="Imagen (URL)" nota="Los canales de compra exigen al menos una.">
+          <input
+            name="imagen"
+            type="url"
+            defaultValue={p.imagen ?? ""}
             className="w-full rounded-lg border border-linea bg-white px-3 py-2"
           />
         </Campo>
