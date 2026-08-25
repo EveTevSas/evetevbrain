@@ -7,7 +7,7 @@
  * dice que no.
  */
 import { revalidatePath } from "next/cache";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { eq, sql } from "drizzle-orm";
 
 import { db } from "@/db/connection";
@@ -66,16 +66,29 @@ async function publicar(datos: FormData) {
   const quiere = datos.get("publicar") === "si";
   try {
     await db().update(producto).set({ publicado: quiere }).where(eq(producto.slug, slug));
-  } catch {
-    // El disparador rechazó la publicación. No hace falta hacer nada: la
-    // pantalla ya muestra los avisos pendientes, que son el motivo exacto.
+  } catch (e) {
+    /* Antes esto se tragaba el error en silencio, con el razonamiento de que la
+     * pantalla ya mostraba los avisos pendientes. Falla en el caso que importa:
+     * si el rechazo es por otra cosa —la base saturada, por ejemplo— quien
+     * pulsa el botón no ve absolutamente nada y cree que publicó. Ya pasó. */
+    const motivo =
+      e instanceof Error && e.message.includes("aviso(s) bloqueante(s)") ? "avisos" : "error";
+    redirect(`/panel/producto/${slug}?fallo=${motivo}`);
   }
   revalidatePath(`/panel/producto/${slug}`);
   revalidatePath("/panel");
+  revalidatePath("/");
 }
 
-export default async function Ficha({ params }: { params: Promise<{ slug: string }> }) {
+export default async function Ficha({
+  params,
+  searchParams
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ fallo?: string }>;
+}) {
   const { slug } = await params;
+  const { fallo } = await searchParams;
   const base = db();
 
   const [p] = await base.select().from(producto).where(eq(producto.slug, slug));
@@ -204,6 +217,13 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
 
       <section className="mt-10 rounded-xl border border-linea bg-white p-5">
         <h2 className="font-display text-lg font-bold">Publicación</h2>
+        {fallo && (
+          <p className="mt-2 rounded-lg bg-[#fdeaea] px-3 py-2 text-sm text-[#b91c1c]">
+            {fallo === "avisos"
+              ? "La base rechazó la publicación: quedan avisos bloqueantes sin resolver."
+              : "No se pudo publicar. Vuelve a intentarlo; si sigue fallando, revisa los registros."}
+          </p>
+        )}
         {p.publicado ? (
           <p className="mt-1 text-sm text-exito">Este producto está publicado en la tienda.</p>
         ) : pendientes.length > 0 ? (

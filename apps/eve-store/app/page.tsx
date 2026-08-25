@@ -7,6 +7,7 @@
  */
 import type { Metadata } from "next";
 
+import { Pie } from "@/app/pie";
 import { pesos, publicados } from "@/lib/producto";
 
 /* ISR en vez de dinámico. Un catálogo no cambia entre visita y visita, y
@@ -53,50 +54,53 @@ export default async function Tienda() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
-      <header className="border-b border-linea pb-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">Eve-Store</p>
-        <h1 className="mt-1 font-display text-4xl font-bold">
-          Aceites naturales y cuidado de la piel
-        </h1>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-pizarra">
-          Marcas colombianas: Bio Essens, Dermanat, Botanikalia. {productos.length} productos, con
-          existencias reales — si dice que hay, hay.
-        </p>
-      </header>
+    <>
+      <main className="mx-auto max-w-6xl px-6 py-12">
+        <header className="border-b border-linea pb-8">
+          <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">Eve-Store</p>
+          <h1 className="mt-1 font-display text-4xl font-bold">
+            Aceites naturales y cuidado de la piel
+          </h1>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-pizarra">
+            Marcas colombianas: Bio Essens, Dermanat, Botanikalia. {productos.length} productos, con
+            existencias reales — si dice que hay, hay.
+          </p>
+        </header>
 
-      <ul className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {productos.map((p) => (
-          <li key={p.slug}>
-            <a href={`/producto/${p.slug}`} className="group flex flex-col gap-3">
-              <div className="aspect-square overflow-hidden rounded-xl border border-linea bg-white">
-                {p.imagen && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={p.imagen}
-                    alt={p.nombre}
-                    loading="lazy"
-                    className="size-full object-contain p-4"
-                  />
-                )}
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-pizarra">{p.marca}</p>
-                <h2 className="font-semibold leading-snug group-hover:underline">
-                  {p.nombre}
-                  {p.contenido && (
-                    <span className="font-normal text-pizarra"> · {p.contenido}</span>
+        <ul className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {productos.map((p) => (
+            <li key={p.slug}>
+              <a href={`/producto/${p.slug}`} className="group flex flex-col gap-3">
+                <div className="aspect-square overflow-hidden rounded-xl border border-linea bg-white">
+                  {p.imagen && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={p.imagen}
+                      alt={p.nombre}
+                      loading="lazy"
+                      className="size-full object-contain p-4"
+                    />
                   )}
-                </h2>
-                <p className="mt-1 font-display text-lg font-bold tabular-nums">
-                  {pesos.format(p.precio_minor)}
-                </p>
-                {p.existencias === 0 && <p className="text-xs text-alerta">Agotado</p>}
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </main>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-pizarra">{p.marca}</p>
+                  <h2 className="font-semibold leading-snug group-hover:underline">
+                    {p.nombre}
+                    {p.contenido && (
+                      <span className="font-normal text-pizarra"> · {p.contenido}</span>
+                    )}
+                  </h2>
+                  <p className="mt-1 font-display text-lg font-bold tabular-nums">
+                    {pesos.format(p.precio_minor)}
+                  </p>
+                  {p.existencias === 0 && <p className="text-xs text-alerta">Agotado</p>}
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </main>
+      <Pie />
+    </>
   );
 }
