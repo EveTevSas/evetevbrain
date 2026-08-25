@@ -20,6 +20,15 @@ import { producto } from "@/db/schema";
  * nada.
  */
 const NOMBRE = "carrito";
+/* La cookie acompañante: lleva SÓLO cuántas unidades hay.
+ *
+ * Existe para que la cabecera pueda enseñar el número sin leer cookies desde el
+ * servidor — leerlas volvería dinámicas la portada y las fichas, que se sirven
+ * con ISR, y perderíamos la caché a cambio de una cifra. Ésta sí es legible
+ * desde el navegador, y no pasa nada: quien la manipule sólo consigue ver un
+ * número equivocado. El carrito de verdad sigue siendo `carrito`, httpOnly, y
+ * los precios se releen de la base en cada pantalla. */
+const CUENTA = "carrito_n";
 const DIAS = 30;
 
 export type Linea = { slug: string; cantidad: number };
@@ -51,15 +60,20 @@ export async function guardar(nuevas: Linea[]) {
   const tarro = await cookies();
   if (nuevas.length === 0) {
     tarro.delete(NOMBRE);
+    tarro.delete(CUENTA);
     return;
   }
+  const comunes = { maxAge: 60 * 60 * 24 * DIAS, sameSite: "lax" as const, path: "/" };
   tarro.set(NOMBRE, encodeURIComponent(JSON.stringify(nuevas)), {
-    maxAge: 60 * 60 * 24 * DIAS,
-    sameSite: "lax",
-    path: "/",
+    ...comunes,
     // No lleva nada sensible, pero tampoco hay motivo para que el JavaScript
     // de la página lo lea: el carrito se maneja entero desde el servidor.
     httpOnly: true
+  });
+  // Ésta sí la lee el navegador: es el número de la cabecera y nada más.
+  tarro.set(CUENTA, String(nuevas.reduce((t, l) => t + l.cantidad, 0)), {
+    ...comunes,
+    httpOnly: false
   });
 }
 

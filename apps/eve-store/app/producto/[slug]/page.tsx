@@ -7,6 +7,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { Cabecera } from "@/app/cabecera";
 import { Pie } from "@/app/pie";
 import { anadir } from "@/lib/acciones-carrito";
 import { jsonLd, pesos, publicado, publicados } from "@/lib/producto";
@@ -37,6 +38,44 @@ export async function generateStaticParams() {
   return (await publicados()).map((p) => ({ slug: p.slug }));
 }
 
+/* La descripción llega con su estructura y hay que respetarla.
+ *
+ * Veintitrés de las veinticuatro descripciones traen saltos de línea desde la
+ * base —títulos, listas, apartados— y la ficha las metía en un único `<p>`,
+ * donde HTML colapsa todo el espacio en blanco. El resultado era un muro de
+ * texto: «…sin conservantes. ¿Por qué elegir…? 100% Puro y Natural: Sin
+ * mezclas…», todo seguido. La estructura estaba ahí desde el principio y la
+ * estábamos tirando al pintar.
+ *
+ * Importa por dos motivos a la vez. Para quien lee, un muro no se lee. Y para
+ * las citas de IA, el contenido escaneable —párrafos cortos, apartados
+ * nombrados, cifras aisladas— es justo lo que se extrae y se cita; un bloque
+ * indiferenciado obliga al modelo a resumir en vez de citar.
+ *
+ * Se parte por líneas en blanco, que es donde el autor separó ideas, y dentro
+ * de cada párrafo se conservan los saltos sueltos con `whitespace-pre-line`.
+ * No se inventa estructura que el texto no tenga: si no hay líneas en blanco,
+ * queda un solo párrafo y nada se rompe. */
+function parrafos(texto: string): string[] {
+  return (
+    texto
+      /* Un punto pegado a la siguiente frase también separaba ideas.
+       *
+       * El volcado de Mercado Libre perdió algunos saltos y dejó cosas como
+       * «…(piel y cabello).Presentación Premium:». Donde no hay espacio tras el
+       * punto no hay prosa posible: era un salto.
+       *
+       * La condición de que antes del punto haya minúscula, cifra o paréntesis
+       * es la que salva las siglas — en «S.A.S.» lo que precede al punto es una
+       * mayúscula, así que no se toca, y no acabamos partiendo la razón social
+       * de la empresa en tres párrafos. */
+      .replace(/([a-záéíóúñ0-9)])\.([A-ZÁÉÍÓÚÑ¿¡])/g, "$1.\n\n$2")
+      .split(/\n\s*\n/)
+      .map((t) => t.trim())
+      .filter(Boolean)
+  );
+}
+
 export default async function Ficha({ params }: { params: Promise<{ slug: string }> }) {
   const p = await publicado((await params).slug);
   if (!p) notFound();
@@ -46,6 +85,7 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
 
   return (
     <>
+      <Cabecera />
       <main className="mx-auto max-w-5xl px-6 py-12">
         {/* El JSON-LD va en el HTML servido, no inyectado por script: es el canal
           de datos que consultan los agentes de compra. */}
@@ -97,7 +137,13 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
             </form>
 
             {p.descripcion && (
-              <p className="mt-8 text-sm leading-relaxed text-ink">{p.descripcion}</p>
+              <div className="mt-8 flex flex-col gap-4 text-sm leading-relaxed text-ink">
+                {parrafos(p.descripcion).map((parrafo, i) => (
+                  <p key={i} className="whitespace-pre-line">
+                    {parrafo}
+                  </p>
+                ))}
+              </div>
             )}
 
             {atributos.length > 0 && (

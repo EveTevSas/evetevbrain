@@ -7,6 +7,7 @@
  */
 import type { Metadata } from "next";
 
+import { Cabecera } from "@/app/cabecera";
 import { Pie } from "@/app/pie";
 import { pesos, publicados } from "@/lib/producto";
 
@@ -55,6 +56,7 @@ export default async function Tienda() {
 
   return (
     <>
+      <Cabecera />
       <main className="mx-auto max-w-6xl px-6 py-12">
         <header className="border-b border-linea pb-8">
           <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">Eve-Store</p>

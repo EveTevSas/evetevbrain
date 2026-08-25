@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { sql } from "drizzle-orm";
 
+import { Cabecera } from "@/app/cabecera";
 import { Pie } from "@/app/pie";
 import { detalle, ENVIO_MINOR, guardar } from "@/lib/carrito";
 import { db } from "@/db/connection";
@@ -101,6 +102,7 @@ export default async function Checkout({
 
   return (
     <>
+      <Cabecera minima />
       <main className="mx-auto max-w-2xl px-6 py-12">
         <a href="/carrito" className="text-sm text-pizarra hover:underline">
           ← Volver al carrito

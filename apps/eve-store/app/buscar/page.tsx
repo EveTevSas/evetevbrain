@@ -3,9 +3,15 @@
  * Es un formulario GET a propósito. Así la consulta vive en la URL —se puede
  * compartir, marcar y volver atrás— y la página funciona sin JavaScript, que es
  * la condición para que un rastreador vea los resultados.
+ *
+ * El formulario vive ahora en `app/cabecera.tsx`, presente en todas las
+ * pantallas: tenerlo sólo aquí obligaba a llegar a esta página para poder
+ * buscar. Aquí se le pasa `q` para que la caja llegue rellena y se vea qué se
+ * buscó.
  */
 import type { Metadata } from "next";
 
+import { Cabecera } from "@/app/cabecera";
 import { Pie } from "@/app/pie";
 import { buscar, pesos } from "@/lib/producto";
 
@@ -25,21 +31,11 @@ export default async function Buscar({ searchParams }: { searchParams: Promise<{
 
   return (
     <>
+      <Cabecera q={q} />
       <main className="mx-auto max-w-4xl px-6 py-12">
         <a href="/" className="text-sm text-pizarra hover:underline">
           ← Todos los productos
         </a>
-
-        <form action="/buscar" method="get" className="mt-6 flex gap-2">
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="aceite de coco, piel grasa, vegano…"
-            aria-label="Buscar productos"
-            className="w-full rounded-xl border border-linea bg-white px-4 py-3"
-          />
-          <button className="rounded-xl bg-noche px-5 py-3 font-semibold text-white">Buscar</button>
-        </form>
 
         {q.trim() && (
           <p className="mt-6 text-sm text-pizarra">
