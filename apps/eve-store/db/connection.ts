@@ -35,11 +35,17 @@ function cliente(): SqlClient {
   }
 
   global_.eveStoreSql = postgres(url, {
-    /* Una sola conexión por instancia. En un entorno sin servidor cada
-     * instancia atiende una petición a la vez, así que un pool de cinco
-     * multiplica por cinco el consumo sin ganar nada — y el límite es del
-     * pooler, compartido con EveConecta. */
-    max: 1,
+    /* Una sola conexión por instancia EN EJECUCIÓN: en un entorno sin servidor
+     * cada instancia atiende una petición a la vez, y un pool mayor multiplica
+     * el consumo sin ganar nada — el límite es del pooler, compartido con
+     * EveConecta.
+     *
+     * Durante la COMPILACIÓN es al revés. Next prerenderiza varias páginas a la
+     * vez y con una sola conexión se hacen cola hasta pasarse del plazo: el
+     * build se caía en `/sitemap.xml` después de haber generado bien la
+     * portada. Ahí conviene holgura, y no hay riesgo de agotar el pooler porque
+     * el proceso dura lo que dura el build. */
+    max: process.env.NEXT_PHASE === "phase-production-build" ? 8 : 1,
     /* Cierra la conexión tras cinco segundos ociosos, y en todo caso la recicla
      * al minuto. Es la lección de haber cambiado una fuga por un cuelgue: al
      * guardar el cliente entre peticiones, Vercel congela la instancia y el
@@ -50,11 +56,11 @@ function cliente(): SqlClient {
     max_lifetime: 60,
     /* Fallar rápido y con un error claro, en vez de dejar la petición colgada
      * hasta que Vercel la mate a los 300 segundos — que es lo que pasó. */
-    connect_timeout: 8,
+    connect_timeout: 12,
     /* Plazo del lado del servidor: una consulta que se pase de diez segundos se
      * aborta. No cubre el socket muerto —el servidor nunca recibe la consulta—,
      * pero sí una consulta que de verdad se atasque. */
-    connection: { statement_timeout: 10_000 },
+    connection: { statement_timeout: 12_000 },
     /* El pooler en modo transacción no admite sentencias preparadas. Se
      * desactivan siempre: en modo sesión no cuesta nada, y así cambiar de
      * puerto no vuelve a romper nada. */

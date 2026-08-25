@@ -13,7 +13,12 @@ import { db } from "@/db/connection";
  *
  * Con plazo, el fallo se convierte en un error normal: en las páginas con ISR,
  * Next sirve la copia anterior y nadie se entera. */
-async function conPlazo<T>(promesa: Promise<T>, ms = 8000): Promise<T> {
+/* Quince segundos, no ocho. El plazo existe para que un socket muerto no
+ * cuelgue la petición 300 segundos, no para exigir latencia — y la primera
+ * conexión desde el contenedor de compilación de Vercel arranca en frío y se
+ * pasó de ocho, tumbando el build entero. Un plazo demasiado corto no protege
+ * mejor: solo rompe cosas que funcionaban. */
+async function conPlazo<T>(promesa: Promise<T>, ms = 15_000): Promise<T> {
   let reloj: ReturnType<typeof setTimeout>;
   try {
     return await Promise.race([
