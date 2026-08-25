@@ -56,6 +56,39 @@ pnpm --filter @evetev/eve-store dev           # arranca en el puerto 3003; el pa
 | `scripts/comprobar-schema.mjs` | Falla si la base y la aplicación se separan.                  |
 | `app/page.tsx`                 | La raíz: reservada para la tienda, hoy una portada mínima.    |
 | `app/panel/`                   | El panel de administración, tras autenticación.               |
+| `app/producto/[slug]/`         | La ficha pública, con su JSON-LD `Product` + `Offer`.         |
+| `app/buscar/`                  | Búsqueda en español, sin tildes.                              |
+| `app/feed.xml/`                | El feed de producto para los canales de compra.               |
+
+## Encontrable
+
+**La búsqueda ignora las tildes, o no sirve.** Nadie teclea «Ácido
+Hialurónico»: teclea «acido hialuronico», y con la configuración `spanish` a
+secas esa consulta no encuentra nada. `db/0004_busqueda.sql` compone una
+configuración propia que pasa `unaccent` antes del lematizador español.
+Comprobado: «pestañas» y «pestanas» devuelven lo mismo, y «ACEITES» encuentra
+trece productos por el lematizador.
+
+El vector es una **columna generada**, no un disparador: así no hay forma de que
+quede desincronizado del producto cuando aparezca una ruta de escritura nueva.
+Los pesos ordenan la relevancia — nombre y marca en A, contenido y atributos en
+B, descripción en C.
+
+**El feed es la apuesta central**, y conviene recordar por qué: en 2026 hay tres
+protocolos agénticos y ninguno está estabilizado —OpenAI apagó Instant Checkout
+en marzo—. Construir contra un cliente concreto es apostar a un canal que puede
+cerrarse; lo que los tres consumen es un feed exacto y fresco.
+
+Se genera contra la base en cada petición, así que **el retraso es cero** y la
+ventana de quince minutos que exige el canal se cumple por construcción. No hay
+copia intermedia que pueda quedarse vieja, y una copia vieja es peor que no
+tener feed: el canal aprende a desconfiar.
+
+**`robots.txt` y `sitemap.xml` se generan del dato.** Con el catálogo vacío el
+sitio se cierra entero; en cuanto hay un producto publicado se abre solo, con el
+sitemap enlazado. Las páginas de resultados van `noindex, follow`: generan
+infinitas URL casi idénticas que compiten con las fichas, que son las que
+queremos que se citen.
 
 ## Quién puede entrar
 

@@ -43,6 +43,26 @@ export async function publicado(slug: string): Promise<Publico | null> {
   return filas[0] ?? null;
 }
 
+/**
+ * Búsqueda en español, sobre lo publicado.
+ *
+ * `websearch_to_tsquery` en vez de `plainto_tsquery` porque entiende lo que la
+ * gente ya sabe escribir sin que nadie se lo enseñe: comillas para frase exacta,
+ * `or`, y `-palabra` para excluir. Y no revienta con puntuación suelta, que es
+ * lo que hace `to_tsquery` a la primera comilla mal cerrada.
+ */
+export async function buscar(consulta: string): Promise<Publico[]> {
+  const limpia = consulta.trim();
+  if (!limpia) return [];
+  return db().execute<Publico>(sql`
+    select p.slug, p.nombre, p.marca, p.gtin, p.precio_minor::int as precio_minor, p.moneda,
+           p.contenido, p.imagen, p.descripcion, p.existencias, p.atributos, p.actualizado_en
+      from tienda.producto p, websearch_to_tsquery('tienda.espanol', ${limpia}) q
+     where p.publicado and p.busqueda @@ q
+     order by ts_rank(p.busqueda, q) desc, p.existencias = 0, p.nombre
+     limit 60`);
+}
+
 export const pesos = new Intl.NumberFormat("es-CO", {
   style: "currency",
   currency: "COP",

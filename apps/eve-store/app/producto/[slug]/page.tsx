@@ -8,15 +8,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { jsonLd, pesos, publicado, publicados } from "@/lib/producto";
+import { urlBase } from "@/lib/url";
 
 export const dynamic = "force-dynamic";
-
-/** La URL pública, para el JSON-LD y el canonical. */
-function base() {
-  const v = process.env.NEXT_PUBLIC_URL_TIENDA ?? process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  if (!v) return "http://localhost:3003";
-  return v.startsWith("http") ? v : `https://${v}`;
-}
 
 export async function generateMetadata({
   params
@@ -32,7 +26,7 @@ export async function generateMetadata({
     // La descripción del meta sale de la del producto, no de una plantilla:
     // duplicarla en veinticinco fichas la vuelve ruido.
     description: p.descripcion?.slice(0, 155) ?? undefined,
-    alternates: { canonical: `${base()}/producto/${p.slug}` }
+    alternates: { canonical: `${urlBase()}/producto/${p.slug}` }
   };
 }
 
@@ -54,7 +48,7 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
           de datos que consultan los agentes de compra. */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(p, base())) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(p, urlBase())) }}
       />
 
       <a href="/" className="text-sm text-pizarra hover:underline">
