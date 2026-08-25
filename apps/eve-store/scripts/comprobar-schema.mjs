@@ -72,15 +72,24 @@ for (const [tabla, columnas] of Object.entries(ESPERADO)) {
     console.log(`  ✓ tienda.${tabla} (${columnas.length} columnas)`);
 }
 
-// La búsqueda tiene que usar el índice GIN. Sin él funciona igual con 25
-// productos y se derrumba con 2.000, que es cuando nadie lo está mirando.
-const [{ plan }] = await sql`
-  explain (format json) select slug from tienda.producto p,
-    websearch_to_tsquery('tienda.espanol', 'aceite') q where p.busqueda @@ q`.then((r) => [
-  { plan: JSON.stringify(r) }
-]);
-if (plan.includes("producto_busqueda_idx")) console.log("  ✓ la búsqueda usa el índice GIN");
-else fallos.push("la búsqueda NO usa el índice: hace escaneo completo de la tabla");
+/* La búsqueda tiene que PODER usar el índice GIN. Sin él funciona igual con 25
+ * productos y se derrumba con 2.000, que es cuando nadie lo está mirando.
+ *
+ * Se comprueba forzando `enable_seqscan = off`, no mirando el plan por defecto:
+ * con una tabla de 25 filas el planificador elige escaneo secuencial porque de
+ * verdad es más rápido, y exigirle lo contrario haría fallar esta comprobación
+ * por una decisión correcta suya. Lo que importa es que el índice exista y sea
+ * utilizable, no cuál prefiera hoy. */
+const plan = await sql
+  .begin(async (t) => {
+    await t`set local enable_seqscan = off`;
+    return t`explain (format json) select slug from tienda.producto p,
+      websearch_to_tsquery('tienda.espanol', 'aceite') q where p.busqueda @@ q`;
+  })
+  .then((r) => JSON.stringify(r));
+if (plan.includes("producto_busqueda_idx"))
+  console.log("  ✓ el índice GIN de búsqueda existe y es utilizable");
+else fallos.push("la búsqueda no puede usar el índice GIN ni forzándolo");
 
 // El precio debe ser entero, no decimal. Si alguien lo cambia a numeric para
 // «guardar los centavos», los importes que viajan a EvePay dejan de cuadrar.

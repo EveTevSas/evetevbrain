@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Pie } from "@/app/pie";
+import { anadir } from "@/lib/acciones-carrito";
 import { jsonLd, pesos, publicado, publicados } from "@/lib/producto";
 import { urlBase } from "@/lib/url";
 
@@ -85,15 +86,15 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
               {hay ? `${p.existencias} disponibles · envío desde Bogotá` : "Agotado"}
             </p>
 
-            <button
-              disabled={!hay}
-              className="mt-6 w-full rounded-xl bg-coral px-6 py-3.5 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:bg-linea disabled:text-pizarra"
-            >
-              {hay ? "Añadir al carrito" : "Sin existencias"}
-            </button>
-            <p className="mt-2 text-xs text-pizarra">
-              El carrito llega en la siguiente fase; hoy el botón no hace nada todavía.
-            </p>
+            <form action={anadir}>
+              <input type="hidden" name="slug" value={p.slug} />
+              <button
+                disabled={!hay}
+                className="mt-6 w-full rounded-xl bg-coral px-6 py-3.5 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:bg-linea disabled:text-pizarra"
+              >
+                {hay ? "Añadir al carrito" : "Sin existencias"}
+              </button>
+            </form>
 
             {p.descripcion && (
               <p className="mt-8 text-sm leading-relaxed text-ink">{p.descripcion}</p>
