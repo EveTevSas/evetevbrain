@@ -18,7 +18,21 @@ import { db } from "@/db/connection";
  * conexión desde el contenedor de compilación de Vercel arranca en frío y se
  * pasó de ocho, tumbando el build entero. Un plazo demasiado corto no protege
  * mejor: solo rompe cosas que funcionaban. */
-async function conPlazo<T>(promesa: Promise<T>, ms = 15_000): Promise<T> {
+/* Quince segundos para una petición de verdad; sesenta al compilar.
+ *
+ * El plazo existe para que una petición de un usuario no se quede colgada
+ * esperando en un socket que Vercel congeló — sin él, la espera duraba los 300
+ * segundos que tarda la plataforma en matarla. Ahí quince segundos ya son una
+ * eternidad.
+ *
+ * Al compilar no hay nadie esperando, y aplicar el mismo número fue un error de
+ * encuadre que tumbó un despliegue: Next prerenderiza muchas páginas a la vez
+ * contra un pool pequeño, las consultas hacen cola, y desde Vercel —con más
+ * latencia hasta Supabase que desde un portátil— la cola se comía el plazo. El
+ * build local pasaba y el de producción no. */
+const PLAZO_MS = process.env.NEXT_PHASE === "phase-production-build" ? 60_000 : 15_000;
+
+async function conPlazo<T>(promesa: Promise<T>, ms = PLAZO_MS): Promise<T> {
   let reloj: ReturnType<typeof setTimeout>;
   try {
     return await Promise.race([

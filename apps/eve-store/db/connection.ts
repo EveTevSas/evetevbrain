@@ -51,8 +51,8 @@ function cliente(): SqlClient {
      * workers de una máquina de diez núcleos son setenta y dos conexiones
      * contra un pooler de quince, y el build se cayó con `EMAXCONNSESSION`. Lo
      * que tiene que caber no es este número, sino su producto por el tope de
-     * `experimental.cpus` en `next.config.ts`: 2 × 2 = 4. */
-    max: process.env.NEXT_PHASE === "phase-production-build" ? 2 : 1,
+     * `experimental.cpus` en `next.config.ts`: 2 × 3 = 6, de quince. */
+    max: process.env.NEXT_PHASE === "phase-production-build" ? 3 : 1,
     /* Cierra la conexión tras cinco segundos ociosos, y en todo caso la recicla
      * al minuto. Es la lección de haber cambiado una fuga por un cuelgue: al
      * guardar el cliente entre peticiones, Vercel congela la instancia y el
