@@ -10,7 +10,7 @@ import { notFound } from "next/navigation";
 import { jsonLd, pesos, publicado, publicados } from "@/lib/producto";
 import { urlBase } from "@/lib/url";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export async function generateMetadata({
   params

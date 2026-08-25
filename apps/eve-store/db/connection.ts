@@ -40,12 +40,21 @@ function cliente(): SqlClient {
      * multiplica por cinco el consumo sin ganar nada — y el límite es del
      * pooler, compartido con EveConecta. */
     max: 1,
-    /* Cierra la conexión tras veinte segundos ociosos. Sin esto una instancia
-     * dormida retiene su hueco del pooler mientras Vercel la mantiene viva. */
-    idle_timeout: 20,
-    /* Si el pooler está saturado conviene fallar rápido y devolver un error
-     * claro, no dejar la petición colgada hasta que el navegador se rinda. */
-    connect_timeout: 10,
+    /* Cierra la conexión tras cinco segundos ociosos, y en todo caso la recicla
+     * al minuto. Es la lección de haber cambiado una fuga por un cuelgue: al
+     * guardar el cliente entre peticiones, Vercel congela la instancia y el
+     * socket muere sin que `postgres.js` se entere. Al despertar escribe sobre
+     * una conexión muerta y espera indefinidamente. Reciclar agresivamente hace
+     * que ese socket nunca llegue a la siguiente petición. */
+    idle_timeout: 5,
+    max_lifetime: 60,
+    /* Fallar rápido y con un error claro, en vez de dejar la petición colgada
+     * hasta que Vercel la mate a los 300 segundos — que es lo que pasó. */
+    connect_timeout: 8,
+    /* Plazo del lado del servidor: una consulta que se pase de diez segundos se
+     * aborta. No cubre el socket muerto —el servidor nunca recibe la consulta—,
+     * pero sí una consulta que de verdad se atasque. */
+    connection: { statement_timeout: 10_000 },
     /* El pooler en modo transacción no admite sentencias preparadas. Se
      * desactivan siempre: en modo sesión no cuesta nada, y así cambiar de
      * puerto no vuelve a romper nada. */

@@ -9,7 +9,11 @@ import type { Metadata } from "next";
 
 import { pesos, publicados } from "@/lib/producto";
 
-export const dynamic = "force-dynamic";
+/* ISR en vez de dinámico. Un catálogo no cambia entre visita y visita, y
+ * servirlo desde caché tiene dos efectos que importan: la base se consulta
+ * una vez por minuto en vez de una por visita, y si la regeneración falla el
+ * visitante recibe la copia anterior en lugar de una página colgada. */
+export const revalidate = 60;
 
 /* El `noindex` se decide con el dato, no con la memoria de nadie.
  *
