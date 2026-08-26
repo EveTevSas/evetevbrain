@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db/connection";
@@ -65,17 +66,43 @@ export type Publico = {
 /* Una sola condición, en un solo sitio: la tienda muestra lo publicado.
  *
  * Se centraliza aquí para que ninguna página se la pueda saltar por descuido.
- * Si mañana hay una página de categoría, una búsqueda o un feed, todas pasan
- * por estas funciones y ninguna puede enseñar un producto bloqueado. */
-export async function publicados(): Promise<Publico[]> {
-  return conPlazo(
-    db().execute<Publico>(sql`
+ * Todo lo demás —una marca, los vecinos de una ficha, el sitemap— se deriva de
+ * esta lista en vez de volver a preguntar.
+ *
+ * **Y se deriva por una razón operativa, no por elegancia.** Cada página hacía
+ * su propia consulta, y con treinta y cuatro páginas prerenderizadas eso son
+ * más de cien conexiones contra un pooler de quince plazas que además comparte
+ * con EveConecta y con la tienda en producción. Un despliegue se cayó así: las
+ * dieciséis primeras páginas se generaron en cuatro décimas y el resto se
+ * quedó esperando plaza hasta agotar el plazo de sesenta segundos. No era
+ * lentitud —la base respondía— era cola.
+ *
+ * El catálogo son veinticuatro filas. Traerlo entero una vez y repartirlo es
+ * más barato que preguntar por trozos. */
+const CONSULTA_CATALOGO = sql`
     select slug, nombre, marca, gtin, precio_minor::int as precio_minor, moneda,
            contenido, imagen, descripcion, existencias, atributos, actualizado_en
       from tienda.producto
      where publicado
-     order by existencias = 0, marca, nombre`)
-  );
+     order by existencias = 0, marca, nombre`;
+
+/* Al compilar, una sola vez para todo el build.
+ *
+ * Es seguro porque el catálogo no cambia mientras dura la compilación. En
+ * ejecución NO se memoriza: ahí cada regeneración de ISR tiene que ver el
+ * estado real, que es justo lo que hace que la tienda no venda lo que no hay. */
+let memoDeCompilacion: Promise<Publico[]> | null = null;
+
+export const catalogo = cache(async (): Promise<Publico[]> => {
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    memoDeCompilacion ??= conPlazo(db().execute<Publico>(CONSULTA_CATALOGO));
+    return memoDeCompilacion;
+  }
+  return conPlazo(db().execute<Publico>(CONSULTA_CATALOGO));
+});
+
+export async function publicados(): Promise<Publico[]> {
+  return catalogo();
 }
 
 /* Lo mínimo para pintar una tarjeta.
@@ -89,19 +116,13 @@ export type Tarjeta = Pick<
   "slug" | "nombre" | "marca" | "contenido" | "imagen" | "precio_minor" | "existencias"
 >;
 
-const COLUMNAS_TARJETA = sql`slug, nombre, marca, contenido, imagen,
-         precio_minor::int as precio_minor, existencias`;
-
 /** Las marcas con algo publicado, de más surtida a menos. */
 export async function marcas(): Promise<{ marca: string; cuantos: number }[]> {
-  return conPlazo(
-    db().execute<{ marca: string; cuantos: number }>(sql`
-      select marca, count(*)::int as cuantos
-        from tienda.producto
-       where publicado
-       group by marca
-       order by count(*) desc, marca`)
-  );
+  const cuenta = new Map<string, number>();
+  for (const p of await catalogo()) cuenta.set(p.marca, (cuenta.get(p.marca) ?? 0) + 1);
+  return [...cuenta]
+    .map(([marca, cuantos]) => ({ marca, cuantos }))
+    .sort((a, b) => b.cuantos - a.cuantos || a.marca.localeCompare(b.marca, "es"));
 }
 
 /* La marca en la URL.
@@ -121,13 +142,7 @@ export function slugDeMarca(marca: string): string {
 }
 
 export async function porMarca(marca: string): Promise<Tarjeta[]> {
-  return conPlazo(
-    db().execute<Tarjeta>(sql`
-      select ${COLUMNAS_TARJETA}
-        from tienda.producto
-       where publicado and marca = ${marca}
-       order by existencias = 0, nombre`)
-  );
+  return (await catalogo()).filter((p) => p.marca === marca).sort(porAgotadoYNombre);
 }
 
 /* Los vecinos de una ficha.
@@ -140,25 +155,26 @@ export async function porMarca(marca: string): Promise<Tarjeta[]> {
  * El orden es fijo, sin `random()`, porque estas páginas se prerenderizan: una
  * lista que cambia en cada regeneración invalida la caché sin aportar nada. */
 export async function hermanos(slug: string, marca: string, limite = 4): Promise<Tarjeta[]> {
-  return conPlazo(
-    db().execute<Tarjeta>(sql`
-      select ${COLUMNAS_TARJETA}
-        from tienda.producto
-       where publicado and slug <> ${slug}
-       order by (marca = ${marca}) desc, existencias = 0, nombre
-       limit ${limite}`)
+  return (await catalogo())
+    .filter((p) => p.slug !== slug)
+    .sort((a, b) => {
+      // Primero los de la misma marca; el resto conserva el orden de siempre.
+      const suya = Number(b.marca === marca) - Number(a.marca === marca);
+      return suya || porAgotadoYNombre(a, b);
+    })
+    .slice(0, limite);
+}
+
+/** El orden de la tienda: lo agotado al final, y dentro de eso, alfabético. */
+function porAgotadoYNombre(a: Tarjeta, b: Tarjeta): number {
+  return (
+    Number(a.existencias === 0) - Number(b.existencias === 0) ||
+    a.nombre.localeCompare(b.nombre, "es")
   );
 }
 
 export async function publicado(slug: string): Promise<Publico | null> {
-  const filas = await conPlazo(
-    db().execute<Publico>(sql`
-      select slug, nombre, marca, gtin, precio_minor::int as precio_minor, moneda,
-             contenido, imagen, descripcion, existencias, atributos, actualizado_en
-        from tienda.producto
-       where publicado and slug = ${slug}`)
-  );
-  return filas[0] ?? null;
+  return (await catalogo()).find((p) => p.slug === slug) ?? null;
 }
 
 /**
