@@ -17,7 +17,7 @@ marcar() { echo "$1=$2" >> "$GITHUB_OUTPUT"; echo "  $1=$2"; }
 
 todo() {
   echo "$1 → se ejecuta todo el CI."
-  for a in global shared api eveconecta landings; do marcar "$a" true; done
+  for a in global shared api eveconecta eveledger landings; do marcar "$a" true; done
   exit 0
 }
 
@@ -53,6 +53,12 @@ marcar api "$API"
 CONECTA=$SHARED
 toca '^apps/eveconecta/' && CONECTA=true
 marcar eveconecta "$CONECTA"
+
+# EveLedger no consume packages/shared: es una aplicación cerrada sobre su
+# propia base. Por eso no arranca desde $SHARED como las dos de arriba.
+EVELEDGER=false
+toca '^apps/eveledger/' && EVELEDGER=true
+marcar eveledger "$EVELEDGER"
 
 # Las landings comparten base.css, generado desde packages/brand.
 LANDINGS=false
