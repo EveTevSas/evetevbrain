@@ -71,8 +71,9 @@ pnpm lint && pnpm typecheck && pnpm test
 
 ## Despliegue: cada app se construye sola
 
-Siete proyectos de Vercel apuntan a este repositorio, y por defecto **todos**
-reconstruían en cada push, tocara lo que tocara el commit. Un cambio de una línea
+Una decena de proyectos de Vercel apuntan a este repositorio —y el número solo
+sube—, y por defecto **todos** reconstruían en cada push, tocara lo que tocara el
+commit. Un cambio de una línea
 en una landing gastaba seis despliegues, y cada PR los cuenta dos veces —preview
 y merge—. Un día de trabajo normal agotó el tope diario del plan Hobby: los
 builds empezaron a fallar con `upgradeToPro=build-rate-limit`, y con ellos dejó

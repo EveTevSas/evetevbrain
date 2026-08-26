@@ -6,10 +6,15 @@ constitución (`ESTANDARES_INGENIERIA.md` §10) y las cuentas de
 
 ## Idea clave
 
-Es un **monorepo → dos proyectos en Vercel**, ambos apuntando al mismo repo
+Es un **monorepo → muchos proyectos en Vercel**, todos apuntando al mismo repo
 `EveTevSas/evetevbrain` pero con **Root Directory distinto**. Cada uno trae su
 `vercel.json`, así que la config ya está versionada; en el dashboard solo fijas el
 Root Directory y el dominio.
+
+La tabla de abajo recoge las apps con dominio de marca, no todas: hoy hay una
+decena de proyectos, contando las landings y las apps sin dominio propio. Cada
+push los dispara a todos, y por eso el `ignoreCommand` de cada `vercel.json` no
+es opcional (ver el README de la raíz).
 
 | App            | Root Directory    | Dominio                              | Hosting                        |
 | -------------- | ----------------- | ------------------------------------ | ------------------------------ |
