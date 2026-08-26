@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { publicados } from "@/lib/producto";
+import { marcas, publicados, slugDeMarca } from "@/lib/producto";
 import { urlBase } from "@/lib/url";
 
 /* Solo lo publicado, y con la fecha real de cada producto.
@@ -12,10 +12,18 @@ export const revalidate = 300;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = urlBase();
-  const productos = await publicados();
+  const [productos, listaDeMarcas] = await Promise.all([publicados(), marcas()]);
 
   return [
     { url: base, changeFrequency: "daily", priority: 1 },
+    /* Las páginas de marca entran aquí porque son páginas de verdad, no un
+       filtro: si no se anuncian, sólo se descubren siguiendo enlaces y tardan
+       en aparecer. */
+    ...listaDeMarcas.map(({ marca }) => ({
+      url: `${base}/marca/${slugDeMarca(marca)}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.6
+    })),
     ...productos.map((p) => ({
       url: `${base}/producto/${p.slug}`,
       lastModified: new Date(p.actualizado_en),

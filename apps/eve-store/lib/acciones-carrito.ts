@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { guardar, lineas } from "@/lib/carrito";
 
@@ -21,8 +20,18 @@ export async function anadir(datos: FormData) {
       ? actuales.map((l) => (l.slug === slug ? { ...l, cantidad: l.cantidad + 1 } : l))
       : [...actuales, { slug, cantidad: 1 }]
   );
+  /* Ya no lleva al carrito.
+   *
+   * Llevaba, y con un solo botón en la ficha tenía sentido. Deja de tenerlo en
+   * cuanto se puede añadir desde la rejilla: sacar a alguien del catálogo cada
+   * vez que echa algo al carrito le corta justo lo que estaba haciendo, que es
+   * mirar productos. Ahora se queda donde estaba y la confirmación la da la
+   * interfaz — el contador de la cabecera y un aviso efímero.
+   *
+   * Sin JavaScript esto sigue siendo un envío de formulario normal: la página
+   * se recarga, la cookie ya está puesta y el contador aparece actualizado. Se
+   * pierde la animación, no la compra. */
   revalidatePath("/carrito");
-  redirect("/carrito");
 }
 
 export async function cambiar(datos: FormData) {

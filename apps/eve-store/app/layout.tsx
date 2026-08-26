@@ -2,14 +2,23 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Eve-Store",
-  /* Nada se indexa todavía: la tienda no existe y el panel es una herramienta
-     interna. El día que la tienda ocupe la raíz, este `noindex` tiene que
-     bajar al layout de `/panel` — dejarlo aquí haría invisible la tienda, que
-     es justo el fallo que auditamos en las landings en agosto. */
-  robots: { index: false, follow: false }
-};
+/* El `noindex` global ESTUVO aquí, y ese día llegó.
+ *
+ * Se puso cuando la tienda no existía y todo lo que había era el panel. El
+ * propio comentario avisaba de que, en cuanto la tienda ocupara la raíz, había
+ * que bajarlo al layout de `/panel` — y no se hizo. Resultado: con veinticuatro
+ * productos publicados, las fichas emitían `noindex, nofollow`. Las páginas que
+ * queremos que se citen eran justo las invisibles.
+ *
+ * Es el mismo fallo que auditamos en las landings en agosto, donde tres de
+ * cuatro arrastraron un `noindex` durante meses porque nadie se acordó de
+ * quitarlo, y es la palanca que de verdad decide si apareces en una respuesta
+ * de IA: el acceso, no el marcado.
+ *
+ * Ahora cada zona declara lo suyo — `/panel`, `/entrar` y `/sin-acceso` se
+ * excluyen en su propio layout o página, y el carrito, el checkout y la
+ * búsqueda ya lo hacían. */
+export const metadata: Metadata = { title: "Eve-Store" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -2,6 +2,14 @@ import { redirect } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
 
+import type { Metadata } from "next";
+
+/* Fuera de `/panel`, así que no hereda su exclusión: se declara aquí. */
+export const metadata: Metadata = {
+  title: "Entrar · Eve-Store",
+  robots: { index: false, follow: false }
+};
+
 export const dynamic = "force-dynamic";
 
 async function entrar(datos: FormData) {

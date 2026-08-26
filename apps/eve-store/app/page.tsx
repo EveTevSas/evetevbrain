@@ -7,8 +7,11 @@
  */
 import type { Metadata } from "next";
 
+import { Cabecera } from "@/app/cabecera";
+import { FiltroMarcas } from "@/app/filtro-marcas";
 import { Pie } from "@/app/pie";
-import { pesos, publicados } from "@/lib/producto";
+import { Rejilla } from "@/app/rejilla";
+import { marcas, publicados } from "@/lib/producto";
 
 /* ISR en vez de dinámico. Un catálogo no cambia entre visita y visita, y
  * servirlo desde caché tiene dos efectos que importan: la base se consulta
@@ -36,6 +39,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Tienda() {
   const productos = await publicados();
 
+  /* Los nombres salen del dato, no de la memoria de nadie.
+   *
+   * Esta frase decía «Bio Essens, Dermanat, Botanikalia» y las tres cosas
+   * estaban mal a la vez: Botanikalia no tiene nada publicado, y faltaban Allen
+   * Nutrition e Ilovepinch. Con la fila de filtros justo debajo, la copia se
+   * contradecía con la propia pantalla. Escrita a mano, esta lista vuelve a
+   * mentir en cuanto entre o salga una marca. */
+  const nombres = (await marcas()).map((m) => m.marca);
+  const listaDeMarcas =
+    nombres.length > 1
+      ? `${nombres.slice(0, -1).join(", ")} y ${nombres.at(-1)}`
+      : (nombres[0] ?? "");
+
   if (productos.length === 0) {
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
@@ -55,6 +71,7 @@ export default async function Tienda() {
 
   return (
     <>
+      <Cabecera />
       <main className="mx-auto max-w-6xl px-6 py-12">
         <header className="border-b border-linea pb-8">
           <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">Eve-Store</p>
@@ -62,43 +79,13 @@ export default async function Tienda() {
             Aceites naturales y cuidado de la piel
           </h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-pizarra">
-            Marcas colombianas: Bio Essens, Dermanat, Botanikalia. {productos.length} productos, con
-            existencias reales — si dice que hay, hay.
+            Marcas colombianas: {listaDeMarcas}. {productos.length} productos, con existencias
+            reales — si dice que hay, hay.
           </p>
+          <FiltroMarcas />
         </header>
 
-        <ul className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {productos.map((p) => (
-            <li key={p.slug}>
-              <a href={`/producto/${p.slug}`} className="group flex flex-col gap-3">
-                <div className="aspect-square overflow-hidden rounded-xl border border-linea bg-white">
-                  {p.imagen && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={p.imagen}
-                      alt={p.nombre}
-                      loading="lazy"
-                      className="size-full object-contain p-4"
-                    />
-                  )}
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-pizarra">{p.marca}</p>
-                  <h2 className="font-semibold leading-snug group-hover:underline">
-                    {p.nombre}
-                    {p.contenido && (
-                      <span className="font-normal text-pizarra"> · {p.contenido}</span>
-                    )}
-                  </h2>
-                  <p className="mt-1 font-display text-lg font-bold tabular-nums">
-                    {pesos.format(p.precio_minor)}
-                  </p>
-                  {p.existencias === 0 && <p className="text-xs text-alerta">Agotado</p>}
-                </div>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <Rejilla productos={productos} />
       </main>
       <Pie />
     </>

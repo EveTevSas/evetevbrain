@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { sql } from "drizzle-orm";
 
+import { Cabecera } from "@/app/cabecera";
 import { Pie } from "@/app/pie";
 import { db } from "@/db/connection";
 import { pesos } from "@/lib/producto";
@@ -49,6 +50,7 @@ export default async function Pedido({ params }: { params: Promise<{ numero: str
 
   return (
     <>
+      <Cabecera />
       <main className="mx-auto max-w-2xl px-6 py-12">
         <p className="text-xs font-semibold uppercase tracking-widest text-exito">
           Pedido confirmado

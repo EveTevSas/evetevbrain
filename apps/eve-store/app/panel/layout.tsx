@@ -3,7 +3,14 @@ import { redirect } from "next/navigation";
 
 import { administrador } from "@/lib/supabase";
 
-export const metadata: Metadata = { title: "Panel · Eve-Store" };
+/* El panel no se rastrea, y se declara aquí por la misma razón que el guardia:
+ * envuelve todas sus páginas, así que una pantalla nueva nace excluida sin que
+ * nadie tenga que acordarse. Antes esto lo cubría el `noindex` del layout raíz,
+ * que de paso hacía invisible la tienda entera. */
+export const metadata: Metadata = {
+  title: "Panel · Eve-Store",
+  robots: { index: false, follow: false }
+};
 
 /* El guardia de autorización del panel.
  *
