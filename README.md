@@ -4,6 +4,10 @@ Monorepo de **Evetev SAS**. Nuestro producto es **EvePay**, la plataforma de pag
 (PSP/gateway sobre Akua). El **dashboard de conjuntos residenciales** es su primera
 vertical: la cuña con la que validamos la plataforma cobrando dinero real.
 
+No todo lo que vive aquí cuelga de EvePay: **EveLedger** (`apps/eveledger`) es
+software de operación para estaciones de servicio y no mueve dinero, lo registra.
+Comparte marca, CI y despliegue; no la plataforma de pagos.
+
 > La fuente de verdad de cómo trabajamos es la constitución:
 > [`docs/ESTANDARES_INGENIERIA.md`](docs/ESTANDARES_INGENIERIA.md).
 > Estándares de la vertical: [`docs/ESTANDARES_EVECONECTA.md`](docs/ESTANDARES_EVECONECTA.md).
@@ -19,6 +23,7 @@ vertical: la cuña con la que validamos la plataforma cobrando dinero real.
 apps/
 ├── api/            # EvePay — el núcleo de pagos (NestJS). No conoce el dominio de la vertical.
 ├── eveconecta/     # EveConecta (Next.js): aplicación de propiedad horizontal.
+├── eveledger/      # EveLedger (Next.js): operación diaria de estaciones de servicio.
 └── website/        # evetev.com — sitio corporativo / marketing (estático, Vercel).
 packages/
 ├── shared/         # contrato de EvePay: tipos + esquemas Zod
@@ -66,8 +71,9 @@ pnpm lint && pnpm typecheck && pnpm test
 
 ## Despliegue: cada app se construye sola
 
-Seis proyectos de Vercel apuntan a este repositorio, y por defecto **todos**
-reconstruían en cada push, tocara lo que tocara el commit. Un cambio de una línea
+Una decena de proyectos de Vercel apuntan a este repositorio —y el número solo
+sube—, y por defecto **todos** reconstruían en cada push, tocara lo que tocara el
+commit. Un cambio de una línea
 en una landing gastaba seis despliegues, y cada PR los cuenta dos veces —preview
 y merge—. Un día de trabajo normal agotó el tope diario del plan Hobby: los
 builds empezaron a fallar con `upgradeToPro=build-rate-limit`, y con ellos dejó
@@ -93,6 +99,11 @@ Dos detalles que no son arbitrarios:
   subida de dependencia cambia lo que se despliega sin tocar su carpeta. Las
   landings estáticas y `eve-studio` no lo necesitan: no instalan nada del
   workspace.
+
+Nota sobre la cuota: el plan es Hobby, con **100 builds en una ventana móvil de
+24 horas**, y cada PR cuenta doble (preview y merge). El `ignoreCommand` es lo
+que hace que añadir una app séptima no multiplique el gasto: solo construye la
+que cambió.
 
 ## Contribuir
 

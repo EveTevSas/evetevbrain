@@ -24,6 +24,10 @@ apps/eveconecta-landing/formularios.js
 apps/evepay/base.css
 apps/evepay/formularios.js
 
+# Cliente de Prisma de EveLedger: lo escribe `prisma generate` en cada
+# instalación y build. Es código generado, no se edita y no está versionado.
+apps/eveledger/src/generated/
+
 # Enlace del CLI de Vercel al proyecto. Lo genera `vercel link` y lo ignora git;
 # que Prettier lo reformatee no rompe nada, pero es ruido en cada ejecución.
 .vercel/

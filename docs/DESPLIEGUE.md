@@ -6,16 +6,22 @@ constitución (`ESTANDARES_INGENIERIA.md` §10) y las cuentas de
 
 ## Idea clave
 
-Es un **monorepo → dos proyectos en Vercel**, ambos apuntando al mismo repo
+Es un **monorepo → muchos proyectos en Vercel**, todos apuntando al mismo repo
 `EveTevSas/evetevbrain` pero con **Root Directory distinto**. Cada uno trae su
 `vercel.json`, así que la config ya está versionada; en el dashboard solo fijas el
 Root Directory y el dominio.
 
-| App            | Root Directory    | Dominio                | Hosting                        |
-| -------------- | ----------------- | ---------------------- | ------------------------------ |
-| `website`      | `apps/website`    | `evetev.com` (+ `www`) | Vercel (estático)              |
-| `eveconecta`   | `apps/eveconecta` | `conecta.evetev.com`   | Vercel (Next.js)               |
-| `api` (EvePay) | `apps/api`        | `api.evetev.com`       | Railway _(cuando se requiera)_ |
+La tabla de abajo recoge las apps con dominio de marca, no todas: hoy hay una
+decena de proyectos, contando las landings y las apps sin dominio propio. Cada
+push los dispara a todos, y por eso el `ignoreCommand` de cada `vercel.json` no
+es opcional (ver el README de la raíz).
+
+| App            | Root Directory    | Dominio                              | Hosting                        |
+| -------------- | ----------------- | ------------------------------------ | ------------------------------ |
+| `website`      | `apps/website`    | `evetev.com` (+ `www`)               | Vercel (estático)              |
+| `eveconecta`   | `apps/eveconecta` | `conecta.evetev.com`                 | Vercel (Next.js)               |
+| `eveledger`    | `apps/eveledger`  | _sin dominio propio, `*.vercel.app`_ | Vercel (Next.js)               |
+| `api` (EvePay) | `apps/api`        | `api.evetev.com`                     | Railway _(cuando se requiera)_ |
 
 ---
 
@@ -61,6 +67,45 @@ Root Directory y el dominio.
    > Usa los valores del proyecto Supabase de EveConecta. `DATABASE_URL` es
    > exclusiva del servidor y `NEXT_PUBLIC_API_URL` apunta a EvePay por HTTP.
 4. **Deploy** → **Settings → Domains** → agrega `conecta.evetev.com`.
+
+## 2 bis. EveLedger → `*.vercel.app`
+
+EveLedger es el MVP de operación diaria de estaciones de servicio. **No lleva
+dominio propio todavía**: se despliega en la URL que asigna Vercel y el
+subdominio se decide cuando el cliente lo apruebe. Por eso este paso no toca DNS.
+
+1. Vercel → **Add New → Project** → el **mismo** repo.
+2. **Root Directory:** `apps/eveledger`. Framework Next.js;
+   `apps/eveledger/vercel.json` lo confirma y trae el `ignoreCommand` que evita
+   reconstruir cuando el commit no toca la carpeta.
+3. **Base de datos:** proyecto **Supabase propio de EveLedger**, separado de los
+   de EvePay y EveConecta. Motivo: los datos son de **un cliente** (una estación
+   de servicio), no de la plataforma; mezclarlos con `evepay` o `conjuntos`
+   ataría la operación de un cliente al ciclo de vida de la plataforma.
+4. **Environment Variables** (Settings → Environment Variables):
+   ```
+   DATABASE_URL   # cadena del pooler de Supabase (:6543), no la directa (:5432)
+   AUTH_SECRET    # secreto de la cookie de sesión: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+   > `ADMIN_EMAIL` y `ADMIN_PASSWORD` **no van en Vercel**: solo los lee la
+   > semilla (`db:sembrar`), que se corre una vez desde local contra la base de
+   > producción. Ponerlos en Vercel sería dejar la contraseña de administrador
+   > en el entorno de todas las funciones sin que nada la use.
+5. **Migraciones y semilla** (una sola vez, desde local, con el `DATABASE_URL` de
+   producción en el `.env`):
+   ```bash
+   pnpm --filter @evetev/eveledger db:migrar    # prisma migrate deploy
+   pnpm --filter @evetev/eveledger db:sembrar   # crea el usuario administrador
+   ```
+   Para migrar conviene usar la conexión **directa** (`:5432`); el pooler en modo
+   transacción no soporta bien el DDL de `migrate deploy`. La aplicación en
+   Vercel sí usa el pooler.
+6. **Deploy.** No hay paso de dominio: la URL de producción es la que da Vercel.
+
+> El build **no necesita la base**: todas las rutas son `force-dynamic` y
+> `prisma generate` solo lee el schema. Si un día una página se prerenderiza
+> contra Postgres, el build empezará a depender de `DATABASE_URL` y el job
+> `EveLedger` del CI —que corre sin ella— lo va a delatar antes que Vercel.
 
 ## 3. DNS (en name.com)
 

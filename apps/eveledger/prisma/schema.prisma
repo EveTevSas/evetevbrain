@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model Product {
+  id          String             @id @default(cuid())
+  nombre      String
+  orden       Int                @default(0)
+  nozzles     Nozzle[]
+  compras     Compra[]
+  inventarios InventarioFisico[]
+  costos      CostoProductoMes[]
+}
+
+model Nozzle {
+  id        String          @id @default(cuid())
+  nombre    String
+  productId String
+  product   Product         @relation(fields: [productId], references: [id])
+  activa    Boolean         @default(true)
+  readings  NozzleReading[]
+}
+
+enum CloseStatus {
+  DRAFT
+  CLOSED
+}
+
+model DailyClose {
+  id        String           @id @default(cuid())
+  fecha     DateTime         @unique
+  estado    CloseStatus      @default(DRAFT)
+  createdAt DateTime         @default(now())
+  closedAt  DateTime?
+  readings  NozzleReading[]
+  payments  Payment[]
+  credits   CreditSale[]
+  shortages EmployeeShortage[]
+}
+
+model NozzleReading {
+  id             String     @id @default(cuid())
+  closeId        String
+  close          DailyClose @relation(fields: [closeId], references: [id], onDelete: Cascade)
+  nozzleId       String
+  nozzle         Nozzle     @relation(fields: [nozzleId], references: [id])
+  lecturaInicial Decimal    @db.Decimal(14, 3)
+  lecturaFinal   Decimal    @db.Decimal(14, 3)
+  calibracion    Decimal    @default(0) @db.Decimal(14, 3)
+  precio         Decimal    @db.Decimal(14, 2)
+}
+
+enum PaymentType {
+  TRANSPORTADORA
+  CREDIBANCO
+  REDEBAN
+  OTRO
+}
+
+model Payment {
+  id      String      @id @default(cuid())
+  closeId String
+  close   DailyClose  @relation(fields: [closeId], references: [id], onDelete: Cascade)
+  tipo    PaymentType
+  detalle String?
+  valor   Decimal     @db.Decimal(14, 2)
+}
+
+model CreditSale {
+  id        String     @id @default(cuid())
+  closeId   String
+  close     DailyClose @relation(fields: [closeId], references: [id], onDelete: Cascade)
+  clienteId String
+  cliente   Cliente    @relation(fields: [clienteId], references: [id])
+  facturaId String?
+  factura   Factura?   @relation(fields: [facturaId], references: [id])
+  valor     Decimal    @db.Decimal(14, 2)
+}
+
+// Módulo 3 (cartera): clientes corporativos que tanquean a crédito.
+// Saldos, totales de factura, aging y FIFO se derivan al leer; solo se
+// persisten clientes, vales, facturas y abonos.
+model Cliente {
+  id       String      @id @default(cuid())
+  nombre   String      @unique
+  cupo     Decimal     @default(0) @db.Decimal(14, 2)
+  activo   Boolean     @default(true)
+  vales    CreditSale[]
+  facturas Factura[]
+  abonos   Abono[]
+}
+
+model Factura {
+  id           String       @id @default(cuid())
+  clienteId    String
+  cliente      Cliente      @relation(fields: [clienteId], references: [id])
+  fechaEmision DateTime // medianoche UTC; el aging corre desde aquí
+  createdAt    DateTime     @default(now())
+  vales        CreditSale[]
+}
+
+model Abono {
+  id        String   @id @default(cuid())
+  clienteId String
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  fecha     DateTime // medianoche UTC
+  valor     Decimal  @db.Decimal(14, 2)
+  detalle   String?
+  createdAt DateTime @default(now())
+}
+
+model EmployeeShortage {
+  id       String     @id @default(cuid())
+  closeId  String
+  close    DailyClose @relation(fields: [closeId], references: [id], onDelete: Cascade)
+  empleado String
+  faltante Decimal    @db.Decimal(14, 2)
+  abono    Decimal    @default(0) @db.Decimal(14, 2)
+}
+
+// Módulo 2 (inventarios): solo se persiste lo digitado (compras y físico).
+// Inicial, ventas, teórica y variación se derivan; nunca se guardan.
+model Compra {
+  id        String   @id @default(cuid())
+  fecha     DateTime
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  galones   Decimal  @db.Decimal(14, 3)
+  createdAt DateTime @default(now())
+
+  @@index([fecha])
+}
+
+model InventarioFisico {
+  id        String  @id @default(cuid())
+  fecha     DateTime
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  galones   Decimal @db.Decimal(14, 3)
+
+  @@unique([fecha, productId])
+}
+
+// Módulo 4 (financiero): solo se persisten los inputs (costos y gastos);
+// P/VENTA, márgenes, utilidades y comparativas se derivan al leer.
+model CostoProductoMes {
+  id           String  @id @default(cuid())
+  anio         Int
+  mes          Int
+  productId    String
+  product      Product @relation(fields: [productId], references: [id])
+  precioCompra Decimal @default(0) @db.Decimal(14, 2)
+  flete        Decimal @default(0) @db.Decimal(14, 2)
+
+  @@unique([anio, mes, productId])
+}
+
+enum CategoriaGasto {
+  NOMINA
+  SERVICIOS
+  FLETES
+  OTROS
+}
+
+model GastoOperativo {
+  id        String         @id @default(cuid())
+  anio      Int
+  mes       Int
+  categoria CategoriaGasto
+  valor     Decimal        @db.Decimal(14, 2)
+  cantidad  Decimal?       @db.Decimal(14, 3) // KW (servicios) o # empleados (nómina)
+  detalle   String?
+  createdAt DateTime       @default(now())
+
+  @@index([anio, mes])
+}

@@ -13,7 +13,7 @@ la topología de despliegue de `ESTANDARES_INGENIERIA.md` (§10).
 | Servicio                       | Para qué                                                                                                                                                                                | Inicio de sesión                                                     |
 | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | **GitHub**                     | Código, monorepo, CI (Actions), fuente de verdad. Org `EveTevSas`, repo `evetevbrain`.                                                                                                  | Cuenta GitHub del equipo                                             |
-| **Supabase**                   | Postgres + Auth + RLS. Schemas `evepay` y `conjuntos`.                                                                                                                                  | **Con GitHub** (SSO)                                                 |
+| **Supabase**                   | Postgres + Auth + RLS. Schemas `evepay` y `conjuntos`; proyecto aparte para EveLedger.                                                                                                  | **Con GitHub** (SSO)                                                 |
 | **Vercel**                     | Hosting de los frontends: `website` (evetev.com) y `eveconecta` (conecta.evetev.com).                                                                                                   | **Con GitHub** (SSO)                                                 |
 | **Railway**                    | Hosting de la API de EvePay (NestJS, proceso de larga vida).                                                                                                                            | _Cuenta aún no creada — se crea cuando se requiera desplegar la API_ |
 | **name.com**                   | Registrador del dominio **evetev.com** y su DNS.                                                                                                                                        | **Con email `contacto@evetev.com`**                                  |
@@ -33,4 +33,9 @@ la topología de despliegue de `ESTANDARES_INGENIERIA.md` (§10).
   - `fluxi.evetev.com` → proyecto Vercel de `apps/rag-assistant` (creado; producción en
     `rag-assistant-ochre.vercel.app`. **Falta el CNAME en name.com**: nombre `fluxi`,
     valor `5202b8778fa8f959.vercel-dns-017.com.`)
+  - `apps/eveledger` → proyecto Vercel **sin dominio de marca**: vive en la URL
+    `*.vercel.app` que asigna Vercel. Es un MVP para un cliente; el subdominio se
+    decide cuando lo apruebe. Su Postgres es un **proyecto Supabase propio**,
+    separado de los de EvePay y EveConecta: son datos de un cliente, no de la
+    plataforma.
 - **Railway:** la cuenta **todavía no existe**; se crea cuando haya que desplegar la API de EvePay. Al crearla, anotar aquí el método de inicio de sesión.
