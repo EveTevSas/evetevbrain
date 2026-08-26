@@ -7,10 +7,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { BotonAnadir } from "@/app/anadir";
 import { Cabecera } from "@/app/cabecera";
+import { Descripcion } from "@/app/descripcion";
 import { Pie } from "@/app/pie";
 import { Rejilla } from "@/app/rejilla";
-import { anadir } from "@/lib/acciones-carrito";
 import { hermanos, jsonLd, pesos, publicado, publicados, slugDeMarca } from "@/lib/producto";
 import { urlBase } from "@/lib/url";
 
@@ -71,6 +72,12 @@ function parrafos(texto: string): string[] {
        * mayúscula, así que no se toca, y no acabamos partiendo la razón social
        * de la empresa en tres párrafos. */
       .replace(/([a-záéíóúñ0-9)])\.([A-ZÁÉÍÓÚÑ¿¡])/g, "$1.\n\n$2")
+      /* Y lo mismo con los dos puntos: «Características Sensoriales:Sabor:» era
+       * un titular pegado a lo que titulaba. Aquí no hace falta salvar siglas
+       * —lo que va tras los dos puntos es una mayúscula que empieza etiqueta—,
+       * y las horas y las proporciones («12:30», «1:2») no entran porque
+       * después llevan cifra, no mayúscula. */
+      .replace(/([a-záéíóúñ]):([A-ZÁÉÍÓÚÑ])/g, "$1:\n\n$2")
       .split(/\n\s*\n/)
       .map((t) => t.trim())
       .filter(Boolean)
@@ -107,7 +114,11 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
         </a>
 
         <div className="mt-6 grid gap-10 md:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl border border-linea bg-white">
+          {/* Cuadrada y `self-start`: antes la caja se estiraba hasta igualar
+              la columna de texto, así que una descripción larga hacía crecer la
+              foto y otra corta la dejaba chata. La misma proporción que en la
+              rejilla, para que la ficha no sorprenda. */}
+          <div className="aspect-square self-start overflow-hidden rounded-2xl border border-linea bg-white">
             {p.imagen && (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={p.imagen} alt={p.nombre} className="size-full object-contain p-8" />
@@ -140,37 +151,28 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
               {hay ? `${p.existencias} disponibles · envío desde Bogotá` : "Agotado"}
             </p>
 
-            <form action={anadir}>
-              <input type="hidden" name="slug" value={p.slug} />
-              <button
-                disabled={!hay}
-                className="mt-6 w-full rounded-xl bg-coral px-6 py-3.5 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:bg-linea disabled:text-pizarra"
-              >
-                {hay ? "Añadir al carrito" : "Sin existencias"}
-              </button>
-            </form>
+            <BotonAnadir slug={p.slug} nombre={p.nombre} hay={hay} />
 
             {p.descripcion && (
-              <div className="mt-8 flex flex-col gap-4 text-sm leading-relaxed text-ink">
-                {parrafos(p.descripcion).map((parrafo, i) => (
-                  <p key={i} className="whitespace-pre-line">
-                    {parrafo}
-                  </p>
-                ))}
-              </div>
+              <Descripcion parrafos={parrafos(p.descripcion)} id={`ver-mas-${p.slug}`} />
             )}
 
             {atributos.length > 0 && (
               <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 border-t border-linea pt-6 text-sm">
                 {atributos.map(([k, v]) => (
                   <div key={k} className="col-span-2 grid grid-cols-subgrid">
-                    <dt className="text-pizarra">{k.replace(/_/g, " ")}</dt>
-                    <dd>{v}</dd>
+                    <dt className="text-pizarra first-letter:uppercase">{k.replace(/_/g, " ")}</dt>
+                    {/* Las comas llegan pegadas del volcado —«…deshidratación,Firmeza
+                        de la piel,Humecta»— y así no se leen como una lista sino
+                        como una palabra larga. Se separan al pintar; el dato no se
+                        toca. Y la etiqueta se capitaliza con CSS y no con
+                        `capitalize`, que pondría «Tipo De Piel». */}
+                    <dd>{v.replace(/,(?=\S)/g, ", ")}</dd>
                   </div>
                 ))}
                 {p.gtin && (
                   <div className="col-span-2 grid grid-cols-subgrid">
-                    <dt className="text-pizarra">código</dt>
+                    <dt className="text-pizarra first-letter:uppercase">código</dt>
                     <dd className="tabular-nums">{p.gtin}</dd>
                   </div>
                 )}

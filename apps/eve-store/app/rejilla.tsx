@@ -1,3 +1,4 @@
+import { BotonAnadir } from "@/app/anadir";
 import { pesos, type Tarjeta } from "@/lib/producto";
 
 /* La rejilla de productos, una sola vez.
@@ -19,7 +20,7 @@ export function Rejilla({ productos, nivel = 2 }: { productos: Tarjeta[]; nivel?
   return (
     <ul className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {productos.map((p) => (
-        <li key={p.slug}>
+        <li key={p.slug} className="relative">
           <a href={`/producto/${p.slug}`} className="group flex flex-col gap-3">
             <div className="aspect-square overflow-hidden rounded-xl border border-linea bg-white">
               {p.imagen && (
@@ -44,6 +45,18 @@ export function Rejilla({ productos, nivel = 2 }: { productos: Tarjeta[]; nivel?
               {p.existencias === 0 && <p className="text-xs text-alerta">Agotado</p>}
             </div>
           </a>
+
+          {/* El botón no puede ir DENTRO del enlace: un botón dentro de un
+              ancla es HTML inválido y el navegador decide por su cuenta qué
+              pasa al pulsarlo. Va superpuesto en una capa que calca la caja de
+              la foto —mismo ancho, mismo `aspect-square`— y que no intercepta
+              el ratón salvo en el propio botón, para que el resto de la imagen
+              siga llevando a la ficha. */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 aspect-square">
+            <div className="pointer-events-auto absolute bottom-3 right-3">
+              <BotonAnadir slug={p.slug} nombre={p.nombre} hay={p.existencias > 0} compacto />
+            </div>
+          </div>
         </li>
       ))}
     </ul>

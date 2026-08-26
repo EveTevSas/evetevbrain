@@ -20,3 +20,51 @@ body {
   background: var(--color-tinte);
   color: var(--color-noche);
 }
+
+/* Las dos animaciones del carrito.
+ *
+ * Confirman que el producto entró sin sacar a nadie de donde estaba: el icono
+ * salta y aparece un aviso abajo. Son la única señal que queda tras quitar el
+ * salto automático al carrito, así que tienen que verse — pero durar poco.
+ *
+ * Bajo `prefers-reduced-motion` no se anima nada. El aviso sigue apareciendo y
+ * el contador sigue subiendo: la información no depende del movimiento, que es
+ * la diferencia entre una animación y un mensaje. */
+@keyframes salto-carrito {
+  0%,
+  100% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(-4px) scale(1.15);
+  }
+  65% {
+    transform: translateY(0) scale(0.94);
+  }
+}
+
+@keyframes entra-aviso {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.salta {
+  animation: salto-carrito 0.5s ease-out;
+}
+
+.aviso-entra {
+  animation: entra-aviso 0.22s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .salta,
+  .aviso-entra {
+    animation: none;
+  }
+}
