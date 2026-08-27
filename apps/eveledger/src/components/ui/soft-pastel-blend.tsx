@@ -9,7 +9,7 @@ export function GradientBackground({ className }: { className?: string }) {
         overflow: "hidden",
         width: "100%",
         height: "100%",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#ffffff"
       }}
     >
       {/* Degradado lila desde esquina superior derecha */}
@@ -18,7 +18,7 @@ export function GradientBackground({ className }: { className?: string }) {
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "radial-gradient(ellipse 70% 80% at 100% 0%, rgba(196, 181, 253, 0.55) 0%, rgba(221, 214, 254, 0.3) 35%, rgba(255,255,255,0) 70%)",
+            "radial-gradient(ellipse 70% 80% at 100% 0%, rgba(196, 181, 253, 0.55) 0%, rgba(221, 214, 254, 0.3) 35%, rgba(255,255,255,0) 70%)"
         }}
       />
 
@@ -31,7 +31,7 @@ export function GradientBackground({ className }: { className?: string }) {
             linear-gradient(rgba(180,180,200,0.18) 1px, transparent 1px),
             linear-gradient(90deg, rgba(180,180,200,0.18) 1px, transparent 1px)
           `,
-          backgroundSize: "80px 80px",
+          backgroundSize: "80px 80px"
         }}
       />
     </div>

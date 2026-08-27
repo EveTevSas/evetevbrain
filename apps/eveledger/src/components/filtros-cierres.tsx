@@ -40,21 +40,20 @@ export default function FiltrosCierres({ desde, hasta, estado, total, filtrados 
   }
 
   return (
-    <div style={{
-      background: "#fff",
-      border: "1px solid #EDF3FA",
-      borderRadius: 14,
-      padding: "1rem 1.25rem",
-      marginBottom: "1.25rem",
-    }}>
+    <div
+      style={{
+        background: "#fff",
+        border: "1px solid #EDF3FA",
+        borderRadius: 14,
+        padding: "1rem 1.25rem",
+        marginBottom: "1.25rem"
+      }}
+    >
       <form onSubmit={aplicar}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.875rem", alignItems: "flex-end" }}>
-
           {/* Desde */}
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0A2540" }}>
-              Desde
-            </label>
+            <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0A2540" }}>Desde</label>
             <input
               className="inp"
               type="date"
@@ -66,9 +65,7 @@ export default function FiltrosCierres({ desde, hasta, estado, total, filtrados 
 
           {/* Hasta */}
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0A2540" }}>
-              Hasta
-            </label>
+            <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0A2540" }}>Hasta</label>
             <input
               className="inp"
               type="date"
@@ -80,15 +77,8 @@ export default function FiltrosCierres({ desde, hasta, estado, total, filtrados 
 
           {/* Estado */}
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0A2540" }}>
-              Estado
-            </label>
-            <select
-              className="inp"
-              name="estado"
-              defaultValue={estado}
-              style={{ width: 140 }}
-            >
+            <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0A2540" }}>Estado</label>
+            <select className="inp" name="estado" defaultValue={estado} style={{ width: 140 }}>
               <option value="">Todos</option>
               <option value="CLOSED">Cerrado</option>
               <option value="DRAFT">Borrador</option>
@@ -120,7 +110,14 @@ export default function FiltrosCierres({ desde, hasta, estado, total, filtrados 
 
           {/* Contador */}
           {hayFiltros && (
-            <p style={{ fontSize: "0.8rem", color: "#64748B", alignSelf: "center", marginLeft: "auto" }}>
+            <p
+              style={{
+                fontSize: "0.8rem",
+                color: "#64748B",
+                alignSelf: "center",
+                marginLeft: "auto"
+              }}
+            >
               {filtrados} de {total} cierres
             </p>
           )}

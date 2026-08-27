@@ -9,7 +9,7 @@ import type { CloseStatus } from "@/generated/prisma/client";
 export const dynamic = "force-dynamic";
 
 export default async function CierresPage({
-  searchParams,
+  searchParams
 }: {
   searchParams: Promise<{ desde?: string; hasta?: string; estado?: string }>;
 }) {
@@ -43,8 +43,8 @@ export default async function CierresPage({
     prisma.dailyClose.findMany({
       where,
       orderBy: { fecha: "desc" },
-      include: { readings: true },
-    }),
+      include: { readings: true }
+    })
   ]);
 
   return (
@@ -52,12 +52,16 @@ export default async function CierresPage({
       {/* Encabezado */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p style={{
-            margin: "0 0 0.2rem",
-            fontSize: "0.68rem", fontWeight: 700,
-            textTransform: "uppercase", letterSpacing: "0.1em",
-            color: "#4b3075",
-          }}>
+          <p
+            style={{
+              margin: "0 0 0.2rem",
+              fontSize: "0.68rem",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              color: "#4b3075"
+            }}
+          >
             Operación diaria
           </p>
           <h1 style={{ margin: 0 }}>Cierres</h1>
@@ -82,7 +86,7 @@ export default async function CierresPage({
           <p className="text-eve-pizarra">
             {desde || hasta || estadoParam
               ? "Ningún cierre coincide con los filtros aplicados."
-              : "No hay cierres todavía. Crea el primero con \"Nuevo cierre\"."}
+              : 'No hay cierres todavía. Crea el primero con "Nuevo cierre".'}
           </p>
         </div>
       ) : (
@@ -90,13 +94,44 @@ export default async function CierresPage({
           <table className="w-full min-w-[560px] text-sm">
             <thead style={{ background: "#F4F9FD", textAlign: "left" }}>
               <tr>
-                <th style={{ padding: "0.75rem 1.25rem", fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94A3B8", borderBottom: "1px solid #EDF3FA" }}>
+                <th
+                  style={{
+                    padding: "0.75rem 1.25rem",
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    color: "#94A3B8",
+                    borderBottom: "1px solid #EDF3FA"
+                  }}
+                >
                   Fecha
                 </th>
-                <th style={{ padding: "0.75rem 1.25rem", fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94A3B8", borderBottom: "1px solid #EDF3FA" }}>
+                <th
+                  style={{
+                    padding: "0.75rem 1.25rem",
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    color: "#94A3B8",
+                    borderBottom: "1px solid #EDF3FA"
+                  }}
+                >
                   Estado
                 </th>
-                <th style={{ padding: "0.75rem 1.25rem", fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94A3B8", borderBottom: "1px solid #EDF3FA", textAlign: "right" }}>
+                <th
+                  style={{
+                    padding: "0.75rem 1.25rem",
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    color: "#94A3B8",
+                    borderBottom: "1px solid #EDF3FA",
+                    textAlign: "right"
+                  }}
+                >
                   Total ventas
                 </th>
                 <th style={{ padding: "0.75rem 1.25rem", borderBottom: "1px solid #EDF3FA" }} />
@@ -109,12 +144,14 @@ export default async function CierresPage({
                     lecturaInicial: Number(r.lecturaInicial),
                     lecturaFinal: Number(r.lecturaFinal),
                     calibracion: Number(r.calibracion),
-                    precio: Number(r.precio),
+                    precio: Number(r.precio)
                   }))
                 );
                 return (
                   <tr key={c.id} style={{ borderTop: "1px solid #EDF3FA" }}>
-                    <td style={{ padding: "0.9rem 1.25rem", fontSize: "0.875rem", color: "#64748B" }}>
+                    <td
+                      style={{ padding: "0.9rem 1.25rem", fontSize: "0.875rem", color: "#64748B" }}
+                    >
                       {formatoFecha(c.fecha)}
                     </td>
                     <td style={{ padding: "0.9rem 1.25rem" }}>
@@ -129,13 +166,26 @@ export default async function CierresPage({
                         </span>
                       )}
                     </td>
-                    <td className="cifra" style={{ padding: "0.9rem 1.25rem", textAlign: "right", fontWeight: 700, color: "#0A2540" }}>
+                    <td
+                      className="cifra"
+                      style={{
+                        padding: "0.9rem 1.25rem",
+                        textAlign: "right",
+                        fontWeight: 700,
+                        color: "#0A2540"
+                      }}
+                    >
                       {formatoPesos(total)}
                     </td>
                     <td style={{ padding: "0.9rem 1.25rem", textAlign: "right" }}>
                       <Link
                         href={`/cierres/${c.id}`}
-                        style={{ color: "#4b3075", fontSize: "0.82rem", fontWeight: 600, textDecoration: "none" }}
+                        style={{
+                          color: "#4b3075",
+                          fontSize: "0.82rem",
+                          fontWeight: 600,
+                          textDecoration: "none"
+                        }}
                       >
                         {c.estado === "CLOSED" ? "Ver →" : "Editar →"}
                       </Link>
@@ -147,7 +197,15 @@ export default async function CierresPage({
           </table>
 
           {/* Footer con total de resultados */}
-          <div style={{ padding: "0.875rem 1.25rem", borderTop: "1px solid #EDF3FA", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div
+            style={{
+              padding: "0.875rem 1.25rem",
+              borderTop: "1px solid #EDF3FA",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}
+          >
             <span style={{ fontSize: "0.8rem", color: "#94A3B8" }}>
               {cierres.length} {cierres.length === 1 ? "cierre" : "cierres"}
               {(desde || hasta || estadoParam) && ` · filtrado de ${todos} total`}
@@ -155,16 +213,25 @@ export default async function CierresPage({
             {/* Resumen de ventas filtradas */}
             <span className="cifra" style={{ fontSize: "0.9rem", color: "#0A2540" }}>
               {formatoPesos(
-                cierres.reduce((acc, c) =>
-                  acc + totalVentasPesos(c.readings.map(r => ({
-                    lecturaInicial: Number(r.lecturaInicial),
-                    lecturaFinal: Number(r.lecturaFinal),
-                    calibracion: Number(r.calibracion),
-                    precio: Number(r.precio),
-                  }))), 0
+                cierres.reduce(
+                  (acc, c) =>
+                    acc +
+                    totalVentasPesos(
+                      c.readings.map((r) => ({
+                        lecturaInicial: Number(r.lecturaInicial),
+                        lecturaFinal: Number(r.lecturaFinal),
+                        calibracion: Number(r.calibracion),
+                        precio: Number(r.precio)
+                      }))
+                    ),
+                  0
                 )
               )}
-              <span style={{ fontSize: "0.72rem", fontWeight: 400, color: "#94A3B8", marginLeft: 4 }}>en ventas</span>
+              <span
+                style={{ fontSize: "0.72rem", fontWeight: 400, color: "#94A3B8", marginLeft: 4 }}
+              >
+                en ventas
+              </span>
             </span>
           </div>
         </div>

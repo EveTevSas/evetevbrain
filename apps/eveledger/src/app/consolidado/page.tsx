@@ -91,7 +91,12 @@ export default async function ConsolidadoPage({
         <table className="w-full min-w-[560px] text-sm">
           <thead className="bg-eve-tinte text-eve-pizarra">
             <tr>
-              <th className="py-2 text-left font-medium" style={{ width: 48, paddingLeft: "1.25rem", paddingRight: "0.5rem" }}>Día</th>
+              <th
+                className="py-2 text-left font-medium"
+                style={{ width: 48, paddingLeft: "1.25rem", paddingRight: "0.5rem" }}
+              >
+                Día
+              </th>
               {productos.map((p) => (
                 <th key={p.id} className="px-3 py-2 text-right font-medium">
                   {p.nombre}
@@ -105,7 +110,17 @@ export default async function ConsolidadoPage({
               const fila = matriz.get(dia);
               return (
                 <tr key={dia} className="border-t border-eve-linea">
-                  <td className="py-1.5 tabular-nums" style={{ paddingLeft: "1.25rem", paddingRight: "0.5rem", color: "#64748B", fontSize: "0.82rem" }}>{dia}</td>
+                  <td
+                    className="py-1.5 tabular-nums"
+                    style={{
+                      paddingLeft: "1.25rem",
+                      paddingRight: "0.5rem",
+                      color: "#64748B",
+                      fontSize: "0.82rem"
+                    }}
+                  >
+                    {dia}
+                  </td>
                   {productos.map((p) => {
                     const gal = fila?.get(p.id);
                     return (
@@ -131,7 +146,12 @@ export default async function ConsolidadoPage({
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-eve-linea bg-eve-tinte">
-              <td className="py-2 font-semibold" style={{ paddingLeft: "1.25rem", paddingRight: "0.5rem" }}>Total mes</td>
+              <td
+                className="py-2 font-semibold"
+                style={{ paddingLeft: "1.25rem", paddingRight: "0.5rem" }}
+              >
+                Total mes
+              </td>
               {productos.map((p) => (
                 <td key={p.id} className="cifra px-3 py-2 text-right">
                   {formatoGalones(totalPorProducto.get(p.id) ?? 0)}

@@ -31,14 +31,8 @@ const COLORES = ["#16A34A", "#1E6FEB", "#EE3D22"];
 const COLORES_BG = ["#F0FDF4", "#EEF4FF", "#FFF5F5"];
 
 /* ── Componente ─────────────────────────────────────────── */
-export default function AccordionInventario({
-  productos,
-}: {
-  productos: ProductoSerial[];
-}) {
-  const [abierto, setAbierto] = useState<string | null>(
-    productos[0]?.id ?? null
-  );
+export default function AccordionInventario({ productos }: { productos: ProductoSerial[] }) {
+  const [abierto, setAbierto] = useState<string | null>(productos[0]?.id ?? null);
 
   const idxAbierto = productos.findIndex((p) => p.id === abierto);
   const productoAbierto = idxAbierto >= 0 ? productos[idxAbierto] : null;
@@ -52,7 +46,7 @@ export default function AccordionInventario({
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gap: "1rem",
-          marginBottom: "1.25rem",
+          marginBottom: "1.25rem"
         }}
       >
         {productos.map((p, i) => {
@@ -74,7 +68,7 @@ export default function AccordionInventario({
                 cursor: "pointer",
                 textAlign: "left",
                 transition: "border-color 0.15s, background 0.15s",
-                width: "100%",
+                width: "100%"
               }}
             >
               {/* Nombre + chevron */}
@@ -82,7 +76,7 @@ export default function AccordionInventario({
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "flex-start",
+                  alignItems: "flex-start"
                 }}
               >
                 <p
@@ -90,7 +84,7 @@ export default function AccordionInventario({
                     margin: 0,
                     fontSize: "1rem",
                     fontWeight: 700,
-                    color: "#0A2540",
+                    color: "#0A2540"
                   }}
                 >
                   {p.nombre}
@@ -108,7 +102,7 @@ export default function AccordionInventario({
                     transform: activo ? "rotate(180deg)" : "rotate(0deg)",
                     transition: "transform 0.2s",
                     flexShrink: 0,
-                    marginTop: 2,
+                    marginTop: 2
                   }}
                 >
                   <polyline points="6 9 12 15 18 9" />
@@ -116,9 +110,7 @@ export default function AccordionInventario({
               </div>
 
               {/* Stats del mes */}
-              <div
-                style={{ display: "flex", gap: "1.25rem", marginTop: "1rem" }}
-              >
+              <div style={{ display: "flex", gap: "1.25rem", marginTop: "1rem" }}>
                 <div>
                   <p
                     style={{
@@ -127,7 +119,7 @@ export default function AccordionInventario({
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.07em",
-                      color: "#94A3B8",
+                      color: "#94A3B8"
                     }}
                   >
                     Compras mes
@@ -138,7 +130,7 @@ export default function AccordionInventario({
                       fontSize: "0.9rem",
                       fontWeight: 700,
                       color: "#0A2540",
-                      fontVariantNumeric: "tabular-nums",
+                      fontVariantNumeric: "tabular-nums"
                     }}
                   >
                     {p.totalCompras > 0 ? formatoGalones(p.totalCompras) : "—"}
@@ -152,7 +144,7 @@ export default function AccordionInventario({
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.07em",
-                      color: "#94A3B8",
+                      color: "#94A3B8"
                     }}
                   >
                     Alertas
@@ -162,7 +154,7 @@ export default function AccordionInventario({
                       margin: 0,
                       fontSize: "0.9rem",
                       fontWeight: 700,
-                      color: p.alertas > 0 ? "#B91C1C" : "#16A34A",
+                      color: p.alertas > 0 ? "#B91C1C" : "#16A34A"
                     }}
                   >
                     {p.alertas === 0 ? "0" : `${p.alertas} días`}
@@ -176,7 +168,7 @@ export default function AccordionInventario({
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.07em",
-                      color: "#94A3B8",
+                      color: "#94A3B8"
                     }}
                   >
                     Digitados
@@ -186,7 +178,7 @@ export default function AccordionInventario({
                       margin: 0,
                       fontSize: "0.9rem",
                       fontWeight: 700,
-                      color: "#0A2540",
+                      color: "#0A2540"
                     }}
                   >
                     {p.diasConFisico} días
@@ -205,7 +197,7 @@ export default function AccordionInventario({
             background: "#fff",
             border: "1px solid #EDF3FA",
             borderRadius: 14,
-            overflow: "hidden",
+            overflow: "hidden"
           }}
         >
           {/* Sub-encabezado */}
@@ -215,7 +207,7 @@ export default function AccordionInventario({
               borderBottom: "1px solid #EDF3FA",
               display: "flex",
               alignItems: "center",
-              gap: "0.5rem",
+              gap: "0.5rem"
             }}
           >
             <span
@@ -225,7 +217,7 @@ export default function AccordionInventario({
                 borderRadius: "50%",
                 background: colorAbierto,
                 display: "inline-block",
-                flexShrink: 0,
+                flexShrink: 0
               }}
             />
             <p
@@ -233,7 +225,7 @@ export default function AccordionInventario({
                 margin: 0,
                 fontSize: "0.82rem",
                 fontWeight: 600,
-                color: "#334155",
+                color: "#334155"
               }}
             >
               {productoAbierto.nombre} — detalle del mes
@@ -247,7 +239,7 @@ export default function AccordionInventario({
                 width: "100%",
                 minWidth: 700,
                 fontSize: "0.85rem",
-                borderCollapse: "collapse",
+                borderCollapse: "collapse"
               }}
             >
               <thead>
@@ -260,7 +252,7 @@ export default function AccordionInventario({
                     { label: "Teórica", align: "right" as const },
                     { label: "Físico", align: "right" as const },
                     { label: "Variación", align: "right" as const },
-                    { label: "", align: "right" as const },
+                    { label: "", align: "right" as const }
                   ].map((h) => (
                     <th
                       key={h.label}
@@ -276,7 +268,7 @@ export default function AccordionInventario({
                         position: "sticky",
                         top: 0,
                         background: "#F4F9FD",
-                        zIndex: 2,
+                        zIndex: 2
                       }}
                     >
                       {h.label}
@@ -286,20 +278,15 @@ export default function AccordionInventario({
               </thead>
               <tbody>
                 {productoAbierto.filas.map((f) => {
-                  const vacio = (
-                    <span style={{ color: "#CBD5E1" }}>—</span>
-                  );
+                  const vacio = <span style={{ color: "#CBD5E1" }}>—</span>;
                   return (
-                    <tr
-                      key={f.dia}
-                      style={{ borderTop: "1px solid #EDF3FA" }}
-                    >
+                    <tr key={f.dia} style={{ borderTop: "1px solid #EDF3FA" }}>
                       {/* Día */}
                       <td
                         style={{
                           padding: "0.55rem 0.875rem",
                           color: "#334155",
-                          fontWeight: 600,
+                          fontWeight: 600
                         }}
                       >
                         {f.dia}
@@ -311,12 +298,10 @@ export default function AccordionInventario({
                           padding: "0.55rem 0.875rem",
                           textAlign: "right",
                           fontVariantNumeric: "tabular-nums",
-                          color: "#64748B",
+                          color: "#64748B"
                         }}
                       >
-                        {f.inicial !== null
-                          ? formatoGalones(f.inicial)
-                          : vacio}
+                        {f.inicial !== null ? formatoGalones(f.inicial) : vacio}
                       </td>
 
                       {/* Compras */}
@@ -326,7 +311,7 @@ export default function AccordionInventario({
                           textAlign: "right",
                           fontVariantNumeric: "tabular-nums",
                           color: f.compras > 0 ? colorAbierto : undefined,
-                          fontWeight: f.compras > 0 ? 700 : 400,
+                          fontWeight: f.compras > 0 ? 700 : 400
                         }}
                       >
                         {f.compras > 0 ? formatoGalones(f.compras) : vacio}
@@ -338,7 +323,7 @@ export default function AccordionInventario({
                           padding: "0.55rem 0.875rem",
                           textAlign: "right",
                           fontVariantNumeric: "tabular-nums",
-                          color: "#64748B",
+                          color: "#64748B"
                         }}
                       >
                         {f.ventas !== null ? formatoGalones(f.ventas) : vacio}
@@ -350,12 +335,10 @@ export default function AccordionInventario({
                           padding: "0.55rem 0.875rem",
                           textAlign: "right",
                           fontVariantNumeric: "tabular-nums",
-                          color: "#64748B",
+                          color: "#64748B"
                         }}
                       >
-                        {f.teorica !== null
-                          ? formatoGalones(f.teorica)
-                          : vacio}
+                        {f.teorica !== null ? formatoGalones(f.teorica) : vacio}
                       </td>
 
                       {/* Físico */}
@@ -365,16 +348,14 @@ export default function AccordionInventario({
                           textAlign: "right",
                           fontVariantNumeric: "tabular-nums",
                           color: "#0A2540",
-                          fontWeight: f.fisico !== null ? 600 : 400,
+                          fontWeight: f.fisico !== null ? 600 : 400
                         }}
                       >
                         {f.fisico !== null ? formatoGalones(f.fisico) : vacio}
                       </td>
 
                       {/* Variación */}
-                      <td
-                        style={{ padding: "0.55rem 0.875rem", textAlign: "right" }}
-                      >
+                      <td style={{ padding: "0.55rem 0.875rem", textAlign: "right" }}>
                         {f.variacion !== null ? (
                           f.alerta ? (
                             <span
@@ -387,7 +368,7 @@ export default function AccordionInventario({
                                 color: "#B91C1C",
                                 background: "#FEE2E2",
                                 borderRadius: 999,
-                                padding: "0.15rem 0.55rem",
+                                padding: "0.15rem 0.55rem"
                               }}
                             >
                               ⚠ {formatoGalones(f.variacion)}
@@ -397,7 +378,7 @@ export default function AccordionInventario({
                               style={{
                                 fontVariantNumeric: "tabular-nums",
                                 color: "#16A34A",
-                                fontWeight: 600,
+                                fontWeight: 600
                               }}
                             >
                               {formatoGalones(f.variacion)}
@@ -409,16 +390,14 @@ export default function AccordionInventario({
                       </td>
 
                       {/* Link editar */}
-                      <td
-                        style={{ padding: "0.55rem 0.875rem", textAlign: "right" }}
-                      >
+                      <td style={{ padding: "0.55rem 0.875rem", textAlign: "right" }}>
                         <Link
                           href={`/inventarios/${f.fecha}`}
                           style={{
                             color: "#1E6FEB",
                             fontSize: "0.8rem",
                             fontWeight: 600,
-                            textDecoration: "none",
+                            textDecoration: "none"
                           }}
                         >
                           Editar →

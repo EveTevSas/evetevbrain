@@ -25,7 +25,7 @@ export default function LoginPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: "1.5rem",
+          padding: "1.5rem"
         }}
       >
         {/* Card */}
@@ -39,7 +39,7 @@ export default function LoginPage() {
             border: "1px solid rgba(255,255,255,0.9)",
             borderRadius: 20,
             padding: "2.5rem",
-            boxShadow: "0 8px 40px rgba(10,37,64,0.1)",
+            boxShadow: "0 8px 40px rgba(10,37,64,0.1)"
           }}
         >
           {/* Logo + nombre */}
@@ -50,7 +50,7 @@ export default function LoginPage() {
               flexDirection: "column",
               alignItems: "center",
               gap: "0.625rem",
-              textAlign: "center",
+              textAlign: "center"
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -67,7 +67,7 @@ export default function LoginPage() {
                 fontSize: "1.75rem",
                 color: "#0A2540",
                 margin: 0,
-                letterSpacing: "-0.01em",
+                letterSpacing: "-0.01em"
               }}
             >
               EveLedger
@@ -76,7 +76,7 @@ export default function LoginPage() {
               style={{
                 fontSize: "0.82rem",
                 color: "#64748B",
-                margin: 0,
+                margin: 0
               }}
             >
               Operación diaria de tu estación · por Evetev
@@ -96,7 +96,7 @@ export default function LoginPage() {
                   fontSize: "0.75rem",
                   fontWeight: 600,
                   color: "#334155",
-                  letterSpacing: "0.03em",
+                  letterSpacing: "0.03em"
                 }}
               >
                 Correo
@@ -116,7 +116,7 @@ export default function LoginPage() {
                   padding: "0.7rem 0.9rem",
                   color: "#0A2540",
                   fontSize: "0.9rem",
-                  outline: "none",
+                  outline: "none"
                 }}
               />
             </div>
@@ -129,7 +129,7 @@ export default function LoginPage() {
                   fontSize: "0.75rem",
                   fontWeight: 600,
                   color: "#334155",
-                  letterSpacing: "0.03em",
+                  letterSpacing: "0.03em"
                 }}
               >
                 Contraseña
@@ -149,7 +149,7 @@ export default function LoginPage() {
                   padding: "0.7rem 0.9rem",
                   color: "#0A2540",
                   fontSize: "0.9rem",
-                  outline: "none",
+                  outline: "none"
                 }}
               />
             </div>
@@ -168,7 +168,7 @@ export default function LoginPage() {
                   padding: "0.6rem 0.875rem",
                   fontSize: "0.85rem",
                   color: "#B91C1C",
-                  margin: 0,
+                  margin: 0
                 }}
               >
                 <IconoError className="h-4 w-4 shrink-0" />
@@ -195,7 +195,7 @@ export default function LoginPage() {
                 cursor: pendiente ? "not-allowed" : "pointer",
                 letterSpacing: "0.02em",
                 boxShadow: pendiente ? "none" : "0 4px 20px rgba(75,48,117,0.35)",
-                transition: "opacity 0.15s",
+                transition: "opacity 0.15s"
               }}
             >
               {pendiente ? "Ingresando…" : "Ingresar"}

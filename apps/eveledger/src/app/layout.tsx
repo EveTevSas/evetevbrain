@@ -39,14 +39,16 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
   return (
     <html lang="es" className={`${inter.variable} ${baloo.variable} h-full antialiased`}>
-      <body style={{
-        margin: 0,
-        minHeight: "100vh",
-        background: autenticado ? "#F5F5F5" : "#ffffff",
-        fontFamily: "var(--font-sans)",
-        color: "#0A2540",
-        lineHeight: 1.65,
-      }}>
+      <body
+        style={{
+          margin: 0,
+          minHeight: "100vh",
+          background: autenticado ? "#F5F5F5" : "#ffffff",
+          fontFamily: "var(--font-sans)",
+          color: "#0A2540",
+          lineHeight: 1.65
+        }}
+      >
         {/* Sin sesión: fondo neutro lo pone el propio login (GradientBackground) */}
         {autenticado ? (
           <div style={{ display: "flex", minHeight: "100vh" }}>
@@ -54,46 +56,58 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <SidebarNav />
 
             {/* Área de contenido */}
-            <div style={{
-              flex: 1,
-              marginLeft: 240,
-              display: "flex",
-              flexDirection: "column",
-              minHeight: "100vh",
-            }}>
-              {/* Top bar */}
-              <header style={{
-                height: 56,
-                background: "#fff",
-                borderBottom: "1px solid #EDF3FA",
+            <div
+              style={{
+                flex: 1,
+                marginLeft: 240,
                 display: "flex",
-                alignItems: "center",
-                padding: "0 2rem",
-                position: "sticky",
-                top: 0,
-                zIndex: 30,
-              }}>
+                flexDirection: "column",
+                minHeight: "100vh"
+              }}
+            >
+              {/* Top bar */}
+              <header
+                style={{
+                  height: 56,
+                  background: "#fff",
+                  borderBottom: "1px solid #EDF3FA",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "0 2rem",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 30
+                }}
+              >
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#16A34A", display: "inline-block" }} />
+                  <span
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      background: "#16A34A",
+                      display: "inline-block"
+                    }}
+                  />
                   <span style={{ fontSize: "0.8rem", color: "#64748B" }}>En operación</span>
                 </div>
               </header>
 
               {/* Contenido principal */}
-              <main style={{
-                flex: 1,
-                padding: "2rem 2.5rem",
-                width: "100%",
-              }}>
+              <main
+                style={{
+                  flex: 1,
+                  padding: "2rem 2.5rem",
+                  width: "100%"
+                }}
+              >
                 {children}
               </main>
             </div>
           </div>
         ) : (
           /* Sin sesión: el login maneja su propio layout y fondo */
-          <main style={{ minHeight: "100vh" }}>
-            {children}
-          </main>
+          <main style={{ minHeight: "100vh" }}>{children}</main>
         )}
       </body>
     </html>
