@@ -18,6 +18,17 @@ async function main() {
   });
   console.log(`Admin listo: ${email}`);
 
+  // Los datos de ejemplo son para desarrollo. En producción sobran: los
+  // productos y mangueras se configuran en /config con los de la estación real,
+  // y los clientes de cartera son de verdad —dejar "Transportes SA" ahí sería
+  // basura en la cartera de un cliente—. Por eso se pueden apagar con
+  // SEMILLA_EJEMPLOS=0, que es lo que hace el despliegue (docs/DESPLIEGUE.md).
+  // El default los deja puestos para no romper el arranque de un clon nuevo.
+  if (process.env.SEMILLA_EJEMPLOS === "0") {
+    console.log("SEMILLA_EJEMPLOS=0 — sin datos de ejemplo, solo el administrador.");
+    return;
+  }
+
   // Productos y mangueras de ejemplo (idempotente por nombre).
   const productos = [
     { nombre: "Corriente", orden: 1 },
