@@ -126,8 +126,26 @@ pnpm db:migrar    # aplica migraciones ya escritas (producción)
 pnpm db:sembrar   # crea el admin y datos de ejemplo
 ```
 
-Los scripts de integración corren contra una base real y **escriben en ella**;
-son para desarrollo local, no para CI:
+### Datos de demostración
+
+Para recorrer la aplicación entera con datos que se parecen a los de verdad —un
+mes de cierres cuadrados, inventarios con merma, cartera en los tres rangos del
+semáforo con abonos FIFO y sobrecupo, y el financiero con su comparativa—:
+
+```bash
+pnpm exec tsx scripts/demo-completa.ts      # genera el mes
+pnpm exec tsx scripts/demo-limpiar.ts --si  # lo borra todo (conserva usuarios)
+```
+
+`demo-completa` se niega a correr si ya hay cierres: no está pensado para
+mezclarse con datos existentes. `demo-limpiar` **no distingue** lo generado de lo
+digitado a mano —borra toda la operación—, por eso exige el `--si`. Ninguno de
+los dos es la semilla: `db:sembrar` solo crea el administrador.
+
+### Scripts de integración
+
+Corren contra una base real y **escriben en ella**; son para desarrollo local,
+no para CI:
 
 ```bash
 pnpm exec tsx scripts/integracion.ts              # lógica de cierres
