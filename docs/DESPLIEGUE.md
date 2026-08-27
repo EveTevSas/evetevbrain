@@ -84,22 +84,63 @@ subdominio se decide cuando el cliente lo apruebe. Por eso este paso no toca DNS
    ataría la operación de un cliente al ciclo de vida de la plataforma.
 4. **Environment Variables** (Settings → Environment Variables):
    ```
-   DATABASE_URL   # cadena del pooler de Supabase (:6543), no la directa (:5432)
+   DATABASE_URL   # transaction pooler de Supabase (:6543) — ver la tabla del paso 5
    AUTH_SECRET    # secreto de la cookie de sesión: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
    ```
    > `ADMIN_EMAIL` y `ADMIN_PASSWORD` **no van en Vercel**: solo los lee la
    > semilla (`db:sembrar`), que se corre una vez desde local contra la base de
    > producción. Ponerlos en Vercel sería dejar la contraseña de administrador
    > en el entorno de todas las funciones sin que nada la use.
-5. **Migraciones y semilla** (una sola vez, desde local, con el `DATABASE_URL` de
-   producción en el `.env`):
+5. **Migraciones y semilla** (una sola vez, desde local). Pon los valores de
+   producción en `apps/eveledger/.env.produccion` —lo ignora git, y al ir aparte
+   el `.env` de desarrollo se queda apuntando a tu Postgres local:
+
    ```bash
-   pnpm --filter @evetev/eveledger db:migrar    # prisma migrate deploy
-   pnpm --filter @evetev/eveledger db:sembrar   # crea el usuario administrador
+   # apps/eveledger/.env.produccion
+   DATABASE_URL="postgresql://postgres.<ref>:<contraseña>@aws-0-<región>.pooler.supabase.com:5432/postgres"
+   ADMIN_EMAIL="..."          # con esto se entra a la app
+   ADMIN_PASSWORD="..."       # ídem; NO dejar los de .env.example
+   SEMILLA_EJEMPLOS=0         # sin productos ni clientes de mentira
    ```
-   Para migrar conviene usar la conexión **directa** (`:5432`); el pooler en modo
-   transacción no soporta bien el DDL de `migrate deploy`. La aplicación en
-   Vercel sí usa el pooler.
+
+   ```bash
+   cd apps/eveledger
+   set -a && . ./.env.produccion && set +a   # dotenv no pisa lo ya exportado
+   pnpm exec prisma migrate deploy           # crea las tablas
+   pnpm exec prisma db seed                  # crea el usuario administrador
+   ```
+
+   `SEMILLA_EJEMPLOS=0` importa: por defecto la semilla crea productos y
+   **clientes de cartera inventados** ("Transportes SA", "ACUAEXPRESS"), que en
+   la base de una estación real son basura dentro de su cartera. El default los
+   deja puestos para que un clon nuevo arranque con algo que mirar.
+
+   **Usa el _session pooler_ para migrar**, no el transaction pooler ni la
+   directa. Supabase ofrece tres cadenas y cada una sirve para algo distinto:
+
+   | Cadena                 | Puerto | Host                                 | Para qué                                    |
+   | ---------------------- | ------ | ------------------------------------ | ------------------------------------------- |
+   | Directa                | 5432   | `db.<ref>.supabase.co`               | Nada aquí: es **IPv6 salvo add-on de pago** |
+   | **Session pooler**     | 5432   | `aws-0-<región>.pooler.supabase.com` | **Migrar y sembrar desde local**            |
+   | **Transaction pooler** | 6543   | `aws-0-<región>.pooler.supabase.com` | **La app en Vercel** (`DATABASE_URL`)       |
+
+   El transaction pooler no sirve para migrar: reparte la conexión por
+   transacción, y el DDL de `migrate deploy` necesita sesión. La directa sí
+   valdría, pero **las conexiones directas son IPv6 por defecto** y desde una red
+   IPv4 no conectan sin contratar el add-on de IPv4; el session pooler es la
+   alternativa IPv4 y mantiene una conexión por cliente, que es lo que el DDL
+   pide. Dos trampas que costaron varios intentos la primera vez:
+
+   - **Copiar la cadena de Vercel y olvidar el puerto.** Las dos del pooler solo
+     se diferencian en `:6543` vs `:5432`. Pegada tal cual, `migrate deploy`
+     apunta al pooler de transacción y falla por el DDL.
+   - **La contraseña sin percent-encodear.** Si lleva `@`, `:`, `/`, `?` o `#`,
+     hay que sustituirlos (`/` → `%2F`, `@` → `%40`, …) **en todas** sus
+     apariciones, y en los dos sitios: Vercel y este archivo. Una `/` cruda corta
+     la URL ahí mismo y el driver lee como base de datos lo que venía después.
+     Si la contraseña tiene varios, es más rápido resetearla en Supabase por una
+     de solo letras y números.
+
 6. **Deploy.** No hay paso de dominio: la URL de producción es la que da Vercel.
 
 > El build **no necesita la base**: todas las rutas son `force-dynamic` y
