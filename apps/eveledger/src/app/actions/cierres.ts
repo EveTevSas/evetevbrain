@@ -11,7 +11,7 @@ export async function crearCierreAction(fecha: string): Promise<ActionState> {
   if (!(await sesionActiva())) return { errores: ["Sesión expirada"] };
   const res = await crearCierre(fecha);
   if (!res.ok) return { errores: res.errores };
-  revalidatePath("/");
+  revalidatePath("/cierres");
   redirect(`/cierres/${res.id}`);
 }
 
@@ -22,7 +22,7 @@ export async function guardarBorradorAction(
   if (!(await sesionActiva())) return { errores: ["Sesión expirada"] };
   const res = await guardarCierre(closeId, data, false);
   if (!res.ok) return { errores: res.errores };
-  revalidatePath("/");
+  revalidatePath("/cierres");
   revalidatePath(`/cierres/${closeId}`);
   return { errores: [] };
 }
@@ -31,7 +31,7 @@ export async function cerrarDiaAction(closeId: string, data: CierreFormData): Pr
   if (!(await sesionActiva())) return { errores: ["Sesión expirada"] };
   const res = await guardarCierre(closeId, data, true);
   if (!res.ok) return { errores: res.errores };
-  revalidatePath("/");
+  revalidatePath("/cierres");
   revalidatePath(`/cierres/${closeId}`);
   revalidatePath("/consolidado");
   return { errores: [] };

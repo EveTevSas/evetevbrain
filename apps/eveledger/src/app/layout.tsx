@@ -37,12 +37,16 @@ export const viewport: Viewport = {
   themeColor: "#0A2540"
 };
 
+// El dashboard va primero: es la vista de "cómo va el mes", la que se mira sin
+// venir a hacer nada concreto. Detrás, las de digitar en el orden en que se
+// trabaja (cierre → inventario → cartera → financiero), y al final las de solo
+// consulta y la configuración. `/` redirige al dashboard.
 const enlaces = [
-  { href: "/", texto: "Cierres" },
+  { href: "/dashboard", texto: "Dashboard" },
+  { href: "/cierres", texto: "Cierres" },
   { href: "/inventarios", texto: "Inventarios" },
   { href: "/cartera", texto: "Cartera" },
   { href: "/financiero", texto: "Financiero" },
-  { href: "/dashboard", texto: "Dashboard" },
   { href: "/consolidado", texto: "Consolidado" },
   { href: "/config", texto: "Configuración" }
 ];
