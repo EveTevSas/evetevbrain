@@ -1,11 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
 import { Inter, Baloo_2 } from "next/font/google";
 import "./globals.css";
 import { sesionActiva } from "@/lib/auth";
-import { logout } from "@/app/actions/auth";
+import SidebarNav from "@/components/sidebar-nav";
 
-// Tipografía de marca (§3): Inter para toda la UI, Baloo 2 para titulares y cifras.
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
@@ -22,7 +20,6 @@ const CDN = "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1";
 export const metadata: Metadata = {
   title: "EveLedger — Operación diaria",
   description: "Cierre diario de estación de servicio",
-  // Favicons del CDN de marca (§4). Nunca dibujar el logo a mano (T1).
   icons: {
     icon: [
       { url: `${CDN}/favicon/favicon.svg`, type: "image/svg+xml" },
@@ -37,89 +34,67 @@ export const viewport: Viewport = {
   themeColor: "#0A2540"
 };
 
-// El dashboard va primero: es la vista de "cómo va el mes", la que se mira sin
-// venir a hacer nada concreto. Detrás, las de digitar en el orden en que se
-// trabaja (cierre → inventario → cartera → financiero), y al final las de solo
-// consulta y la configuración. `/` redirige al dashboard.
-const enlaces = [
-  { href: "/dashboard", texto: "Dashboard" },
-  { href: "/cierres", texto: "Cierres" },
-  { href: "/inventarios", texto: "Inventarios" },
-  { href: "/cartera", texto: "Cartera" },
-  { href: "/financiero", texto: "Financiero" },
-  { href: "/consolidado", texto: "Consolidado" },
-  { href: "/config", texto: "Configuración" }
-];
-
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const autenticado = await sesionActiva();
+
   return (
     <html lang="es" className={`${inter.variable} ${baloo.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-eve-blanco font-sans text-eve-azul-noche">
-        {autenticado && (
-          /* Nav sticky con blur y borde inferior línea (§6) */
-          <header className="sticky top-0 z-50 border-b border-eve-linea bg-eve-blanco/95 backdrop-blur-[8px]">
-            <div className="mx-auto flex h-[60px] max-w-[1040px] items-center justify-between px-[clamp(24px,4.5vw,32px)]">
-              {/* Logo: isotipo del CDN + nombre del producto en Baloo 2 600 (§4) */}
-              <Link href="/" aria-label="EveLedger inicio" className="flex items-center gap-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`${CDN}/isotipos/isotipo-azul-noche.svg`} alt="" width={32} height={23} />
-                <span className="brand text-lg leading-none">EveLedger</span>
-                <span className="hidden text-xs text-eve-pizarra sm:inline">por Evetev</span>
-              </Link>
+      <body style={{
+        margin: 0,
+        minHeight: "100vh",
+        background: autenticado ? "#F5F5F5" : "#ffffff",
+        fontFamily: "var(--font-sans)",
+        color: "#0A2540",
+        lineHeight: 1.65,
+      }}>
+        {/* Sin sesión: fondo neutro lo pone el propio login (GradientBackground) */}
+        {autenticado ? (
+          <div style={{ display: "flex", minHeight: "100vh" }}>
+            {/* Sidebar */}
+            <SidebarNav />
 
-              {/* Menú escritorio */}
-              <nav className="hidden items-center gap-[26px] text-[0.85rem] text-eve-pizarra md:flex">
-                {enlaces.map((e) => (
-                  <Link
-                    key={e.href}
-                    href={e.href}
-                    className="transition-colors duration-150 hover:text-eve-azul-noche"
-                  >
-                    {e.texto}
-                  </Link>
-                ))}
-                <form action={logout}>
-                  <button type="submit" className="btn btn-ghost !min-h-[36px] !px-4 !py-1.5">
-                    Salir
-                  </button>
-                </form>
-              </nav>
+            {/* Área de contenido */}
+            <div style={{
+              flex: 1,
+              marginLeft: 240,
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "100vh",
+            }}>
+              {/* Top bar */}
+              <header style={{
+                height: 56,
+                background: "#fff",
+                borderBottom: "1px solid #EDF3FA",
+                display: "flex",
+                alignItems: "center",
+                padding: "0 2rem",
+                position: "sticky",
+                top: 0,
+                zIndex: 30,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#16A34A", display: "inline-block" }} />
+                  <span style={{ fontSize: "0.8rem", color: "#64748B" }}>En operación</span>
+                </div>
+              </header>
 
-              {/* Menú móvil (≤760px): hamburguesa 3 líneas 20×2px con panel desplegable */}
-              <details className="group relative md:hidden">
-                <summary
-                  aria-label="Abrir menú"
-                  className="flex h-11 w-11 cursor-pointer list-none flex-col items-center justify-center gap-1 rounded-[9px] [&::-webkit-details-marker]:hidden"
-                >
-                  <span className="block h-[2px] w-5 rounded bg-eve-azul-noche" />
-                  <span className="block h-[2px] w-5 rounded bg-eve-azul-noche" />
-                  <span className="block h-[2px] w-5 rounded bg-eve-azul-noche" />
-                </summary>
-                <nav className="card absolute right-0 top-full mt-2 flex w-48 flex-col gap-1 p-2 text-[0.85rem]">
-                  {enlaces.map((e) => (
-                    <Link
-                      key={e.href}
-                      href={e.href}
-                      className="rounded-[9px] px-3 py-2.5 text-eve-azul-noche hover:bg-eve-tinte"
-                    >
-                      {e.texto}
-                    </Link>
-                  ))}
-                  <form action={logout}>
-                    <button type="submit" className="btn btn-ghost mt-1 w-full !min-h-[44px]">
-                      Salir
-                    </button>
-                  </form>
-                </nav>
-              </details>
+              {/* Contenido principal */}
+              <main style={{
+                flex: 1,
+                padding: "2rem 2.5rem",
+                width: "100%",
+              }}>
+                {children}
+              </main>
             </div>
-          </header>
+          </div>
+        ) : (
+          /* Sin sesión: el login maneja su propio layout y fondo */
+          <main style={{ minHeight: "100vh" }}>
+            {children}
+          </main>
         )}
-        {/* Ancho de contenido máx. 1040px, padding fluido (§5) */}
-        <main className="mx-auto w-full max-w-[1040px] flex-1 px-[clamp(24px,4.5vw,32px)] py-8">
-          {children}
-        </main>
       </body>
     </html>
   );

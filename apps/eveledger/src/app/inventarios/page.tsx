@@ -1,29 +1,19 @@
 import Link from "next/link";
 import { inventarioMensual } from "@/lib/inventarios";
-import { formatoGalones, fechaAInput } from "@/lib/format";
-import { IconoAlerta } from "@/components/iconos";
+import { fechaAInput } from "@/lib/format";
+import AccordionInventario from "@/components/accordion-inventario";
+import type { ProductoSerial } from "@/components/accordion-inventario";
 
 export const dynamic = "force-dynamic";
 
 const MESES = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre"
+  "Enero", "Febrero", "Marzo", "Abril",
+  "Mayo", "Junio", "Julio", "Agosto",
+  "Septiembre", "Octubre", "Noviembre", "Diciembre",
 ];
 
-const tdNum = "px-3 py-1.5 text-right tabular-nums";
-
 export default async function InventariosPage({
-  searchParams
+  searchParams,
 }: {
   searchParams: Promise<{ anio?: string; mes?: string }>;
 }) {
@@ -35,16 +25,78 @@ export default async function InventariosPage({
   const { diasEnMes, productos } = await inventarioMensual(anio, mes);
   const anios = [anio - 2, anio - 1, anio, anio + 1];
 
+  /* ── Serializar Map → array plano para el Client Component ── */
+  const productosSerial: ProductoSerial[] = productos.map((p) => {
+    const filas = Array.from({ length: diasEnMes }, (_, i) => i + 1).map(
+      (dia) => {
+        const f = p.dias.get(dia)!;
+        const fecha = fechaAInput(new Date(Date.UTC(anio, mes - 1, dia)));
+        return { dia, ...f, fecha };
+      }
+    );
+    return {
+      id: p.id,
+      nombre: p.nombre,
+      filas,
+      totalCompras: filas.reduce((s, f) => s + f.compras, 0),
+      alertas: filas.filter((f) => f.alerta).length,
+      diasConFisico: filas.filter((f) => f.fisico !== null).length,
+    };
+  });
+
   return (
     <div className="space-y-6">
-      <h1>Inventarios</h1>
-
-      <form method="get" className="card flex flex-wrap items-end gap-4 p-4 sm:p-6">
+      {/* Encabezado */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <label htmlFor="mes" className="lbl">
+          <p
+            style={{
+              margin: "0 0 0.2rem",
+              fontSize: "0.68rem",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              color: "#4b3075",
+            }}
+          >
+            Operación diaria
+          </p>
+          <h1 style={{ margin: 0 }}>Inventarios</h1>
+        </div>
+      </div>
+
+      {/* Selector de mes */}
+      <form
+        method="get"
+        style={{
+          background: "#fff",
+          border: "1px solid #EDF3FA",
+          borderRadius: 14,
+          padding: "1rem 1.25rem",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "flex-end",
+          gap: "1rem",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <label
+            htmlFor="mes"
+            style={{
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: "#334155",
+            }}
+          >
             Mes
           </label>
-          <select id="mes" name="mes" defaultValue={mes} className="inp">
+          <select
+            id="mes"
+            name="mes"
+            defaultValue={mes}
+            className="inp"
+            style={{ width: 140 }}
+          >
             {MESES.map((m, i) => (
               <option key={i + 1} value={i + 1}>
                 {m}
@@ -52,11 +104,25 @@ export default async function InventariosPage({
             ))}
           </select>
         </div>
-        <div>
-          <label htmlFor="anio" className="lbl">
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <label
+            htmlFor="anio"
+            style={{
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: "#334155",
+            }}
+          >
             Año
           </label>
-          <select id="anio" name="anio" defaultValue={anio} className="inp">
+          <select
+            id="anio"
+            name="anio"
+            defaultValue={anio}
+            className="inp"
+            style={{ width: 100 }}
+          >
             {anios.map((a) => (
               <option key={a} value={a}>
                 {a}
@@ -64,82 +130,30 @@ export default async function InventariosPage({
             ))}
           </select>
         </div>
-        {/* Acción secundaria (mezclado): esta vista no tiene CTA coral */}
-        <button type="submit" className="btn btn-sec">
+
+        <button
+          type="submit"
+          className="btn btn-sec"
+          style={{ minHeight: 42, padding: "0 1.25rem", fontSize: "0.82rem" }}
+        >
           Ver
         </button>
+
+        {/* Mes actual a la derecha */}
+        <p
+          style={{
+            marginLeft: "auto",
+            fontSize: "0.8rem",
+            color: "#64748B",
+            alignSelf: "center",
+          }}
+        >
+          {MESES[mes - 1]} {anio} — {diasEnMes} días
+        </p>
       </form>
 
-      <p className="text-sm text-eve-pizarra">
-        {MESES[mes - 1]} de {anio} — inicial, ventas, teórica y variación se derivan; solo se
-        digitan compras (descargas) e inventario físico. Toca un día para digitar.
-      </p>
-
-      {productos.map((p) => (
-        <section key={p.id} className="card overflow-x-auto">
-          <h2 className="px-3 pt-3">{p.nombre}</h2>
-          <table className="w-full min-w-[760px] text-sm">
-            <thead className="bg-eve-tinte text-eve-pizarra">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">Día</th>
-                <th className="px-3 py-2 text-right font-medium">Inicial</th>
-                <th className="px-3 py-2 text-right font-medium">Compras</th>
-                <th className="px-3 py-2 text-right font-medium">Ventas</th>
-                <th className="px-3 py-2 text-right font-medium">Teórica</th>
-                <th className="px-3 py-2 text-right font-medium">Físico</th>
-                <th className="px-3 py-2 text-right font-medium">Variación</th>
-                <th className="px-3 py-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: diasEnMes }, (_, i) => i + 1).map((dia) => {
-                const fila = p.dias.get(dia)!;
-                const fecha = fechaAInput(new Date(Date.UTC(anio, mes - 1, dia)));
-                const vacio = <span className="text-eve-muted">—</span>;
-                return (
-                  <tr key={dia} className="border-t border-eve-linea">
-                    <td className="px-3 py-1.5">{dia}</td>
-                    <td className={tdNum}>
-                      {fila.inicial !== null ? formatoGalones(fila.inicial) : vacio}
-                    </td>
-                    <td className={tdNum}>
-                      {fila.compras > 0 ? formatoGalones(fila.compras) : vacio}
-                    </td>
-                    <td className={tdNum}>
-                      {fila.ventas !== null ? formatoGalones(fila.ventas) : vacio}
-                    </td>
-                    <td className={tdNum}>
-                      {fila.teorica !== null ? formatoGalones(fila.teorica) : vacio}
-                    </td>
-                    <td className={tdNum}>
-                      {fila.fisico !== null ? formatoGalones(fila.fisico) : vacio}
-                    </td>
-                    <td className={tdNum}>
-                      {fila.variacion !== null ? (
-                        fila.alerta ? (
-                          <span className="badge bg-eve-alerta/10 text-eve-alerta">
-                            <IconoAlerta className="h-3.5 w-3.5" />
-                            {formatoGalones(fila.variacion)}
-                          </span>
-                        ) : (
-                          formatoGalones(fila.variacion)
-                        )
-                      ) : (
-                        vacio
-                      )}
-                    </td>
-                    <td className="px-3 py-1.5 text-right">
-                      <Link href={`/inventarios/${fecha}`} className="lnk">
-                        Editar
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </section>
-      ))}
+      {/* Acordeón de productos */}
+      <AccordionInventario productos={productosSerial} />
 
       <p className="text-sm">
         <Link href="/cierres" className="lnk">
