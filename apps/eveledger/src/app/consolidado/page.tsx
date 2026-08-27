@@ -145,7 +145,7 @@ export default async function ConsolidadoPage({
       </div>
 
       <p className="text-sm">
-        <Link href="/" className="lnk">
+        <Link href="/cierres" className="lnk">
           ← Volver a cierres
         </Link>
       </p>
