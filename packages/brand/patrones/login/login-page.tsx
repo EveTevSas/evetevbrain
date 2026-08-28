@@ -1,12 +1,33 @@
+/**
+ * Plantilla de página de login — Evetev
+ *
+ * CÓMO USAR:
+ *  1. Copia este archivo a `app/login/page.tsx` en tu app Next.js
+ *  2. Copia `soft-pastel-blend.tsx` a `components/ui/soft-pastel-blend.tsx`
+ *  3. Busca TODO: y reemplaza con los valores de tu app
+ *  4. Ajusta la lógica de autenticación (Supabase, NextAuth, etc.)
+ *
+ * DEPENDENCIAS:
+ *  - lucide-react  (Eye, EyeOff)
+ *  - next/navigation (useRouter)
+ *  - Tu cliente de autenticación
+ *
+ * NOTA: Este es un Client Component por el manejo de estado del formulario.
+ */
+
 "use client";
 
 import { GradientBackground } from "@/components/ui/soft-pastel-blend";
-import { isSafeInternalPath } from "@/lib/auth/permissions";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { BrandMark } from "../../components/brand-mark";
+
+// TODO: Importar el cliente de autenticación de tu app
+// import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+
+// TODO: Importar helper de rutas seguras si tu app lo tiene
+// import { isSafeInternalPath } from "@/lib/auth/permissions";
 
 type BusyAction = "login" | "recovery" | null;
 
@@ -23,59 +44,49 @@ export default function LoginPage() {
     setBusy("login");
     setMessage(null);
 
-    const supabase = getSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password
-    });
+    // TODO: Reemplaza con tu lógica de autenticación
+    // Ejemplo con Supabase:
+    // const supabase = getSupabaseBrowserClient();
+    // const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    // if (error) {
+    //   setMessage({ text: "No pudimos validar esas credenciales.", tone: "error" });
+    //   setBusy(null);
+    //   return;
+    // }
 
-    if (error) {
-      setMessage({
-        text: "No pudimos validar esas credenciales. Revisa los datos o recupera tu acceso.",
-        tone: "error"
-      });
-      setBusy(null);
-      return;
-    }
-
-    const requestedPath = new URLSearchParams(window.location.search).get("next");
-    router.replace(isSafeInternalPath(requestedPath) ? requestedPath : "/");
+    // TODO: Redirigir al destino solicitado o a la raíz
+    // const requestedPath = new URLSearchParams(window.location.search).get("next");
+    // router.replace(isSafeInternalPath(requestedPath) ? requestedPath : "/");
+    router.replace("/");
     router.refresh();
   }
 
   async function recoverAccess() {
     if (!email.trim()) {
-      setMessage({
-        text: "Escribe primero el correo asociado a tu cuenta.",
-        tone: "error"
-      });
+      setMessage({ text: "Escribe primero el correo asociado a tu cuenta.", tone: "error" });
       return;
     }
 
     setBusy("recovery");
     setMessage(null);
-    const redirectTo = `${window.location.origin}/auth/callback?next=/actualizar-contrasena`;
-    const { error } = await getSupabaseBrowserClient().auth.resetPasswordForEmail(email.trim(), {
-      redirectTo
-    });
 
-    if (error) {
-      setMessage({
-        text: "No pudimos procesar la solicitud en este momento. Inténtalo nuevamente.",
-        tone: "error"
-      });
-    } else {
-      setMessage({
-        text: "Si el correo está registrado, recibirás un enlace para crear una contraseña nueva.",
-        tone: "info"
-      });
-    }
+    // TODO: Reemplaza con tu lógica de recuperación de contraseña
+    // Ejemplo con Supabase:
+    // const redirectTo = `${window.location.origin}/auth/callback?next=/actualizar-contrasena`;
+    // const { error } = await getSupabaseBrowserClient().auth.resetPasswordForEmail(email.trim(), { redirectTo });
+    // if (error) {
+    //   setMessage({ text: "No pudimos procesar la solicitud.", tone: "error" });
+    // } else {
+    //   setMessage({ text: "Si el correo está registrado, recibirás un enlace.", tone: "info" });
+    // }
+
     setBusy(null);
   }
 
   return (
     <div style={{ position: "relative", minHeight: "100vh", width: "100%" }}>
-      {/* Fondo pastel */}
+      {/* Fondo pastel — agregar illustrationUrl si la app tiene ilustración */}
+      {/* TODO: Si usas imagen: illustrationUrl="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/NOMBRE.webp" */}
       <GradientBackground className="absolute inset-0" />
 
       {/* Contenido centrado */}
@@ -90,7 +101,7 @@ export default function LoginPage() {
           padding: "1.5rem"
         }}
       >
-        {/* Card */}
+        {/* Card glassmorphism */}
         <div
           style={{
             width: "100%",
@@ -115,9 +126,18 @@ export default function LoginPage() {
               textAlign: "center"
             }}
           >
-            <span style={{ display: "grid", placeItems: "center" }}>
-              <BrandMark priority size={42} />
-            </span>
+            {/* TODO: Reemplaza con el isotipo de tu app */}
+            {/* Opción A: componente BrandMark */}
+            {/* <BrandMark priority size={42} /> */}
+            {/* Opción B: imagen directa del CDN */}
+            <Image
+              src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg"
+              alt="Logo"
+              width={42}
+              height={42}
+              priority
+            />
+            {/* TODO: Cambiar por el nombre de tu app */}
             <h1
               style={{
                 fontWeight: 700,
@@ -127,10 +147,11 @@ export default function LoginPage() {
                 letterSpacing: "-0.01em"
               }}
             >
-              EveConecta
+              NombreApp {/* ← CAMBIAR */}
             </h1>
+            {/* TODO: Ajustar el subtítulo según el contexto de la app */}
             <p style={{ fontSize: "0.82rem", color: "#64748B", margin: 0 }}>
-              Usa las credenciales enviadas por la administración
+              Subtítulo descriptivo de la app {/* ← CAMBIAR */}
             </p>
           </div>
 
@@ -139,7 +160,7 @@ export default function LoginPage() {
             onSubmit={submit}
             style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}
           >
-            {/* Correo */}
+            {/* Campo: correo */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
               <label
                 htmlFor="email"
@@ -173,7 +194,7 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Contraseña */}
+            {/* Campo: contraseña */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
               <label
                 htmlFor="password"
@@ -250,19 +271,18 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Mensaje error / info */}
+            {/* Mensaje de error o confirmación */}
             {message && (
               <p
                 role={message.tone === "error" ? "alert" : "status"}
                 aria-live="polite"
                 style={{
                   margin: 0,
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "0.5rem",
                   background:
                     message.tone === "error" ? "rgba(239,68,68,0.08)" : "rgba(75,48,117,0.07)",
-                  border: `1px solid ${message.tone === "error" ? "rgba(239,68,68,0.25)" : "rgba(75,48,117,0.2)"}`,
+                  border: `1px solid ${
+                    message.tone === "error" ? "rgba(239,68,68,0.25)" : "rgba(75,48,117,0.2)"
+                  }`,
                   borderRadius: 9,
                   padding: "0.6rem 0.875rem",
                   fontSize: "0.85rem",
@@ -273,7 +293,7 @@ export default function LoginPage() {
               </p>
             )}
 
-            {/* Botón */}
+            {/* Botón principal */}
             <button
               type="submit"
               disabled={busy !== null}
@@ -296,11 +316,13 @@ export default function LoginPage() {
                 transition: "opacity 0.15s"
               }}
             >
-              {busy === "login" ? "Validando…" : "Entrar a EveConecta"}
+              {/* TODO: Cambiar por el nombre de tu app */}
+              {busy === "login" ? "Validando…" : "Entrar a NombreApp"}
             </button>
           </form>
 
           {/* Pie de seguridad */}
+          {/* TODO: Ajustar el texto según la tecnología de autenticación */}
           <p
             style={{
               marginTop: "1.25rem",
@@ -310,7 +332,7 @@ export default function LoginPage() {
               lineHeight: 1.6
             }}
           >
-            Sesión validada con Supabase Auth · cada perfil accede solo a su copropiedad
+            Sesión validada con Supabase Auth · acceso restringido
           </p>
         </div>
       </div>
