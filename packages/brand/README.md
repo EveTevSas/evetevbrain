@@ -10,7 +10,25 @@ assets/
 ├── logotipos/ · isotipos/ · lockups/
 ├── favicon/ · mascota/ · unidades/
 └── evetev_brand_styles.md        # guía de uso de marca
+
+patrones/
+└── login/                        # patrón de login (ver abajo)
+    ├── README.md                  # tokens, anatomía, checklist
+    ├── soft-pastel-blend.tsx      # componente de fondo (copiable)
+    └── login-page.tsx             # plantilla completa (copiable)
 ```
+
+## `patrones/login/` — patrón de pantalla de inicio de sesión
+
+Guía de referencia para construir el login de cualquier app Evetev.
+Incluye tokens, anatomía visual, el componente de fondo `GradientBackground`
+y una plantilla de página lista para copiar y adaptar.
+
+Aplicado en: **EveLedger** · **EveConecta**
+
+Ver [`patrones/login/README.md`](./patrones/login/README.md) para la guía completa.
+
+---
 
 Los tokens de color (`colores.json`, `tokens/`) son la marca en forma de datos.
 Cuando exista `packages/ui` (design system), consumirá estos tokens — no se
