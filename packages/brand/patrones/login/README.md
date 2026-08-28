@@ -35,16 +35,16 @@ Aplicado en **EveLedger** y **EveConecta**.
 
 ## Tokens de color
 
-| Token               | Valor          | Uso                                        |
-|---------------------|----------------|--------------------------------------------|
-| `accent-primary`    | `#4b3075`      | Botón de recuperar, mensajes info, activos  |
-| `navy-deep`         | `#0a2540`      | Títulos, gradiente botón (inicio)          |
-| `navy-text`         | `#0A2540`      | Texto de inputs y títulos                  |
-| `slate-label`       | `#334155`      | Labels de campos                           |
-| `slate-placeholder` | `#64748B`      | Subtítulo card                             |
-| `slate-muted`       | `#94A3B8`      | Pie de seguridad, ícono de contraseña      |
-| `input-border`      | `#E2E8F0`      | Borde de inputs en reposo                  |
-| `lila-gradient`     | `rgba(196,181,253,0.55)` | Degradado radial superior-derecho |
+| Token               | Valor                    | Uso                                        |
+| ------------------- | ------------------------ | ------------------------------------------ |
+| `accent-primary`    | `#4b3075`                | Botón de recuperar, mensajes info, activos |
+| `navy-deep`         | `#0a2540`                | Títulos, gradiente botón (inicio)          |
+| `navy-text`         | `#0A2540`                | Texto de inputs y títulos                  |
+| `slate-label`       | `#334155`                | Labels de campos                           |
+| `slate-placeholder` | `#64748B`                | Subtítulo card                             |
+| `slate-muted`       | `#94A3B8`                | Pie de seguridad, ícono de contraseña      |
+| `input-border`      | `#E2E8F0`                | Borde de inputs en reposo                  |
+| `lila-gradient`     | `rgba(196,181,253,0.55)` | Degradado radial superior-derecho          |
 
 ---
 
@@ -61,11 +61,11 @@ La imagen va **debajo** del degradado lila para que el color sea uniforme aunque
 
 ### Ilustraciones disponibles en CDN
 
-| Aplicación     | Ilustración                                      | URL CDN                                                                        |
-|----------------|--------------------------------------------------|--------------------------------------------------------------------------------|
-| EveConecta     | `conjunto-residencial-calle.webp`                | `https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial-calle.webp` |
-| EveLedger      | *(sin imagen; solo degradado y grid)*            | —                                                                              |
-| EvePay         | Pendiente                                        | —                                                                              |
+| Aplicación | Ilustración                           | URL CDN                                                                                        |
+| ---------- | ------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| EveConecta | `conjunto-residencial-calle.webp`     | `https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial-calle.webp` |
+| EveLedger  | _(sin imagen; solo degradado y grid)_ | —                                                                                              |
+| EvePay     | Pendiente                             | —                                                                                              |
 
 ---
 
@@ -100,6 +100,7 @@ box-shadow: 0 4px 20px rgba(75, 48, 117, 0.35);
 ```
 
 Estado deshabilitado (cargando):
+
 ```css
 background: rgba(10, 37, 64, 0.4);
 box-shadow: none;
@@ -136,6 +137,7 @@ app/
 ```
 
 Archivos de referencia en este directorio:
+
 - [`soft-pastel-blend.tsx`](./soft-pastel-blend.tsx) — componente de fondo
 - [`login-page.tsx`](./login-page.tsx) — plantilla completa lista para copiar
 
