@@ -67,9 +67,9 @@ jobs:
         run: pnpm format:check
 
   # ── Landings: una sola fuente de lo compartido ─────────────────────────────
-  # Las landings son estáticas y cada una lleva su copia de base.css y de
-  # formularios.js, generadas desde packages/brand/landing/. Este job impide
-  # que se desvíen.
+  # Las landings son estáticas y comparten una copia de base.css y de
+  # formularios.js en apps/website/landings/, generada desde
+  # packages/brand/landing/. Este job impide que se desvíe.
   landings:
     name: Archivos compartidos de las landings
     runs-on: ubuntu-latest

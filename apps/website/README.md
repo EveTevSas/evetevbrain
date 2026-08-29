@@ -4,13 +4,40 @@
 se despliega en **Vercel** (§10).
 
 ```
-index.html        # la landing
+index.html        # la portada
 nosotros.html     # Nosotros · Equipo · Trabaja con nosotros
 estilos.css       # hoja compartida por ambas páginas
-formularios.js    # envío de los dos formularios
+formularios.js    # envío de los dos formularios corporativos
 api/contacto.js   # función serverless que manda el correo
 files/            # video de fondo e imagen de portada
+
+evepay/           # → evetev.com/evepay        landing de EvePay
+conecta/          # → evetev.com/conecta       landing de EveConecta
+intelligence/     # → evetev.com/intelligence  landing de Eve Intelligence
+landings/         # base.css + formularios.js que comparten las tres
 ```
+
+## Las landings de producto son rutas de aquí
+
+Antes cada landing era un proyecto de Vercel con su propio subdominio
+(`evepay.`, `eveconecta.`, `eveintelligence.evetev.com`). Ahora son carpetas de
+este sitio y se sirven en `/evepay`, `/conecta` e `/intelligence`: un solo
+proyecto, un solo despliegue por push y un solo dominio acumulando autoridad,
+en vez de cuatro sitios repartiéndosela. Los subdominios viejos quedan como
+redirección permanente (§10).
+
+Ojo con el parecido: `conecta.evetev.com` **no** es esta ruta, es el portal de
+residentes (`apps/eveconecta`), que sigue siendo otra aplicación.
+
+Dos reglas al editarlas:
+
+- **Rutas absolutas** para CSS, JS y media (`/landings/base.css`,
+  `/conecta/dashboard.mp4`). Con rutas relativas la página se rompe según se
+  llegue a `/conecta` o a `/conecta/`, que es exactamente el fallo que nadie ve
+  al probar en local.
+- `landings/base.css` y `landings/formularios.js` **son copias generadas**
+  desde `packages/brand/landing/`. Se editan allí y se corre `pnpm
+landings:sync`; el CI rechaza una copia desviada.
 
 ## Formularios
 
@@ -18,16 +45,17 @@ files/            # video de fondo e imagen de portada
 formularios y envía el correo a **contacto@evetev.com** con `reply_to` en la
 dirección de quien escribe, para poder responderle dando a "Responder":
 
-| Formulario         | Dónde vive                | Asunto que llega             |
-| ------------------ | ------------------------- | ---------------------------- |
-| Contacto           | `index.html`              | `Contacto: nombre — tamaño`  |
-| Postulación        | `nosotros.html`           | `Postulación: nombre — área` |
-| Demo de EvePay     | `apps/evepay`             | `EvePay · Demo: nombre`      |
-| Demo de EveConecta | `apps/eveconecta-landing` | `EveConecta · Demo: nombre`  |
+| Formulario         | Dónde vive      | Asunto que llega             |
+| ------------------ | --------------- | ---------------------------- |
+| Contacto           | `index.html`    | `Contacto: nombre — tamaño`  |
+| Postulación        | `nosotros.html` | `Postulación: nombre — área` |
+| Demo de EvePay     | `evepay/`       | `EvePay · Demo: nombre`      |
+| Demo de EveConecta | `conecta/`      | `EveConecta · Demo: nombre`  |
 
-Los dos últimos son otros dominios y llegan aquí **por CORS**. Están en una
-lista de orígenes al principio de la función, junto con las previews de Vercel
-de esas landings y `localhost` para desarrollo. El producto no lo escribe el
+Los dos últimos ya **no** son cross-origin: desde que las landings son rutas de
+este sitio llaman a `/api/contacto` en el mismo dominio. La lista de orígenes
+del principio de la función sigue ahí para las previews de Vercel, `localhost`
+y los subdominios viejos mientras redirijan. El producto no lo escribe el
 cliente: manda una clave (`evepay`, `eveconecta`) que la función traduce contra
 su propia lista blanca, así que un origen curioso no puede hacer que llegue un
 correo firmado por cualquier cosa. Además del prefijo del asunto, el cuerpo
@@ -42,10 +70,11 @@ llegaba sin él. Por eso la tabla es una sola y no dos listas paralelas; antes
 había una para limpiar y otra para pintar, y podían no coincidir.
 
 **Por qué una sola función y no una por landing:** la clave del proveedor
-viviría entonces en tres proyectos de Vercel — tres sitios donde rotarla y tres
-donde olvidarla. Con este reparto las landings siguen siendo estáticas puras,
-sin variables de entorno. El precio a pagar es que **añadir o cambiar el dominio
-de una landing obliga a tocar la lista de orígenes**; si no, el navegador
+viviría si no en varios proyectos de Vercel — varios sitios donde rotarla y
+varios donde olvidarla. Con las landings dentro de este proyecto eso deja de ser
+un reparto y pasa a ser lo natural: mismo origen, misma función, una sola clave.
+Lo que hay que seguir recordando es que **un dominio nuevo que apunte a este
+endpoint desde fuera obliga a tocar la lista de orígenes**; si no, el navegador
 bloquea el envío y el formulario deja de funcionar sin que el despliegue avise.
 
 **Ya está activo en producción**: el proveedor está configurado y la clave

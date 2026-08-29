@@ -523,7 +523,7 @@ norma.
 
 **Al usarla:** va de fondo, atenuada y desvanecida, nunca a plena opacidad
 detrás de un texto. Es línea densa y compite con lo que hay que leer. El patrón
-es `.portada::after` en `apps/eveconecta-landing/estilos.css`.
+es `.portada::after` en `apps/website/conecta/estilos.css`.
 
 **Y súbela a `ilustraciones/` en este repositorio con una etiqueta nueva** — sin
 etiqueta, `@1` no la sirve. Después hay que **purgar `@1` en jsDelivr**, porque

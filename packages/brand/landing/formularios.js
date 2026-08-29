@@ -1,10 +1,10 @@
 /* Envío de los formularios de demo de las landings de producto.
-   Fuente única: se replica en cada landing con `pnpm landings:sync`.
+   Fuente única: se copia a apps/website/landings/ con `pnpm landings:sync`.
 
-   Las landings son estáticas y viven en dominios propios, así que NO tienen
-   función serverless: el formulario llama al endpoint del sitio corporativo,
-   que es el único que conoce la credencial del proveedor de correo. Ese
-   endpoint permite estos orígenes por CORS (ver apps/website/api/contacto.js).
+   Las landings viven ahora bajo evetev.com (/conecta, /evepay, /intelligence),
+   el mismo origen que la función serverless del sitio corporativo. Por eso el
+   endpoint es relativo: la llamada deja de ser cross-origin y no depende de la
+   lista de orígenes de apps/website/api/contacto.js.
 
    Contrato con el marcado — la landing no escribe JavaScript, solo esto:
 
@@ -20,7 +20,7 @@
    el correo directo de la empresa, que funciona aunque el backend no. */
 
 (function () {
-  var ENDPOINT = "https://evetev.com/api/contacto";
+  var ENDPOINT = "/api/contacto";
   var CORREO_EMPRESA = "contacto@evetev.com";
 
   function mensajeDeError(error) {
@@ -67,9 +67,10 @@
       });
       datos.tipo = "demo";
       datos.producto = form.dataset.demo;
-      /* El host real, no una etiqueta fija: así un envío desde una preview de
-         Vercel o desde localhost se distingue de uno de un cliente. */
-      datos.origen = window.location.host + " — formulario de demo";
+      /* Host y ruta, no una etiqueta fija: la ruta es la que dice de qué
+         landing salió el envío ahora que las tres comparten dominio, y el host
+         distingue una preview de Vercel o localhost de un cliente real. */
+      datos.origen = window.location.host + window.location.pathname + " — formulario de demo";
 
       var resultado;
       try {

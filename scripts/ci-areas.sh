@@ -60,7 +60,9 @@ EVELEDGER=false
 toca '^apps/eveledger/' && EVELEDGER=true
 marcar eveledger "$EVELEDGER"
 
-# Las landings comparten base.css, generado desde packages/brand.
+# Las landings comparten base.css y formularios.js, generados desde
+# packages/brand hacia apps/website/landings/. Viven dentro del sitio
+# corporativo desde que dejaron sus subdominios por rutas de evetev.com.
 LANDINGS=false
-toca '^apps/(evepay|eveconecta-landing)/|^packages/brand/' && LANDINGS=true
+toca '^apps/website/|^packages/brand/' && LANDINGS=true
 marcar landings "$LANDINGS"

@@ -21,8 +21,10 @@ redefinen colores por app (§8: "ninguna app define colores propios").
 
 ## `landing/` — lo que comparten las landings de producto
 
-**Fuente única** de los dos archivos que llevan idénticos todas las landings
-estáticas (`apps/evepay`, `apps/eveconecta-landing`, y las que vengan):
+**Fuente única** de los dos archivos que comparten las landings estáticas de
+producto. Desde que las tres son rutas del sitio corporativo
+(`evetev.com/evepay`, `/conecta`, `/intelligence`) comparten un solo par de
+copias, servido en `apps/website/landings/`:
 
 | Archivo                  | Qué es                                                                                                                             |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -30,21 +32,24 @@ estáticas (`apps/evepay`, `apps/eveconecta-landing`, y las que vengan):
 | `landing/formularios.js` | el envío del formulario de demo al endpoint de `evetev.com`                                                                        |
 
 No se sirven por CDN como `assets/`: son internos del monorepo, y publicarlos
-obligaría a etiquetar una versión del repo de marca por cada ajuste. Se replican
-a cada landing con un script y el CI vigila que las copias no se desvíen.
+obligaría a etiquetar una versión del repo de marca por cada ajuste. Se copian
+al sitio con un script y el CI vigila que la copia no se desvíe.
 
 ```bash
-pnpm landings:sync      # replica las fuentes en cada landing
-pnpm landings:check     # lo que corre el CI: falla si alguna se desvió
+pnpm landings:sync      # copia las fuentes a apps/website/landings/
+pnpm landings:check     # lo que corre el CI: falla si la copia se desvió
 ```
 
-**Para apuntar una landing nueva**, en su `package.json`:
+**Una landing nueva** no tiene que sincronizar nada: se crea como una carpeta
+más de `apps/website/` —esa carpeta es su ruta pública— y enlaza los archivos ya
+copiados, con rutas absolutas para que funcionen igual con `/ruta` que con
+`/ruta/`:
 
-```json
-"evetev": { "landing": true }
+```html
+<link rel="stylesheet" href="/landings/base.css" />
+<link rel="stylesheet" href="/mi-producto/estilos.css" />
+<script src="/landings/formularios.js" defer></script>
 ```
-
-y `pnpm landings:sync`. No hay que tocar el script.
 
 ### El formulario de demo
 

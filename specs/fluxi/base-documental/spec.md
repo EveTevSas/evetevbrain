@@ -141,7 +141,7 @@ spec no puede resolver sola:
 
 | Fuente                                         | Qué dice sobre la adquirencia y la tokenización                                                                                                                                                              |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `apps/evepay/index.html` (landing)             | «Integración con **Credibanco y Redeban** (adquirencia directa)» · «Tokenización como Servicio (TaaS) con proveedores como **VGS y Basis Theory**» · métodos locales PSE, Nequi y Bre-B en fases posteriores |
+| `apps/website/evepay/index.html` (landing)     | «Integración con **Credibanco y Redeban** (adquirencia directa)» · «Tokenización como Servicio (TaaS) con proveedores como **VGS y Basis Theory**» · métodos locales PSE, Nequi y Bre-B en fases posteriores |
 | `docs/ESTANDARES_INGENIERIA.md` §7, decisión 5 | **Akua** como backbone, **único proveedor, sin agregador intermedio**, detrás de la interfaz `PaymentProvider`. La tokenización es la de Akua, y es lo que nos deja fuera de PCI                             |
 | `apps/website/index.html` (FAQ)                | «checkout embebido **del proveedor**», sin nombrarlo                                                                                                                                                         |
 
