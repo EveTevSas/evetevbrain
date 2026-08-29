@@ -108,8 +108,7 @@
   left: 50%;
   width: 100vw;
   transform: translateX(-50%);
-  background: url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial-calle.webp")
-    center bottom/contain no-repeat;
+  background: url("/marca/conjunto-residencial-calle.webp") center bottom/contain no-repeat;
 }
 
 /* **Ya no hay hueco radial.** Existía por una sola razón —«el dibujo se abre en

@@ -111,8 +111,8 @@
   left: 50%;
   width: 100vw;
   transform: translateX(-50%);
-  background: url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/pasarela-de-pago.webp")
-    center calc(100% + clamp(28px, 4.5vw, 60px)) / contain no-repeat;
+  background: url("/marca/pasarela-de-pago.webp") center calc(100% + clamp(28px, 4.5vw, 60px)) /
+    contain no-repeat;
 }
 
 /* **Ya no hay hueco radial.** Existía por una sola razón —«el dibujo se abre en

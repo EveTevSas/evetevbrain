@@ -86,7 +86,7 @@ export default function LoginPage() {
   return (
     <div style={{ position: "relative", minHeight: "100vh", width: "100%" }}>
       {/* Fondo pastel — agregar illustrationUrl si la app tiene ilustración */}
-      {/* TODO: Si usas imagen: illustrationUrl="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/NOMBRE.webp" */}
+      {/* TODO: Si usas imagen: illustrationUrl="/marca/NOMBRE.webp" */}
       <GradientBackground className="absolute inset-0" />
 
       {/* Contenido centrado */}
@@ -130,13 +130,7 @@ export default function LoginPage() {
             {/* Opción A: componente BrandMark */}
             {/* <BrandMark priority size={42} /> */}
             {/* Opción B: imagen directa del CDN */}
-            <Image
-              src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg"
-              alt="Logo"
-              width={42}
-              height={42}
-              priority
-            />
+            <Image src="/marca/isotipo-azul-noche.svg" alt="Logo" width={42} height={42} priority />
             {/* TODO: Cambiar por el nombre de tu app */}
             <h1
               style={{

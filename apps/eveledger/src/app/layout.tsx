@@ -15,18 +15,21 @@ const baloo = Baloo_2({
   variable: "--font-baloo"
 });
 
-const CDN = "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1";
+/* Los activos de marca se sirven desde esta misma app (public/marca), no
+   desde un CDN externo: la carpeta la llena `pnpm marca:sync` desde
+   packages/brand, que es la fuente única, y el CI vigila que no se desvíe. */
+const CDN = "/marca";
 
 export const metadata: Metadata = {
   title: "EveLedger — Operación diaria",
   description: "Cierre diario de estación de servicio",
   icons: {
     icon: [
-      { url: `${CDN}/favicon/favicon.svg`, type: "image/svg+xml" },
-      { url: `${CDN}/favicon/favicon-32.png`, sizes: "32x32", type: "image/png" }
+      { url: `${CDN}/favicon.svg`, type: "image/svg+xml" },
+      { url: `${CDN}/favicon-32.png`, sizes: "32x32", type: "image/png" }
     ],
-    apple: [{ url: `${CDN}/favicon/apple-touch-icon.png` }],
-    other: [{ rel: "mask-icon", url: `${CDN}/favicon/mask-icon.svg`, color: "#0A2540" }]
+    apple: [{ url: `${CDN}/apple-touch-icon.png` }],
+    other: [{ rel: "mask-icon", url: `${CDN}/mask-icon.svg`, color: "#0A2540" }]
   }
 };
 

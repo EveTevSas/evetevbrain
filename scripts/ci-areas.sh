@@ -60,9 +60,10 @@ EVELEDGER=false
 toca '^apps/eveledger/' && EVELEDGER=true
 marcar eveledger "$EVELEDGER"
 
-# Las landings comparten base.css y formularios.js, generados desde
-# packages/brand hacia apps/website/landings/. Viven dentro del sitio
-# corporativo desde que dejaron sus subdominios por rutas de evetev.com.
+# Dos cosas se generan desde packages/brand y el CI vigila que no se desvíen:
+# base.css y formularios.js hacia apps/website/landings/, y los activos de marca
+# hacia la carpeta /marca de cada app. Cualquier app puede tener copias, así que
+# esto ya no mira solo al sitio corporativo.
 LANDINGS=false
-toca '^apps/website/|^packages/brand/' && LANDINGS=true
+toca '^apps/|^packages/brand/|^scripts/(landings|marca)-sync\.mjs$' && LANDINGS=true
 marcar landings "$LANDINGS"
