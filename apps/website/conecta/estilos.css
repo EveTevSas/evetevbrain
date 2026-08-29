@@ -233,16 +233,18 @@
 .split-figura {
   text-align: center;
 }
-/* Tope en 160 px, la mitad de lo que ocupaba: a 320 px el WebP de la mascota
-   se veía blando, así que va pequeña a propósito y nítida. Si algún día se
-   publica una versión del activo con más resolución, este tope se puede
-   revisar; hasta entonces no se sube. */
+/* El tope estuvo en 160 px mientras aquí vivía una pose suelta: aquel WebP era
+   de 512 px y a 320 se veía blando. La escena que hay ahora es de 929 px de
+   ancho, así que aguanta 420 sin ablandarse —y los necesita: es apaisada y
+   dentro lleva un móvil con texto y una viñeta con una persona, que a 160 px
+   no se leen y la ilustración deja de contar nada.
+   La sombra se va con ella: una escena con su propia sombra dibujada bajo el
+   gato no necesita otra, y superpuestas se notaba el recorte. */
 .mascota {
-  width: min(160px, 70%);
+  width: min(420px, 100%);
   height: auto;
   margin: 0 auto;
   display: block;
-  filter: drop-shadow(0 18px 30px rgba(10, 37, 64, 0.12));
 }
 .figura-nota {
   margin-top: 16px;

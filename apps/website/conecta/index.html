@@ -229,20 +229,29 @@
             <div class="split-figura">
               <!-- La mascota es el rostro del asistente digital (§4). En este
                contexto ilustra y da cercanía; no está en un flujo de pago
-               real, así que su uso es válido.
+               real —esto es una landing, no la pasarela—, así que su uso es
+               válido.
                Sale del CDN de marca (T1), no de raw.githubusercontent: aquel
                seguía a main, así que la imagen se habría roto sola el día que
                el archivo se moviera, y sin caché de borde.
-               Va a 160 px (la mitad de lo que ocupaba): a 320 el WebP se
-               veía blando; el tope está documentado en estilos.css. -->
+               Va a la VERSIÓN EXACTA y no a @1: jsDelivr responde a las URL con
+               versión con `immutable`, y así el día que esta escena se
+               reemplace la URL cambiará con ella. Con @1, el archivo nuevo se
+               queda siete días detrás en el navegador de cada visitante.
+               Antes aquí había una pose suelta a 160 px. Se cambió por una
+               escena que cuenta el recorrido del cobro —residente, pago
+               confirmado, dinero a la cuenta—, que es de lo que habla esta
+               sección; por eso ahora es apaisada y ocupa más. -->
               <img
                 class="mascota"
-                src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/mascota/mascota.webp"
-                alt="Eve, la mascota de Evetev: un gato-robot azul que asiste a los conjuntos"
-                width="160"
-                height="160"
+                src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1.16.0/mascota/mascota-contacto-cliente.webp"
+                alt="Una residente paga su cuota desde el móvil y el dinero viaja a la cuenta del conjunto, mientras Eve, la mascota de Evetev, muestra el pago confirmado"
+                width="929"
+                height="772"
               />
-              <p class="figura-nota">Eve, la de la casa, te acompaña en la operación.</p>
+              <p class="figura-nota">
+                Del bolsillo del residente a la cuenta del conjunto, sin escalas.
+              </p>
             </div>
           </div>
         </div>
