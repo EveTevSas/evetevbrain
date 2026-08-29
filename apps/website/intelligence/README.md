@@ -53,5 +53,4 @@ y abrir `http://localhost:3002/intelligence`.
 
 ## Estado
 
-Lleva **`<meta name="robots" content="noindex">`** a propósito. **Hay que
-quitarlo cuando la landing esté terminada.**
+**Indexable.** El `noindex` con el que nació se quitó en #108.

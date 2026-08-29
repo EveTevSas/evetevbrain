@@ -53,6 +53,6 @@ y abrir `http://localhost:3002/evepay`.
 
 ## Estado
 
-Lleva **`<meta name="robots" content="noindex">`** a propósito: una página a
-medias posicionando por «EvePay» hace más daño que no aparecer. **Hay que
-quitarlo cuando la landing esté terminada.**
+**Indexable.** El `noindex` con el que nació se quitó en #108: la página está lo
+bastante terminada para aparecer, y esconderla también la esconde de las
+respuestas de IA, que es donde más caro sale.
