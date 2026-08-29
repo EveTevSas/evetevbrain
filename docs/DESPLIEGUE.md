@@ -66,10 +66,23 @@ deja de ser cross-origin, así que ya no depende de que alguien acuerde de añad
 un dominio a la lista de CORS.
 
 **Retirar los subdominios viejos.** La redirección **no** se pone en el panel:
-vive en `apps/website/vercel.json`, en tres reglas condicionadas por host
+vive en `apps/website/vercel.json`, en reglas condicionadas por host
 (`has: [{ "type": "host", … }]`) que mandan cualquier ruta del subdominio viejo
 a la landing nueva con un 308. En código se revisa en un PR y se ve en el
 `git blame`; en un campo del panel no la ve nadie hasta que falla.
+
+> Y en el panel **no se podría**, aunque se quisiera. El campo «Redirect to» de
+> un dominio solo acepta otro dominio del mismo proyecto, no una URL con ruta:
+> la API responde _«Unable to redirect to https://evetev.com/evepay, because
+> that domain is not added to the project»_. Lo máximo que da el panel es mandar
+> el subdominio a la portada, que no es lo que se quiere.
+
+> **Cada host necesita DOS reglas, `/` y `/:ruta*`.** `/:ruta*` no casa con la
+> raíz. Con solo esa regla, `evepay.evetev.com/lo-que-sea` redirigía bien y
+> `evepay.evetev.com` a secas servía la portada corporativa con un `200` — que
+> es peor que un error, porque parece que funciona. Se descubrió en producción,
+> probando las dos URL por separado; probar solo la raíz, o solo una ruta, no
+> lo habría encontrado.
 
 Con eso ya desplegado, quedan dos pasos:
 
