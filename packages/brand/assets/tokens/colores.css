@@ -1,6 +1,13 @@
 /* Evetev S.A.S. — tokens de color oficiales
    Paleta votada por socios (Manual de marca v2.0)
-   Uso: @import url("https://cdn.jsdelivr.net/gh/EveTev/brand@1/tokens/colores.css"); */
+   Uso: <link rel="stylesheet" href="/marca/colores.css">, que cada app sirve
+   desde su propio origen. Aquí está la fuente; la copia la hace
+   `pnpm marca:sync`.
+
+   Antes esta línea decía @import de una URL de jsDelivr sobre "EveTev/brand".
+   Ese repositorio nunca existió —el de marca era "Evetev-Dev/brand", y también
+   se borró—, así que la URL respondía 404 desde el primer día. Nadie lo notó
+   porque era un comentario: se copiaba a las páginas y no se pedía nunca. */
 
 :root {
   /* Base */
