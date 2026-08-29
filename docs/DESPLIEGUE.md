@@ -65,7 +65,12 @@ gasta un despliegue del cupo diario en vez de cuatro; y el formulario de demo
 deja de ser cross-origin, así que ya no depende de que alguien acuerde de añadir
 un dominio a la lista de CORS.
 
-**Retirar los subdominios viejos.** La redirección **no** se pone en el panel:
+**Retirar los subdominios viejos — hecho el 28-ago-2026.** Los tres proyectos
+(`evepay`, `eveconecta`, `eve-intelligence`) están borrados y sus dominios
+adjuntos a `website`, redirigiendo con 308. Lo que sigue queda como registro de
+cómo se hizo, y como receta si vuelve a pasar.
+
+La redirección **no** se pone en el panel:
 vive en `apps/website/vercel.json`, en reglas condicionadas por host
 (`has: [{ "type": "host", … }]`) que mandan cualquier ruta del subdominio viejo
 a la landing nueva con un 308. En código se revisa en un PR y se ve en el
@@ -234,11 +239,11 @@ que muestre Vercel**, por si cambian.
 > Esta tabla describía la intención, no lo que hay; ojo con leerla como
 > inventario.
 >
-> Arreglarlo son dos pasos, y el orden da igual:
->
-> 1. En name.com, crear el `CNAME` de `www` a `cname.vercel-dns.com`.
-> 2. `vercel domains add www.evetev.com website --scope evetev`. Vercel redirige
->    `www` al apex por su cuenta en cuanto los dos están en el mismo proyecto.
+> El paso de Vercel ya está hecho: `www.evetev.com` está adjunto al proyecto
+> `website`, y Vercel lo redirige al apex por su cuenta. **Falta solo el DNS**,
+> que es panel de name.com y no se puede hacer desde aquí: crear el `CNAME` de
+> `www` apuntando a `cname.vercel-dns.com`. Hasta que ese registro exista,
+> `www.evetev.com` sigue sin resolver.
 >
 > El apex resuelve hoy a `216.198.79.1`, no al `76.76.21.21` de la tabla: Vercel
 > cambió de IP. Otra razón para pedirle a Vercel los valores en el momento.
