@@ -232,21 +232,29 @@ Se ponen en el panel DNS de **name.com** (login `contacto@evetev.com`). Propaga 
 minutos–horas; Vercel emite el certificado HTTPS solo. **Usa siempre los valores
 que muestre Vercel**, por si cambian.
 
-> **`www.evetev.com` está sin hacer, pese a la fila de arriba.** Hoy (28-ago-2026)
-> no resuelve —`dig www.evetev.com` no devuelve nada— y el dominio tampoco está
-> adjunto al proyecto `website`. Quien teclee `www.evetev.com` no llega a
-> ninguna parte: no es una redirección lenta, es un error de DNS del navegador.
-> Esta tabla describía la intención, no lo que hay; ojo con leerla como
-> inventario.
+> **`www.evetev.com` estuvo sin hacer hasta el 28-ago-2026**, pese a que la fila
+> de arriba lo listaba desde el principio. No resolvía —`dig` no devolvía nada—
+> y el dominio tampoco estaba adjunto al proyecto: quien lo tecleara no llegaba
+> a ninguna parte. La tabla describía la intención, no lo que había; ojo con
+> leerla como inventario.
 >
-> El paso de Vercel ya está hecho: `www.evetev.com` está adjunto al proyecto
-> `website`, y Vercel lo redirige al apex por su cuenta. **Falta solo el DNS**,
-> que es panel de name.com y no se puede hacer desde aquí: crear el `CNAME` de
-> `www` apuntando a `cname.vercel-dns.com`. Hasta que ese registro exista,
-> `www.evetev.com` sigue sin resolver.
+> Ya está en pie: `CNAME www → 3a80ad15d636bba4.vercel-dns-017.com` en name.com,
+> el dominio adjunto a `website` y **con «Redirect to» al apex, 308**. Ese
+> último paso no es opcional: adjuntar `www` a secas hace que sirva el sitio
+> entero en los dos hosts, y entonces cada página existe en dos URL distintas.
+> Redirige la raíz y también cualquier ruta (`www.evetev.com/evepay` → 308).
 >
-> El apex resuelve hoy a `216.198.79.1`, no al `76.76.21.21` de la tabla: Vercel
-> cambió de IP. Otra razón para pedirle a Vercel los valores en el momento.
+> El valor del `CNAME` no es el genérico `cname.vercel-dns.com` de la tabla,
+> sino el que Vercel da para este dominio en concreto, como el resto de los
+> registros que ya había. Se pide con:
+>
+> ```bash
+> vercel domains verify www.evetev.com --scope evetev
+> ```
+>
+> El apex, por cierto, resuelve hoy a `216.198.79.1`, no al `76.76.21.21` de la
+> tabla: Vercel cambió de IP. Otra razón para pedirle los valores en el momento
+> en vez de fiarse de esta página.
 
 ## 4. Pipeline
 
