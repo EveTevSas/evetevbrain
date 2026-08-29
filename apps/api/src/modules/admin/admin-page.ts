@@ -9,13 +9,25 @@ export const ADMIN_HTML = /* html */ `<!DOCTYPE html>
 <meta name="theme-color" content="#0A2540">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Tokens de color de la marca, incrustados. Copia de
-   packages/brand/assets/tokens/colores.css — la API no sirve archivos
-   estáticos y esta página es una sola plantilla, así que traerlos de fuera
-   significaba depender de un CDN para 1,6 KB. */
+/* MARCA:INICIO tokens — GENERADO, NO EDITAR.
+   Copia de packages/brand/assets/tokens/colores.css, escrita por
+   «pnpm marca:sync». La API no sirve archivos estáticos y esta página es una
+   sola plantilla, así que traer los tokens de fuera significaba depender de un
+   CDN para 1,6 KB.
+   Se sincroniza, y el CI lo comprueba, porque ya se desvió una vez: se incrustó
+   la copia, se corrigió después un comentario en la fuente, y esta se quedó
+   atrás publicando una URL muerta. Un redespliegue no lo habría arreglado — el
+   texto viejo estaba aquí, en el código, no en el build. */
 /* Evetev S.A.S. — tokens de color oficiales
    Paleta votada por socios (Manual de marca v2.0)
-   Uso: @import url("https://cdn.jsdelivr.net/gh/EveTev/brand@1/tokens/colores.css"); */
+   Uso: <link rel="stylesheet" href="/marca/colores.css">, que cada app sirve
+   desde su propio origen. Aquí está la fuente; la copia la hace
+   \`pnpm marca:sync\`.
+
+   Antes esta línea decía @import de una URL de jsDelivr sobre "EveTev/brand".
+   Ese repositorio nunca existió —el de marca era "Evetev-Dev/brand", y también
+   se borró—, así que la URL respondía 404 desde el primer día. Nadie lo notó
+   porque era un comentario: se copiaba a las páginas y no se pedía nunca. */
 
 :root {
   /* Base */
@@ -62,6 +74,7 @@ export const ADMIN_HTML = /* html */ `<!DOCTYPE html>
   --eve-font-ui: "Inter", sans-serif;
   --eve-font-mono: "JetBrains Mono", monospace;
 }
+/* MARCA:FIN */
 </style>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
