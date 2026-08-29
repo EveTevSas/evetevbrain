@@ -75,8 +75,7 @@ mismo estado que declara la web corporativa —en construcción, y primer client
 de la casa para probar EvePay con dinero real—. Que las dos páginas cuenten lo
 mismo importa más que sonar mejor aquí.
 
-Lleva **`<meta name="robots" content="noindex">`** a propósito. **Hay que
-quitarlo cuando la landing esté terminada.**
+**Indexable.** El `noindex` con el que nació se quitó en #108.
 
 La regla que conserva «Entrar al portal» en móvil vive en `base.css`, apoyada en
 la clase `.portal`: cualquier landing con portal la necesitará igual.
