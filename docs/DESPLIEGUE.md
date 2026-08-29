@@ -68,8 +68,16 @@ un dominio a la lista de CORS.
 **Retirar los subdominios viejos** (una sola vez, en el panel; el código ya no
 los necesita):
 
-1. En cada proyecto viejo (`evepay`, `eveconecta-landing`, `eve-intelligence`) →
-   **Settings → Domains** → quitar el dominio.
+1. En cada proyecto viejo → **Settings → Domains** → quitar el dominio. Los
+   nombres reales en el panel son `evepay`, **`eveconecta`** y
+   `eve-intelligence`.
+
+   > **Cuidado con `eveconecta`.** Ese nombre es el de la _landing_ (Root
+   > Directory `apps/eveconecta-landing`, que ya no existe). El portal de
+   > residentes es el proyecto **`evetevbrain-eveconecta`**, y ese no se toca:
+   > borrarlo tumba `conecta.evetev.com`. Comprueba el Root Directory antes de
+   > borrar nada — es el único campo que los distingue sin lugar a dudas.
+
 2. Añadirlo al proyecto `website` y marcarlo **Redirect to** `evetev.com` con la
    ruta correspondiente, permanente (308):
    | Subdominio                   | Redirige a                |
