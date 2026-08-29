@@ -4,7 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
 
-const CDN = "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1";
+/* Los activos de marca se sirven desde esta misma app (public/marca), no
+   desde un CDN externo: la carpeta la llena `pnpm marca:sync` desde
+   packages/brand, que es la fuente única, y el CI vigila que no se desvíe. */
+const CDN = "/marca";
 
 /* ── Iconos SVG 16×16 stroke ───────────────────────────── */
 function IcoDashboard() {
@@ -208,7 +211,7 @@ export default function SidebarNav({ email }: { email?: string }) {
           style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`${CDN}/isotipos/isotipo-azul-noche.svg`} alt="" width={28} height={20} />
+          <img src={`${CDN}/isotipo-azul-noche.svg`} alt="" width={28} height={20} />
           <div>
             <div
               style={{

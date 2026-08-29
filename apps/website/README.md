@@ -110,10 +110,15 @@ detectado.
 
 El sitio sigue `packages/brand/assets/evetev_brand_styles.md` (v1.0):
 
-- **Activos de marca SIEMPRE desde el CDN** (regla T1):
-  `https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/...` — isotipos, unidades,
-  favicon y mascota. No se guardan copias locales ni se dibujan a mano.
-- **Tokens**: se importan de `…/tokens/colores.css` con respaldo local en `:root`.
+- **Activos de marca desde `/marca/`** (regla T1): isotipos, unidades, favicon,
+  mascota e ilustraciones. Nunca se dibujan a mano ni se enlazan de fuera.
+  La carpeta `marca/` de esta app **es generada**: la llena `pnpm marca:sync`
+  desde `packages/brand`, que es la fuente, y el CI comprueba que no se desvíe.
+  Para añadir un activo hay que apuntarlo en `scripts/marca-sync.mjs`; ponerlo
+  solo en `packages/brand` no lo sirve.
+  Hasta agosto de 2026 esto venía del CDN de jsDelivr, del repositorio
+  `Evetev-Dev/brand`, que se borró.
+- **Tokens**: se importan de `/marca/colores.css` con respaldo local en `:root`.
 - **Coral `#EE3D22`**: exclusivo del CTA global del nav (único por vista, C2).
   El resto de acciones usa `.btn-sec` (mezclado `#144A96`) o `.btn-ghost`.
 - Tipografías: Baloo 2 (titulares/cifras), Inter (UI), JetBrains Mono (código).

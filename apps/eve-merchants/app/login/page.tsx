@@ -7,7 +7,10 @@ import { api, ApiError } from "@/lib/api";
 import { setSession } from "@/lib/auth";
 import ParticlesBackground from "@/components/ui/particles-bg";
 
-const CDN = "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1";
+/* Los activos de marca se sirven desde esta misma app (public/marca), no
+   desde un CDN externo: la carpeta la llena `pnpm marca:sync` desde
+   packages/brand, que es la fuente única, y el CI vigila que no se desvíe. */
+const CDN = "/marca";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -75,12 +78,7 @@ export default function LoginPage() {
                 textDecoration: "none"
               }}
             >
-              <img
-                src={`${CDN}/isotipos/isotipo-azul-noche.svg`}
-                alt="Evetev"
-                width={44}
-                height={32}
-              />
+              <img src={`${CDN}/isotipo-azul-noche.svg`} alt="Evetev" width={44} height={32} />
               <span
                 style={{
                   fontFamily: "'Baloo 2', sans-serif",

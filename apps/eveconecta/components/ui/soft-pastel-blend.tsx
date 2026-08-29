@@ -17,8 +17,7 @@ export function GradientBackground({ className }: { className?: string }) {
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage:
-            "url('https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial-calle.webp')",
+          backgroundImage: "url('/marca/conjunto-residencial-calle.webp')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           opacity: 0.13

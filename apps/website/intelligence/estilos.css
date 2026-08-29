@@ -97,8 +97,8 @@
   left: 50%;
   width: 100vw;
   transform: translateX(-50%);
-  background: url("https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1.14.0/ilustraciones/asistente-documental.webp")
-    center calc(100% + clamp(8px, 1.2vw, 20px)) / contain no-repeat;
+  background: url("/marca/asistente-documental.webp") center calc(100% + clamp(8px, 1.2vw, 20px)) /
+    contain no-repeat;
   /* **Sin hueco de máscara, a diferencia de EvePay y EveConecta.** Allá el
      hueco radial existe porque su texto de portada va en gris pizarra y
      necesita fondo limpio. Aquí el titular, la entrada y la nota están los

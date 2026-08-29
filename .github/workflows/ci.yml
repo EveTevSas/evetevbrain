@@ -67,11 +67,14 @@ jobs:
         run: pnpm format:check
 
   # ── Landings: una sola fuente de lo compartido ─────────────────────────────
-  # Las landings son estáticas y comparten una copia de base.css y de
-  # formularios.js en apps/website/landings/, generada desde
-  # packages/brand/landing/. Este job impide que se desvíe.
+  # Dos juegos de copias salen de packages/brand y este job impide que se
+  # desvíen: base.css y formularios.js en apps/website/landings/, y los activos
+  # de marca en la carpeta /marca de cada app. Los segundos existen desde que se
+  # borró el repositorio de marca y cada app pasó a servirlos por su cuenta; un
+  # activo que se desvía o que falta es una imagen rota, y una imagen rota no
+  # hace fallar ningún despliegue.
   landings:
-    name: Archivos compartidos de las landings
+    name: Copias generadas desde packages/brand
     runs-on: ubuntu-latest
     needs: cambios
     if: ${{ needs.cambios.outputs.landings == 'true' }}
@@ -85,7 +88,9 @@ jobs:
       # Sin dependencias a propósito: el script usa solo node:fs y node:path,
       # así que no hace falta instalar el workspace para comprobarlo.
       - name: Copias al día
-        run: node scripts/landings-sync.mjs --check
+        run: |
+          node scripts/landings-sync.mjs --check
+          node scripts/marca-sync.mjs --check
 
   # ── Paso 1: shared (bloquea todo lo demás) ─────────────────────────────────
   shared:

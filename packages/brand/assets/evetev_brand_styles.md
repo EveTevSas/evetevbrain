@@ -68,7 +68,7 @@ Referencias del sector: Anthropic y Apple en sobriedad; nunca recargado ni "corp
 **Atajo:** puedes importar los tokens en vez de copiarlos:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css" />
+<link rel="stylesheet" href="/marca/colores.css" />
 ```
 
 ### Reglas de color (obligatorias)
@@ -143,9 +143,20 @@ Nunca menos de 12 px. Máximo dos familias visibles por pieza (la mono solo en c
 
 ---
 
-## 4. Activos de marca (CDN — NO generar logos a mano)
+## 4. Activos de marca (NO generar logos a mano)
 
-**REGLA T1 — PROHIBIDO dibujar, recrear o aproximar el logo de Evetev.** Siempre referenciar por URL del CDN.
+**REGLA T1 — PROHIBIDO dibujar, recrear o aproximar el logo de Evetev.** Siempre
+referenciar el archivo, nunca reproducirlo.
+
+> **Dónde están.** La fuente es `packages/brand/assets/` en el monorepo, y cada
+> app los sirve desde su propio origen en `/marca/<archivo>`. La carpeta la
+> llena `pnpm marca:sync` desde un manifiesto (`scripts/marca-sync.mjs`), y el
+> CI comprueba que no se desvíe. Si el activo que necesitas no está en `/marca`,
+> se añade una línea al manifiesto; no se enlaza desde fuera.
+>
+> Hasta agosto de 2026 esto se servía por jsDelivr desde el repositorio
+> `Evetev-Dev/brand`. Ese repositorio se borró: **cualquier URL de
+> `cdn.jsdelivr.net/gh/Evetev-Dev/brand` que encuentres está muerta.**
 
 **REGLA T2 — La variante se elige por el fondo, no por gusto.** El criterio es
 el contraste, y es obligatorio:
@@ -164,7 +175,7 @@ noche, así que sobre fondo oscuro pierden ese extremo** y la figura se corta po
 la mitad. Sobre oscuro va `-blanco`, siempre. Y `-blanco` sobre fondo claro es
 el mismo error al revés: desaparece.
 
-**Patrón de URL:** `https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/RUTA`
+**Patrón de URL:** `/marca/RUTA`
 
 ### Qué activo usar — guía de decisión
 
@@ -207,7 +218,7 @@ membretes ilegibles.
 - **Degradados fuera de piezas expresivas** (C6): prohibidos en botones, texto y
   componentes funcionales.
 - **Mascota en documentos legales, facturas o en el flujo de pago** de EvePay.
-- **Recolorear un SVG del CDN con CSS.** `fill: currentColor` no cruza la
+- **Recolorear un SVG servido como `<img>` con CSS.** `fill: currentColor` no cruza la
   frontera de un `<img>`. Por eso existen las variantes ya hechas; si falta un
   color, se agrega al repositorio en vez de improvisarlo.
 
@@ -306,26 +317,10 @@ Juego completo (`favicon/`):
 | `mask-icon.svg`                | pestaña fijada de Safari              | transparente, monocromo      |
 
 ```html
-<link
-  rel="icon"
-  href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg"
-  type="image/svg+xml"
-/>
-<link
-  rel="icon"
-  href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png"
-  sizes="32x32"
-  type="image/png"
-/>
-<link
-  rel="apple-touch-icon"
-  href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png"
-/>
-<link
-  rel="mask-icon"
-  href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/mask-icon.svg"
-  color="#0A2540"
-/>
+<link rel="icon" href="/marca/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/marca/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="/marca/apple-touch-icon.png" />
+<link rel="mask-icon" href="/marca/mask-icon.svg" color="#0A2540" />
 <meta name="theme-color" content="#0A2540" />
 ```
 
@@ -525,9 +520,11 @@ norma.
 detrás de un texto. Es línea densa y compite con lo que hay que leer. El patrón
 es `.portada::after` en `apps/website/conecta/estilos.css`.
 
-**Y súbela a `ilustraciones/` en este repositorio con una etiqueta nueva** — sin
-etiqueta, `@1` no la sirve. Después hay que **purgar `@1` en jsDelivr**, porque
-cachea la resolución del rango y la etiqueta sola no basta.
+**Y súbela a `packages/brand/ilustraciones/`**, más la línea que la añade al
+manifiesto de `scripts/marca-sync.mjs` para la app que la vaya a usar. Sin esa
+línea el archivo está en el repositorio y no lo sirve nadie: la página da 404.
+Antes esto era «etiquetar una versión y purgar el CDN», con dos formas conocidas
+de fallar en silencio; ahora falla en el CI, que es donde debe fallar.
 
 > Los archivos publicados de esta carpeta cuentan la historia de estas reglas y
 > **ninguno es la referencia de estilo; la referencia es el prompt.**
@@ -541,12 +538,7 @@ cachea la resolución del rango y la etiqueta sola no basta.
 
 ```html
 <a class="logo" href="/" aria-label="Evetev inicio">
-  <img
-    src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg"
-    alt=""
-    width="32"
-    height="23"
-  />
+  <img src="/marca/isotipo-azul-noche.svg" alt="" width="32" height="23" />
   <span class="brand">Evetev</span>
 </a>
 ```
@@ -781,7 +773,7 @@ mensual del software. NUNCA escribir "tarifa fija sin porcentaje" (información 
 
 Antes de devolver cualquier artefacto, confirma:
 
-- [ ] ¿Usé las URLs del CDN para el logo, sin dibujarlo a mano?
+- [ ] ¿Usé las rutas `/marca/…` para el logo, sin dibujarlo a mano?
 - [ ] ¿Hay **exactamente un** botón coral por pantalla?
 - [ ] ¿El violeta aparece solo en contexto de Eve Intelligence y **no** en botones?
 - [ ] ¿Todos los botones son pill (`border-radius:999px`)?
@@ -803,20 +795,13 @@ Antes de devolver cualquier artefacto, confirma:
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Evetev — [título]</title>
-    <link
-      rel="icon"
-      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg"
-      type="image/svg+xml"
-    />
+    <link rel="icon" href="/marca/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#0A2540" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css"
-    />
+    <link rel="stylesheet" href="/marca/colores.css" />
     <style>
       * {
         margin: 0;
@@ -897,5 +882,5 @@ Antes de devolver cualquier artefacto, confirma:
 | Titular grande               | Baloo 2 600, `clamp(1.9rem,4.6vw,2.6rem)`        |
 | Cifra o monto destacado      | Baloo 2 700                                      |
 | Texto de interfaz            | Inter 400/500                                    |
-| Ícono de producto            | unidad SVG del CDN, 30–34 px                     |
+| Ícono de producto            | unidad SVG de `/marca/`, 30–34 px                |
 | Marca en encabezado          | isotipo azul noche 32 px + "Evetev" en Baloo 600 |

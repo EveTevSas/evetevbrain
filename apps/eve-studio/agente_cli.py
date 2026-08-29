@@ -23,12 +23,29 @@ llm = ChatOpenAI(
 # solo módulo para no añadir importaciones relativas al montaje de Vercel, que ya
 # dio problemas una vez. Es la copia la que paga el precio, así que si cambias
 # aquí el criterio de URLs o la validación, cámbialo también allí.
-REPO_MARCA = "Evetev-Dev/brand"
-# El CDN es la única forma válida de citar un activo de marca (regla T1 del
-# manual). raw.githubusercontent no tiene caché de borde y sigue a main, así que
-# la imagen se rompe sola el día que el archivo se mueva.
-CDN_MARCA = f"https://cdn.jsdelivr.net/gh/{REPO_MARCA}@1"
+# La marca vive en packages/brand de este mismo monorepo desde que se borró
+# Evetev-Dev/brand (agosto de 2026). RAIZ_MARCA es la fuente; MARCA_SERVIDA es
+# la carpeta que el navegador ve, que la llena `pnpm marca:sync`.
+REPO_MARCA = "EveTevSas/evetevbrain"
+RAIZ_MARCA = "packages/brand"
+MARCA_SERVIDA = "apps/website/marca"
+# La ruta del propio sitio es la única forma válida de citar un activo de marca.
+# raw.githubusercontent no tiene caché de borde y sigue a main, así que la
+# imagen se rompe sola el día que el archivo se mueva; y el CDN de jsDelivr que
+# se usaba antes apuntaba a un repositorio que ya no existe.
 EXTENSIONES_IMAGEN = ('.png', '.webp', '.jpg', '.jpeg', '.svg', '.gif', '.ico', '.mp4')
+
+
+def _ruta_marca(ruta: str, carpeta: bool = False) -> str:
+    """Traduce 'mascota/mascota.webp' a donde vive hoy dentro del monorepo.
+
+    Las ilustraciones cuelgan de la raíz de packages/brand y todo lo demás de
+    assets/. El agente sigue pidiendo las rutas de siempre; esto lo absorbe.
+    """
+    limpia = ruta.strip("/")
+    if limpia.startswith("ilustraciones"):
+        return f"{RAIZ_MARCA}/{limpia}"
+    return f"{RAIZ_MARCA}/assets" + (f"/{limpia}" if limpia else "")
 
 
 @tool
@@ -44,30 +61,36 @@ def obtener_activo_github(ruta_archivo: str) -> str:
 
     if limpia.lower().endswith(EXTENSIONES_IMAGEN):
         # Un binario no se mete en el contexto: se devuelve su URL. Se comprueba
-        # contra el CDN y no contra la API de GitHub porque es exactamente la
-        # URL que va a acabar en la página: un archivo puede estar en main y
-        # todavía no en la versión etiquetada que sirve @1.
-        url = f"{CDN_MARCA}/{limpia}"
+        # contra apps/website/marca y no contra packages/brand porque esa es la
+        # carpeta que el navegador ve: un activo puede estar en la fuente y no
+        # haberse añadido al manifiesto que la sincroniza, y entonces la URL
+        # está bien formada y da 404.
+        nombre = limpia.split("/")[-1]
         try:
-            respuesta = requests.head(url, timeout=20, allow_redirects=True)
+            respuesta = requests.get(
+                f"https://api.github.com/repos/{REPO_MARCA}/contents/{MARCA_SERVIDA}/{nombre}",
+                headers={"Accept": "application/vnd.github+json"},
+                timeout=20,
+            )
         except requests.RequestException as e:
-            return f"Error de red consultando el CDN de marca: {e}"
+            return f"Error de red consultando GitHub: {e}"
         if respuesta.status_code == 404:
             return (
-                f"El CDN no sirve '{limpia}'. O no está en el repositorio de marca, "
-                "o está en main pero todavía no en una versión etiquetada. Lista la "
-                "carpeta y elige uno de los publicados; no uses esta ruta."
+                f"El sitio no sirve '{nombre}'. O no está en packages/brand, o está "
+                "pero nadie lo añadió al manifiesto de scripts/marca-sync.mjs, que "
+                "es lo que llena /marca. Lista la carpeta y elige uno de los que sí "
+                "se sirven; no uses esta ruta."
             )
         if respuesta.status_code != 200:
             return (
-                f"No se pudo comprobar '{limpia}' en el CDN "
+                f"No se pudo comprobar '{nombre}' en el repositorio "
                 f"(código {respuesta.status_code}). No la uses sin confirmarla."
             )
-        return url
+        return f"/marca/{nombre}"
 
     try:
         respuesta = requests.get(
-            f"https://api.github.com/repos/{REPO_MARCA}/contents/{limpia}",
+            f"https://api.github.com/repos/{REPO_MARCA}/contents/{_ruta_marca(limpia)}",
             headers={
                 "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
                 "Accept": "application/vnd.github.v3.raw",
@@ -93,7 +116,7 @@ def listar_carpeta_de_marca(ruta_carpeta: str = "") -> str:
     """
     try:
         respuesta = requests.get(
-            f"https://api.github.com/repos/{REPO_MARCA}/contents/{ruta_carpeta.lstrip('/')}",
+            f"https://api.github.com/repos/{REPO_MARCA}/contents/{_ruta_marca(ruta_carpeta.lstrip('/'), carpeta=True)}",
             headers={
                 "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
                 "Accept": "application/vnd.github+json",

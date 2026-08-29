@@ -61,11 +61,11 @@ La imagen va **debajo** del degradado lila para que el color sea uniforme aunque
 
 ### Ilustraciones disponibles en CDN
 
-| Aplicación | Ilustración                           | URL CDN                                                                                        |
-| ---------- | ------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| EveConecta | `conjunto-residencial-calle.webp`     | `https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial-calle.webp` |
-| EveLedger  | _(sin imagen; solo degradado y grid)_ | —                                                                                              |
-| EvePay     | Pendiente                             | —                                                                                              |
+| Aplicación | Ilustración                           | URL CDN                                  |
+| ---------- | ------------------------------------- | ---------------------------------------- |
+| EveConecta | `conjunto-residencial-calle.webp`     | `/marca/conjunto-residencial-calle.webp` |
+| EveLedger  | _(sin imagen; solo degradado y grid)_ | —                                        |
+| EvePay     | Pendiente                             | —                                        |
 
 ---
 

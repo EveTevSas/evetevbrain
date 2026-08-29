@@ -38,24 +38,28 @@ load_dotenv()  # solo para desarrollo local; en Vercel las vars ya están en el 
 
 app = FastAPI(title="Agente Frontend Evetev", docs_url=None, redoc_url=None)
 
-REPO_MARCA = os.getenv("REPO_MARCA", "Evetev-Dev/brand")
 REPO_CODIGO = os.getenv("REPO_CODIGO", "EveTevSas/evetevbrain")
 
-# SIN respaldo en GITHUB_TOKEN, y no es un olvido. Un token de alcance fino
-# está limitado a los recursos de UNA organización: el de marca pertenece a
-# Evetev-Dev y este repo es de EveTevSas. Mandarlo no es neutro, empeora las
-# cosas — sin cabecera GitHub sirve el repositorio público, y con una credencial
-# de otra organización responde 403. Se comprobó en producción.
+# La marca ya no vive en un repositorio propio. Hasta agosto de 2026 estaba en
+# Evetev-Dev/brand y se servía por jsDelivr; ese repo se borró y sus activos son
+# ahora packages/brand de este mismo monorepo, que es también la fuente desde la
+# que `pnpm marca:sync` llena la carpeta pública de cada app.
+RAIZ_MARCA = "packages/brand"
+# Y esta es la que el navegador ve. Un activo solo se puede citar en una página
+# si está AQUÍ: estar en packages/brand no basta, porque ahí no lo sirve nadie.
+MARCA_SERVIDA = "apps/website/marca"
+
+# Antes había aquí una nota sobre no mandar GITHUB_TOKEN al repo de marca: era
+# de otra organización y la credencial cruzada devolvía 403. Con la marca dentro
+# del monorepo el problema desaparece — un solo repo, una sola credencial.
 TOKEN_CODIGO = os.getenv("GITHUB_TOKEN_CODIGO")
 
-# La forma canónica de citar un activo de marca es el CDN (regla T1 del manual:
-# "logos SIEMPRE desde el CDN"), no raw.githubusercontent, que no tiene caché de
-# borde, no está pensado para servir a usuarios finales y —al seguir a main— se
+# La forma canónica de citar un activo de marca es la ruta /marca del propio
+# sitio. La regla T1 del manual decía "logos SIEMPRE desde el CDN"; se cambió al
+# borrar el repositorio de marca. Lo que NO cambia es lo que prohibía: citar
+# raw.githubusercontent, que no tiene caché de borde, no está pensado para
+# servir a usuarios finales y —al seguir a main— se
 # rompe en silencio el día que el archivo se mueva.
-# @1 sigue la última 1.x publicada: así un activo nuevo queda disponible sin
-# tocar este código, y las páginas ya escritas no cambian de imagen.
-VERSION_MARCA = os.getenv("VERSION_MARCA", "1")
-CDN_MARCA = f"https://cdn.jsdelivr.net/gh/{REPO_MARCA}@{VERSION_MARCA}"
 
 # ── El arnés de escritura ──────────────────────────────────────────────────
 # Todo esto vive en código y no en el prompt a propósito: a un modelo se le
@@ -126,7 +130,7 @@ def _pedir(repo: str, ruta: str, token: str | None, crudo: bool):
     return respuesta
 
 
-def _leer_archivo(repo: str, ruta_archivo: str, token: str | None) -> str:
+def _leer_archivo(repo: str, ruta_archivo: str, token: str | None, es_marca: bool = False) -> str:
     if ruta_archivo.lower().endswith(EXTENSIONES_IMAGEN):
         # Un binario no se mete en el contexto: se devuelve su URL para usarla
         # tal cual en el marcado. Pero antes se comprueba que exista: una URL
@@ -134,31 +138,32 @@ def _leer_archivo(repo: str, ruta_archivo: str, token: str | None) -> str:
         # porque el agente la da por buena y la imagen rota solo se ve en la
         # página.
         limpia = ruta_archivo.lstrip("/")
-        if repo == REPO_MARCA:
-            # Se comprueba contra el CDN, no contra la API de GitHub, porque es
-            # exactamente la URL que va a acabar en la página. Un archivo puede
-            # estar en main y NO en la última versión etiquetada: pasó con
-            # v1.3.0, que se etiquetó antes de mezclar el PR y dejaba a @1
-            # sirviendo el árbol viejo. Preguntarle a GitHub habría dicho que sí
-            # mientras el navegador recibía un 404.
-            url = f"{CDN_MARCA}/{limpia}"
+        if es_marca:
+            # Se comprueba contra apps/website/marca y NO contra packages/brand,
+            # porque esa es la carpeta que el navegador ve. Un activo puede estar
+            # en la fuente y no estar sincronizado a la carpeta pública: en ese
+            # caso la URL está bien formada y da 404, que es el peor resultado
+            # posible —el agente la da por buena y la imagen rota solo se ve en
+            # la página—. Antes esto mismo se comprobaba contra el CDN por la
+            # misma razón: preguntar donde de verdad se sirve.
+            nombre = limpia.split("/")[-1]
             try:
-                existe = requests.head(url, timeout=20, allow_redirects=True)
+                existe = _pedir(repo, f"{MARCA_SERVIDA}/{nombre}", token, crudo=False)
             except requests.RequestException as e:
-                return f"Error de red consultando el CDN de marca: {e}"
+                return f"Error de red consultando GitHub: {e}"
             if existe.status_code == 404:
                 return (
-                    f"El CDN no sirve '{limpia}'. O no está en el repositorio de "
-                    "marca, o está en main pero todavía no en una versión "
-                    "etiquetada. Lista la carpeta y elige uno de los publicados; "
-                    "no uses esta ruta."
+                    f"El sitio no sirve '{nombre}'. O no está en packages/brand, o "
+                    "está pero nadie lo añadió al manifiesto de "
+                    "scripts/marca-sync.mjs, que es lo que llena /marca. Lista la "
+                    "carpeta y elige uno de los que sí se sirven; no uses esta ruta."
                 )
             if existe.status_code != 200:
                 return (
-                    f"No se pudo comprobar '{limpia}' en el CDN "
+                    f"No se pudo comprobar '{nombre}' en el repositorio "
                     f"(código {existe.status_code}). No la uses sin confirmarla."
                 )
-            return url
+            return f"/marca/{nombre}"
 
         # Monorepo: no hay CDN, así que se sirve por raw fijado a main.
         try:
@@ -236,7 +241,12 @@ def obtener_activo_github(ruta_archivo: str) -> str:
 
     Si no sabes el nombre exacto del activo, usa antes 'listar_carpeta_de_marca'.
     """
-    return _leer_archivo(REPO_MARCA, ruta_archivo, os.getenv("GITHUB_TOKEN"))
+    # Las rutas se piden como siempre —'mascota/mascota.webp'— y aquí se
+    # traducen a donde viven ahora. Las ilustraciones cuelgan de la raíz de
+    # packages/brand y el resto de assets/; el agente no tiene por qué saberlo.
+    limpia = ruta_archivo.lstrip("/")
+    sub = "" if limpia.startswith("ilustraciones/") else "assets/"
+    return _leer_archivo(REPO_CODIGO, f"{RAIZ_MARCA}/{sub}{limpia}", TOKEN_CODIGO, es_marca=True)
 
 
 @tool
@@ -246,9 +256,14 @@ def listar_carpeta_de_marca(ruta_carpeta: str = "") -> str:
     Úsala ANTES de citar cualquier imagen, para partir de los archivos que
     existen de verdad en vez de deducir el nombre. Con cadena vacía lista la
     raíz; las carpetas son 'mascota', 'isotipos', 'logotipos', 'lockups',
-    'unidades', 'favicon' y 'tokens'.
+    'unidades', 'favicon', 'tokens' e 'ilustraciones'.
     """
-    return _listar_carpeta(REPO_MARCA, ruta_carpeta, os.getenv("GITHUB_TOKEN"))
+    limpia = ruta_carpeta.strip("/")
+    if limpia == "ilustraciones":
+        ruta = f"{RAIZ_MARCA}/ilustraciones"
+    else:
+        ruta = f"{RAIZ_MARCA}/assets" + (f"/{limpia}" if limpia else "")
+    return _listar_carpeta(REPO_CODIGO, ruta, TOKEN_CODIGO)
 
 
 @tool
@@ -470,14 +485,17 @@ REGLAS DE COMPORTAMIENTO:
 3. NUNCA deduzcas el nombre de un activo de marca. Antes de citar cualquier
    imagen, lista la carpeta con 'listar_carpeta_de_marca' y elige de lo que
    exista de verdad; luego pide esa ruta a 'obtener_activo_github' y usa la URL
-   que te devuelva tal cual —será una del CDN (cdn.jsdelivr.net), que es la
-   única forma válida de citar un activo de marca; NUNCA escribas a mano una de
-   raw.githubusercontent, que no tiene caché y se rompe sola cuando el archivo
-   se mueve. Solo sirven los activos publicados en el repo de
-   marca, que no son siempre los mismos que están en el monorepo: por eso hay
-   que listar, no recordar. Si el activo que necesitas no aparece en el listado,
-   dilo en tu respuesta y propón uno de los que sí están; no inventes la URL,
-   porque una imagen rota no falla ruidosamente.
+   que te devuelva TAL CUAL. Será una ruta del propio sitio, de la forma
+   `/marca/<archivo>`: el sitio sirve su marca desde su origen, y esa es la
+   única forma válida de citarla. NUNCA escribas a mano una URL de un CDN
+   externo ni de raw.githubusercontent: el repositorio de marca que había en
+   jsDelivr se borró en agosto de 2026, así que cualquier `cdn.jsdelivr.net/gh/
+   Evetev-Dev/brand` que escribas hoy es una imagen rota.
+   No todo lo que está en packages/brand se sirve: solo lo que el manifiesto de
+   scripts/marca-sync.mjs copia a /marca. Por eso hay que listar y pedir, no
+   recordar. Si el activo que necesitas no aparece o la herramienta te dice que
+   no se sirve, dilo en tu respuesta y propón uno de los que sí están; no
+   inventes la URL, porque una imagen rota no falla ruidosamente.
 4. Devuelve ÚNICAMENTE código HTML, listo para ser renderizado. No agregues explicaciones fuera del bloque de código.
 
 GENERAR PARA UNA LANDING DEL MONOREPO:
@@ -487,7 +505,8 @@ devuelvas una página autocontenida: devuelve el archivo tal como tiene que
 quedar en el repositorio.
 
 A. Lee primero el `index.html` actual de esa carpeta y respeta su cabecera: el
-   favicon, las tipografías, los tokens del CDN y —muy importante— la etiqueta
+   favicon, las tipografías, los tokens de `/marca/colores.css` y —muy
+   importante— la etiqueta
    `<meta name="robots" content="noindex">` mientras la landing esté en
    construcción. Quitarla sin querer hace que Google indexe una página a medias.
 B. Enlaza las hojas, no las incrustes, y SIEMPRE con ruta absoluta desde la
@@ -702,7 +721,7 @@ async def diagnostico(x_agente_token: str | None = Header(default=None)):
         }
 
     return {
-        "marca": probar(REPO_MARCA, "colores.json", os.getenv("GITHUB_TOKEN")),
+        "marca": probar(REPO_CODIGO, f"{RAIZ_MARCA}/assets/tokens/colores.json", TOKEN_CODIGO),
         "codigo": probar(REPO_CODIGO, "package.json", TOKEN_CODIGO),
         "escritura": probar_escritura(),
     }

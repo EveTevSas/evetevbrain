@@ -4,7 +4,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getApiKey, getMerchant, logout } from "@/lib/auth";
 
-const CDN = "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1";
+/* Los activos de marca se sirven desde esta misma app (public/marca), no
+   desde un CDN externo: la carpeta la llena `pnpm marca:sync` desde
+   packages/brand, que es la fuente única, y el CI vigila que no se desvíe. */
+const CDN = "/marca";
 
 /* ── Iconos SVG ─────────────────────────────────────────── */
 function IconDashboard({ active }: { active: boolean }) {
@@ -119,7 +122,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             href="/dashboard"
             style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}
           >
-            <img src={`${CDN}/isotipos/isotipo-azul-noche.svg`} alt="" width={26} height={19} />
+            <img src={`${CDN}/isotipo-azul-noche.svg`} alt="" width={26} height={19} />
             <div>
               <div
                 style={{
@@ -331,7 +334,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Breadcrumb */}
           <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <img
-              src={`${CDN}/isotipos/isotipo-azul-noche.svg`}
+              src={`${CDN}/isotipo-azul-noche.svg`}
               alt=""
               width={18}
               height={13}

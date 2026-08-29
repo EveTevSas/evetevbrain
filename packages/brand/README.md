@@ -34,8 +34,10 @@ Los tokens de color (`colores.json`, `tokens/`) son la marca en forma de datos.
 Cuando exista `packages/ui` (design system), consumirá estos tokens — no se
 redefinen colores por app (§8: "ninguna app define colores propios").
 
-> Importado del repo `Evetev-Dev/brand`. Consolidado al monorepo para versionar
-> la marca junto al código que la usa.
+> Importado del repo `Evetev-Dev/brand`, que se borró en agosto de 2026. Esta es
+> ahora la única copia: la marca se versiona junto al código que la usa, y cada
+> app sirve lo suyo desde `/marca` mediante `pnpm marca:sync`. Ver
+> `assets/COMO-SE-SIRVEN.md`.
 
 ## `landing/` — lo que comparten las landings de producto
 

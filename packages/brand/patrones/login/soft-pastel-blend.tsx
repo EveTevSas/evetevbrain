@@ -13,7 +13,7 @@
  * Uso con imagen (EveConecta):
  *   <GradientBackground
  *     className="absolute inset-0"
- *     illustrationUrl="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/conjunto-residencial-calle.webp"
+ *     illustrationUrl="/marca/conjunto-residencial-calle.webp"
  *   />
  */
 
@@ -23,7 +23,7 @@ interface GradientBackgroundProps {
   /**
    * URL de la ilustración de fondo.
    * Se renderiza a opacity 0.13, debajo del degradado lila.
-   * Usar imágenes del CDN: https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/ilustraciones/
+   * Usar imágenes de marca: /marca/<archivo> (las sirve la propia app)
    */
   illustrationUrl?: string;
 }

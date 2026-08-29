@@ -6,7 +6,10 @@ import { IconoError } from "@/components/iconos";
 import { GradientBackground } from "@/components/ui/soft-pastel-blend";
 
 const inicial: LoginState = {};
-const CDN = "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1";
+/* Los activos de marca se sirven desde esta misma app (public/marca), no
+   desde un CDN externo: la carpeta la llena `pnpm marca:sync` desde
+   packages/brand, que es la fuente única, y el CI vigila que no se desvíe. */
+const CDN = "/marca";
 
 export default function LoginPage() {
   const [state, formAction, pendiente] = useActionState(login, inicial);
@@ -54,12 +57,7 @@ export default function LoginPage() {
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`${CDN}/isotipos/isotipo-azul-noche.svg`}
-              alt="Evetev"
-              width={48}
-              height={34}
-            />
+            <img src={`${CDN}/isotipo-azul-noche.svg`} alt="Evetev" width={48} height={34} />
             <h1
               style={{
                 fontFamily: "var(--font-brand)",
