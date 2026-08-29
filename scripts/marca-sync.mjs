@@ -107,6 +107,31 @@ const APPS = [
   }
 ];
 
+/** Lo que no se copia como archivo, sino que se incrusta dentro de otro.
+ *
+ *  La API no sirve estáticos —su panel de administración es una sola plantilla
+ *  HTML— así que sus tokens van dentro del propio archivo, entre dos marcas.
+ *  Se sincroniza igual que lo demás porque ya se desvió una vez: se incrustó la
+ *  copia, luego se corrigió un comentario en la fuente, y la copia se quedó
+ *  atrás publicando una URL muerta. Nadie lo habría visto, y redesplegar no lo
+ *  arreglaba: el texto viejo estaba en el código, no en el build. */
+/** El destino es un template literal de TypeScript, así que un backtick o un
+ *  ${ dentro del CSS cerrarían la cadena y romperían el build. Pasó: la fuente
+ *  llevaba `pnpm marca:sync` entre backticks en un comentario y `nest build`
+ *  falló con «',' expected». Se escapa aquí y no se prohíbe en la fuente,
+ *  porque la fuente es CSS y no tiene por qué saber dónde acaba copiada. */
+const escaparParaPlantilla = (texto) =>
+  texto.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
+
+const INCRUSTADOS = [
+  {
+    archivo: "apps/api/src/modules/admin/admin-page.ts",
+    fuente: "packages/brand/assets/tokens/colores.css",
+    inicio: "/* MARCA:INICIO tokens",
+    fin: "/* MARCA:FIN */"
+  }
+];
+
 const comprobar = process.argv.includes("--check");
 let problemas = 0;
 
@@ -159,6 +184,35 @@ for (const { nombre, destino, activos } of APPS) {
   }
 }
 
+for (const { archivo, fuente, inicio, fin } of INCRUSTADOS) {
+  const ruta = join(raiz, archivo);
+  const texto = readFileSync(ruta, "utf8");
+  const i = texto.indexOf(inicio);
+  const j = texto.indexOf(fin, i);
+  if (i === -1 || j === -1) {
+    console.error(`  ✗ ${archivo}: no encuentro las marcas ${inicio}…${fin}`);
+    problemas++;
+    continue;
+  }
+  /* Del bloque solo se compara lo que viene DESPUÉS del comentario de cabecera:
+     esa cabecera explica por qué está incrustado y no existe en la fuente. */
+  const finCabecera = texto.indexOf("*/", i) + 2;
+  const actual = texto.slice(finCabecera, j).trim();
+  const esperado = escaparParaPlantilla(readFileSync(join(raiz, fuente), "utf8").trim());
+
+  if (actual === esperado) {
+    if (!comprobar) console.log(`  = ${archivo} (tokens incrustados)`);
+    continue;
+  }
+  if (comprobar) {
+    console.error(`  ✗ ${archivo}: los tokens incrustados se desviaron de ${fuente}`);
+    problemas++;
+  } else {
+    writeFileSync(ruta, texto.slice(0, finCabecera) + "\n" + esperado + "\n" + texto.slice(j));
+    console.log(`  ↻ ${archivo} (tokens incrustados)`);
+  }
+}
+
 if (problemas > 0) {
   if (comprobar) {
     console.error(
@@ -170,6 +224,6 @@ if (problemas > 0) {
 }
 console.log(
   comprobar
-    ? `✓ ${APPS.length} app(s) con la marca al día`
-    : `✓ sincronizadas ${APPS.length} app(s)`
+    ? `✓ ${APPS.length} app(s) + ${INCRUSTADOS.length} incrustado(s) al día`
+    : `✓ sincronizadas ${APPS.length} app(s) y ${INCRUSTADOS.length} incrustado(s)`
 );
