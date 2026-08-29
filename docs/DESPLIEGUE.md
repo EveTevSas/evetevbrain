@@ -65,31 +65,41 @@ gasta un despliegue del cupo diario en vez de cuatro; y el formulario de demo
 deja de ser cross-origin, así que ya no depende de que alguien acuerde de añadir
 un dominio a la lista de CORS.
 
-**Retirar los subdominios viejos** (una sola vez, en el panel; el código ya no
-los necesita):
+**Retirar los subdominios viejos.** La redirección **no** se pone en el panel:
+vive en `apps/website/vercel.json`, en tres reglas condicionadas por host
+(`has: [{ "type": "host", … }]`) que mandan cualquier ruta del subdominio viejo
+a la landing nueva con un 308. En código se revisa en un PR y se ve en el
+`git blame`; en un campo del panel no la ve nadie hasta que falla.
 
-1. En cada proyecto viejo → **Settings → Domains** → quitar el dominio. Los
-   nombres reales en el panel son `evepay`, **`eveconecta`** y
-   `eve-intelligence`.
+Con eso ya desplegado, quedan dos pasos:
 
-   > **Cuidado con `eveconecta`.** Ese nombre es el de la _landing_ (Root
-   > Directory `apps/eveconecta-landing`, que ya no existe). El portal de
-   > residentes es el proyecto **`evetevbrain-eveconecta`**, y ese no se toca:
-   > borrarlo tumba `conecta.evetev.com`. Comprueba el Root Directory antes de
-   > borrar nada — es el único campo que los distingue sin lugar a dudas.
+1. **Borrar los tres proyectos viejos.** Al borrarlos sueltan sus dominios; el
+   único hueco es el minuto entre eso y el paso 2.
 
-2. Añadirlo al proyecto `website` y marcarlo **Redirect to** `evetev.com` con la
-   ruta correspondiente, permanente (308):
-   | Subdominio                   | Redirige a                |
-   | ---------------------------- | ------------------------- |
-   | `evepay.evetev.com`          | `evetev.com/evepay`       |
-   | `eveconecta.evetev.com`      | `evetev.com/conecta`      |
-   | `eveintelligence.evetev.com` | `evetev.com/intelligence` |
-3. Borrar los tres proyectos viejos, ya sin dominio.
-4. En Search Console, pedir la reindexación de las tres rutas nuevas.
+   | Proyecto           | Root Directory (así se identifica)       | Dominio                      |
+   | ------------------ | ---------------------------------------- | ---------------------------- |
+   | `evepay`           | `apps/evepay` — ya no existe             | `evepay.evetev.com`          |
+   | `eveconecta`       | `apps/eveconecta-landing` — ya no existe | `eveconecta.evetev.com`      |
+   | `eve-intelligence` | `apps/eve-intelligence` — ya no existe   | `eveintelligence.evetev.com` |
 
-> El DNS no cambia: los `CNAME` de esos hosts siguen apuntando a
-> `cname.vercel-dns.com`; lo que cambia es qué proyecto los reclama.
+   > **Cuidado con `eveconecta`.** Ese nombre es el de la _landing_. El portal de
+   > residentes es el proyecto **`evetevbrain-eveconecta`** (Root Directory
+   > `apps/eveconecta`), y ese no se toca: borrarlo tumba `conecta.evetev.com`.
+   > El Root Directory es el único campo que los distingue sin lugar a dudas.
+
+2. **Adjuntar los tres dominios al proyecto `website`**, sin marcar nada más —la
+   redirección ya la hace `vercel.json`—:
+
+   ```bash
+   vercel domains add evepay.evetev.com website --scope evetev
+   vercel domains add eveconecta.evetev.com website --scope evetev
+   vercel domains add eveintelligence.evetev.com website --scope evetev
+   ```
+
+3. En Search Console, pedir la reindexación de las tres rutas nuevas.
+
+> El DNS no cambia: los `CNAME` de esos hosts siguen apuntando a Vercel; lo que
+> cambia es qué proyecto los reclama.
 
 > **`conecta.evetev.com` no se toca.** Ese es el portal de residentes
 > (`apps/eveconecta`), no la landing. Se parecen y no son lo mismo.
@@ -203,6 +213,22 @@ Al agregar cada dominio, **Vercel muestra los registros exactos**. Los típicos:
 Se ponen en el panel DNS de **name.com** (login `contacto@evetev.com`). Propaga en
 minutos–horas; Vercel emite el certificado HTTPS solo. **Usa siempre los valores
 que muestre Vercel**, por si cambian.
+
+> **`www.evetev.com` está sin hacer, pese a la fila de arriba.** Hoy (28-ago-2026)
+> no resuelve —`dig www.evetev.com` no devuelve nada— y el dominio tampoco está
+> adjunto al proyecto `website`. Quien teclee `www.evetev.com` no llega a
+> ninguna parte: no es una redirección lenta, es un error de DNS del navegador.
+> Esta tabla describía la intención, no lo que hay; ojo con leerla como
+> inventario.
+>
+> Arreglarlo son dos pasos, y el orden da igual:
+>
+> 1. En name.com, crear el `CNAME` de `www` a `cname.vercel-dns.com`.
+> 2. `vercel domains add www.evetev.com website --scope evetev`. Vercel redirige
+>    `www` al apex por su cuenta en cuanto los dos están en el mismo proyecto.
+>
+> El apex resuelve hoy a `216.198.79.1`, no al `76.76.21.21` de la tabla: Vercel
+> cambió de IP. Otra razón para pedirle a Vercel los valores en el momento.
 
 ## 4. Pipeline
 
