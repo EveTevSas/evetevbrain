@@ -1,8 +1,8 @@
 <!doctype html>
-<!-- eveconecta.evetev.com — landing del producto EveConecta.
+<!-- evetev.com/conecta — landing del producto EveConecta.
      Ojo: el portal de residentes vive en conecta.evetev.com y es otra app
      (apps/eveconecta). Esta es solo la página pública de producto.
-     Mismo montaje que apps/website y apps/evepay: HTML y CSS planos.
+     Mismo montaje que apps/website y apps/website/evepay: HTML y CSS planos.
      Marca según packages/brand/assets/evetev_brand_styles.md (v1.0):
      logos SIEMPRE desde el CDN (T1) y coral exclusivo de acción (C2),
      aquí un solo botón coral por vista (el CTA de la portada).
@@ -45,7 +45,7 @@
     <meta name="theme-color" content="#0A2540" />
 
     <!-- Tipografía oficial (§3): Baloo 2 (titulares) + Inter (interfaz) -->
-    <link rel="canonical" href="https://eveconecta.evetev.com/" />
+    <link rel="canonical" href="https://evetev.com/conecta" />
 
     <script type="application/ld+json">
       {
@@ -77,9 +77,9 @@
           },
           {
             "@type": "Service",
-            "@id": "https://eveconecta.evetev.com/#servicio",
+            "@id": "https://evetev.com/conecta#servicio",
             "name": "EveConecta",
-            "url": "https://eveconecta.evetev.com/",
+            "url": "https://evetev.com/conecta",
             "description": "Gestión y recaudo para conjuntos residenciales: cuotas por coeficiente, estado de cuenta, pago en línea del residente y paz y salvo.",
             "serviceType": "Software de propiedad horizontal",
             "provider": {
@@ -109,8 +109,8 @@
     />
 
     <!-- Armazón compartido (generado desde packages/brand) y luego lo propio -->
-    <link rel="stylesheet" href="base.css" />
-    <link rel="stylesheet" href="estilos.css" />
+    <link rel="stylesheet" href="/landings/base.css" />
+    <link rel="stylesheet" href="/conecta/estilos.css" />
   </head>
   <body>
     <header class="nav">
@@ -295,12 +295,12 @@
               loop
               playsinline
               controls
-              poster="dashboard-poster.webp"
+              poster="/conecta/dashboard-poster.webp"
               width="1600"
               height="826"
               aria-describedby="video-demo-pie"
             >
-              <source src="dashboard.mp4" type="video/mp4" />
+              <source src="/conecta/dashboard.mp4" type="video/mp4" />
             </video>
             <figcaption id="video-demo-pie" class="video-demo-pie">
               Recorrido por el dashboard: presupuesto y gastos, reservas de zonas comunes y el resto
@@ -720,6 +720,6 @@
       })();
     </script>
     <!-- GENERADO desde packages/brand/landing/formularios.js — ver README. -->
-    <script src="formularios.js"></script>
+    <script src="/landings/formularios.js"></script>
   </body>
 </html>

@@ -206,15 +206,15 @@ Vercel, que es la landing real funcionando: revisar deja de ser leer un diff.
 El arnés vive **en código, no en el prompt** — a un modelo se le puede convencer
 de saltarse una instrucción; a un `if` no:
 
-| Límite                  | Valor                                                                |
-| ----------------------- | -------------------------------------------------------------------- |
-| Carpetas                | `apps/evepay/`, `apps/eveconecta-landing/`, `apps/eve-intelligence/` |
-| Extensiones             | `.html`, `.css`                                                      |
-| Prohibidos              | `base.css` (generado desde `packages/brand`)                         |
-| Archivos por PR         | 5                                                                    |
-| Tamaño por archivo      | 100 KB                                                               |
-| Propuestas por petición | 3                                                                    |
-| Operaciones             | crear y actualizar; **nunca** borrar ni renombrar                    |
+| Límite                  | Valor                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| Carpetas                | `apps/website/evepay/`, `apps/website/conecta/`, `apps/website/intelligence/` |
+| Extensiones             | `.html`, `.css`                                                               |
+| Prohibidos              | `base.css` (generado desde `packages/brand`)                                  |
+| Archivos por PR         | 5                                                                             |
+| Tamaño por archivo      | 100 KB                                                                        |
+| Propuestas por petición | 3                                                                             |
+| Operaciones             | crear y actualizar; **nunca** borrar ni renombrar                             |
 
 Dos exclusiones importan especialmente: **`base.css`**, porque editarlo ahí lo
 revierte el siguiente `pnpm landings:sync` y rompe el job de CI; y **`apps/eve-studio`**,
@@ -380,7 +380,7 @@ eso pase, el agente dirá que no está, que es lo correcto, en vez de enlazarlo
 roto.
 
 Lo segundo es lo que permite pedirle _"cámbiale el titular a la portada de
-EvePay"_: lee `apps/evepay/index.html` y parte de ahí, en vez de generar una
+EvePay"_: lee `apps/website/evepay/index.html` y parte de ahí, en vez de generar una
 página nueva desde cero. Puede listar carpetas antes de leer, para no adivinar
 rutas.
 

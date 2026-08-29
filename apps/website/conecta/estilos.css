@@ -48,7 +48,7 @@
      imagen no se sustituya: jsDelivr la manda con siete días de caché, así que
      cambiar los bytes sin cambiar la ruta deja a los visitantes viendo la
      anterior. Si algún día se reemplaza, hay que fijar la versión exacta como
-     hace apps/eve-intelligence/estilos.css. Es un WebP de 195 KB, 2048 px
+     hace apps/website/intelligence/estilos.css. Es un WebP de 195 KB, 2048 px
      de ancho, con el blanco convertido a transparencia. El alfa no es opcional:
      con `contain` sobra ancho a los lados, y un fondo blanco opaco dibujaría el
      rectángulo de la imagen recortado contra el degradado.

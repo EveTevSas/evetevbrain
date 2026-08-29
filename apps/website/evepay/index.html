@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- evepay.evetev.com — landing del producto EvePay.
+<!-- evetev.com/evepay — landing del producto EvePay.
      Mismo montaje que apps/website: HTML y CSS planos, sin compilación.
      Marca según packages/brand/assets/evetev_brand_styles.md (v1.0):
      logos SIEMPRE desde el CDN (T1) y coral exclusivo de acción (C2),
@@ -42,7 +42,7 @@
     <meta name="theme-color" content="#0A2540" />
 
     <!-- Tipografía oficial (§3): Baloo 2 (titulares) + Inter (interfaz) -->
-    <link rel="canonical" href="https://evepay.evetev.com/" />
+    <link rel="canonical" href="https://evetev.com/evepay" />
 
     <script type="application/ld+json">
       {
@@ -74,9 +74,9 @@
           },
           {
             "@type": "Service",
-            "@id": "https://evepay.evetev.com/#servicio",
+            "@id": "https://evetev.com/evepay#servicio",
             "name": "EvePay",
-            "url": "https://evepay.evetev.com/",
+            "url": "https://evetev.com/evepay",
             "description": "Pasarela de pagos en línea de arquitectura gateway: el dinero fluye del cliente a la cuenta del comercio sin pasar por la tesorería de Evetev.",
             "serviceType": "Pasarela de pagos",
             "provider": {
@@ -106,8 +106,8 @@
     />
 
     <!-- Armazón compartido (generado desde packages/brand) y luego lo propio -->
-    <link rel="stylesheet" href="base.css" />
-    <link rel="stylesheet" href="estilos.css" />
+    <link rel="stylesheet" href="/landings/base.css" />
+    <link rel="stylesheet" href="/evepay/estilos.css" />
   </head>
   <body>
     <header class="nav">
@@ -495,6 +495,6 @@
       document.getElementById("anio").textContent = new Date().getFullYear();
     </script>
     <!-- GENERADO desde packages/brand/landing/formularios.js — ver README. -->
-    <script src="formularios.js"></script>
+    <script src="/landings/formularios.js"></script>
   </body>
 </html>

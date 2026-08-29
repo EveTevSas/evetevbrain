@@ -9,5 +9,11 @@
       "maxDuration": 10
     }
   },
-  "ignoreCommand": "git rev-parse HEAD^ >/dev/null 2>&1 || exit 1; git diff --quiet HEAD^ HEAD -- ."
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/eveconecta", "destination": "/conecta", "permanent": true },
+    { "source": "/eveintelligence", "destination": "/intelligence", "permanent": true },
+    { "source": "/eve-intelligence", "destination": "/intelligence", "permanent": true }
+  ],
+  "ignoreCommand": "git rev-parse HEAD^ >/dev/null 2>&1 || exit 1; git diff --quiet HEAD^ HEAD -- . ../../packages/brand/landing"
 }

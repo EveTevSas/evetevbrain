@@ -32,11 +32,12 @@ es opcional (ver el README de la raíz).
 3. Framework/build: los deja como están — `apps/website/vercel.json` ya define
    que es estático (sin build, sirve la carpeta) más la función serverless del
    formulario (`api/contacto.js`).
-   > Esa función es el buzón de **toda** la marca: también recibe, por CORS, las
-   > demos de `evepay.evetev.com` y `eveconecta.evetev.com`. Por eso la
-   > `RESEND_API_KEY` va **solo aquí** y los proyectos de las landings siguen
-   > sin variables de entorno. Si una landing estrena dominio, hay que añadirlo
-   > a la lista de orígenes de `apps/website/api/contacto.js`.
+   > Esa función es el buzón de **toda** la marca. Las tres landings de
+   > producto —`/evepay`, `/conecta`, `/intelligence`— son rutas de este mismo
+   > proyecto desde que dejaron sus subdominios, así que sus demos llegan al
+   > endpoint sin CORS de por medio. La lista de orígenes de
+   > `apps/website/api/contacto.js` solo hace falta para un dominio nuevo o
+   > para los subdominios viejos mientras sigan redirigiendo.
 4. **Variables de entorno** (Settings → Environment Variables):
    ```
    RESEND_API_KEY       # API key de resend.com (obligatoria para que funcione el formulario)
@@ -51,6 +52,47 @@ es opcional (ver el README de la raíz).
 5. **Deploy.**
 6. **Settings → Domains** → agrega `evetev.com` y `www.evetev.com`
    (Vercel redirige `www` → apex automáticamente).
+
+## 1 bis. Las landings de producto → rutas de `evetev.com`
+
+`/evepay`, `/conecta` e `/intelligence` **no son proyectos aparte**: son
+carpetas de `apps/website` (`evepay/`, `conecta/`, `intelligence/`) y se
+despliegan con el sitio. No hay nada que configurar en Vercel para ellas.
+
+Antes cada una era su propio proyecto, con su subdominio. Se unificaron por tres
+razones: la autoridad de dominio deja de repartirse entre cuatro sitios; un push
+gasta un despliegue del cupo diario en vez de cuatro; y el formulario de demo
+deja de ser cross-origin, así que ya no depende de que alguien acuerde de añadir
+un dominio a la lista de CORS.
+
+**Retirar los subdominios viejos** (una sola vez, en el panel; el código ya no
+los necesita):
+
+1. En cada proyecto viejo → **Settings → Domains** → quitar el dominio. Los
+   nombres reales en el panel son `evepay`, **`eveconecta`** y
+   `eve-intelligence`.
+
+   > **Cuidado con `eveconecta`.** Ese nombre es el de la _landing_ (Root
+   > Directory `apps/eveconecta-landing`, que ya no existe). El portal de
+   > residentes es el proyecto **`evetevbrain-eveconecta`**, y ese no se toca:
+   > borrarlo tumba `conecta.evetev.com`. Comprueba el Root Directory antes de
+   > borrar nada — es el único campo que los distingue sin lugar a dudas.
+
+2. Añadirlo al proyecto `website` y marcarlo **Redirect to** `evetev.com` con la
+   ruta correspondiente, permanente (308):
+   | Subdominio                   | Redirige a                |
+   | ---------------------------- | ------------------------- |
+   | `evepay.evetev.com`          | `evetev.com/evepay`       |
+   | `eveconecta.evetev.com`      | `evetev.com/conecta`      |
+   | `eveintelligence.evetev.com` | `evetev.com/intelligence` |
+3. Borrar los tres proyectos viejos, ya sin dominio.
+4. En Search Console, pedir la reindexación de las tres rutas nuevas.
+
+> El DNS no cambia: los `CNAME` de esos hosts siguen apuntando a
+> `cname.vercel-dns.com`; lo que cambia es qué proyecto los reclama.
+
+> **`conecta.evetev.com` no se toca.** Ese es el portal de residentes
+> (`apps/eveconecta`), no la landing. Se parecen y no son lo mismo.
 
 ## 2. EveConecta → `conecta.evetev.com`
 

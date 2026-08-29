@@ -63,10 +63,14 @@ CDN_MARCA = f"https://cdn.jsdelivr.net/gh/{REPO_MARCA}@{VERSION_MARCA}"
 TOKEN_ESCRITURA = os.getenv("GITHUB_TOKEN_ESCRITURA")
 
 RAMA_BASE = "main"
+# Las tres landings son subcarpetas del sitio corporativo desde que pasaron de
+# subdominio a ruta (/evepay, /conecta, /intelligence). Se listan una por una y
+# NO como "apps/website/": la portada, el Nosotros y la función del formulario
+# viven en la raíz de esa carpeta y no son escribibles desde aquí.
 CARPETAS_ESCRIBIBLES = (
-    "apps/evepay/",
-    "apps/eveconecta-landing/",
-    "apps/eve-intelligence/",
+    "apps/website/evepay/",
+    "apps/website/conecta/",
+    "apps/website/intelligence/",
 )
 EXTENSIONES_ESCRIBIBLES = (".html", ".css")
 # base.css y formularios.js son copias GENERADAS desde packages/brand: editarlas
@@ -253,7 +257,7 @@ def leer_archivo_del_repo(ruta_archivo: str) -> str:
 
     Úsala antes de modificar algo existente, para partir del archivo real en vez
     de reescribirlo desde cero. La ruta es desde la raíz del repositorio, por
-    ejemplo 'apps/evepay/index.html' o 'apps/website/estilos.css'.
+    ejemplo 'apps/website/evepay/index.html' o 'apps/website/estilos.css'.
 
     Si no sabes la ruta exacta, usa antes 'listar_carpeta_del_repo'.
     """
@@ -265,7 +269,7 @@ def listar_carpeta_del_repo(ruta_carpeta: str = "") -> str:
     """Lista los archivos y carpetas de una ruta del monorepo de CÓDIGO.
 
     Sirve para descubrir qué hay antes de leer. Con cadena vacía lista la raíz.
-    Ejemplos de ruta: 'apps', 'apps/evepay'.
+    Ejemplos de ruta: 'apps', 'apps/website/evepay'.
     """
     return _listar_carpeta(REPO_CODIGO, ruta_carpeta, TOKEN_CODIGO)
 
@@ -275,7 +279,7 @@ def listar_carpeta_del_repo(ruta_carpeta: str = "") -> str:
 # enrutado de esta app en Vercel ya nos dio problemas una vez, y no conviene
 # añadirle importaciones relativas al montaje.
 class ArchivoPropuesto(BaseModel):
-    ruta: str = Field(description="Ruta desde la raíz del repo, p.ej. apps/evepay/index.html")
+    ruta: str = Field(description="Ruta desde la raíz del repo, p.ej. apps/website/evepay/index.html")
     contenido: str = Field(description="Contenido COMPLETO del archivo, no un fragmento")
 
 
@@ -352,8 +356,8 @@ def crear_herramienta_escritura(registro: dict):
 
         Úsala cuando el cambio deba quedar en el repositorio. Manda el contenido
         COMPLETO de cada archivo, no un fragmento. Solo puedes tocar las landings
-        (apps/evepay, apps/eveconecta-landing, apps/eve-intelligence) y solo
-        archivos .html y .css.
+        (apps/website/evepay, apps/website/conecta, apps/website/intelligence)
+        y solo archivos .html y .css.
 
         Devuelve la URL del PR, que debes incluir en tu respuesta.
         """
@@ -477,17 +481,20 @@ REGLAS DE COMPORTAMIENTO:
 4. Devuelve ÚNICAMENTE código HTML, listo para ser renderizado. No agregues explicaciones fuera del bloque de código.
 
 GENERAR PARA UNA LANDING DEL MONOREPO:
-Cuando lo que te piden es una página de `apps/evepay`, `apps/eveconecta-landing`,
-`apps/eve-intelligence` o cualquier otra landing, NO devuelvas una página autocontenida: devuelve el
-archivo tal como tiene que quedar en el repositorio.
+Cuando lo que te piden es una página de `apps/website/evepay`,
+`apps/website/conecta`, `apps/website/intelligence` o cualquier otra landing, NO
+devuelvas una página autocontenida: devuelve el archivo tal como tiene que
+quedar en el repositorio.
 
 A. Lee primero el `index.html` actual de esa carpeta y respeta su cabecera: el
    favicon, las tipografías, los tokens del CDN y —muy importante— la etiqueta
    `<meta name="robots" content="noindex">` mientras la landing esté en
    construcción. Quitarla sin querer hace que Google indexe una página a medias.
-B. Enlaza las hojas, no las incrustes:
-       <link rel="stylesheet" href="base.css">
-       <link rel="stylesheet" href="estilos.css">
+B. Enlaza las hojas, no las incrustes, y SIEMPRE con ruta absoluta desde la
+   raíz del sitio —nunca relativa—, porque la landing se sirve tanto en
+   `/evepay` como en `/evepay/` y una ruta relativa se rompe en uno de los dos:
+       <link rel="stylesheet" href="/landings/base.css">
+       <link rel="stylesheet" href="/evepay/estilos.css">
    `base.css` es el armazón compartido entre landings y es un archivo GENERADO
    desde packages/brand/landing/base.css: NO lo reescribas ni copies su
    contenido dentro del HTML. Ya trae reset, tipografía, .wrap, .p-ico, .nav,
@@ -502,7 +509,7 @@ D. El color de producto no se fija en CSS: va en el marcado con `--p`
 E. El formulario de demo del cierre YA FUNCIONA: manda el correo a la empresa.
    Si la página que devuelves lo incluye, consérvalo tal cual está —con su
    `data-demo`, su campo trampa `name="sitio"`, su `<p class="demo-estado">` y
-   la etiqueta `<script src="formularios.js"></script>` del final—. Ese script
+   la etiqueta `<script src="/landings/formularios.js"></script>` del final—. Ese script
    es un archivo generado que tú no puedes escribir, y sin esas piezas el
    formulario deja de enviar sin que nadie se entere.
 
@@ -510,17 +517,21 @@ TRABAJAR SOBRE CÓDIGO QUE YA EXISTE:
 5. Si te piden cambiar, ampliar o corregir algo que ya está hecho, LEE PRIMERO el archivo real con 'leer_archivo_del_repo' y parte de él. No lo reescribas desde cero: perderías decisiones ya tomadas.
 6. Si no sabes la ruta exacta, descúbrela con 'listar_carpeta_del_repo' antes de leer. No adivines rutas.
 7. Dónde está cada cosa en el monorepo:
-   - 'apps/website' — sitio corporativo evetev.com (index.html, nosotros.html, estilos.css)
-   - 'apps/evepay' — landing de evepay.evetev.com
-   - 'apps/eveconecta-landing' — landing de eveconecta.evetev.com
-   - 'apps/eve-intelligence' — landing de eveintelligence.evetev.com, la línea
+   - 'apps/website' — sitio corporativo evetev.com (index.html, nosotros.html,
+     estilos.css). Las tres landings son subcarpetas suyas: la carpeta ES la
+     ruta pública.
+   - 'apps/website/evepay' — landing de evetev.com/evepay
+   - 'apps/website/conecta' — landing de evetev.com/conecta. Ojo: el portal de
+     residentes (conecta.evetev.com) es otra app, 'apps/eveconecta', y no se
+     toca desde aquí.
+   - 'apps/website/intelligence' — landing de evetev.com/intelligence, la línea
      de IA empresarial. Su color identificador es el violeta (--eve-violeta),
      que va SOLO en iconos y chips: nunca en botones (regla C3), y sobre blanco
      se usa --eve-violeta-texto porque el violeta base no da contraste (C7).
      Esta landing lleva instalado el asistente con una etiqueta <script> a
      fluxi.evetev.com; no la quites al reescribir la página.
-   Las landings comparten 'base.css', que es una copia GENERADA de
-   'packages/brand/landing/base.css'. Si hay que cambiar el armazón común, el
+   Las landings comparten 'apps/website/landings/base.css', que es una copia
+   GENERADA de 'packages/brand/landing/base.css'. Si hay que cambiar el armazón común, el
    cambio va en el original, nunca en la copia; lo propio de una landing va en
    su 'estilos.css'. Comparten también 'formularios.js' —el envío del formulario
    de demo—, generado igual y fuera de lo que puedes escribir.
@@ -535,8 +546,8 @@ DEJAR EL CAMBIO EN EL REPOSITORIO:
    cambiaste y por qué, no repitas el código.
 10. Manda SIEMPRE el contenido completo de cada archivo. La herramienta
     sustituye archivos enteros, no aplica parches.
-11. Solo puedes escribir en apps/evepay, apps/eveconecta-landing y
-    apps/eve-intelligence, y solo archivos .html y .css. Si necesitas tocar otra cosa —el CI, packages/,
+11. Solo puedes escribir en apps/website/evepay, apps/website/conecta y
+    apps/website/intelligence, y solo archivos .html y .css. Si necesitas tocar otra cosa —el CI, packages/,
     base.css, la configuración— NO lo intentes: explícalo en tu respuesta para
     que lo haga una persona.
 12. Si la herramienta rechaza la propuesta, lee el motivo y corrige. No
