@@ -249,21 +249,74 @@ def obtener_activo_github(ruta_archivo: str) -> str:
     return _leer_archivo(REPO_CODIGO, f"{RAIZ_MARCA}/{sub}{limpia}", TOKEN_CODIGO, es_marca=True)
 
 
+def _nombres_servidos(token: str | None) -> set | None:
+    """Qué archivos ve el navegador en /marca. None si no se pudo averiguar.
+
+    Se pregunta a la carpeta pública y NO al manifiesto: es la misma fuente que
+    comprueba `_leer_archivo`, y si las dos herramientas se guiaran por sitios
+    distintos podrían contradecirse —listar un activo como disponible y luego
+    negarse a darlo—, que es peor que no marcar nada.
+    """
+    try:
+        respuesta = _pedir(REPO_CODIGO, MARCA_SERVIDA, token, crudo=False)
+    except requests.RequestException:
+        return None
+    if respuesta.status_code != 200:
+        return None
+    contenido = respuesta.json()
+    if not isinstance(contenido, list):
+        return None
+    return {e["name"] for e in contenido if e["type"] == "file"}
+
+
 @tool
 def listar_carpeta_de_marca(ruta_carpeta: str = "") -> str:
-    """Lista los activos disponibles en el repositorio de MARCA.
+    """Lista los activos de marca, diciendo cuáles se sirven de verdad.
 
     Úsala ANTES de citar cualquier imagen, para partir de los archivos que
     existen de verdad en vez de deducir el nombre. Con cadena vacía lista la
     raíz; las carpetas son 'mascota', 'isotipos', 'logotipos', 'lockups',
     'unidades', 'favicon', 'tokens' e 'ilustraciones'.
+
+    SOLO puedes citar los marcados [se sirve]. Los marcados [NO se sirve] están
+    en el repositorio pero el sitio no los publica, así que su ruta daría 404.
     """
     limpia = ruta_carpeta.strip("/")
     if limpia == "ilustraciones":
         ruta = f"{RAIZ_MARCA}/ilustraciones"
     else:
         ruta = f"{RAIZ_MARCA}/assets" + (f"/{limpia}" if limpia else "")
-    return _listar_carpeta(REPO_CODIGO, ruta, TOKEN_CODIGO)
+
+    listado = _listar_carpeta(REPO_CODIGO, ruta, TOKEN_CODIGO)
+
+    # Estar en packages/brand no basta para poder citar un activo: solo llega al
+    # navegador lo que el manifiesto de scripts/marca-sync.mjs copia a /marca.
+    # Sin esta marca el listado enseña nombres que no se pueden usar, y el
+    # agente concluye —razonablemente— que sí. Era el hueco que quedaba: la
+    # herramienta de leer ya se negaba, pero solo DESPUÉS de que eligiera uno.
+    servidos = _nombres_servidos(TOKEN_CODIGO)
+    if servidos is None or not listado or listado.startswith(("No se pudo", "Error de red", "'")):
+        return listado
+
+    lineas = []
+    for linea in listado.split("\n"):
+        if not linea.startswith("archivo  "):
+            lineas.append(linea)
+            continue
+        # Se casa por nombre de archivo porque marca-sync aplana: `tokens/
+        # colores.css` acaba en `/marca/colores.css`. Si dos fuentes comparten
+        # nombre, la marca no distingue cuál de las dos se copió — pero la RUTA
+        # que se anuncia sigue siendo válida, que es lo que la herramienta
+        # responde de verdad: «¿puedo citar esto?».
+        nombre = linea.rsplit("/", 1)[-1]
+        lineas.append(
+            f"{linea}   [se sirve: /marca/{nombre}]" if nombre in servidos else f"{linea}   [NO se sirve]"
+        )
+    return "\n".join(lineas) + (
+        "\n\nSolo se pueden citar los [se sirve]. Para publicar uno que no lo esté, "
+        "la persona lo hace desde la pestaña «Imagen» de Eve Studio o con "
+        "`pnpm marca:imagen`; tú no puedes añadirlo."
+    )
 
 
 @tool
@@ -492,10 +545,13 @@ REGLAS DE COMPORTAMIENTO:
    jsDelivr se borró en agosto de 2026, así que cualquier `cdn.jsdelivr.net/gh/
    Evetev-Dev/brand` que escribas hoy es una imagen rota.
    No todo lo que está en packages/brand se sirve: solo lo que el manifiesto de
-   scripts/marca-sync.mjs copia a /marca. Por eso hay que listar y pedir, no
-   recordar. Si el activo que necesitas no aparece o la herramienta te dice que
-   no se sirve, dilo en tu respuesta y propón uno de los que sí están; no
-   inventes la URL, porque una imagen rota no falla ruidosamente.
+   scripts/marca-sync.mjs copia a /marca. El listado te lo dice archivo por
+   archivo — elige SOLO de los marcados [se sirve] y no cites nunca uno marcado
+   [NO se sirve], porque su ruta da 404. Si lo que necesitas no está servido,
+   dilo en tu respuesta y propón uno de los que sí lo están: publicarlo es cosa
+   de la persona, desde la pestaña «Imagen» de Eve Studio o con
+   `pnpm marca:imagen`. No inventes la URL, porque una imagen rota no falla
+   ruidosamente.
 4. Devuelve ÚNICAMENTE código HTML, listo para ser renderizado. No agregues explicaciones fuera del bloque de código.
 
 GENERAR PARA UNA LANDING DEL MONOREPO:
