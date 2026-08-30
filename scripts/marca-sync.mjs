@@ -60,7 +60,8 @@ const APPS = [
       "ilustraciones/conjunto-residencial-calle.webp",
       "ilustraciones/pasarela-de-pago.webp",
       "ilustraciones/asistente-documental.webp",
-      "ilustraciones/datafono.webp"
+      "ilustraciones/datafono.webp",
+      "ilustraciones/movil-to-movil.webp"
     ]
   },
   {
