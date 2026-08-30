@@ -1108,6 +1108,27 @@ class PeticionImagen(BaseModel):
     carpeta: Literal["ilustraciones", "mascota"] = "ilustraciones"
 
 
+@app.get("/api/imagen/apps")
+async def apps_que_sirven_marca(x_agente_token: str | None = Header(default=None, alias="X-Agente-Token")):
+    """Qué apps pueden servir una imagen, leído del manifiesto.
+
+    Existe para que la interfaz no lleve la lista escrita a mano: una copia en
+    JavaScript se quedaría atrás el día que alguien añada una app, y el fallo
+    sería silencioso —la app nueva simplemente no aparecería como opción.
+    """
+    verificar_token(x_agente_token)
+    if not TOKEN_ESCRITURA:
+        raise HTTPException(status_code=503, detail="sin_credencial_de_escritura")
+
+    import base64
+
+    r = _gh("GET", f"/contents/scripts/marca-sync.mjs?ref={RAMA_BASE}")
+    if r.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"no_pude_leer_el_manifiesto:{r.status_code}")
+    destinos = _apps_del_manifiesto(base64.b64decode(r.json()["content"]).decode("utf-8"))
+    return {"apps": [{"nombre": n, "destino": d} for n, d in destinos.items()]}
+
+
 @app.post("/api/imagen")
 async def publicar_imagen(
     peticion: PeticionImagen,
