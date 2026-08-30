@@ -973,3 +973,307 @@ async def generar_interfaz(
         # incrustar (responde 302 al SSO y manda X-Frame-Options: DENY).
         "archivos": registro.get("archivos", []),
     }
+
+
+# ── Publicar una imagen de marca ───────────────────────────────────────────
+# Esto NO es una herramienta del agente, y es deliberado. Publicar una imagen no
+# tiene nada que decidir: se convierte, se anota y se abre el PR. Dejárselo al
+# modelo solo añadiría la posibilidad de que cuente que lo hizo sin haberlo
+# hecho —ya pasó con `proponer_cambios`—, así que es un endpoint que dispara la
+# interfaz con un botón. Un `if` no se deja convencer.
+#
+# Hace en el servidor lo mismo que `pnpm marca:imagen` hace en el Mac, y por las
+# mismas razones; la receta —2048 px, calidad 80, alfa 50— está medida, no
+# supuesta. La diferencia es el final: allí escribe en el árbol de trabajo, aquí
+# abre un PR, porque en Vercel el sistema de archivos es de solo lectura y
+# efímero.
+ANCHO_MARCA = 2048
+CALIDAD_WEBP = 80
+CALIDAD_ALFA = 50
+
+# Solo las dos familias que son mapa de bits. El resto de packages/brand son SVG
+# —logotipos, isotipos, lockups— y convertirlos a WebP sería estropearlos.
+CARPETAS_IMAGEN = ("ilustraciones", "mascota")
+
+# Vercel corta el cuerpo de una petición en 4,5 MB, así que un PNG grande no
+# llega entero. La interfaz reduce a ANCHO_MARCA en un canvas antes de subir
+# —donde está el peso es en el ancho, no en la calidad—, y esto es la red por si
+# alguien llama al endpoint a mano. Se mide sobre el base64 ya decodificado.
+MAX_BYTES_IMAGEN = 4_000_000
+
+
+def _kebab(texto: str) -> str:
+    """Sin acentos ni espacios: el nombre acaba en una URL y en el manifiesto."""
+    import unicodedata
+
+    plano = unicodedata.normalize("NFD", texto)
+    plano = "".join(c for c in plano if unicodedata.category(c) != "Mn")
+    return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", plano.lower())).strip("-")
+
+
+def _apps_del_manifiesto(texto: str) -> dict:
+    """Qué apps hay y dónde sirve cada una su marca, leído del manifiesto.
+
+    Se saca de scripts/marca-sync.mjs y no se copia aquí: una lista duplicada se
+    queda atrás el día que alguien añada una app, y el fallo sería que la imagen
+    no se copia a una app que sí la pidió.
+    """
+    return {
+        m.group(1): m.group(2)
+        for m in re.finditer(r'nombre:\s*"([^"]+)",\s*\n\s*destino:\s*"([^"]+)"', texto)
+    }
+
+
+def _anotar_manifiesto(texto: str, app: str, activo: str) -> str:
+    """Añade `activo` a la lista de una app, con el formato que deja Prettier.
+
+    POR QUÉ SE IMITA A PRETTIER Y NO SE LLAMA. Prettier es Node y esto corre en
+    una función de Python; no hay dónde ejecutarlo. Y el formato no es opcional:
+    el CI corre `pnpm format:check`, así que un corchete mal puesto pondría el
+    PR en rojo por un espacio. Son dos reglas —100 columnas y sin coma final— y
+    se aplican aquí explícitamente para que se vean.
+    """
+    inicio = texto.index(f'nombre: "{app}"')
+    abre = texto.index("activos: [", inicio)
+    cierra = texto.index("]", abre)
+
+    activos = re.findall(r'"([^"]+)"', texto[abre:cierra])
+    if activo in activos:
+        return texto
+    activos.append(activo)
+
+    # La sangría de la propia línea `activos:`, que es la que manda.
+    sangria = " " * (abre - texto.rindex("\n", 0, abre) - 1)
+    citados = ", ".join('"' + a + '"' for a in activos)
+    if len(sangria) + len("activos: []") + len(citados) <= 100:
+        bloque = "activos: [" + citados + "]"
+    else:
+        dentro = f",\n{sangria}  ".join(f'"{a}"' for a in activos)
+        bloque = f"activos: [\n{sangria}  {dentro}\n{sangria}]"
+    return texto[:abre] + bloque + texto[cierra + 1 :]
+
+
+def _convertir_a_webp(datos: bytes) -> dict:
+    """Analiza la imagen y la devuelve en WebP con la receta de marca.
+
+    Reduce pero NO amplía: estirar una fuente pequeña no añade detalle, solo
+    peso y bordes blandos. Y si no trae transparencia se le quita el canal alfa,
+    porque el alfa cuesta la mitad del archivo y no se paga por nada.
+    """
+    from io import BytesIO
+
+    from PIL import Image
+
+    try:
+        imagen = Image.open(BytesIO(datos))
+        imagen.load()
+    except Exception:
+        raise HTTPException(status_code=400, detail="imagen_ilegible")
+
+    formato = imagen.format or "?"
+    if formato not in ("PNG", "JPEG", "WEBP"):
+        # El SVG ni siquiera llega aquí: Pillow no lo abre. Es lo correcto —un
+        # SVG ya es ligero y convertirlo a mapa de bits lo empeora.
+        raise HTTPException(status_code=415, detail=f"formato_no_admitido:{formato}")
+
+    alfa = imagen.mode in ("RGBA", "LA", "PA") or "transparency" in imagen.info
+    ancho_original = imagen.width
+
+    if imagen.width > ANCHO_MARCA:
+        alto = round(imagen.height * ANCHO_MARCA / imagen.width)
+        imagen = imagen.resize((ANCHO_MARCA, alto), Image.LANCZOS)
+
+    imagen = imagen.convert("RGBA" if alfa else "RGB")
+
+    salida = BytesIO()
+    opciones = {"quality": CALIDAD_WEBP, "method": 6}
+    if alfa:
+        opciones["alpha_quality"] = CALIDAD_ALFA
+    imagen.save(salida, "WEBP", **opciones)
+
+    return {
+        "bytes": salida.getvalue(),
+        "formato_origen": formato,
+        "ancho": imagen.width,
+        "alto": imagen.height,
+        "ancho_original": ancho_original,
+        "alfa": alfa,
+    }
+
+
+class PeticionImagen(BaseModel):
+    imagen_base64: str = Field(description="La imagen de origen, en base64 (con o sin data URL)")
+    nombre: str = Field(min_length=1, max_length=60, description="Nombre del activo, sin extensión")
+    apps: List[str] = Field(min_length=1, description="Qué apps la van a servir")
+    carpeta: Literal["ilustraciones", "mascota"] = "ilustraciones"
+
+
+@app.post("/api/imagen")
+async def publicar_imagen(
+    peticion: PeticionImagen,
+    x_agente_token: str | None = Header(default=None, alias="X-Agente-Token"),
+):
+    """Convierte una imagen, la publica en packages/brand y abre el PR.
+
+    El PR queda COMPLETO a propósito: la fuente, las copias de cada app que la
+    pidió y el manifiesto anotado. Un PR con solo la fuente dejaría un archivo
+    que está en el repositorio y no sirve nadie, que es justo el fallo que esto
+    viene a evitar — la página escribiría la ruta bien y respondería 404.
+    """
+    import base64
+
+    verificar_token(x_agente_token)
+    if not TOKEN_ESCRITURA:
+        raise HTTPException(status_code=503, detail="sin_credencial_de_escritura")
+
+    crudo = peticion.imagen_base64.split(",", 1)[-1] if "," in peticion.imagen_base64 else peticion.imagen_base64
+    try:
+        datos = base64.b64decode(crudo, validate=True)
+    except Exception:
+        raise HTTPException(status_code=400, detail="base64_invalido")
+    if not datos:
+        raise HTTPException(status_code=400, detail="imagen_vacia")
+    if len(datos) > MAX_BYTES_IMAGEN:
+        raise HTTPException(status_code=413, detail="imagen_demasiado_grande")
+
+    nombre = _kebab(peticion.nombre)
+    if not nombre:
+        raise HTTPException(status_code=400, detail="nombre_vacio_tras_limpiarlo")
+    archivo = f"{nombre}.webp"
+
+    # El manifiesto manda: de él salen las apps válidas y dónde copia cada una.
+    r = _gh("GET", f"/contents/scripts/marca-sync.mjs?ref={RAMA_BASE}")
+    if r.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"no_pude_leer_el_manifiesto:{r.status_code}")
+    manifiesto = base64.b64decode(r.json()["content"]).decode("utf-8")
+    destinos = _apps_del_manifiesto(manifiesto)
+
+    desconocidas = [a for a in peticion.apps if a not in destinos]
+    if desconocidas:
+        raise HTTPException(
+            status_code=400,
+            detail=f"apps_desconocidas:{','.join(desconocidas)}|validas:{','.join(destinos)}",
+        )
+
+    ruta_fuente = (
+        f"{RAIZ_MARCA}/{peticion.carpeta}/{archivo}"
+        if peticion.carpeta == "ilustraciones"
+        else f"{RAIZ_MARCA}/assets/{peticion.carpeta}/{archivo}"
+    )
+
+    # Pisar un activo que ya existe es distinto de publicar uno nuevo: la URL no
+    # cambia y ningún navegador que ya la tenga se entera. Lo que se ve entonces
+    # es la imagen vieja con el CSS nuevo, que parece un fallo de despliegue y no
+    # lo es. Aquí se corta y se pide otro nombre.
+    if _gh("GET", f"/contents/{ruta_fuente}?ref={RAMA_BASE}").status_code == 200:
+        raise HTTPException(status_code=409, detail=f"ya_existe:{ruta_fuente}")
+
+    convertida = _convertir_a_webp(datos)
+    activo = f"{peticion.carpeta}/{archivo}"
+
+    for app_nombre in peticion.apps:
+        manifiesto = _anotar_manifiesto(manifiesto, app_nombre, activo)
+
+    try:
+        # Un solo blob para la fuente y para todas las copias: son los mismos
+        # bytes, así que el árbol referencia el mismo sha desde varias rutas.
+        # Es además lo que hace que las copias sean idénticas byte a byte, que
+        # es exactamente lo que comprueba `pnpm marca:check`.
+        r = _gh("POST", "/git/blobs", {"content": base64.b64encode(convertida["bytes"]).decode(), "encoding": "base64"})
+        if r.status_code not in (200, 201):
+            raise HTTPException(status_code=502, detail=f"no_pude_crear_el_blob:{r.status_code}")
+        sha_imagen = r.json()["sha"]
+
+        arbol = [{"path": ruta_fuente, "mode": "100644", "type": "blob", "sha": sha_imagen}]
+        for app_nombre in peticion.apps:
+            arbol.append({
+                "path": f"{destinos[app_nombre]}/{archivo}",
+                "mode": "100644",
+                "type": "blob",
+                "sha": sha_imagen,
+            })
+        # El manifiesto es texto, así que va en línea; el resto son binarios y
+        # por eso hubo que pasar por /git/blobs: el campo `content` del árbol es
+        # UTF-8 y un WebP no cabe ahí.
+        arbol.append({
+            "path": "scripts/marca-sync.mjs",
+            "mode": "100644",
+            "type": "blob",
+            "content": manifiesto,
+        })
+
+        rama = f"eve/imagen-{nombre}"[:60]
+        r = _gh("GET", f"/git/ref/heads/{RAMA_BASE}")
+        if r.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"no_pude_leer_{RAMA_BASE}:{r.status_code}")
+        sha_base = r.json()["object"]["sha"]
+
+        r = _gh("GET", f"/git/ref/heads/{rama}")
+        if r.status_code == 200:
+            sha_padre = r.json()["object"]["sha"]
+        else:
+            r = _gh("POST", "/git/refs", {"ref": f"refs/heads/{rama}", "sha": sha_base})
+            if r.status_code not in (200, 201):
+                raise HTTPException(status_code=502, detail=f"no_pude_crear_la_rama:{r.status_code}")
+            sha_padre = sha_base
+
+        commit_padre = _gh("GET", f"/git/commits/{sha_padre}").json()
+        r = _gh("POST", "/git/trees", {"base_tree": commit_padre["tree"]["sha"], "tree": arbol})
+        if r.status_code not in (200, 201):
+            raise HTTPException(status_code=502, detail=f"no_pude_preparar_los_archivos:{r.status_code}")
+
+        cuerpo = (
+            f"Publica `{archivo}` ({convertida['ancho']}px, "
+            f"{'con' if convertida['alfa'] else 'sin'} transparencia, "
+            f"{len(convertida['bytes']) // 1024} KB) desde {convertida['formato_origen']}.\n\n"
+            f"Servida por: {', '.join(peticion.apps)}.\n\n"
+            f"Incluye la fuente, las copias y el manifiesto anotado, que es lo que "
+            f"`pnpm marca:check` comprueba."
+        )
+        r = _gh("POST", "/git/commits", {
+            "message": f"feat(marca): publica {archivo}\n\n{cuerpo}\n\nGenerado por Eve Studio.",
+            "tree": r.json()["sha"],
+            "parents": [sha_padre],
+            "author": AUTOR_COMMIT,
+            "committer": AUTOR_COMMIT,
+        })
+        if r.status_code not in (200, 201):
+            raise HTTPException(status_code=502, detail=f"no_pude_crear_el_commit:{r.status_code}")
+
+        r = _gh("PATCH", f"/git/refs/heads/{rama}", {"sha": r.json()["sha"]})
+        if r.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"no_pude_actualizar_la_rama:{r.status_code}")
+
+        abiertos = _gh("GET", f"/pulls?state=open&head={REPO_CODIGO.split('/')[0]}:{rama}")
+        if abiertos.status_code == 200 and abiertos.json():
+            pr_url = abiertos.json()[0]["html_url"]
+        else:
+            r = _gh("POST", "/pulls", {
+                "title": f"feat(marca): publica {archivo}",
+                "head": rama,
+                "base": RAMA_BASE,
+                "body": cuerpo + "\n\n---\nGenerado por **Eve Studio**.",
+            })
+            if r.status_code not in (200, 201):
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"quedo_en_la_rama_{rama}_pero_no_pude_abrir_el_pr:{r.status_code}",
+                )
+            pr_url = r.json()["html_url"]
+    except requests.RequestException as e:
+        raise HTTPException(status_code=502, detail=f"error_de_red_con_github:{e}")
+
+    return {
+        "pr_url": pr_url,
+        "rama": rama,
+        "archivo": archivo,
+        "ruta_publica": f"/marca/{archivo}",
+        "ruta_fuente": ruta_fuente,
+        "apps": peticion.apps,
+        "ancho": convertida["ancho"],
+        "alto": convertida["alto"],
+        "ancho_original": convertida["ancho_original"],
+        "alfa": convertida["alfa"],
+        "bytes": len(convertida["bytes"]),
+        "formato_origen": convertida["formato_origen"],
+    }

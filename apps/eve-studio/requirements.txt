@@ -12,3 +12,7 @@ requests==2.34.2
 python-dotenv==1.2.2
 langchain-openai==1.4.2
 langgraph==1.2.10
+# Conversión de imágenes a WebP para /api/imagen. Sustituye a `cwebp`, que en el
+# Mac lo pone Homebrew y en una función de Vercel no existe. Soporta
+# `alpha_quality`, que es lo que permite reproducir aquí la receta medida.
+pillow==11.3.0
