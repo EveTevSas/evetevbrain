@@ -26,11 +26,11 @@ const MES = HOY.getUTCMonth() + 1;
 const DIA_HOY = HOY.getUTCDate();
 
 /** Precio de venta por producto (COP/galón). */
-const PRECIOS: Record<string, number> = { Corriente: 16500, ACPM: 15200, Extra: 19800 };
+const PRECIOS: Record<string, number> = { Corriente: 16500, Diesel: 15200, Extra: 19800 };
 /** Costo y flete del mes actual; el anterior se deriva un poco más barato. */
 const COSTOS: Record<string, { compra: number; flete: number }> = {
   Corriente: { compra: 14100, flete: 320 },
-  ACPM: { compra: 13050, flete: 320 },
+  Diesel: { compra: 13050, flete: 320 },
   Extra: { compra: 16900, flete: 380 }
 };
 
@@ -74,12 +74,19 @@ async function main() {
 
   // ── 1. Configuración: productos y mangueras ───────────────────────────────
   const productos: { id: string; nombre: string }[] = [];
-  for (const [orden, nombre] of ["Corriente", "ACPM", "Extra"].entries()) {
+  // Nombres tal como aparecen en el Excel del cliente: las columnas de producto
+  // dicen CORRIENTE / DIESEL / EXTRA, y las mangueras van numeradas con la
+  // abreviatura del combustible (2 CTE, 3 ACPM…). Que coincida importa: es lo
+  // que la gerencia compara contra su hoja.
+  const ABREV: Record<string, string> = { Corriente: "CTE", Diesel: "ACPM", Extra: "EXTRA" };
+  let numeroManguera = 0;
+  for (const [orden, nombre] of ["Corriente", "Diesel", "Extra"].entries()) {
     let p = await prisma.product.findFirst({ where: { nombre } });
     p ??= await prisma.product.create({ data: { nombre, orden: orden + 1 } });
     productos.push({ id: p.id, nombre: p.nombre });
     for (let i = 1; i <= 2; i++) {
-      const nombreManguera = `${nombre} ${i}`;
+      numeroManguera++;
+      const nombreManguera = `${numeroManguera} ${ABREV[nombre]}`;
       const existe = await prisma.nozzle.findFirst({
         where: { nombre: nombreManguera, productId: p.id }
       });

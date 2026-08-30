@@ -48,7 +48,7 @@ export default async function ConsolidadoPage({
 
   return (
     <div className="space-y-6">
-      <h1>Consolidado mensual de galones</h1>
+      <h1>Ventas</h1>
 
       <form method="get" className="card flex flex-wrap items-end gap-4 p-4 sm:p-6">
         <div>
@@ -82,8 +82,8 @@ export default async function ConsolidadoPage({
       </form>
 
       <p className="text-sm text-eve-pizarra">
-        {MESES[mes - 1]} de {anio} — solo cierres en estado Cerrado. Sin digitación: se deriva de
-        los cierres diarios.
+        {MESES[mes - 1]} de {anio} — galones por día y producto. Sin digitación: sale del diario, y
+        solo cuenta los días ya cerrados.
       </p>
 
       {/* La tabla ancha tiene su propio scroll horizontal contenido */}
@@ -166,7 +166,7 @@ export default async function ConsolidadoPage({
 
       <p className="text-sm">
         <Link href="/cierres" className="lnk">
-          ← Volver a cierres
+          ← Volver al diario
         </Link>
       </p>
     </div>
