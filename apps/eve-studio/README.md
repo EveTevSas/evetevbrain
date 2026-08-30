@@ -1,9 +1,10 @@
 # @evetev/eve-studio
 
 Agente que genera interfaces de usuario a partir del manual de marca. Python +
-LangGraph, con **Kimi (Moonshot)** como motor. Lee los activos de marca del
-repositorio `Evetev-Dev/brand` y el código de este monorepo, ambos en GitHub y
-en solo lectura, para partir de lo que ya existe en vez de reescribirlo.
+LangGraph, con **Kimi (Moonshot)** como motor. Lee, en solo lectura y desde
+GitHub, el código de este monorepo y sus activos de marca —que viven en
+`packages/brand` desde que se borró el repositorio `Evetev-Dev/brand`—, para
+partir de lo que ya existe en vez de reescribirlo.
 
 La constitución (§8) dice: _"Servicio de IA en Python: cuando aparezca, entra
 como `apps/ai` en el mismo monorepo."_ Se respeta el fondo —vive en el monorepo,
@@ -206,15 +207,15 @@ Vercel, que es la landing real funcionando: revisar deja de ser leer un diff.
 El arnés vive **en código, no en el prompt** — a un modelo se le puede convencer
 de saltarse una instrucción; a un `if` no:
 
-| Límite                  | Valor                                                                |
-| ----------------------- | -------------------------------------------------------------------- |
-| Carpetas                | `apps/evepay/`, `apps/eveconecta-landing/`, `apps/eve-intelligence/` |
-| Extensiones             | `.html`, `.css`                                                      |
-| Prohibidos              | `base.css` (generado desde `packages/brand`)                         |
-| Archivos por PR         | 5                                                                    |
-| Tamaño por archivo      | 100 KB                                                               |
-| Propuestas por petición | 3                                                                    |
-| Operaciones             | crear y actualizar; **nunca** borrar ni renombrar                    |
+| Límite                  | Valor                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| Carpetas                | `apps/website/evepay/`, `apps/website/conecta/`, `apps/website/intelligence/` |
+| Extensiones             | `.html`, `.css`                                                               |
+| Prohibidos              | `base.css` (generado desde `packages/brand`)                                  |
+| Archivos por PR         | 5                                                                             |
+| Tamaño por archivo      | 100 KB                                                                        |
+| Propuestas por petición | 3                                                                             |
+| Operaciones             | crear y actualizar; **nunca** borrar ni renombrar                             |
 
 Dos exclusiones importan especialmente: **`base.css`**, porque editarlo ahí lo
 revierte el siguiente `pnpm landings:sync` y rompe el job de CI; y **`apps/eve-studio`**,
@@ -331,7 +332,7 @@ Dos repositorios, ambos de solo lectura:
 
 | Repositorio             | Para qué                       | Herramientas                                       |
 | ----------------------- | ------------------------------ | -------------------------------------------------- |
-| `Evetev-Dev/brand`      | manual, tokens, logos, mascota | `obtener_activo_github`, `listar_carpeta_de_marca` |
+| `packages/brand/`       | manual, tokens, logos, mascota | `obtener_activo_github`, `listar_carpeta_de_marca` |
 | `EveTevSas/evetevbrain` | el código tal como está hoy    | `leer_archivo_del_repo`, `listar_carpeta_del_repo` |
 
 ### Las imágenes se listan, no se recuerdan
@@ -371,16 +372,19 @@ precio lo paga la copia, así que un cambio en el criterio de URLs o en la
 validación hay que hacerlo en los dos sitios. Es lo que se olvidó la primera vez
 y dejó el REPL entregando URLs de `raw` cuando la API ya no lo hacía.
 
-Ese desfase concreto ya se cerró: las 22 poses se publicaron en WebP en
-`Evetev-Dev/brand` v1.3.1, y `listar_carpeta_de_marca` devuelve 24 archivos.
-Pero **el desfase puede volver**, porque nada sincroniza los dos repositorios —
-`pnpm landings:sync` solo replica lo de `packages/brand/landing/`, no los activos.
+Ese desfase ya no puede volver: **no hay dos repositorios**. Al borrarse
+`Evetev-Dev/brand`, sus activos pasaron a `packages/brand` —incluidas las 22
+poses en WebP, que solo estaban allí— y el agente lee de ahí. Lo que sí hay que
+vigilar es otra cosa: un activo puede estar en `packages/brand` y no servirse,
+porque quien lo sirve es la carpeta `/marca` de cada app, que llena
+`pnpm marca:sync` desde un manifiesto. Por eso `obtener_activo_github` comprueba
+contra `apps/website/marca` y no contra la fuente.
 Cada activo nuevo hay que publicarlo a mano y etiquetar una `v1.x`; hasta que
 eso pase, el agente dirá que no está, que es lo correcto, en vez de enlazarlo
 roto.
 
 Lo segundo es lo que permite pedirle _"cámbiale el titular a la portada de
-EvePay"_: lee `apps/evepay/index.html` y parte de ahí, en vez de generar una
+EvePay"_: lee `apps/website/evepay/index.html` y parte de ahí, en vez de generar una
 página nueva desde cero. Puede listar carpetas antes de leer, para no adivinar
 rutas.
 

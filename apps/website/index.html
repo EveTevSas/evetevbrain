@@ -11,26 +11,10 @@
     <title>Evetev — Pagos e inteligencia artificial, sin complicaciones</title>
 
     <!-- Favicon y mascota desde el CDN de marca (§4) -->
-    <link
-      rel="icon"
-      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg"
-      type="image/svg+xml"
-    />
-    <link
-      rel="icon"
-      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon-32.png"
-      sizes="32x32"
-      type="image/png"
-    />
-    <link
-      rel="apple-touch-icon"
-      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/apple-touch-icon.png"
-    />
-    <link
-      rel="mask-icon"
-      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/mask-icon.svg"
-      color="#0A2540"
-    />
+    <link rel="icon" href="/marca/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/marca/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/marca/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/marca/mask-icon.svg" color="#0A2540" />
     <meta name="theme-color" content="#0A2540" />
 
     <!-- Tipografía oficial (§3): Baloo 2 (marca/titulares) + Inter (UI) + JetBrains Mono (técnico) -->
@@ -50,7 +34,7 @@
             "foundingDate": "2026",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-cian.svg"
+              "url": "/marca/isotipo-cian.svg"
             },
             "address": {
               "@type": "PostalAddress",
@@ -144,10 +128,7 @@
 
     <!-- Tokens de color oficiales (§2). La redeclaración local en :root actúa de
      respaldo si el CDN no está disponible. -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css"
-    />
+    <link rel="stylesheet" href="/marca/colores.css" />
 
     <link rel="stylesheet" href="estilos.css" />
   </head>
@@ -155,12 +136,7 @@
     <nav aria-label="Navegación principal">
       <div class="wrap nav-in">
         <a class="logo" href="#" aria-label="Evetev inicio">
-          <img
-            src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg"
-            alt=""
-            width="32"
-            height="23"
-          />
+          <img src="/marca/isotipo-azul-noche.svg" alt="" width="32" height="23" />
           <span class="brand">Evetev</span>
         </a>
         <div class="menu" id="menu">
@@ -169,34 +145,34 @@
               Productos <span style="font-size: 9px" aria-hidden="true">▾</span>
             </button>
             <div class="drop-panel">
-              <a href="#servicios"
+              <a href="/evepay"
                 ><span
                   class="p-ico sm"
                   style="
                     --p: var(--eve-electrico);
-                    --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+                    --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
                   "
                   aria-hidden="true"
                 ></span>
                 EvePay</a
               >
-              <a href="#servicios"
+              <a href="/conecta"
                 ><span
                   class="p-ico sm"
                   style="
                     --p: var(--eve-mezclado);
-                    --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg&quot;);
+                    --u: url(&quot;/marca/unidad-derecha-negro.svg&quot;);
                   "
                   aria-hidden="true"
                 ></span>
                 EveConecta</a
               >
-              <a href="#servicios"
+              <a href="/intelligence"
                 ><span
                   class="p-ico sm"
                   style="
                     --p: var(--eve-violeta);
-                    --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+                    --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
                   "
                   aria-hidden="true"
                 ></span>
@@ -233,12 +209,7 @@
       <div id="eve-particulas" aria-hidden="true"></div>
       <header class="wrap hero">
         <div class="hero-marca">
-          <img
-            src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-gradiente-corporativo.svg"
-            alt=""
-            width="46"
-            height="32"
-          />
+          <img src="/marca/isotipo-gradiente-corporativo.svg" alt="" width="46" height="32" />
         </div>
         <h1>Pagos e inteligencia artificial, sin complicaciones</h1>
         <p>Tarifas transparentes. Tecnología propia. Cero letra menuda.</p>
@@ -303,10 +274,7 @@
        es la unidad oficial del CDN usada como máscara y teñida con --p (T1). -->
       <div class="prod">
         <article
-          style="
-            --p: var(--eve-electrico);
-            --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
-          "
+          style="--p: var(--eve-electrico); --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;)"
         >
           <span class="p-ico" role="img" aria-label="Ícono de EvePay"></span>
           <h3>
@@ -337,16 +305,13 @@
             <li>Nunca tocamos el número de tarjeta: checkout embebido del proveedor.</li>
           </ul>
           <div class="enlaces">
-            <a class="link destacado" href="https://evepay.evetev.com">Conocer EvePay →</a>
+            <a class="link destacado" href="/evepay">Conocer EvePay →</a>
             <a class="link" href="#desarrolladores">Ver cómo se integra →</a>
           </div>
         </article>
 
         <article
-          style="
-            --p: var(--eve-mezclado);
-            --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-derecha-negro.svg&quot;);
-          "
+          style="--p: var(--eve-mezclado); --u: url(&quot;/marca/unidad-derecha-negro.svg&quot;)"
         >
           <span class="p-ico" role="img" aria-label="Ícono de EveConecta"></span>
           <h3>
@@ -377,7 +342,7 @@
             <li>Cada movimiento queda auditado: quién, cuándo y por qué.</li>
           </ul>
           <div class="enlaces">
-            <a class="link destacado" href="https://eveconecta.evetev.com">Conocer EveConecta →</a>
+            <a class="link destacado" href="/conecta">Conocer EveConecta →</a>
             <a class="link" href="#contacto">Hablar de un piloto →</a>
           </div>
         </article>
@@ -390,7 +355,7 @@
           style="
             --p: var(--eve-violeta);
             --p-texto: var(--eve-violeta-texto);
-            --u: url(&quot;https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/unidades/unidad-izquierda-negro.svg&quot;);
+            --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
           "
         >
           <span class="p-ico" role="img" aria-label="Ícono de Eve Intelligence"></span>
@@ -407,9 +372,7 @@
             <li>Tu base documental es tuya, escrita y con manual para mantenerla.</li>
           </ul>
           <div class="enlaces">
-            <a class="link destacado" href="https://eveintelligence.evetev.com"
-              >Conocer Eve Intelligence →</a
-            >
+            <a class="link destacado" href="/intelligence">Conocer Eve Intelligence →</a>
             <a class="link" href="#contacto">Hablar de un caso →</a>
           </div>
         </article>
@@ -881,12 +844,7 @@
       <div class="wrap">
         <div class="foot-top">
           <div class="foot-marca">
-            <img
-              src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-cian.svg"
-              alt=""
-              width="40"
-              height="28"
-            />
+            <img src="/marca/isotipo-cian.svg" alt="" width="40" height="28" />
             <span class="brand">Evetev</span>
             <p>
               Pagos e inteligencia artificial para la empresa latinoamericana. Construido por
@@ -895,9 +853,9 @@
           </div>
           <div class="foot-col">
             <h4>Productos</h4>
-            <a href="#servicios">EvePay</a>
-            <a href="#servicios">EveConecta</a>
-            <a href="#servicios">Eve Intelligence</a>
+            <a href="/evepay">EvePay</a>
+            <a href="/conecta">EveConecta</a>
+            <a href="/intelligence">Eve Intelligence</a>
           </div>
           <div class="foot-col">
             <h4>Empresa</h4>
@@ -957,12 +915,7 @@
 
     <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
       <div class="modal">
-        <img
-          src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg"
-          alt=""
-          width="52"
-          height="37"
-        />
+        <img src="/marca/isotipo-azul-noche.svg" alt="" width="52" height="37" />
         <h3 id="modalTitulo">Cuenta creada (demo)</h3>
         <p>Así se sentiría la confirmación: silenciosa, clara y sin pasos de más.</p>
         <button class="btn btn-sec" style="width: 100%" onclick="cerrarModal()">Entendido</button>

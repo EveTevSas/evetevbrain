@@ -1,0 +1,528 @@
+/* EveConecta — estilos propios de esta landing.
+   El armazón compartido (tokens de respaldo, reset, nav, portada, pie) está en
+   base.css, que se genera desde packages/brand/landing/base.css. Aquí solo va
+   lo que sea exclusivo de EveConecta.
+
+   Se carga DESPUÉS de base.css: lo que se declare aquí gana.
+   El color de producto no se fija en CSS — va con --p en el marcado. */
+
+/* ── CTA de la portada ───────────────────────────────────────────────────
+   El único botón coral de la página (C2). base.css no lo posiciona, así que
+   aquí le damos aire y su nota honesta debajo. */
+.cta {
+  margin-top: 34px;
+}
+.cta-nota {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  color: var(--eve-azul-noche);
+}
+
+/* ── Ilustración de portada ──────────────────────────────────────────────
+   El conjunto residencial en trazo técnico, de fondo, entero.
+
+   - Va como ::after y NO como background de .portada, porque base.css ya usa
+     ese background para el degradado radial. Sobrescribirlo aquí se llevaría
+     por delante el armazón compartido en esta landing.
+   - `contain`, no `cover`. Con cover y una banda baja, en una pantalla ancha
+     el dibujo se escalaba al ancho y se recortaba por arriba: a 2000 px solo
+     quedaba el 28 % inferior, o sea las líneas del suelo sin edificios. Se veía
+     como un error de maquetación, que es lo que era. Con contain el dibujo se
+     ve completo a cualquier ancho y nunca se recorta.
+   - Anclado abajo: el dibujo tiene el suelo en su borde inferior, así que
+     apoyarlo en la base de la sección es lo que lo hace parecer un suelo y no
+     una estampa flotando.
+   - El dibujo no llega al titular. El techo de las torres caía al 21% de la
+     sección y el titular ocupa del 20% al 37%: justo encima, y justo donde el
+     dibujo tiene cornisas y rejillas. Una línea recta cruzando una letra rompe
+     su forma, y eso se lee como suciedad por muy tenue que sea. Agrandar el
+     dibujo NO lo arreglaba —subía el techo de las torres y cruzaba todavía
+     más—; lo que lo arregla es que el dibujo empiece por debajo del titular,
+     que es lo que hace el envoltorio de aquí abajo.
+   - Con el titular a salvo, la opacidad puede quedarse en .2 sin ensuciar nada.
+   - La escena lleva luz en dos elementos —un poste indicador a la izquierda y
+     una cámara a la derecha, los dos con acentos cian sobre relleno azul
+     noche—, a los lados. Se colocaron así cuando había un hueco radial que se
+     comía el centro; ese hueco ya no está, y siguen funcionando en los lados.
+   - La URL es del CDN de marca (T1), fijada a @1, que sirve mientras esta
+     imagen no se sustituya: jsDelivr la manda con siete días de caché, así que
+     cambiar los bytes sin cambiar la ruta deja a los visitantes viendo la
+     anterior. Si algún día se reemplaza, hay que fijar la versión exacta como
+     hace apps/website/intelligence/estilos.css. Es un WebP de 195 KB, 2048 px
+     de ancho, con el blanco convertido a transparencia. El alfa no es opcional:
+     con `contain` sobra ancho a los lados, y un fondo blanco opaco dibujaría el
+     rectángulo de la imagen recortado contra el degradado.
+   - Antes hubo aquí un SVG dibujado a mano, de 6,7 KB. Pesaba treinta veces
+     menos y aun así se cambió: un dibujo programático sale con todos los
+     ángulos iguales y ninguna irregularidad, y en una página de producto eso no
+     se lee como minimalismo. La norma vigente (§4 del manual) es generar
+     siempre y arreglar el peso en la conversión. El SVG sigue publicado, porque
+     lo publicado no se retira, pero no se usa. */
+.portada {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+/* El dibujo cuelga de `.portada-cuerpo`, no de la sección, y esa es toda la
+   diferencia: **empieza donde empieza el texto de entrada, por debajo del
+   titular**. Antes cubría la portada entera y pasaba por detrás del titular,
+   que es lo primero que se lee y lo que menos conviene ensuciar.
+
+   Por qué un envoltorio y no un `top` en la sección: el titular no mide lo
+   mismo en todas partes —dos líneas en escritorio, hasta cuatro en móvil—, así
+   que cualquier número fijo acierta en una pantalla y falla en las demás. Un
+   elemento que empieza donde tiene que empezar acierta en todas sin medir nada.
+
+   El ancho sí se escapa del `wrap`: el bloque de texto está limitado a la
+   columna de lectura y el dibujo tiene que respirar de borde a borde, de ahí
+   el `100vw` centrado. Lo recorta el `overflow:hidden` de la sección, que
+   además evita la barra horizontal que causaría el ancho del scrollbar.
+
+   El respiro inferior se le quita a la sección y se le da a este bloque
+   (`.portada{padding-bottom:0}`). Si se dejaran los dos, el dibujo terminaría
+   donde termina el bloque y quedaría una franja de blanco hasta el borde de la
+   sección: el dibujo flotando en lugar de apoyarse en el corte.
+
+   Y el respiro sube de clamp(150px,20vw,260px) a clamp(200px,27vw,350px), que
+   tampoco es estética: `contain` encaja la escena en la caja, esta caja es más
+   baja que la sección entera, así que la altura pasó a mandar y el dibujo se
+   quedaba al 71 % del ancho cuando antes llegaba de borde a borde. Con este
+   respiro vuelve al 86 %. No se sube más porque la ilustración es de 2048×1013
+   —proporción 2,02, bastante más cuadrada que el 2,37 de Eve Intelligence— y
+   llevarla al ancho completo pediría 442 px de respiro: la portada crecería
+   250 px y el resto de la página se iría a empujones hacia abajo. Así crece 90. */
+.portada-cuerpo {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: clamp(200px, 27vw, 350px);
+}
+.portada-cuerpo::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.2;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: url("/marca/conjunto-residencial-calle.webp") center bottom/contain no-repeat;
+}
+
+/* **Ya no hay hueco radial.** Existía por una sola razón —«el dibujo se abre en
+   el centro en vez de pasar por detrás del texto»— y el envoltorio resuelve eso
+   mismo de forma directa: el dibujo ya no llega al titular, así que no hay nada
+   que abrir. Mantenerlo habría sido peor que quitarlo, porque el hueco estaba
+   calibrado contra la altura de la sección entera y, al colgar de un bloque más
+   bajo, caía sobre el centro del dibujo —justo lo que la escena quiere que se
+   mire—. Es el mismo fallo que ya se corrigió en Eve Intelligence, donde el
+   hueco se comía la cabeza del robot.
+
+   Quitarlo es seguro en cuanto a contraste porque las tres bandas de portada
+   van en azul noche, no en pizarra —comprobado en el navegador: rgb(10,37,64)
+   en titular, entrada y nota—, y las medidas de más abajo se tomaron con el
+   dibujo compuesto al 20 % detrás **y sin contar con el hueco**. Ninguna baja
+   de 11:1. Si algún día el texto volviera a pizarra, habría que devolver el
+   hueco o quitar el dibujo. */
+
+/* El texto de portada va en azul noche, no en el gris pizarra de base.css.
+   No es una preferencia: con el dibujo detrás, --eve-pizarra se queda en 4,06:1
+   donde una línea cruza una letra, y AA exige 4,5. Sobre blanco puro ese gris
+   ya estaba en 4,76, así que no había margen que gastar. El azul noche aguanta
+   13:1 con el dibujo detrás, y eso es lo que permite que el fondo exista.
+   Si algún día se quita la ilustración, esto puede volver a --eve-pizarra. */
+.portada .entrada {
+  color: var(--eve-azul-noche);
+}
+
+/* ── Secciones ───────────────────────────────────────────────────────────
+   Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
+   claro, un solo bloque de peso (el del CTA final) en azul noche. */
+.seccion {
+  padding: 84px 0;
+}
+.seccion-tinte {
+  background: var(--eve-tinte);
+}
+.seccion h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+  text-align: center;
+}
+.seccion-intro {
+  margin: 12px auto 0;
+  max-width: 560px;
+  text-align: center;
+  color: var(--eve-pizarra);
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+
+/* ── El dolor (tres puntos) ──────────────────────────────────────────────
+   Sin icono de producto: aquí el protagonista es el texto, no la marca.
+   Jerarquía por espacio, según la variante minimalista del manual (§6). */
+.dolores {
+  list-style: none;
+  margin: 48px auto 0;
+  padding: 0;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+}
+.dolor h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.dolor p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
+
+/* ── Bloque a dos columnas (recaudo + mascota) ───────────────────────────
+   Texto a la izquierda, mascota a la derecha; una columna en móvil. */
+.split {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.split-texto .p-ico {
+  margin-bottom: 16px;
+}
+.split-texto h2 {
+  text-align: left;
+}
+.split-texto > p {
+  margin-top: 16px;
+  color: var(--eve-pizarra);
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+
+/* Lista de verificación con tilde en el color de marca, nunca coral (C2). */
+.ticks {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.ticks li {
+  position: relative;
+  padding-left: 28px;
+  font-size: 0.93rem;
+}
+.ticks li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 15px;
+  height: 15px;
+  background-color: var(--eve-mezclado);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+}
+
+.split-figura {
+  text-align: center;
+}
+/* El tope estuvo en 160 px mientras aquí vivía una pose suelta: aquel WebP era
+   de 512 px y a 320 se veía blando. La escena que hay ahora es de 929 px de
+   ancho, así que aguanta 420 sin ablandarse —y los necesita: es apaisada y
+   dentro lleva un móvil con texto y una viñeta con una persona, que a 160 px
+   no se leen y la ilustración deja de contar nada.
+   La sombra se va con ella: una escena con su propia sombra dibujada bajo el
+   gato no necesita otra, y superpuestas se notaba el recorte. */
+.mascota {
+  width: min(420px, 100%);
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+.figura-nota {
+  margin-top: 16px;
+  font-size: 0.84rem;
+  color: var(--eve-pizarra);
+}
+
+/* ── Vídeo del dashboard ─────────────────────────────────────────────────
+   Una captura de pantalla de una app dentro de una página es un rectángulo
+   claro sobre otro rectángulo claro: sin un canto que lo separe, el vídeo
+   parece parte de la maqueta. De ahí el borde en --eve-linea y la sombra
+   suave, la misma familia que la de la mascota (§6).
+
+   `aspect-ratio` con las medidas reales del archivo: reserva el hueco antes
+   de que baje nada, así la lista de módulos no da un salto cuando aparece la
+   portada. Es la razón por la que el <video> lleva width/height en el HTML.
+
+   `background` en azul noche para el instante entre la portada y el primer
+   fotograma: en blanco ese parpadeo se ve como un destello. */
+.video-demo {
+  margin: 44px auto 0;
+  max-width: 980px;
+}
+.video-demo-el {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1600/826;
+  background: var(--eve-azul-noche);
+  border: 1px solid var(--eve-linea);
+  border-radius: var(--eve-radio-lg);
+  box-shadow: 0 18px 40px rgba(10, 37, 64, 0.1);
+}
+.video-demo-pie {
+  margin-top: 14px;
+  font-size: 0.84rem;
+  color: var(--eve-pizarra);
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* ── Características (módulos del dashboard) ─────────────────────────────
+   Variante minimalista del manual (§6): sin fondo ni sombra, la jerarquía la
+   da el espacio y el icono de producto teñido con --p. */
+.caracts-grid {
+  list-style: none;
+  margin: 48px auto 0;
+  padding: 0;
+  max-width: 980px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px 36px;
+}
+.caract .p-ico {
+  margin-bottom: 16px;
+}
+.caract h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.caract p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
+
+/* ── Pasos numerados ─────────────────────────────────────────────────────
+   El número es Baloo 700 (cifra protagonista, §3) en un círculo hielo;
+   nunca coral: aquí no hay acción que pedir. */
+.pasos {
+  list-style: none;
+  margin: 48px auto 0;
+  padding: 0;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+}
+.paso {
+  text-align: center;
+}
+.paso-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: var(--eve-hielo);
+  color: var(--eve-mezclado);
+  font-family: "Baloo 2", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.paso h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.paso p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
+
+/* ── Asamblea (texto de peso, sin botón) ─────────────────────────────────
+   No compite con el coral: es un cierre de argumento, no una acción (C2). */
+.asamblea {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+.asamblea h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+}
+.asamblea p {
+  margin-top: 14px;
+  color: var(--eve-pizarra);
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+
+/* ── FAQ (acordeón) ──────────────────────────────────────────────────────
+   Patrón <details>/<summary> del manual (§6): divisor fino y marcador +/–
+   en azul eléctrico. Nativo, así que ya es navegable por teclado. */
+.faq {
+  max-width: 720px;
+  margin: 40px auto 0;
+}
+.faq details {
+  border-bottom: 1px solid var(--eve-linea);
+}
+.faq details:first-child {
+  border-top: 1px solid var(--eve-linea);
+}
+.faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 4px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--eve-azul-noche);
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq summary::after {
+  content: "+";
+  flex: none;
+  font-family: "Baloo 2", system-ui, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--eve-electrico);
+  line-height: 1;
+}
+.faq details[open] summary::after {
+  content: "–";
+}
+.faq-cuerpo {
+  padding: 0 4px 20px;
+}
+.faq-cuerpo p {
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
+/* Hasta ahora toda respuesta cabía en un párrafo, así que dos seguidos salían
+   pegados y se leían como uno solo mal partido. */
+.faq-cuerpo p + p {
+  margin-top: 12px;
+}
+
+/* ── Demo final (formulario sobre azul noche) ────────────────────────────
+   El bloque de peso de la página (§2). El botón es secundario (mezclado)
+   porque el único coral de la vista ya se usó en la portada.
+   La tarjeta del formulario (.demo-form) está en base.css, compartida. */
+.demo {
+  padding: 88px 0;
+  background: var(--eve-azul-noche);
+  color: #fff;
+}
+.demo-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: start;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.demo-texto h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+  text-align: left;
+}
+.demo-texto > p {
+  margin-top: 14px;
+  color: #b9cce0;
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+.demo-puntos {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.demo-puntos li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 0.9rem;
+  color: #b9cce0;
+}
+.demo-puntos li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--eve-cian);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .split,
+  .demo-grid {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 760px) {
+  .seccion {
+    padding: 64px 0;
+  }
+  .dolores {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    max-width: 420px;
+  }
+  .split {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .split-texto h2 {
+    text-align: center;
+  }
+  .split-texto .p-ico {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .ticks {
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .pasos {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    max-width: 420px;
+  }
+  .demo {
+    padding: 64px 0;
+  }
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+  .demo-texto h2 {
+    text-align: center;
+  }
+}
+
+@media (min-width: 1440px) {
+  .dolores,
+  .split,
+  .caracts-grid,
+  .pasos,
+  .demo-grid {
+    max-width: 1060px;
+  }
+}

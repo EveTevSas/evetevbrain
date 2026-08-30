@@ -7,12 +7,25 @@ import * as schema from "./schema";
 
 type SqlClient = ReturnType<typeof postgres>;
 
-/* En desarrollo Next recarga los módulos en cada cambio; sin esto se abre un
- * pool nuevo por recarga hasta agotar las conexiones de Postgres. Mismo patrón
- * que usa EveConecta. */
+/* Un solo cliente por proceso, SIEMPRE.
+ *
+ * La versión anterior guardaba el cliente solo fuera de producción —
+ * `if (NODE_ENV !== "production")`— que es exactamente al revés de lo que hace
+ * falta. En producción cada llamada a `db()` abría un pool nuevo que nunca se
+ * cerraba, y `db()` se llama varias veces por petición: la página, su
+ * `generateMetadata`, el sitemap, el robots y el feed. Las conexiones se
+ * acumularon hasta agotar el pooler de Supabase, que en modo sesión admite 15
+ * clientes, y la tienda entera empezó a devolver 500.
+ *
+ * El caché en `globalThis` sirve para las dos cosas a la vez: en desarrollo
+ * sobrevive a las recargas de módulo de Next, y en producción evita que se abra
+ * más de un pool por instancia.
+ */
 const global_ = globalThis as typeof globalThis & { eveStoreSql?: SqlClient };
 
 function cliente(): SqlClient {
+  if (global_.eveStoreSql) return global_.eveStoreSql;
+
   const url = process.env.DATABASE_URL;
   if (!url?.startsWith("postgres")) {
     throw new Error(
@@ -20,9 +33,48 @@ function cliente(): SqlClient {
         ".env.local y rellénala desde el panel de Supabase."
     );
   }
-  const c = global_.eveStoreSql ?? postgres(url, { max: 5, onnotice: () => {} });
-  if (process.env.NODE_ENV !== "production") global_.eveStoreSql = c;
-  return c;
+
+  global_.eveStoreSql = postgres(url, {
+    /* Una sola conexión por instancia EN EJECUCIÓN: en un entorno sin servidor
+     * cada instancia atiende una petición a la vez, y un pool mayor multiplica
+     * el consumo sin ganar nada — el límite es del pooler, compartido con
+     * EveConecta.
+     *
+     * Durante la COMPILACIÓN es al revés. Next prerenderiza varias páginas a la
+     * vez y con una sola conexión se hacen cola hasta pasarse del plazo: el
+     * build se caía en `/sitemap.xml` después de haber generado bien la
+     * portada. Ahí conviene holgura, y no hay riesgo de agotar el pooler porque
+     * el proceso dura lo que dura el build.
+     *
+     * Ese razonamiento tenía un agujero y costó dos builds: Next arranca UN
+     * PROCESO POR WORKER, y cada uno abre su propio pool. Ocho por los nueve
+     * workers de una máquina de diez núcleos son setenta y dos conexiones
+     * contra un pooler de quince, y el build se cayó con `EMAXCONNSESSION`. Lo
+     * que tiene que caber no es este número, sino su producto por el tope de
+     * `experimental.cpus` en `next.config.ts`: 2 × 3 = 6, de quince. */
+    max: process.env.NEXT_PHASE === "phase-production-build" ? 3 : 1,
+    /* Cierra la conexión tras cinco segundos ociosos, y en todo caso la recicla
+     * al minuto. Es la lección de haber cambiado una fuga por un cuelgue: al
+     * guardar el cliente entre peticiones, Vercel congela la instancia y el
+     * socket muere sin que `postgres.js` se entere. Al despertar escribe sobre
+     * una conexión muerta y espera indefinidamente. Reciclar agresivamente hace
+     * que ese socket nunca llegue a la siguiente petición. */
+    idle_timeout: 5,
+    max_lifetime: 60,
+    /* Fallar rápido y con un error claro, en vez de dejar la petición colgada
+     * hasta que Vercel la mate a los 300 segundos — que es lo que pasó. */
+    connect_timeout: 12,
+    /* Plazo del lado del servidor: una consulta que se pase de diez segundos se
+     * aborta. No cubre el socket muerto —el servidor nunca recibe la consulta—,
+     * pero sí una consulta que de verdad se atasque. */
+    connection: { statement_timeout: 12_000 },
+    /* El pooler en modo transacción no admite sentencias preparadas. Se
+     * desactivan siempre: en modo sesión no cuesta nada, y así cambiar de
+     * puerto no vuelve a romper nada. */
+    prepare: false,
+    onnotice: () => {}
+  });
+  return global_.eveStoreSql;
 }
 
 export function db(): PostgresJsDatabase<typeof schema> {

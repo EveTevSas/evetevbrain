@@ -121,9 +121,10 @@
   var guion = document.currentScript;
   var cfg = {
     api: (guion && guion.dataset.api) || nuevaBase(guion),
-    mascota:
-      (guion && guion.dataset.mascota) ||
-      "https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/mascota/mascota.webp",
+    /* Contra el origen del propio script y no una ruta relativa: el widget se
+       incrusta en páginas ajenas, donde "/marca/..." apuntaría al sitio del
+       cliente. `nuevaBase` lee el src de este mismo <script>. */
+    mascota: (guion && guion.dataset.mascota) || nuevaBase(guion) + "/marca/mascota.webp",
     contacto: (guion && guion.dataset.contacto) || "mailto:contacto@evetev.com",
     nombre: (guion && guion.dataset.nombre) || "Eve",
     saludo:

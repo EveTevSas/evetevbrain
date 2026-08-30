@@ -1,0 +1,4 @@
+# Cliente de Prisma: lo genera `prisma generate` en cada instalación/build.
+src/generated/
+# Lo escribe `next dev`/`next build`.
+next-env.d.ts

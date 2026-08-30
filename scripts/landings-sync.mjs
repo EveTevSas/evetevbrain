@@ -6,13 +6,13 @@
  *   node scripts/landings-sync.mjs --check  → falla si alguna copia se desvió
  *
  * Por qué copias versionadas y no un paso de build: las landings son estáticas
- * y Vercel las despliega con Root Directory en apps/<landing>. Leer un archivo
- * de packages/ durante el build exige activar «incluir archivos fuera del Root
- * Directory» en cada proyecto — una casilla de un panel, fácil de olvidar en el
- * siguiente proyecto, y que rompe el despliegue sin avisar. La copia va al repo
- * y el CI garantiza que no se desvíe: la comprobación vive donde vive el código.
+ * y Vercel las despliega con Root Directory en apps/website. Leer un archivo de
+ * packages/ durante el build exige activar «incluir archivos fuera del Root
+ * Directory» en el proyecto — una casilla de un panel, fácil de olvidar, y que
+ * rompe el despliegue sin avisar. La copia va al repo y el CI garantiza que no
+ * se desvíe: la comprobación vive donde vive el código.
  */
-import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -29,31 +29,17 @@ const aviso = (fuente) => `/* ARCHIVO GENERADO — NO EDITAR.
    Copia de ${fuente}. Edita allí y corre \`pnpm landings:sync\`.
    Los cambios hechos aquí los revierte el siguiente sync, y el CI los rechaza. */\n\n`;
 
-/** Una landing se declara a sí misma con "evetev": { "landing": true } en su
- *  package.json. Se prefiere a detectarlas por el nombre de la carpeta o por
- *  la presencia del archivo: una app nueva se apunta escribiendo una línea, sin
- *  tener que crear antes las copias vacías ni tocar este script. */
-function landings() {
-  const apps = join(raiz, "apps");
-  return readdirSync(apps, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => join(apps, d.name))
-    .filter((dir) => {
-      const pkg = join(dir, "package.json");
-      if (!existsSync(pkg)) return false;
-      return JSON.parse(readFileSync(pkg, "utf8")).evetev?.landing === true;
-    });
-}
+/** Dónde aterrizan las copias. Antes eran tres carpetas —una por landing, cada
+ *  una en su propio dominio— y el script las descubría por un marcador en su
+ *  package.json. Ahora las tres landings son rutas de un mismo sitio
+ *  (evetev.com/conecta, /evepay, /intelligence), así que comparten una sola
+ *  copia servida en /landings/ y el descubrimiento sobra: un destino explícito
+ *  dice más y no puede quedarse en cero por accidente. */
+const DESTINO = "apps/website/landings";
 
 const comprobar = process.argv.includes("--check");
-const objetivos = landings();
-
-if (objetivos.length === 0) {
-  // Sin destinos no hay nada que garantizar, y un "todo bien" aquí sería
-  // engañoso: significa que el descubrimiento falló, no que esté sincronizado.
-  console.error("✗ No se encontró ninguna landing. ¿Se movieron las apps?");
-  process.exit(1);
-}
+const objetivos = [join(raiz, DESTINO)];
+if (!comprobar) mkdirSync(objetivos[0], { recursive: true });
 
 let desviadas = 0;
 for (const { fuente, destino } of COMPARTIDOS) {
@@ -87,6 +73,6 @@ if (comprobar && desviadas > 0) {
 }
 console.log(
   comprobar
-    ? `✓ ${objetivos.length} landing(s) al día`
-    : `✓ sincronizado: ${COMPARTIDOS.length} archivo(s) × ${objetivos.length} landing(s)`
+    ? `✓ ${DESTINO} al día`
+    : `✓ sincronizado: ${COMPARTIDOS.length} archivo(s) en ${DESTINO}`
 );

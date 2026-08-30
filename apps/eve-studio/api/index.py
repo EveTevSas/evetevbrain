@@ -38,24 +38,28 @@ load_dotenv()  # solo para desarrollo local; en Vercel las vars ya están en el 
 
 app = FastAPI(title="Agente Frontend Evetev", docs_url=None, redoc_url=None)
 
-REPO_MARCA = os.getenv("REPO_MARCA", "Evetev-Dev/brand")
 REPO_CODIGO = os.getenv("REPO_CODIGO", "EveTevSas/evetevbrain")
 
-# SIN respaldo en GITHUB_TOKEN, y no es un olvido. Un token de alcance fino
-# está limitado a los recursos de UNA organización: el de marca pertenece a
-# Evetev-Dev y este repo es de EveTevSas. Mandarlo no es neutro, empeora las
-# cosas — sin cabecera GitHub sirve el repositorio público, y con una credencial
-# de otra organización responde 403. Se comprobó en producción.
+# La marca ya no vive en un repositorio propio. Hasta agosto de 2026 estaba en
+# Evetev-Dev/brand y se servía por jsDelivr; ese repo se borró y sus activos son
+# ahora packages/brand de este mismo monorepo, que es también la fuente desde la
+# que `pnpm marca:sync` llena la carpeta pública de cada app.
+RAIZ_MARCA = "packages/brand"
+# Y esta es la que el navegador ve. Un activo solo se puede citar en una página
+# si está AQUÍ: estar en packages/brand no basta, porque ahí no lo sirve nadie.
+MARCA_SERVIDA = "apps/website/marca"
+
+# Antes había aquí una nota sobre no mandar GITHUB_TOKEN al repo de marca: era
+# de otra organización y la credencial cruzada devolvía 403. Con la marca dentro
+# del monorepo el problema desaparece — un solo repo, una sola credencial.
 TOKEN_CODIGO = os.getenv("GITHUB_TOKEN_CODIGO")
 
-# La forma canónica de citar un activo de marca es el CDN (regla T1 del manual:
-# "logos SIEMPRE desde el CDN"), no raw.githubusercontent, que no tiene caché de
-# borde, no está pensado para servir a usuarios finales y —al seguir a main— se
+# La forma canónica de citar un activo de marca es la ruta /marca del propio
+# sitio. La regla T1 del manual decía "logos SIEMPRE desde el CDN"; se cambió al
+# borrar el repositorio de marca. Lo que NO cambia es lo que prohibía: citar
+# raw.githubusercontent, que no tiene caché de borde, no está pensado para
+# servir a usuarios finales y —al seguir a main— se
 # rompe en silencio el día que el archivo se mueva.
-# @1 sigue la última 1.x publicada: así un activo nuevo queda disponible sin
-# tocar este código, y las páginas ya escritas no cambian de imagen.
-VERSION_MARCA = os.getenv("VERSION_MARCA", "1")
-CDN_MARCA = f"https://cdn.jsdelivr.net/gh/{REPO_MARCA}@{VERSION_MARCA}"
 
 # ── El arnés de escritura ──────────────────────────────────────────────────
 # Todo esto vive en código y no en el prompt a propósito: a un modelo se le
@@ -63,10 +67,14 @@ CDN_MARCA = f"https://cdn.jsdelivr.net/gh/{REPO_MARCA}@{VERSION_MARCA}"
 TOKEN_ESCRITURA = os.getenv("GITHUB_TOKEN_ESCRITURA")
 
 RAMA_BASE = "main"
+# Las tres landings son subcarpetas del sitio corporativo desde que pasaron de
+# subdominio a ruta (/evepay, /conecta, /intelligence). Se listan una por una y
+# NO como "apps/website/": la portada, el Nosotros y la función del formulario
+# viven en la raíz de esa carpeta y no son escribibles desde aquí.
 CARPETAS_ESCRIBIBLES = (
-    "apps/evepay/",
-    "apps/eveconecta-landing/",
-    "apps/eve-intelligence/",
+    "apps/website/evepay/",
+    "apps/website/conecta/",
+    "apps/website/intelligence/",
 )
 EXTENSIONES_ESCRIBIBLES = (".html", ".css")
 # base.css y formularios.js son copias GENERADAS desde packages/brand: editarlas
@@ -122,7 +130,7 @@ def _pedir(repo: str, ruta: str, token: str | None, crudo: bool):
     return respuesta
 
 
-def _leer_archivo(repo: str, ruta_archivo: str, token: str | None) -> str:
+def _leer_archivo(repo: str, ruta_archivo: str, token: str | None, es_marca: bool = False) -> str:
     if ruta_archivo.lower().endswith(EXTENSIONES_IMAGEN):
         # Un binario no se mete en el contexto: se devuelve su URL para usarla
         # tal cual en el marcado. Pero antes se comprueba que exista: una URL
@@ -130,31 +138,32 @@ def _leer_archivo(repo: str, ruta_archivo: str, token: str | None) -> str:
         # porque el agente la da por buena y la imagen rota solo se ve en la
         # página.
         limpia = ruta_archivo.lstrip("/")
-        if repo == REPO_MARCA:
-            # Se comprueba contra el CDN, no contra la API de GitHub, porque es
-            # exactamente la URL que va a acabar en la página. Un archivo puede
-            # estar en main y NO en la última versión etiquetada: pasó con
-            # v1.3.0, que se etiquetó antes de mezclar el PR y dejaba a @1
-            # sirviendo el árbol viejo. Preguntarle a GitHub habría dicho que sí
-            # mientras el navegador recibía un 404.
-            url = f"{CDN_MARCA}/{limpia}"
+        if es_marca:
+            # Se comprueba contra apps/website/marca y NO contra packages/brand,
+            # porque esa es la carpeta que el navegador ve. Un activo puede estar
+            # en la fuente y no estar sincronizado a la carpeta pública: en ese
+            # caso la URL está bien formada y da 404, que es el peor resultado
+            # posible —el agente la da por buena y la imagen rota solo se ve en
+            # la página—. Antes esto mismo se comprobaba contra el CDN por la
+            # misma razón: preguntar donde de verdad se sirve.
+            nombre = limpia.split("/")[-1]
             try:
-                existe = requests.head(url, timeout=20, allow_redirects=True)
+                existe = _pedir(repo, f"{MARCA_SERVIDA}/{nombre}", token, crudo=False)
             except requests.RequestException as e:
-                return f"Error de red consultando el CDN de marca: {e}"
+                return f"Error de red consultando GitHub: {e}"
             if existe.status_code == 404:
                 return (
-                    f"El CDN no sirve '{limpia}'. O no está en el repositorio de "
-                    "marca, o está en main pero todavía no en una versión "
-                    "etiquetada. Lista la carpeta y elige uno de los publicados; "
-                    "no uses esta ruta."
+                    f"El sitio no sirve '{nombre}'. O no está en packages/brand, o "
+                    "está pero nadie lo añadió al manifiesto de "
+                    "scripts/marca-sync.mjs, que es lo que llena /marca. Lista la "
+                    "carpeta y elige uno de los que sí se sirven; no uses esta ruta."
                 )
             if existe.status_code != 200:
                 return (
-                    f"No se pudo comprobar '{limpia}' en el CDN "
+                    f"No se pudo comprobar '{nombre}' en el repositorio "
                     f"(código {existe.status_code}). No la uses sin confirmarla."
                 )
-            return url
+            return f"/marca/{nombre}"
 
         # Monorepo: no hay CDN, así que se sirve por raw fijado a main.
         try:
@@ -232,19 +241,82 @@ def obtener_activo_github(ruta_archivo: str) -> str:
 
     Si no sabes el nombre exacto del activo, usa antes 'listar_carpeta_de_marca'.
     """
-    return _leer_archivo(REPO_MARCA, ruta_archivo, os.getenv("GITHUB_TOKEN"))
+    # Las rutas se piden como siempre —'mascota/mascota.webp'— y aquí se
+    # traducen a donde viven ahora. Las ilustraciones cuelgan de la raíz de
+    # packages/brand y el resto de assets/; el agente no tiene por qué saberlo.
+    limpia = ruta_archivo.lstrip("/")
+    sub = "" if limpia.startswith("ilustraciones/") else "assets/"
+    return _leer_archivo(REPO_CODIGO, f"{RAIZ_MARCA}/{sub}{limpia}", TOKEN_CODIGO, es_marca=True)
+
+
+def _nombres_servidos(token: str | None) -> set | None:
+    """Qué archivos ve el navegador en /marca. None si no se pudo averiguar.
+
+    Se pregunta a la carpeta pública y NO al manifiesto: es la misma fuente que
+    comprueba `_leer_archivo`, y si las dos herramientas se guiaran por sitios
+    distintos podrían contradecirse —listar un activo como disponible y luego
+    negarse a darlo—, que es peor que no marcar nada.
+    """
+    try:
+        respuesta = _pedir(REPO_CODIGO, MARCA_SERVIDA, token, crudo=False)
+    except requests.RequestException:
+        return None
+    if respuesta.status_code != 200:
+        return None
+    contenido = respuesta.json()
+    if not isinstance(contenido, list):
+        return None
+    return {e["name"] for e in contenido if e["type"] == "file"}
 
 
 @tool
 def listar_carpeta_de_marca(ruta_carpeta: str = "") -> str:
-    """Lista los activos disponibles en el repositorio de MARCA.
+    """Lista los activos de marca, diciendo cuáles se sirven de verdad.
 
     Úsala ANTES de citar cualquier imagen, para partir de los archivos que
     existen de verdad en vez de deducir el nombre. Con cadena vacía lista la
     raíz; las carpetas son 'mascota', 'isotipos', 'logotipos', 'lockups',
-    'unidades', 'favicon' y 'tokens'.
+    'unidades', 'favicon', 'tokens' e 'ilustraciones'.
+
+    SOLO puedes citar los marcados [se sirve]. Los marcados [NO se sirve] están
+    en el repositorio pero el sitio no los publica, así que su ruta daría 404.
     """
-    return _listar_carpeta(REPO_MARCA, ruta_carpeta, os.getenv("GITHUB_TOKEN"))
+    limpia = ruta_carpeta.strip("/")
+    if limpia == "ilustraciones":
+        ruta = f"{RAIZ_MARCA}/ilustraciones"
+    else:
+        ruta = f"{RAIZ_MARCA}/assets" + (f"/{limpia}" if limpia else "")
+
+    listado = _listar_carpeta(REPO_CODIGO, ruta, TOKEN_CODIGO)
+
+    # Estar en packages/brand no basta para poder citar un activo: solo llega al
+    # navegador lo que el manifiesto de scripts/marca-sync.mjs copia a /marca.
+    # Sin esta marca el listado enseña nombres que no se pueden usar, y el
+    # agente concluye —razonablemente— que sí. Era el hueco que quedaba: la
+    # herramienta de leer ya se negaba, pero solo DESPUÉS de que eligiera uno.
+    servidos = _nombres_servidos(TOKEN_CODIGO)
+    if servidos is None or not listado or listado.startswith(("No se pudo", "Error de red", "'")):
+        return listado
+
+    lineas = []
+    for linea in listado.split("\n"):
+        if not linea.startswith("archivo  "):
+            lineas.append(linea)
+            continue
+        # Se casa por nombre de archivo porque marca-sync aplana: `tokens/
+        # colores.css` acaba en `/marca/colores.css`. Si dos fuentes comparten
+        # nombre, la marca no distingue cuál de las dos se copió — pero la RUTA
+        # que se anuncia sigue siendo válida, que es lo que la herramienta
+        # responde de verdad: «¿puedo citar esto?».
+        nombre = linea.rsplit("/", 1)[-1]
+        lineas.append(
+            f"{linea}   [se sirve: /marca/{nombre}]" if nombre in servidos else f"{linea}   [NO se sirve]"
+        )
+    return "\n".join(lineas) + (
+        "\n\nSolo se pueden citar los [se sirve]. Para publicar uno que no lo esté, "
+        "la persona lo hace desde la pestaña «Imagen» de Eve Studio o con "
+        "`pnpm marca:imagen`; tú no puedes añadirlo."
+    )
 
 
 @tool
@@ -253,7 +325,7 @@ def leer_archivo_del_repo(ruta_archivo: str) -> str:
 
     Úsala antes de modificar algo existente, para partir del archivo real en vez
     de reescribirlo desde cero. La ruta es desde la raíz del repositorio, por
-    ejemplo 'apps/evepay/index.html' o 'apps/website/estilos.css'.
+    ejemplo 'apps/website/evepay/index.html' o 'apps/website/estilos.css'.
 
     Si no sabes la ruta exacta, usa antes 'listar_carpeta_del_repo'.
     """
@@ -265,7 +337,7 @@ def listar_carpeta_del_repo(ruta_carpeta: str = "") -> str:
     """Lista los archivos y carpetas de una ruta del monorepo de CÓDIGO.
 
     Sirve para descubrir qué hay antes de leer. Con cadena vacía lista la raíz.
-    Ejemplos de ruta: 'apps', 'apps/evepay'.
+    Ejemplos de ruta: 'apps', 'apps/website/evepay'.
     """
     return _listar_carpeta(REPO_CODIGO, ruta_carpeta, TOKEN_CODIGO)
 
@@ -275,7 +347,7 @@ def listar_carpeta_del_repo(ruta_carpeta: str = "") -> str:
 # enrutado de esta app en Vercel ya nos dio problemas una vez, y no conviene
 # añadirle importaciones relativas al montaje.
 class ArchivoPropuesto(BaseModel):
-    ruta: str = Field(description="Ruta desde la raíz del repo, p.ej. apps/evepay/index.html")
+    ruta: str = Field(description="Ruta desde la raíz del repo, p.ej. apps/website/evepay/index.html")
     contenido: str = Field(description="Contenido COMPLETO del archivo, no un fragmento")
 
 
@@ -352,8 +424,8 @@ def crear_herramienta_escritura(registro: dict):
 
         Úsala cuando el cambio deba quedar en el repositorio. Manda el contenido
         COMPLETO de cada archivo, no un fragmento. Solo puedes tocar las landings
-        (apps/evepay, apps/eveconecta-landing, apps/eve-intelligence) y solo
-        archivos .html y .css.
+        (apps/website/evepay, apps/website/conecta, apps/website/intelligence)
+        y solo archivos .html y .css.
 
         Devuelve la URL del PR, que debes incluir en tu respuesta.
         """
@@ -466,28 +538,38 @@ REGLAS DE COMPORTAMIENTO:
 3. NUNCA deduzcas el nombre de un activo de marca. Antes de citar cualquier
    imagen, lista la carpeta con 'listar_carpeta_de_marca' y elige de lo que
    exista de verdad; luego pide esa ruta a 'obtener_activo_github' y usa la URL
-   que te devuelva tal cual —será una del CDN (cdn.jsdelivr.net), que es la
-   única forma válida de citar un activo de marca; NUNCA escribas a mano una de
-   raw.githubusercontent, que no tiene caché y se rompe sola cuando el archivo
-   se mueve. Solo sirven los activos publicados en el repo de
-   marca, que no son siempre los mismos que están en el monorepo: por eso hay
-   que listar, no recordar. Si el activo que necesitas no aparece en el listado,
-   dilo en tu respuesta y propón uno de los que sí están; no inventes la URL,
-   porque una imagen rota no falla ruidosamente.
+   que te devuelva TAL CUAL. Será una ruta del propio sitio, de la forma
+   `/marca/<archivo>`: el sitio sirve su marca desde su origen, y esa es la
+   única forma válida de citarla. NUNCA escribas a mano una URL de un CDN
+   externo ni de raw.githubusercontent: el repositorio de marca que había en
+   jsDelivr se borró en agosto de 2026, así que cualquier `cdn.jsdelivr.net/gh/
+   Evetev-Dev/brand` que escribas hoy es una imagen rota.
+   No todo lo que está en packages/brand se sirve: solo lo que el manifiesto de
+   scripts/marca-sync.mjs copia a /marca. El listado te lo dice archivo por
+   archivo — elige SOLO de los marcados [se sirve] y no cites nunca uno marcado
+   [NO se sirve], porque su ruta da 404. Si lo que necesitas no está servido,
+   dilo en tu respuesta y propón uno de los que sí lo están: publicarlo es cosa
+   de la persona, desde la pestaña «Imagen» de Eve Studio o con
+   `pnpm marca:imagen`. No inventes la URL, porque una imagen rota no falla
+   ruidosamente.
 4. Devuelve ÚNICAMENTE código HTML, listo para ser renderizado. No agregues explicaciones fuera del bloque de código.
 
 GENERAR PARA UNA LANDING DEL MONOREPO:
-Cuando lo que te piden es una página de `apps/evepay`, `apps/eveconecta-landing`,
-`apps/eve-intelligence` o cualquier otra landing, NO devuelvas una página autocontenida: devuelve el
-archivo tal como tiene que quedar en el repositorio.
+Cuando lo que te piden es una página de `apps/website/evepay`,
+`apps/website/conecta`, `apps/website/intelligence` o cualquier otra landing, NO
+devuelvas una página autocontenida: devuelve el archivo tal como tiene que
+quedar en el repositorio.
 
 A. Lee primero el `index.html` actual de esa carpeta y respeta su cabecera: el
-   favicon, las tipografías, los tokens del CDN y —muy importante— la etiqueta
+   favicon, las tipografías, los tokens de `/marca/colores.css` y —muy
+   importante— la etiqueta
    `<meta name="robots" content="noindex">` mientras la landing esté en
    construcción. Quitarla sin querer hace que Google indexe una página a medias.
-B. Enlaza las hojas, no las incrustes:
-       <link rel="stylesheet" href="base.css">
-       <link rel="stylesheet" href="estilos.css">
+B. Enlaza las hojas, no las incrustes, y SIEMPRE con ruta absoluta desde la
+   raíz del sitio —nunca relativa—, porque la landing se sirve tanto en
+   `/evepay` como en `/evepay/` y una ruta relativa se rompe en uno de los dos:
+       <link rel="stylesheet" href="/landings/base.css">
+       <link rel="stylesheet" href="/evepay/estilos.css">
    `base.css` es el armazón compartido entre landings y es un archivo GENERADO
    desde packages/brand/landing/base.css: NO lo reescribas ni copies su
    contenido dentro del HTML. Ya trae reset, tipografía, .wrap, .p-ico, .nav,
@@ -502,7 +584,7 @@ D. El color de producto no se fija en CSS: va en el marcado con `--p`
 E. El formulario de demo del cierre YA FUNCIONA: manda el correo a la empresa.
    Si la página que devuelves lo incluye, consérvalo tal cual está —con su
    `data-demo`, su campo trampa `name="sitio"`, su `<p class="demo-estado">` y
-   la etiqueta `<script src="formularios.js"></script>` del final—. Ese script
+   la etiqueta `<script src="/landings/formularios.js"></script>` del final—. Ese script
    es un archivo generado que tú no puedes escribir, y sin esas piezas el
    formulario deja de enviar sin que nadie se entere.
 
@@ -510,17 +592,21 @@ TRABAJAR SOBRE CÓDIGO QUE YA EXISTE:
 5. Si te piden cambiar, ampliar o corregir algo que ya está hecho, LEE PRIMERO el archivo real con 'leer_archivo_del_repo' y parte de él. No lo reescribas desde cero: perderías decisiones ya tomadas.
 6. Si no sabes la ruta exacta, descúbrela con 'listar_carpeta_del_repo' antes de leer. No adivines rutas.
 7. Dónde está cada cosa en el monorepo:
-   - 'apps/website' — sitio corporativo evetev.com (index.html, nosotros.html, estilos.css)
-   - 'apps/evepay' — landing de evepay.evetev.com
-   - 'apps/eveconecta-landing' — landing de eveconecta.evetev.com
-   - 'apps/eve-intelligence' — landing de eveintelligence.evetev.com, la línea
+   - 'apps/website' — sitio corporativo evetev.com (index.html, nosotros.html,
+     estilos.css). Las tres landings son subcarpetas suyas: la carpeta ES la
+     ruta pública.
+   - 'apps/website/evepay' — landing de evetev.com/evepay
+   - 'apps/website/conecta' — landing de evetev.com/conecta. Ojo: el portal de
+     residentes (conecta.evetev.com) es otra app, 'apps/eveconecta', y no se
+     toca desde aquí.
+   - 'apps/website/intelligence' — landing de evetev.com/intelligence, la línea
      de IA empresarial. Su color identificador es el violeta (--eve-violeta),
      que va SOLO en iconos y chips: nunca en botones (regla C3), y sobre blanco
      se usa --eve-violeta-texto porque el violeta base no da contraste (C7).
      Esta landing lleva instalado el asistente con una etiqueta <script> a
      fluxi.evetev.com; no la quites al reescribir la página.
-   Las landings comparten 'base.css', que es una copia GENERADA de
-   'packages/brand/landing/base.css'. Si hay que cambiar el armazón común, el
+   Las landings comparten 'apps/website/landings/base.css', que es una copia
+   GENERADA de 'packages/brand/landing/base.css'. Si hay que cambiar el armazón común, el
    cambio va en el original, nunca en la copia; lo propio de una landing va en
    su 'estilos.css'. Comparten también 'formularios.js' —el envío del formulario
    de demo—, generado igual y fuera de lo que puedes escribir.
@@ -535,8 +621,8 @@ DEJAR EL CAMBIO EN EL REPOSITORIO:
    cambiaste y por qué, no repitas el código.
 10. Manda SIEMPRE el contenido completo de cada archivo. La herramienta
     sustituye archivos enteros, no aplica parches.
-11. Solo puedes escribir en apps/evepay, apps/eveconecta-landing y
-    apps/eve-intelligence, y solo archivos .html y .css. Si necesitas tocar otra cosa —el CI, packages/,
+11. Solo puedes escribir en apps/website/evepay, apps/website/conecta y
+    apps/website/intelligence, y solo archivos .html y .css. Si necesitas tocar otra cosa —el CI, packages/,
     base.css, la configuración— NO lo intentes: explícalo en tu respuesta para
     que lo haga una persona.
 12. Si la herramienta rechaza la propuesta, lee el motivo y corrige. No
@@ -691,7 +777,7 @@ async def diagnostico(x_agente_token: str | None = Header(default=None)):
         }
 
     return {
-        "marca": probar(REPO_MARCA, "colores.json", os.getenv("GITHUB_TOKEN")),
+        "marca": probar(REPO_CODIGO, f"{RAIZ_MARCA}/assets/tokens/colores.json", TOKEN_CODIGO),
         "codigo": probar(REPO_CODIGO, "package.json", TOKEN_CODIGO),
         "escritura": probar_escritura(),
     }
@@ -942,4 +1028,329 @@ async def generar_interfaz(
         # vista previa fiel sin depender de la de Vercel, que no se puede
         # incrustar (responde 302 al SSO y manda X-Frame-Options: DENY).
         "archivos": registro.get("archivos", []),
+    }
+
+
+# ── Publicar una imagen de marca ───────────────────────────────────────────
+# Esto NO es una herramienta del agente, y es deliberado. Publicar una imagen no
+# tiene nada que decidir: se convierte, se anota y se abre el PR. Dejárselo al
+# modelo solo añadiría la posibilidad de que cuente que lo hizo sin haberlo
+# hecho —ya pasó con `proponer_cambios`—, así que es un endpoint que dispara la
+# interfaz con un botón. Un `if` no se deja convencer.
+#
+# Hace en el servidor lo mismo que `pnpm marca:imagen` hace en el Mac, y por las
+# mismas razones; la receta —2048 px, calidad 80, alfa 50— está medida, no
+# supuesta. La diferencia es el final: allí escribe en el árbol de trabajo, aquí
+# abre un PR, porque en Vercel el sistema de archivos es de solo lectura y
+# efímero.
+ANCHO_MARCA = 2048
+CALIDAD_WEBP = 80
+CALIDAD_ALFA = 50
+
+# Solo las dos familias que son mapa de bits. El resto de packages/brand son SVG
+# —logotipos, isotipos, lockups— y convertirlos a WebP sería estropearlos.
+CARPETAS_IMAGEN = ("ilustraciones", "mascota")
+
+# Vercel corta el cuerpo de una petición en 4,5 MB, así que un PNG grande no
+# llega entero. La interfaz reduce a ANCHO_MARCA en un canvas antes de subir
+# —donde está el peso es en el ancho, no en la calidad—, y esto es la red por si
+# alguien llama al endpoint a mano. Se mide sobre el base64 ya decodificado.
+MAX_BYTES_IMAGEN = 4_000_000
+
+
+def _kebab(texto: str) -> str:
+    """Sin acentos ni espacios: el nombre acaba en una URL y en el manifiesto."""
+    import unicodedata
+
+    plano = unicodedata.normalize("NFD", texto)
+    plano = "".join(c for c in plano if unicodedata.category(c) != "Mn")
+    return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", plano.lower())).strip("-")
+
+
+def _apps_del_manifiesto(texto: str) -> dict:
+    """Qué apps hay y dónde sirve cada una su marca, leído del manifiesto.
+
+    Se saca de scripts/marca-sync.mjs y no se copia aquí: una lista duplicada se
+    queda atrás el día que alguien añada una app, y el fallo sería que la imagen
+    no se copia a una app que sí la pidió.
+    """
+    return {
+        m.group(1): m.group(2)
+        for m in re.finditer(r'nombre:\s*"([^"]+)",\s*\n\s*destino:\s*"([^"]+)"', texto)
+    }
+
+
+def _anotar_manifiesto(texto: str, app: str, activo: str) -> str:
+    """Añade `activo` a la lista de una app, con el formato que deja Prettier.
+
+    POR QUÉ SE IMITA A PRETTIER Y NO SE LLAMA. Prettier es Node y esto corre en
+    una función de Python; no hay dónde ejecutarlo. Y el formato no es opcional:
+    el CI corre `pnpm format:check`, así que un corchete mal puesto pondría el
+    PR en rojo por un espacio. Son dos reglas —100 columnas y sin coma final— y
+    se aplican aquí explícitamente para que se vean.
+    """
+    inicio = texto.index(f'nombre: "{app}"')
+    abre = texto.index("activos: [", inicio)
+    cierra = texto.index("]", abre)
+
+    activos = re.findall(r'"([^"]+)"', texto[abre:cierra])
+    if activo in activos:
+        return texto
+    activos.append(activo)
+
+    # La sangría de la propia línea `activos:`, que es la que manda.
+    sangria = " " * (abre - texto.rindex("\n", 0, abre) - 1)
+    citados = ", ".join('"' + a + '"' for a in activos)
+    if len(sangria) + len("activos: []") + len(citados) <= 100:
+        bloque = "activos: [" + citados + "]"
+    else:
+        dentro = f",\n{sangria}  ".join(f'"{a}"' for a in activos)
+        bloque = f"activos: [\n{sangria}  {dentro}\n{sangria}]"
+    return texto[:abre] + bloque + texto[cierra + 1 :]
+
+
+def _convertir_a_webp(datos: bytes) -> dict:
+    """Analiza la imagen y la devuelve en WebP con la receta de marca.
+
+    Reduce pero NO amplía: estirar una fuente pequeña no añade detalle, solo
+    peso y bordes blandos. Y si no trae transparencia se le quita el canal alfa,
+    porque el alfa cuesta la mitad del archivo y no se paga por nada.
+    """
+    from io import BytesIO
+
+    from PIL import Image
+
+    try:
+        imagen = Image.open(BytesIO(datos))
+        imagen.load()
+    except Exception:
+        raise HTTPException(status_code=400, detail="imagen_ilegible")
+
+    formato = imagen.format or "?"
+    if formato not in ("PNG", "JPEG", "WEBP"):
+        # El SVG ni siquiera llega aquí: Pillow no lo abre. Es lo correcto —un
+        # SVG ya es ligero y convertirlo a mapa de bits lo empeora.
+        raise HTTPException(status_code=415, detail=f"formato_no_admitido:{formato}")
+
+    alfa = imagen.mode in ("RGBA", "LA", "PA") or "transparency" in imagen.info
+    ancho_original = imagen.width
+
+    if imagen.width > ANCHO_MARCA:
+        alto = round(imagen.height * ANCHO_MARCA / imagen.width)
+        imagen = imagen.resize((ANCHO_MARCA, alto), Image.LANCZOS)
+
+    imagen = imagen.convert("RGBA" if alfa else "RGB")
+
+    salida = BytesIO()
+    opciones = {"quality": CALIDAD_WEBP, "method": 6}
+    if alfa:
+        opciones["alpha_quality"] = CALIDAD_ALFA
+    imagen.save(salida, "WEBP", **opciones)
+
+    return {
+        "bytes": salida.getvalue(),
+        "formato_origen": formato,
+        "ancho": imagen.width,
+        "alto": imagen.height,
+        "ancho_original": ancho_original,
+        "alfa": alfa,
+    }
+
+
+class PeticionImagen(BaseModel):
+    imagen_base64: str = Field(description="La imagen de origen, en base64 (con o sin data URL)")
+    nombre: str = Field(min_length=1, max_length=60, description="Nombre del activo, sin extensión")
+    apps: List[str] = Field(min_length=1, description="Qué apps la van a servir")
+    carpeta: Literal["ilustraciones", "mascota"] = "ilustraciones"
+
+
+@app.get("/api/imagen/apps")
+async def apps_que_sirven_marca(x_agente_token: str | None = Header(default=None, alias="X-Agente-Token")):
+    """Qué apps pueden servir una imagen, leído del manifiesto.
+
+    Existe para que la interfaz no lleve la lista escrita a mano: una copia en
+    JavaScript se quedaría atrás el día que alguien añada una app, y el fallo
+    sería silencioso —la app nueva simplemente no aparecería como opción.
+    """
+    verificar_token(x_agente_token)
+    if not TOKEN_ESCRITURA:
+        raise HTTPException(status_code=503, detail="sin_credencial_de_escritura")
+
+    import base64
+
+    r = _gh("GET", f"/contents/scripts/marca-sync.mjs?ref={RAMA_BASE}")
+    if r.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"no_pude_leer_el_manifiesto:{r.status_code}")
+    destinos = _apps_del_manifiesto(base64.b64decode(r.json()["content"]).decode("utf-8"))
+    return {"apps": [{"nombre": n, "destino": d} for n, d in destinos.items()]}
+
+
+@app.post("/api/imagen")
+async def publicar_imagen(
+    peticion: PeticionImagen,
+    x_agente_token: str | None = Header(default=None, alias="X-Agente-Token"),
+):
+    """Convierte una imagen, la publica en packages/brand y abre el PR.
+
+    El PR queda COMPLETO a propósito: la fuente, las copias de cada app que la
+    pidió y el manifiesto anotado. Un PR con solo la fuente dejaría un archivo
+    que está en el repositorio y no sirve nadie, que es justo el fallo que esto
+    viene a evitar — la página escribiría la ruta bien y respondería 404.
+    """
+    import base64
+
+    verificar_token(x_agente_token)
+    if not TOKEN_ESCRITURA:
+        raise HTTPException(status_code=503, detail="sin_credencial_de_escritura")
+
+    crudo = peticion.imagen_base64.split(",", 1)[-1] if "," in peticion.imagen_base64 else peticion.imagen_base64
+    try:
+        datos = base64.b64decode(crudo, validate=True)
+    except Exception:
+        raise HTTPException(status_code=400, detail="base64_invalido")
+    if not datos:
+        raise HTTPException(status_code=400, detail="imagen_vacia")
+    if len(datos) > MAX_BYTES_IMAGEN:
+        raise HTTPException(status_code=413, detail="imagen_demasiado_grande")
+
+    nombre = _kebab(peticion.nombre)
+    if not nombre:
+        raise HTTPException(status_code=400, detail="nombre_vacio_tras_limpiarlo")
+    archivo = f"{nombre}.webp"
+
+    # El manifiesto manda: de él salen las apps válidas y dónde copia cada una.
+    r = _gh("GET", f"/contents/scripts/marca-sync.mjs?ref={RAMA_BASE}")
+    if r.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"no_pude_leer_el_manifiesto:{r.status_code}")
+    manifiesto = base64.b64decode(r.json()["content"]).decode("utf-8")
+    destinos = _apps_del_manifiesto(manifiesto)
+
+    desconocidas = [a for a in peticion.apps if a not in destinos]
+    if desconocidas:
+        raise HTTPException(
+            status_code=400,
+            detail=f"apps_desconocidas:{','.join(desconocidas)}|validas:{','.join(destinos)}",
+        )
+
+    ruta_fuente = (
+        f"{RAIZ_MARCA}/{peticion.carpeta}/{archivo}"
+        if peticion.carpeta == "ilustraciones"
+        else f"{RAIZ_MARCA}/assets/{peticion.carpeta}/{archivo}"
+    )
+
+    # Pisar un activo que ya existe es distinto de publicar uno nuevo: la URL no
+    # cambia y ningún navegador que ya la tenga se entera. Lo que se ve entonces
+    # es la imagen vieja con el CSS nuevo, que parece un fallo de despliegue y no
+    # lo es. Aquí se corta y se pide otro nombre.
+    if _gh("GET", f"/contents/{ruta_fuente}?ref={RAMA_BASE}").status_code == 200:
+        raise HTTPException(status_code=409, detail=f"ya_existe:{ruta_fuente}")
+
+    convertida = _convertir_a_webp(datos)
+    activo = f"{peticion.carpeta}/{archivo}"
+
+    for app_nombre in peticion.apps:
+        manifiesto = _anotar_manifiesto(manifiesto, app_nombre, activo)
+
+    try:
+        # Un solo blob para la fuente y para todas las copias: son los mismos
+        # bytes, así que el árbol referencia el mismo sha desde varias rutas.
+        # Es además lo que hace que las copias sean idénticas byte a byte, que
+        # es exactamente lo que comprueba `pnpm marca:check`.
+        r = _gh("POST", "/git/blobs", {"content": base64.b64encode(convertida["bytes"]).decode(), "encoding": "base64"})
+        if r.status_code not in (200, 201):
+            raise HTTPException(status_code=502, detail=f"no_pude_crear_el_blob:{r.status_code}")
+        sha_imagen = r.json()["sha"]
+
+        arbol = [{"path": ruta_fuente, "mode": "100644", "type": "blob", "sha": sha_imagen}]
+        for app_nombre in peticion.apps:
+            arbol.append({
+                "path": f"{destinos[app_nombre]}/{archivo}",
+                "mode": "100644",
+                "type": "blob",
+                "sha": sha_imagen,
+            })
+        # El manifiesto es texto, así que va en línea; el resto son binarios y
+        # por eso hubo que pasar por /git/blobs: el campo `content` del árbol es
+        # UTF-8 y un WebP no cabe ahí.
+        arbol.append({
+            "path": "scripts/marca-sync.mjs",
+            "mode": "100644",
+            "type": "blob",
+            "content": manifiesto,
+        })
+
+        rama = f"eve/imagen-{nombre}"[:60]
+        r = _gh("GET", f"/git/ref/heads/{RAMA_BASE}")
+        if r.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"no_pude_leer_{RAMA_BASE}:{r.status_code}")
+        sha_base = r.json()["object"]["sha"]
+
+        r = _gh("GET", f"/git/ref/heads/{rama}")
+        if r.status_code == 200:
+            sha_padre = r.json()["object"]["sha"]
+        else:
+            r = _gh("POST", "/git/refs", {"ref": f"refs/heads/{rama}", "sha": sha_base})
+            if r.status_code not in (200, 201):
+                raise HTTPException(status_code=502, detail=f"no_pude_crear_la_rama:{r.status_code}")
+            sha_padre = sha_base
+
+        commit_padre = _gh("GET", f"/git/commits/{sha_padre}").json()
+        r = _gh("POST", "/git/trees", {"base_tree": commit_padre["tree"]["sha"], "tree": arbol})
+        if r.status_code not in (200, 201):
+            raise HTTPException(status_code=502, detail=f"no_pude_preparar_los_archivos:{r.status_code}")
+
+        cuerpo = (
+            f"Publica `{archivo}` ({convertida['ancho']}px, "
+            f"{'con' if convertida['alfa'] else 'sin'} transparencia, "
+            f"{len(convertida['bytes']) // 1024} KB) desde {convertida['formato_origen']}.\n\n"
+            f"Servida por: {', '.join(peticion.apps)}.\n\n"
+            f"Incluye la fuente, las copias y el manifiesto anotado, que es lo que "
+            f"`pnpm marca:check` comprueba."
+        )
+        r = _gh("POST", "/git/commits", {
+            "message": f"feat(marca): publica {archivo}\n\n{cuerpo}\n\nGenerado por Eve Studio.",
+            "tree": r.json()["sha"],
+            "parents": [sha_padre],
+            "author": AUTOR_COMMIT,
+            "committer": AUTOR_COMMIT,
+        })
+        if r.status_code not in (200, 201):
+            raise HTTPException(status_code=502, detail=f"no_pude_crear_el_commit:{r.status_code}")
+
+        r = _gh("PATCH", f"/git/refs/heads/{rama}", {"sha": r.json()["sha"]})
+        if r.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"no_pude_actualizar_la_rama:{r.status_code}")
+
+        abiertos = _gh("GET", f"/pulls?state=open&head={REPO_CODIGO.split('/')[0]}:{rama}")
+        if abiertos.status_code == 200 and abiertos.json():
+            pr_url = abiertos.json()[0]["html_url"]
+        else:
+            r = _gh("POST", "/pulls", {
+                "title": f"feat(marca): publica {archivo}",
+                "head": rama,
+                "base": RAMA_BASE,
+                "body": cuerpo + "\n\n---\nGenerado por **Eve Studio**.",
+            })
+            if r.status_code not in (200, 201):
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"quedo_en_la_rama_{rama}_pero_no_pude_abrir_el_pr:{r.status_code}",
+                )
+            pr_url = r.json()["html_url"]
+    except requests.RequestException as e:
+        raise HTTPException(status_code=502, detail=f"error_de_red_con_github:{e}")
+
+    return {
+        "pr_url": pr_url,
+        "rama": rama,
+        "archivo": archivo,
+        "ruta_publica": f"/marca/{archivo}",
+        "ruta_fuente": ruta_fuente,
+        "apps": peticion.apps,
+        "ancho": convertida["ancho"],
+        "alto": convertida["alto"],
+        "ancho_original": convertida["ancho_original"],
+        "alfa": convertida["alfa"],
+        "bytes": len(convertida["bytes"]),
+        "formato_origen": convertida["formato_origen"],
     }

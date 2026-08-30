@@ -33,8 +33,10 @@ const DESTINO = process.env.CONTACTO_DESTINO || "contacto@evetev.com";
    correo existente. */
 const REMITENTE = process.env.CONTACTO_REMITENTE || "Web Evetev <web@send.evetev.com>";
 
-/* Quién puede llamar desde el navegador. Los formularios de las landings son
-   cross-origin, así que sin esto el navegador bloquea la respuesta.
+/* Quién puede llamar desde el navegador. Desde que las landings de producto
+   son rutas de este mismo sitio (/conecta, /evepay, /intelligence) el envío ya
+   no es cross-origin y no necesita CORS; los subdominios siguen aquí mientras
+   estén redirigiendo, y las previews sí lo necesitan.
 
    Ojo con lo que esta lista SÍ y NO hace: impide que una página ajena use el
    endpoint desde el navegador de un visitante, no que alguien lo llame con
@@ -42,16 +44,18 @@ const REMITENTE = process.env.CONTACTO_REMITENTE || "Web Evetev <web@send.evetev
 const ORIGENES = new Set([
   "https://evetev.com",
   "https://www.evetev.com",
+  /* Antiguos subdominios de las landings. Se conservan mientras redirigen a
+     evetev.com; se pueden borrar cuando los dominios se retiren del panel. */
   "https://evepay.evetev.com",
   "https://eveconecta.evetev.com",
   "https://eveintelligence.evetev.com"
 ]);
-/* Previews de Vercel de las dos landings, para poder probar el formulario en
-   el despliegue de un PR. El correo que llega lleva el host real en «Enviado
-   desde», así que una prueba nunca se confunde con un cliente. */
-const ORIGEN_PREVIEW =
-  /^https:\/\/(evepay|eveconecta-landing|eve-intelligence)-[a-z0-9-]+\.vercel\.app$/;
-/* Desarrollo local: `pnpm dev` sirve las landings en localhost. */
+/* Previews de Vercel del sitio —landings incluidas, que ahora son rutas suyas—
+   para poder probar el formulario en el despliegue de un PR. El correo que
+   llega lleva el host y la ruta reales en «Enviado desde», así que una prueba
+   nunca se confunde con un cliente. */
+const ORIGEN_PREVIEW = /^https:\/\/website-[a-z0-9-]+\.vercel\.app$/;
+/* Desarrollo local: `pnpm dev` sirve el sitio entero en localhost. */
 const ORIGEN_LOCAL = /^http:\/\/localhost:\d{2,5}$/;
 
 /** Rótulo del producto. Lista blanca a propósito: el asunto del correo no lo

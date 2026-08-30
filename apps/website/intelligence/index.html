@@ -1,0 +1,600 @@
+<!doctype html>
+<!-- evetev.com/intelligence — landing de Eve Intelligence.
+     Mismo montaje que las demás landings: HTML y CSS planos, sin compilación.
+     Marca según packages/brand/assets/evetev_brand_styles.md (v1.0):
+     activos SIEMPRE desde el CDN (T1), coral exclusivo de acción (C2) y
+     violeta SOLO como identificador de la línea —iconos y chips—, nunca en
+     botones (C3) ni como texto sobre blanco (C7). -->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eve Intelligence — asistentes que responden con los documentos de tu empresa</title>
+    <meta
+      name="description"
+      content="Montamos un asistente que responde solo con la documentación de tu empresa: cita de dónde salió cada respuesta y, cuando no lo sabe, lo dice y pasa a una persona. Para empleados o de cara a tus clientes."
+    />
+
+    <link rel="icon" href="/marca/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/marca/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/marca/apple-touch-icon.png" />
+
+    <link rel="canonical" href="https://evetev.com/intelligence" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://evetev.com/#organizacion",
+            "name": "Evetev",
+            "legalName": "Evetev S.A.S.",
+            "url": "https://evetev.com/",
+            "description": "Sociedad por acciones simplificada colombiana que desarrolla y comercializa software diseñado con y para la inteligencia artificial.",
+            "foundingDate": "2026",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "/marca/isotipo-cian.svg"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Bogotá",
+              "addressCountry": "CO"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "ventas",
+              "email": "contacto@evetev.com",
+              "availableLanguage": "es"
+            }
+          },
+          {
+            "@type": "Service",
+            "@id": "https://evetev.com/intelligence#servicio",
+            "name": "Eve Intelligence",
+            "url": "https://evetev.com/intelligence",
+            "description": "Montaje de asistentes documentales que responden únicamente con la documentación de la empresa cliente, citando la fuente de cada respuesta.",
+            "serviceType": "Asistentes documentales con IA",
+            "provider": {
+              "@id": "https://evetev.com/#organizacion"
+            },
+            "areaServed": {
+              "@type": "Country",
+              "name": "Colombia"
+            },
+            "inLanguage": "es"
+          }
+        ]
+      }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- GENERADO desde packages/brand/landing/base.css — ver README. -->
+    <link rel="stylesheet" href="/landings/base.css" />
+    <link rel="stylesheet" href="/intelligence/estilos.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap">
+        <a class="marca" href="/" aria-label="Eve Intelligence, inicio">
+          <span
+            class="p-ico"
+            style="--p: var(--eve-violeta); --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;)"
+            aria-hidden="true"
+          ></span>
+          Eve Intelligence
+        </a>
+        <nav aria-label="Secciones de la página">
+          <a href="#como">Cómo se monta</a>
+          <a href="#anclaje">Por qué no inventa</a>
+          <a href="#demo">Pedir una demo</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- Portada: única vista con botón coral (C2). El violeta identifica la
+       línea en el chip y los iconos, nunca en el botón (C3). -->
+      <section class="portada">
+        <div class="wrap">
+          <span class="etiqueta etiqueta-ia">
+            <span
+              class="p-ico sm"
+              style="
+                --p: var(--eve-violeta);
+                --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
+              "
+              aria-hidden="true"
+            ></span>
+            Eve Intelligence · Asistentes documentales
+          </span>
+          <h1>Un asistente que responde con los documentos de tu empresa.</h1>
+          <!-- Este envoltorio existe solo para anclar la ilustración: el dibujo
+           cuelga de él, así que empieza donde empieza este bloque y el titular
+           queda limpio. No se puede resolver con un `top` fijo en la sección
+           porque el titular ocupa dos líneas en escritorio y cuatro en móvil. -->
+          <div class="portada-cuerpo">
+            <p class="entrada">
+              Le entregamos tu documentación y responde solo con ella: cita de dónde salió cada cosa
+              y, cuando no lo sabe, lo dice y pasa a una persona. Sirve para que tu equipo deje de
+              contestar lo mismo veinte veces, o para atender a tus clientes de noche sin decir nada
+              que no sea cierto.
+            </p>
+            <p class="cta">
+              <a class="btn btn-cta" href="#demo">Pedir una demo</a>
+            </p>
+            <p class="cta-nota">Te contactamos en menos de un día hábil.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pruébalo aquí: la propia página lleva el asistente instalado. Es la
+       demostración menos discutible que hay. -->
+      <section class="seccion seccion-tinte" aria-labelledby="titulo-pruebalo">
+        <div class="wrap">
+          <h2 id="titulo-pruebalo">Pruébalo en esta misma página</h2>
+          <p class="seccion-intro">
+            La mascota de abajo a la derecha no es un adorno: es este producto, cargado con la
+            documentación de Evetev. Pregúntale algo de la compañía —y pregúntale también algo que
+            no tenga, para ver qué contesta.
+          </p>
+        </div>
+      </section>
+
+      <!-- Cómo se monta: tres pasos, en español claro (§9). -->
+      <section class="seccion" id="como" aria-labelledby="titulo-como">
+        <div class="wrap">
+          <h2 id="titulo-como">¿Cómo se monta un asistente documental?</h2>
+          <p class="seccion-intro">
+            El trabajo no está en conectar un modelo: está en dejar tu documentación en condiciones
+            de ser respondida. Son tres pasos: levantamos tu base documental entrevistando a quien
+            hoy contesta, la medimos con tus propias preguntas antes de publicar nada, y la
+            instalamos con una etiqueta en tu sitio.
+          </p>
+          <ol class="pasos" role="list">
+            <li class="paso">
+              <span class="paso-num" aria-hidden="true">1</span>
+              <h3>Levantamos tu base documental</h3>
+              <p>
+                Entrevistamos a quien hoy contesta, inventariamos dónde vive cada respuesta y
+                escribimos lo que solo está en la cabeza de alguien. Es la parte más larga y la que
+                decide el resultado.
+              </p>
+            </li>
+            <li class="paso">
+              <span class="paso-num" aria-hidden="true">2</span>
+              <h3>Lo medimos antes de publicarlo</h3>
+              <p>
+                Con tus propias preguntas: las que debe responder, las que debe rechazar y los
+                intentos de sacarlo de su papel. Sale un informe con los resultados, y sin ese
+                informe no se publica.
+              </p>
+            </li>
+            <li class="paso">
+              <span class="paso-num" aria-hidden="true">3</span>
+              <h3>Se instala con una línea</h3>
+              <p>
+                Una etiqueta <code>&lt;script&gt;</code> en tu sitio, con tus colores y tu nombre.
+                No toca el resto de la página, y si el asistente se cae, aparece tu formulario de
+                contacto.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- El diferenciador técnico, en el idioma de quien compra. -->
+      <section class="seccion seccion-tinte" id="anclaje" aria-labelledby="titulo-anclaje">
+        <div class="wrap">
+          <h2 id="titulo-anclaje">¿Por qué no inventa?</h2>
+          <p class="seccion-intro">
+            Cualquiera conecta un chat a un modelo en una tarde. Lo difícil —y lo que se contrata—
+            es que no se invente nada. Aquí eso no depende de pedírselo con buenas palabras: son
+            seis capas, y cuatro viven en el código.
+          </p>
+          <ol class="capas" role="list">
+            <li>
+              <b>Solo entran tus documentos.</b> El modelo no aporta conocimiento; aporta redacción.
+              Lo único que puede afirmar son los fragmentos que le pasamos en esa misma petición.
+            </li>
+            <li>
+              <b>Si no hay respaldo, ni siquiera se le pregunta.</b> Cuando la búsqueda no encuentra
+              material suficiente, el modelo no se llama: sale la respuesta de derivación. Es
+              imposible inventar sobre algo que nunca se preguntó.
+            </li>
+            <li>
+              <b>Las instrucciones están escritas y versionadas</b>, no escondidas en el código. Se
+              revisan como cualquier otro documento.
+            </li>
+            <li>
+              <b>Cada cita se comprueba.</b> Si la respuesta cita un documento que no se le entregó,
+              se descarta entera.
+            </li>
+            <li>
+              <b>Cada cifra se comprueba.</b> Todo número tiene que aparecer en tus documentos. Es
+              lo que impide que un precio se «redondee».
+            </li>
+            <li>
+              <b>Hay temas que no toca</b>, con la respuesta ya escrita: asesoría legal,
+              comparaciones con competidores, lo que tú decidas.
+            </li>
+          </ol>
+          <p class="capas-nota">
+            Y la regla que ordena todo lo demás:
+            <b>ninguna instrucción se da por cumplida porque el modelo diga que la cumplió.</b> Lo
+            que se le pide, se verifica.
+          </p>
+        </div>
+      </section>
+
+      <section class="seccion" id="usos" aria-labelledby="titulo-usos">
+        <div class="wrap">
+          <h2 id="titulo-usos">¿De qué dos formas se usa?</h2>
+          <p class="seccion-intro">
+            Mismo motor, distinta base documental y distinto público. Hacia adentro responde a tu
+            equipo sobre políticas, procedimientos y trámites internos. Hacia afuera atiende a tus
+            clientes sobre producto, condiciones y cobertura a cualquier hora, y lo que no sabe lo
+            pasa a una persona.
+          </p>
+          <ul class="caracts-grid" role="list">
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-violeta);
+                  --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Hacia adentro, para tu equipo</h3>
+              <p>
+                Políticas, procedimientos, manuales y trámites internos. Deja de contestarse lo
+                mismo por chat veinte veces, y quien entra nuevo encuentra las respuestas sin
+                interrumpir a nadie.
+              </p>
+            </li>
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-violeta);
+                  --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Hacia afuera, para tus clientes</h3>
+              <p>
+                Producto, condiciones, cobertura y preguntas frecuentes. Atiende a cualquier hora, y
+                lo que no sabe lo pasa a una persona en lugar de improvisar en nombre de tu empresa.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="seccion seccion-tinte" id="incluye" aria-labelledby="titulo-incluye">
+        <div class="wrap">
+          <h2 id="titulo-incluye">¿Qué te llevas?</h2>
+          <p class="seccion-intro">
+            Cuatro cosas, y ninguna te ata a nosotros: el informe que mide cuánto acierta y cuántas
+            veces se abstiene bien, tu base documental escrita en archivos que mantienes tú, un
+            informe mensual de lo que no supo responder, y un asistente accesible de verdad.
+          </p>
+          <ul class="caracts-grid" role="list">
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-violeta);
+                  --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>El informe de que no miente</h3>
+              <p>
+                Sobre tus propias preguntas: cuánto acierta, cuántas veces se abstiene correctamente
+                y qué pasó con los intentos de sacarlo de su papel. Se entrega al cierre y se repite
+                cada mes.
+              </p>
+            </li>
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-violeta);
+                  --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Tu base documental, escrita y tuya</h3>
+              <p>
+                Con manual de redacción para que la mantengas tú. No queda encerrada en un panel
+                nuestro: son archivos, con historia de cambios y con autor.
+              </p>
+            </li>
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-violeta);
+                  --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>El informe de lo que no supo responder</h3>
+              <p>
+                Cada mes, las preguntas que no pudo contestar, agrupadas. Cada grupo es un documento
+                que le falta a tu base — y así el asistente mejora con el uso en vez de envejecer.
+              </p>
+            </li>
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-violeta);
+                  --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Accesible de verdad</h3>
+              <p>
+                Funciona con teclado, con lector de pantalla y en un celular de pantalla pequeña. No
+                es un añadido al final: es como está construido.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="seccion" id="requisitos" aria-labelledby="titulo-requisitos">
+        <div class="wrap">
+          <h2 id="titulo-requisitos">¿Qué necesitas para arrancar?</h2>
+          <p class="seccion-intro">
+            Poco, pero sin negociar, y lo decimos antes de cobrar: alguien con nombre y apellido que
+            apruebe lo que el asistente va a decir, tus fuentes aunque estén desordenadas, un canal
+            al que derivar lo que no responda, poder añadir una línea a tu sitio, y cuentas propias
+            de modelo y hosting a tu nombre.
+          </p>
+          <ul class="requisitos" role="list">
+            <li>
+              <b>Alguien que apruebe lo que el asistente va a decir.</b> Con nombre y apellido. Un
+              asistente sobre documentos que nadie aprueba es un generador de afirmaciones sin
+              dueño, y ahí no entramos.
+            </li>
+            <li>
+              <b>Tus fuentes, aunque estén desordenadas.</b> Documentos, correos, lo que sea. Lo que
+              solo está en la cabeza de alguien lo escribimos nosotros.
+            </li>
+            <li>
+              <b>Un canal al que derivar</b> lo que el asistente no responda: formulario, correo o
+              WhatsApp.
+            </li>
+            <li>
+              <b>Poder añadir una línea a tu sitio.</b> Si lo maneja un tercero, hay que confirmarlo
+              antes.
+            </li>
+            <li>
+              <b>Cuentas propias</b> de modelo y hosting, a tu nombre. Son tus datos y tus llaves:
+              no quedas atado a nosotros.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="seccion seccion-tinte" id="costos" aria-labelledby="titulo-costos">
+        <div class="wrap">
+          <h2 id="titulo-costos">¿Cuánto cuesta y cómo se cobra?</h2>
+          <p class="seccion-intro">
+            Dos cosas separadas, y conviene no confundirlas. Lo nuestro es una implantación y una
+            suscripción mensual. Lo de los proveedores —el modelo y el hosting— va a tu nombre y lo
+            pagas directo, sin sobreprecio nuestro: el asistente de esta página gasta menos de
+            $25.000 COP al mes.
+          </p>
+          <ul class="caracts-grid" role="list">
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-violeta);
+                  --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Lo nuestro</h3>
+              <p>
+                Una implantación —levantar la base, medirla, montarlo y entregártelo— y una
+                suscripción mensual que cubre los informes, las actualizaciones del corpus y la
+                re-evaluación. Se cotiza según el tamaño de tu documentación.
+              </p>
+            </li>
+            <li class="caract">
+              <span
+                class="p-ico"
+                style="
+                  --p: var(--eve-violeta);
+                  --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
+                "
+                aria-hidden="true"
+              ></span>
+              <h3>Lo de los proveedores</h3>
+              <p>
+                El modelo y el hosting van a tu nombre y los pagas tú, directo. Sin intermediación
+                ni sobreprecio nuestro: ves exactamente lo que cuesta.
+              </p>
+            </li>
+          </ul>
+          <p class="capas-nota">
+            Para que tengas una referencia real:
+            <b
+              >nuestro propio asistente, el de esta página, gasta menos de $25.000 COP al mes de
+              modelo para dos mil conversaciones.</b
+            >
+            El grueso del gasto recurrente no es la inteligencia artificial — es el hosting.
+          </p>
+        </div>
+      </section>
+
+      <section class="demo" id="demo" aria-labelledby="titulo-demo">
+        <div class="wrap">
+          <div class="demo-grid">
+            <div class="demo-texto">
+              <h2 id="titulo-demo">Cuéntanos qué documentación tienes</h2>
+              <p>
+                Te mostramos el asistente funcionando y, si encaja, te decimos qué haría falta para
+                montar el tuyo. Si no encaja, también te lo decimos.
+              </p>
+              <ul class="demo-puntos" role="list">
+                <li>Demo guiada por el equipo que construye el producto.</li>
+                <li>
+                  Te decimos qué parte de tu documentación sirve como está y cuál hay que escribir.
+                </li>
+                <li>Sin compromiso: si tu caso no da, preferimos decirlo antes.</li>
+              </ul>
+            </div>
+            <!-- El envío lo hace formularios.js (compartido con las demás landings):
+             POST a evetev.com/api/contacto, el único sitio con la credencial
+             del correo. `data-demo` es lo que hace que el mensaje llegue
+             marcado como Eve Intelligence. -->
+            <form class="demo-form" data-demo="eveintelligence">
+              <div class="campo">
+                <label for="f-nombre">Tu nombre</label>
+                <input
+                  id="f-nombre"
+                  name="nombre"
+                  type="text"
+                  autocomplete="name"
+                  maxlength="120"
+                  required
+                />
+              </div>
+              <div class="campo">
+                <label for="f-empresa">Empresa</label>
+                <input
+                  id="f-empresa"
+                  name="empresa"
+                  type="text"
+                  autocomplete="organization"
+                  maxlength="120"
+                  required
+                />
+              </div>
+              <div class="campo">
+                <label for="f-correo">Correo de trabajo</label>
+                <input
+                  id="f-correo"
+                  name="correo"
+                  type="email"
+                  autocomplete="email"
+                  maxlength="160"
+                  required
+                />
+              </div>
+              <div class="campo">
+                <label for="f-telefono">Teléfono o WhatsApp</label>
+                <input
+                  id="f-telefono"
+                  name="telefono"
+                  type="tel"
+                  autocomplete="tel"
+                  inputmode="tel"
+                  pattern="[+0-9\(\)\-\s]{7,40}"
+                  maxlength="40"
+                  title="Solo dígitos, espacios y los signos + ( ) -"
+                  required
+                />
+              </div>
+              <div class="campo">
+                <label for="f-uso">¿Para quién sería?</label>
+                <select id="f-uso" name="uso" required>
+                  <option value="" selected>Selecciona una opción</option>
+                  <option value="Para el equipo interno">Para el equipo interno</option>
+                  <option value="De cara a los clientes">De cara a los clientes</option>
+                  <option value="Las dos cosas">Las dos cosas</option>
+                  <option value="Todavía no lo tengo claro">Todavía no lo tengo claro</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="f-documentos">¿Cuánta documentación tienes? (opcional)</label>
+                <select id="f-documentos" name="documentos">
+                  <option value="" selected>Selecciona un rango</option>
+                  <option value="Poca y dispersa">Poca, y dispersa</option>
+                  <option value="Menos de 50 documentos">Menos de 50 documentos</option>
+                  <option value="Entre 50 y 200 documentos">Entre 50 y 200 documentos</option>
+                  <option value="Más de 200 documentos">Más de 200 documentos</option>
+                  <option value="Está sobre todo en la cabeza del equipo">
+                    Está sobre todo en la cabeza del equipo
+                  </option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="f-plazo">¿Para cuándo? (opcional)</label>
+                <select id="f-plazo" name="plazo">
+                  <option value="" selected>Selecciona una opción</option>
+                  <option value="Cuanto antes">Cuanto antes</option>
+                  <option value="En 1–3 meses">En 1–3 meses</option>
+                  <option value="Estoy explorando">Estoy explorando</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="f-mensaje"
+                  >¿Qué preguntas te gustaría que respondiera? (opcional)</label
+                >
+                <textarea id="f-mensaje" name="mensaje" rows="3"></textarea>
+              </div>
+              <!-- Trampa antibots: una persona nunca ve este campo, así que si
+               llega lleno la función descarta el envío. -->
+              <div class="trampa" aria-hidden="true">
+                <label for="f-sitio">No llenar</label>
+                <input id="f-sitio" name="sitio" type="text" tabindex="-1" autocomplete="off" />
+              </div>
+              <noscript>
+                <p class="demo-estado error">
+                  Este formulario necesita JavaScript para enviarse. Escríbenos a
+                  <a href="mailto:contacto@evetev.com">contacto@evetev.com</a>.
+                </p>
+              </noscript>
+              <button class="btn btn-cta" type="submit">Quiero una demo</button>
+              <p class="demo-estado" data-estado role="status" aria-live="polite"></p>
+              <p class="demo-legal">
+                Al enviar aceptas el tratamiento de tus datos según nuestra política de tratamiento
+                de datos.
+              </p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="pie">
+      <div class="wrap">
+        <span>© <span id="anio">2026</span> Evetev SAS · Bogotá, Colombia</span>
+        <a href="https://evetev.com">evetev.com</a>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("anio").textContent = new Date().getFullYear();
+    </script>
+    <!-- GENERADO desde packages/brand/landing/formularios.js — ver README. -->
+    <script src="/landings/formularios.js"></script>
+
+    <!-- El propio producto, instalado en la página que lo vende. Es la
+     demostración menos discutible que hay: si no funcionara aquí, no habría
+     nada que ofrecer. -->
+    <script
+      src="https://fluxi.evetev.com/fluxi.js"
+      data-nombre="Eve"
+      data-contacto="#demo"
+      data-saludo="Soy el producto de esta página: pregúntame algo de Evetev y mira cómo respondo — y qué hago cuando no lo sé."
+      data-privacidad="Guardamos tu pregunta 90 días para mejorar el asistente, sin datos que te identifiquen. No escribas cédulas, tarjetas ni contraseñas."
+      defer
+    ></script>
+  </body>
+</html>

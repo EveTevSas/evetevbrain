@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+/* ============================================================
+   EveLedger — Identidad visual Evetev S.A.S. (evetev_brand_styles.md)
+   Tokens §2 declarados en @theme (Tailwind v4): habilita clases
+   bg-eve-coral, text-eve-azul-noche, border-eve-linea, etc.
+   ============================================================ */
+@theme {
+  /* Base */
+  --color-eve-azul-noche: #0a2540;
+  --color-eve-azul-noche-profundo: #081d33;
+  --color-eve-hielo: #eaf2fb;
+  --color-eve-tinte: #f4f9fd;
+  --color-eve-linea: #edf3fa;
+  --color-eve-pizarra: #64748b;
+  --color-eve-muted: #94a3b8;
+  --color-eve-blanco: #fdfeff;
+
+  /* Acción */
+  --color-eve-coral: #ee3d22;
+  --color-eve-coral-hover: #cf3016;
+
+  /* Azules funcionales */
+  --color-eve-electrico: #1e6feb;
+  --color-eve-mezclado: #144a96;
+  --color-eve-cian: #22d3ee;
+  --color-eve-teal: #3baec2;
+
+  /* Semánticos */
+  --color-eve-exito: #16a34a;
+  --color-eve-alerta: #d97706;
+  --color-eve-error: #b91c1c;
+
+  /* Tipografía (§3): variables inyectadas por next/font */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-brand: var(--font-baloo), "Baloo 2", ui-sans-serif, sans-serif;
+}
+
+/* ---------- Base ---------- */
+body {
+  background: var(--color-eve-blanco);
+  color: var(--color-eve-azul-noche);
+  line-height: 1.65;
+}
+
+/* Baloo 2 600 para marca y titulares (§3) */
+h1,
+h2,
+.brand {
+  font-family: var(--font-brand);
+  font-weight: 600;
+}
+
+/* Escala fluida con clamp (§3) */
+h1 {
+  font-size: clamp(1.9rem, 4.6vw, 2.6rem);
+  line-height: 1.16;
+}
+h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+}
+
+/* Baloo 2 700 para cifras protagonistas: montos, comprobación, acumulados */
+.cifra {
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Foco visible siempre (§8) */
+:focus-visible {
+  outline: 2px solid var(--color-eve-electrico);
+  outline-offset: 2px;
+}
+
+/* Movimiento: respetar prefers-reduced-motion (§5) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Componentes (§6) ---------- */
+@layer components {
+  /* Botones: SIEMPRE pill, área táctil ≥44px, transición 150ms ease-out */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 11px 24px;
+    border: none;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 150ms ease-out;
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  /* CTA primario — coral, máximo uno por vista (C2) */
+  .btn-cta {
+    background: var(--color-eve-coral);
+    color: #fff;
+  }
+  .btn-cta:hover:not(:disabled) {
+    background: var(--color-eve-coral-hover);
+  }
+  /* Secundario — mezclado */
+  .btn-sec {
+    background: var(--color-eve-mezclado);
+    color: #fff;
+  }
+  .btn-sec:hover:not(:disabled) {
+    filter: brightness(1.15);
+  }
+  /* Terciario — ghost */
+  .btn-ghost {
+    background: none;
+    border: 1px solid #d7e3f0;
+    color: var(--color-eve-azul-noche);
+    font-weight: 500;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--color-eve-tinte);
+  }
+
+  /* Enlaces: azul eléctrico; variante peligro para acciones destructivas */
+  .lnk {
+    color: var(--color-eve-electrico);
+    transition: color 150ms ease-out;
+  }
+  .lnk:hover {
+    text-decoration: underline;
+  }
+  .lnk-peligro {
+    color: var(--color-eve-error);
+    transition: color 150ms ease-out;
+  }
+  .lnk-peligro:hover {
+    text-decoration: underline;
+  }
+
+  /* Tarjetas: borde línea, radius 14px, sombra sutil máx. permitida */
+  .card {
+    background: #fff;
+    border: 1px solid var(--color-eve-linea);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(10, 37, 64, 0.08);
+  }
+
+  /* Formularios (§6): radius 9px, borde #dce7f2, foco eléctrico */
+  .lbl {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .inp {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #dce7f2;
+    border-radius: 9px;
+    font-size: 0.88rem;
+    font-family: var(--font-sans);
+    background: #fff;
+    color: var(--color-eve-azul-noche);
+    transition:
+      border-color 150ms ease-out,
+      outline 150ms ease-out;
+  }
+  .inp:focus {
+    outline: 2px solid var(--color-eve-electrico);
+    border-color: transparent;
+  }
+  .inp:disabled {
+    background: var(--color-eve-tinte);
+    color: var(--color-eve-pizarra);
+  }
+  .inp-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Badges: siempre pill */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 2px 12px;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+}

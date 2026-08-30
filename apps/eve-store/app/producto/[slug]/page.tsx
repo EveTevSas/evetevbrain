@@ -1,250 +1,195 @@
-/* Ficha de producto en el panel: revisar, corregir y publicar.
+/* La ficha pública. Es la página que decide si un agente nos recomienda.
  *
- * Las acciones son de servidor. No es preferencia de estilo: significa que
- * ninguna escritura depende de que el navegador ejecute nada, y que la
- * validación vive donde vive el dato. El disparador de Postgres sigue siendo la
- * última palabra sobre publicar — esta pantalla se limita a explicar por qué
- * dice que no.
+ * Todo el contenido llega renderizado desde el servidor —precio, existencias,
+ * descripción y el JSON-LD—, así que un rastreador que no ejecute JavaScript,
+ * que son todos, lo ve completo en la primera respuesta.
  */
-import { revalidatePath } from "next/cache";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { eq, sql } from "drizzle-orm";
 
-import { db } from "@/db/connection";
-import { aviso, producto } from "@/db/schema";
+import { BotonAnadir } from "@/app/anadir";
+import { Cabecera } from "@/app/cabecera";
+import { Descripcion } from "@/app/descripcion";
+import { Pie } from "@/app/pie";
+import { Rejilla } from "@/app/rejilla";
+import { hermanos, jsonLd, pesos, publicado, publicados, slugDeMarca } from "@/lib/producto";
+import { urlBase } from "@/lib/url";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
-const pesos = new Intl.NumberFormat("es-CO", {
-  style: "currency",
-  currency: "COP",
-  maximumFractionDigits: 0
-});
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const p = await publicado((await params).slug);
+  if (!p) return { title: "Producto no encontrado" };
 
-async function resolverAviso(datos: FormData) {
-  "use server";
-  const id = Number(datos.get("id"));
-  const slug = String(datos.get("slug"));
-  await db()
-    .update(aviso)
-    .set({ resueltoEn: new Date(), resueltoPor: "panel" })
-    .where(eq(aviso.id, id));
-  revalidatePath(`/producto/${slug}`);
-  revalidatePath("/");
+  const nombre = p.contenido ? `${p.nombre} ${p.contenido}` : p.nombre;
+  return {
+    title: `${nombre} · ${p.marca}`,
+    // La descripción del meta sale de la del producto, no de una plantilla:
+    // duplicarla en veinticinco fichas la vuelve ruido.
+    description: p.descripcion?.slice(0, 155) ?? undefined,
+    alternates: { canonical: `${urlBase()}/producto/${p.slug}` }
+  };
 }
 
-async function guardar(datos: FormData) {
-  "use server";
-  const slug = String(datos.get("slug"));
-  const precio = Number(datos.get("precio"));
-  const existencias = Number(datos.get("existencias"));
-  const contenido = String(datos.get("contenido") ?? "").trim();
-  const descripcion = String(datos.get("descripcion") ?? "").trim();
-
-  // Se valida aquí y la base vuelve a validar con sus `check`. Dos capas a
-  // propósito: esta da un mensaje útil, la otra hace la regla infranqueable.
-  if (!Number.isInteger(precio) || precio <= 0) return;
-  if (!Number.isInteger(existencias) || existencias < 0) return;
-
-  await db()
-    .update(producto)
-    .set({
-      precioMinor: precio,
-      existencias,
-      contenido: contenido || null,
-      descripcion: descripcion || null,
-      descripcionPorConfirmar: datos.get("confirmada") !== "on"
-    })
-    .where(eq(producto.slug, slug));
-  revalidatePath(`/producto/${slug}`);
-  revalidatePath("/");
+/** Prerenderiza las fichas publicadas: menos espera y menos carga en la base. */
+export async function generateStaticParams() {
+  return (await publicados()).map((p) => ({ slug: p.slug }));
 }
 
-async function publicar(datos: FormData) {
-  "use server";
-  const slug = String(datos.get("slug"));
-  const quiere = datos.get("publicar") === "si";
-  try {
-    await db().update(producto).set({ publicado: quiere }).where(eq(producto.slug, slug));
-  } catch {
-    // El disparador rechazó la publicación. No hace falta hacer nada: la
-    // pantalla ya muestra los avisos pendientes, que son el motivo exacto.
-  }
-  revalidatePath(`/producto/${slug}`);
-  revalidatePath("/");
-}
-
-export default async function Ficha({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const base = db();
-
-  const [p] = await base.select().from(producto).where(eq(producto.slug, slug));
-  if (!p) notFound();
-
-  const avisos = await base
-    .select()
-    .from(aviso)
-    .where(eq(aviso.productoSlug, slug))
-    .orderBy(sql`resuelto_en is not null, id`);
-
-  const pendientes = avisos.filter((a) => !a.resueltoEn);
-
+/* La descripción llega con su estructura y hay que respetarla.
+ *
+ * Veintitrés de las veinticuatro descripciones traen saltos de línea desde la
+ * base —títulos, listas, apartados— y la ficha las metía en un único `<p>`,
+ * donde HTML colapsa todo el espacio en blanco. El resultado era un muro de
+ * texto: «…sin conservantes. ¿Por qué elegir…? 100% Puro y Natural: Sin
+ * mezclas…», todo seguido. La estructura estaba ahí desde el principio y la
+ * estábamos tirando al pintar.
+ *
+ * Importa por dos motivos a la vez. Para quien lee, un muro no se lee. Y para
+ * las citas de IA, el contenido escaneable —párrafos cortos, apartados
+ * nombrados, cifras aisladas— es justo lo que se extrae y se cita; un bloque
+ * indiferenciado obliga al modelo a resumir en vez de citar.
+ *
+ * Se parte por líneas en blanco, que es donde el autor separó ideas, y dentro
+ * de cada párrafo se conservan los saltos sueltos con `whitespace-pre-line`.
+ * No se inventa estructura que el texto no tenga: si no hay líneas en blanco,
+ * queda un solo párrafo y nada se rompe. */
+function parrafos(texto: string): string[] {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
-      <a href="/" className="text-sm text-pizarra hover:underline">
-        ← Cola de trabajo
-      </a>
-
-      <header className="mt-4 border-b border-linea pb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">{p.marca}</p>
-        <h1 className="font-display text-3xl font-bold">{p.nombre}</h1>
-        <p className="mt-2 text-sm text-pizarra">
-          {pesos.format(p.precioMinor)} · {p.existencias} en bodega · GTIN {p.gtin ?? "sin asignar"}
-        </p>
-      </header>
-
-      <section className="mt-8">
-        <h2 className="font-display text-xl font-bold">
-          {pendientes.length > 0
-            ? `${pendientes.length} aviso${pendientes.length === 1 ? "" : "s"} por resolver`
-            : "Sin avisos pendientes"}
-        </h2>
-        <ul className="mt-3 flex flex-col gap-2">
-          {avisos.map((a) => (
-            <li
-              key={a.id}
-              className={`flex items-start gap-3 rounded-lg border border-linea bg-white p-3 text-sm ${
-                a.resueltoEn ? "opacity-50" : ""
-              }`}
-            >
-              <span className="flex-1 leading-relaxed">{a.texto}</span>
-              {a.resueltoEn ? (
-                <span className="shrink-0 text-xs text-exito">resuelto</span>
-              ) : a.origen === "automatico" ? (
-                /* Los avisos automáticos no se resuelven a mano: se retiran
-                   cuando el dato se arregla. Ofrecer un botón aquí sería
-                   ofrecer una forma de publicar un producto sin GTIN. */
-                <span className="shrink-0 text-xs text-pizarra">se retira al corregir el dato</span>
-              ) : (
-                <form action={resolverAviso} className="shrink-0">
-                  <input type="hidden" name="id" value={a.id} />
-                  <input type="hidden" name="slug" value={slug} />
-                  <button className="rounded-md border border-linea px-2.5 py-1 text-xs font-medium hover:bg-hielo">
-                    Resolver
-                  </button>
-                </form>
-              )}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <form action={guardar} className="mt-10 flex flex-col gap-5">
-        <input type="hidden" name="slug" value={slug} />
-        <h2 className="font-display text-xl font-bold">Detalles</h2>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Campo etiqueta="Precio (pesos enteros)" nota="Se guarda como entero, igual que EvePay.">
-            <input
-              name="precio"
-              type="number"
-              min={1}
-              step={1}
-              defaultValue={p.precioMinor}
-              className="w-full rounded-lg border border-linea bg-white px-3 py-2 tabular-nums"
-            />
-          </Campo>
-          <Campo etiqueta="Existencias">
-            <input
-              name="existencias"
-              type="number"
-              min={0}
-              step={1}
-              defaultValue={p.existencias}
-              className="w-full rounded-lg border border-linea bg-white px-3 py-2 tabular-nums"
-            />
-          </Campo>
-        </div>
-
-        <Campo
-          etiqueta="Contenido"
-          nota="En cosmética es lo que permite comparar precio entre presentaciones."
-        >
-          <input
-            name="contenido"
-            defaultValue={p.contenido ?? ""}
-            placeholder="250 ml"
-            className="w-full rounded-lg border border-linea bg-white px-3 py-2"
-          />
-        </Campo>
-
-        <Campo etiqueta="Descripción" nota="Mínimo 150 caracteres para competir en los canales.">
-          <textarea
-            name="descripcion"
-            rows={6}
-            defaultValue={p.descripcion ?? ""}
-            className="w-full rounded-lg border border-linea bg-white px-3 py-2 leading-relaxed"
-          />
-        </Campo>
-
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            name="confirmada"
-            defaultChecked={!p.descripcionPorConfirmar}
-            className="size-4"
-          />
-          La descripción está revisada y aprobada
-        </label>
-
-        <button className="self-start rounded-lg bg-noche px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
-          Guardar
-        </button>
-      </form>
-
-      <section className="mt-10 rounded-xl border border-linea bg-white p-5">
-        <h2 className="font-display text-lg font-bold">Publicación</h2>
-        {p.publicado ? (
-          <p className="mt-1 text-sm text-exito">Este producto está publicado en la tienda.</p>
-        ) : pendientes.length > 0 ? (
-          <p className="mt-1 text-sm text-alerta">
-            No se puede publicar: {pendientes.length} aviso
-            {pendientes.length === 1 ? "" : "s"} bloqueante
-            {pendientes.length === 1 ? "" : "s"} sin resolver. La regla la aplica la base de datos,
-            no esta pantalla.
-          </p>
-        ) : (
-          <p className="mt-1 text-sm text-pizarra">Listo para publicar.</p>
-        )}
-        <form action={publicar} className="mt-3">
-          <input type="hidden" name="slug" value={slug} />
-          <input type="hidden" name="publicar" value={p.publicado ? "no" : "si"} />
-          <button
-            disabled={!p.publicado && pendientes.length > 0}
-            className="rounded-lg border border-linea px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {p.publicado ? "Retirar de la tienda" : "Publicar"}
-          </button>
-        </form>
-      </section>
-    </main>
+    texto
+      /* Un punto pegado a la siguiente frase también separaba ideas.
+       *
+       * El volcado de Mercado Libre perdió algunos saltos y dejó cosas como
+       * «…(piel y cabello).Presentación Premium:». Donde no hay espacio tras el
+       * punto no hay prosa posible: era un salto.
+       *
+       * La condición de que antes del punto haya minúscula, cifra o paréntesis
+       * es la que salva las siglas — en «S.A.S.» lo que precede al punto es una
+       * mayúscula, así que no se toca, y no acabamos partiendo la razón social
+       * de la empresa en tres párrafos. */
+      .replace(/([a-záéíóúñ0-9)])\.([A-ZÁÉÍÓÚÑ¿¡])/g, "$1.\n\n$2")
+      /* Y lo mismo con los dos puntos: «Características Sensoriales:Sabor:» era
+       * un titular pegado a lo que titulaba. Aquí no hace falta salvar siglas
+       * —lo que va tras los dos puntos es una mayúscula que empieza etiqueta—,
+       * y las horas y las proporciones («12:30», «1:2») no entran porque
+       * después llevan cifra, no mayúscula. */
+      .replace(/([a-záéíóúñ]):([A-ZÁÉÍÓÚÑ])/g, "$1:\n\n$2")
+      .split(/\n\s*\n/)
+      .map((t) => t.trim())
+      .filter(Boolean)
   );
 }
 
-function Campo({
-  etiqueta,
-  nota,
-  children
-}: {
-  etiqueta: string;
-  nota?: string;
-  children: React.ReactNode;
-}) {
+export default async function Ficha({ params }: { params: Promise<{ slug: string }> }) {
+  const p = await publicado((await params).slug);
+  if (!p) notFound();
+
+  const hay = p.existencias > 0;
+  const atributos = Object.entries(p.atributos ?? {});
+
+  /* Sin esto, dos de las veinticuatro fichas son callejones sin salida: Allen
+   * Nutrition e Ilovepinch tienen un solo producto cada una, y quien entra por
+   * una búsqueda no encuentra ningún sitio al que seguir. `hermanos` pone
+   * delante los de la misma marca y completa con el resto del catálogo. */
+  const vecinos = await hermanos(p.slug, p.marca);
+  const mismaMarca = vecinos.length > 0 && vecinos.every((v) => v.marca === p.marca);
+
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-sm font-medium">{etiqueta}</span>
-      {children}
-      {nota && <span className="text-xs text-pizarra">{nota}</span>}
-    </label>
+    <>
+      <Cabecera />
+      <main className="mx-auto max-w-5xl px-6 py-12">
+        {/* El JSON-LD va en el HTML servido, no inyectado por script: es el canal
+          de datos que consultan los agentes de compra. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(p, urlBase())) }}
+        />
+
+        <a href="/" className="text-sm text-pizarra hover:underline">
+          ← Todos los productos
+        </a>
+
+        <div className="mt-6 grid gap-10 md:grid-cols-2">
+          {/* Cuadrada y `self-start`: antes la caja se estiraba hasta igualar
+              la columna de texto, así que una descripción larga hacía crecer la
+              foto y otra corta la dejaba chata. La misma proporción que en la
+              rejilla, para que la ficha no sorprenda. */}
+          <div className="aspect-square self-start overflow-hidden rounded-2xl border border-linea bg-white">
+            {p.imagen && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={p.imagen} alt={p.nombre} className="size-full object-contain p-8" />
+            )}
+          </div>
+
+          <div>
+            {/* La marca lleva a su página. Enlazar hacia dentro no es adorno:
+                es cómo se llega al resto del catálogo desde una ficha a la que
+                se entró por una búsqueda, y cómo un rastreador descubre que
+                hay más. */}
+            <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">
+              <a href={`/marca/${slugDeMarca(p.marca)}`} className="hover:underline">
+                {p.marca}
+              </a>
+            </p>
+            <h1 className="mt-1 font-display text-3xl font-bold leading-tight">
+              {p.nombre}
+              {p.contenido && <span className="font-normal text-pizarra"> · {p.contenido}</span>}
+            </h1>
+
+            <p className="mt-5 font-display text-3xl font-bold tabular-nums">
+              {pesos.format(p.precio_minor)}
+            </p>
+
+            {/* Existencias reales, con el número. «Consultar disponibilidad» es
+              lo que obliga a una persona a escribir para saber si puede
+              comprar, y a un agente a descartarnos. */}
+            <p className={`mt-1 text-sm ${hay ? "text-exito" : "text-alerta"}`}>
+              {hay ? `${p.existencias} disponibles · envío desde Bogotá` : "Agotado"}
+            </p>
+
+            <BotonAnadir slug={p.slug} nombre={p.nombre} hay={hay} />
+
+            {p.descripcion && (
+              <Descripcion parrafos={parrafos(p.descripcion)} id={`ver-mas-${p.slug}`} />
+            )}
+
+            {atributos.length > 0 && (
+              <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 border-t border-linea pt-6 text-sm">
+                {atributos.map(([k, v]) => (
+                  <div key={k} className="col-span-2 grid grid-cols-subgrid">
+                    <dt className="text-pizarra first-letter:uppercase">{k.replace(/_/g, " ")}</dt>
+                    {/* Las comas llegan pegadas del volcado —«…deshidratación,Firmeza
+                        de la piel,Humecta»— y así no se leen como una lista sino
+                        como una palabra larga. Se separan al pintar; el dato no se
+                        toca. Y la etiqueta se capitaliza con CSS y no con
+                        `capitalize`, que pondría «Tipo De Piel». */}
+                    <dd>{v.replace(/,(?=\S)/g, ", ")}</dd>
+                  </div>
+                ))}
+                {p.gtin && (
+                  <div className="col-span-2 grid grid-cols-subgrid">
+                    <dt className="text-pizarra first-letter:uppercase">código</dt>
+                    <dd className="tabular-nums">{p.gtin}</dd>
+                  </div>
+                )}
+              </dl>
+            )}
+          </div>
+        </div>
+        {vecinos.length > 0 && (
+          <section className="mt-16 border-t border-linea pt-10">
+            <h2 className="font-display text-2xl font-bold">
+              {mismaMarca ? `Más de ${p.marca}` : "Otros productos"}
+            </h2>
+            <Rejilla productos={vecinos} nivel={3} />
+          </section>
+        )}
+      </main>
+      <Pie />
+    </>
   );
 }

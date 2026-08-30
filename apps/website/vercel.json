@@ -9,5 +9,89 @@
       "maxDuration": 10
     }
   },
-  "ignoreCommand": "git rev-parse HEAD^ >/dev/null 2>&1 || exit 1; git diff --quiet HEAD^ HEAD -- ."
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "evepay.evetev.com"
+        }
+      ],
+      "destination": "https://evetev.com/evepay",
+      "permanent": true
+    },
+    {
+      "source": "/:ruta*",
+      "has": [
+        {
+          "type": "host",
+          "value": "evepay.evetev.com"
+        }
+      ],
+      "destination": "https://evetev.com/evepay",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "eveconecta.evetev.com"
+        }
+      ],
+      "destination": "https://evetev.com/conecta",
+      "permanent": true
+    },
+    {
+      "source": "/:ruta*",
+      "has": [
+        {
+          "type": "host",
+          "value": "eveconecta.evetev.com"
+        }
+      ],
+      "destination": "https://evetev.com/conecta",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "eveintelligence.evetev.com"
+        }
+      ],
+      "destination": "https://evetev.com/intelligence",
+      "permanent": true
+    },
+    {
+      "source": "/:ruta*",
+      "has": [
+        {
+          "type": "host",
+          "value": "eveintelligence.evetev.com"
+        }
+      ],
+      "destination": "https://evetev.com/intelligence",
+      "permanent": true
+    },
+    {
+      "source": "/eveconecta",
+      "destination": "/conecta",
+      "permanent": true
+    },
+    {
+      "source": "/eveintelligence",
+      "destination": "/intelligence",
+      "permanent": true
+    },
+    {
+      "source": "/eve-intelligence",
+      "destination": "/intelligence",
+      "permanent": true
+    }
+  ],
+  "ignoreCommand": "git rev-parse HEAD^ >/dev/null 2>&1 || exit 1; git diff --quiet HEAD^ HEAD -- . ../../packages/brand/landing"
 }

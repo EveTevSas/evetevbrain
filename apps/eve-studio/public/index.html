@@ -11,16 +11,8 @@
     <title>Eve Studio — Evetev</title>
     <meta name="robots" content="noindex" />
 
-    <link
-      rel="icon"
-      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/favicon.svg"
-      type="image/svg+xml"
-    />
-    <link
-      rel="mask-icon"
-      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/favicon/mask-icon.svg"
-      color="#0A2540"
-    />
+    <link rel="icon" href="/marca/favicon.svg" type="image/svg+xml" />
+    <link rel="mask-icon" href="/marca/mask-icon.svg" color="#0A2540" />
     <meta name="theme-color" content="#0A2540" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,10 +21,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/tokens/colores.css"
-    />
+    <link rel="stylesheet" href="/marca/colores.css" />
 
     <style>
       :root {
@@ -415,7 +404,7 @@
         #btnLimpiar {
           display: none;
         }
-        /* Cuatro pestañas no caben en 375 px. Desplazan DENTRO de su barra en vez de
+        /* Cinco pestañas no caben en 375 px. Desplazan DENTRO de su barra en vez de
      empujar la página: el body nunca debe moverse en horizontal. */
         .pestanas {
           flex-wrap: wrap;
@@ -491,6 +480,95 @@
       }
       .panel li {
         margin: 3px 0;
+      }
+      /* ── Panel de imagen ── */
+      .soltar {
+        display: block;
+        border: 1.5px dashed #d7e3f0;
+        border-radius: 14px;
+        padding: 22px 16px;
+        text-align: center;
+        cursor: pointer;
+        font-size: 0.84rem;
+        color: var(--eve-pizarra);
+        transition: 0.15s;
+      }
+      .soltar:hover,
+      .soltar.encima {
+        border-color: var(--eve-coral);
+        background: #fff8f6;
+      }
+      .soltar input {
+        display: none;
+      }
+      .medida {
+        margin-top: 10px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-size: 0.8rem;
+        color: var(--eve-pizarra);
+      }
+      .medida img {
+        width: 72px;
+        height: 72px;
+        object-fit: contain;
+        border-radius: 8px;
+        /* Un damero detrás: sin él una imagen con transparencia parece tener
+       fondo blanco, que es justo lo que hay que poder ver antes de publicar. */
+        background: repeating-conic-gradient(#eef4fa 0% 25%, #fff 0% 50%) 50% / 14px 14px;
+      }
+      #imagen input[type="text"],
+      #imagen select {
+        width: 100%;
+        border: 1px solid #d7e3f0;
+        border-radius: 10px;
+        padding: 9px 12px;
+        font: inherit;
+        font-size: 0.84rem;
+        color: var(--eve-azul-noche);
+        background: #fff;
+      }
+      .apps {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .apps label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid #d7e3f0;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .apps label:has(input:checked) {
+        border-color: var(--eve-coral);
+        background: #fff8f6;
+      }
+      #btnPublicarImagen {
+        margin-top: 18px;
+      }
+      .apunte {
+        margin-top: 0;
+      }
+      .resultado-ok,
+      .resultado-mal {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        line-height: 1.5;
+      }
+      .resultado-ok {
+        background: #f0f9f4;
+        border: 1px solid #bfe3cd;
+      }
+      .resultado-mal {
+        background: #fdf2f2;
+        border: 1px solid #f2c6c6;
       }
       .panel code {
         font-family: "JetBrains Mono", monospace;
@@ -649,12 +727,7 @@
   <body>
     <header>
       <div class="marca">
-        <img
-          src="https://cdn.jsdelivr.net/gh/Evetev-Dev/brand@1/isotipos/isotipo-azul-noche.svg"
-          alt=""
-          width="30"
-          height="21"
-        />
+        <img src="/marca/isotipo-azul-noche.svg" alt="" width="30" height="21" />
         <b>Eve Studio</b>
         <span>· generador de interfaces</span>
       </div>
@@ -742,6 +815,9 @@
             <button class="pestana" role="tab" aria-selected="false" data-panel="instrucciones">
               Instrucciones
             </button>
+            <button class="pestana" role="tab" aria-selected="false" data-panel="imagen">
+              Imagen
+            </button>
           </div>
           <div class="acciones-previa">
             <!-- La preview de Vercel no se puede incrustar: responde 302 al SSO y
@@ -773,6 +849,46 @@
               placeholder="Ej.: el tono de esta landing es directo, sin superlativos. Cada sección debe caber en una pantalla."
             ></textarea>
             <button class="btn btn-ghost" id="btnGuardarInstr">Guardar</button>
+          </div>
+          <div id="imagen" class="panel oculto">
+            <h3>Publicar una imagen de marca</h3>
+            <p>
+              La convierte a WebP, la deja en <code>packages/brand</code>, la anota en el manifiesto
+              y abre un PR con las copias de cada app. Cuando se mezcle podrás citarla como
+              <code>/marca/&lt;archivo&gt;</code> en cualquier página.
+            </p>
+
+            <label class="soltar" id="zonaImagen" for="archivoImagen">
+              <input type="file" id="archivoImagen" accept="image/png,image/jpeg,image/webp" />
+              <span id="textoZona">Elige una imagen o suéltala aquí — PNG, JPG o WebP</span>
+            </label>
+            <div class="medida oculto" id="medidaImagen"></div>
+
+            <h3>Nombre</h3>
+            <p class="apunte">
+              Acaba en la URL, así que se limpia a minúsculas y sin acentos. Si el activo ya existe
+              no se pisa: hay que darle otro nombre, porque una URL que no cambia deja la imagen
+              vieja en el navegador de quien ya la vio.
+            </p>
+            <input type="text" id="nombreImagen" placeholder="escena-de-cobro" />
+
+            <h3>Carpeta</h3>
+            <select id="carpetaImagen">
+              <option value="ilustraciones">ilustraciones — escenas de apoyo</option>
+              <option value="mascota">mascota — poses de Fluxi</option>
+            </select>
+
+            <h3>Qué apps la van a servir</h3>
+            <p class="apunte">
+              Solo las que la marquen recibirán la copia. Una app que no esté aquí dará 404 con la
+              ruta bien escrita.
+              <b>EvePay, Conecta e Intelligence son páginas de <code>website</code></b
+              >, no apps aparte: marcando <code>website</code> les llega a las tres.
+            </p>
+            <div id="appsImagen" class="apps">Cargando…</div>
+
+            <button class="btn btn-cta" id="btnPublicarImagen" disabled>Publicar y abrir PR</button>
+            <div id="resultadoImagen"></div>
           </div>
           <div class="sin-nada" id="sinNada">La interfaz generada aparecerá aquí.</div>
         </div>
@@ -1085,9 +1201,9 @@
    previa. Se deduce de la ruta que tocó el agente, no lo elige nadie — el
    selector manual que había antes era un ajuste que se olvidaba. */
       const ORIGEN = {
-        "apps/evepay/": "https://evepay.evetev.com/",
-        "apps/eveconecta-landing/": "https://eveconecta.evetev.com/",
-        "apps/eve-intelligence/": "https://eveintelligence.evetev.com/"
+        "apps/website/evepay/": "https://evetev.com/evepay",
+        "apps/website/conecta/": "https://evetev.com/conecta",
+        "apps/website/intelligence/": "https://evetev.com/intelligence"
       };
 
       /* Arma una vista previa fiel con los archivos propuestos:
@@ -1267,7 +1383,182 @@
         }
       });
 
-      const PANELES = ["previa", "detalles", "registro", "instrucciones"];
+      // ── Publicar una imagen de marca ─────────────────────────────────────────
+      // Reducir aquí y no en el servidor no es un capricho: Vercel corta el cuerpo
+      // de una petición en 4,5 MB y un PNG recién generado los pasa de sobra. El
+      // peso está en el ancho —está medido—, así que bajando a 2048 px el archivo
+      // entra sin tocar la calidad. La conversión final la sigue haciendo el
+      // servidor con la receta exacta; esto solo lo hace transportable.
+      const ANCHO_MARCA = 2048;
+      const TOPE_SUBIDA = 3_500_000; // por debajo del corte de Vercel, con holgura
+      let imagenLista = null;
+
+      function pesar(bytes) {
+        return bytes > 1024 * 1024
+          ? (bytes / 1024 / 1024).toFixed(1) + " MB"
+          : Math.round(bytes / 1024) + " KB";
+      }
+
+      async function prepararImagen(archivo) {
+        const bitmap = await createImageBitmap(archivo);
+        const escala = Math.min(1, ANCHO_MARCA / bitmap.width); // reduce, nunca amplía
+        const lienzo = document.createElement("canvas");
+        lienzo.width = Math.round(bitmap.width * escala);
+        lienzo.height = Math.round(bitmap.height * escala);
+        lienzo.getContext("2d").drawImage(bitmap, 0, 0, lienzo.width, lienzo.height);
+
+        // PNG primero, que no vuelve a perder calidad. Si aun reducido no cabe, se
+        // manda WebP casi sin pérdida: el servidor lo recodifica a calidad 80, así
+        // que hay dos pasadas con pérdida. Es peor que una, y sigue siendo mucho
+        // mejor que no poder publicar la imagen.
+        let blob = await new Promise((r) => lienzo.toBlob(r, "image/png"));
+        let via = "PNG";
+        if (blob.size > TOPE_SUBIDA) {
+          blob = await new Promise((r) => lienzo.toBlob(r, "image/webp", 0.95));
+          via = "WebP 0,95";
+        }
+        return {
+          blob,
+          via,
+          ancho: lienzo.width,
+          alto: lienzo.height,
+          anchoOriginal: bitmap.width,
+          url: lienzo.toDataURL("image/png")
+        };
+      }
+
+      async function tomarImagen(archivo) {
+        if (!archivo) return;
+        $("#resultadoImagen").innerHTML = "";
+        try {
+          imagenLista = await prepararImagen(archivo);
+        } catch {
+          imagenLista = null;
+          avisar("No pude leer esa imagen.");
+          return;
+        }
+        $("#textoZona").textContent = archivo.name;
+        const reducida = imagenLista.anchoOriginal > imagenLista.ancho;
+        $("#medidaImagen").innerHTML =
+          `<img src="${imagenLista.url}" alt="" /><div>` +
+          `${imagenLista.anchoOriginal}px de origen · ` +
+          `${reducida ? `reducida a ${imagenLista.ancho}×${imagenLista.alto}` : "se deja como está"}<br>` +
+          `${pesar(imagenLista.blob.size)} a subir (${imagenLista.via}) · ` +
+          `el servidor la deja en WebP</div>`;
+        $("#medidaImagen").classList.remove("oculto");
+        if (!$("#nombreImagen").value.trim()) {
+          $("#nombreImagen").value = archivo.name.replace(/\.[^.]+$/, "");
+        }
+        repasarPublicar();
+      }
+
+      function appsMarcadas() {
+        return [...document.querySelectorAll("#appsImagen input:checked")].map((c) => c.value);
+      }
+      function repasarPublicar() {
+        $("#btnPublicarImagen").disabled =
+          !imagenLista || !$("#nombreImagen").value.trim() || !appsMarcadas().length;
+      }
+
+      async function pintarAppsImagen() {
+        const caja = $("#appsImagen");
+        if (caja.dataset.listo) return;
+        try {
+          const r = await fetch("/api/imagen/apps", { headers: { "X-Agente-Token": token() } });
+          if (!r.ok) throw new Error(r.status);
+          const { apps } = await r.json();
+          caja.innerHTML = apps
+            .map(
+              (a) =>
+                `<label title="${a.destino}"><input type="checkbox" value="${a.nombre}" />${a.nombre}</label>`
+            )
+            .join("");
+          caja.dataset.listo = "1";
+          caja.addEventListener("change", repasarPublicar);
+        } catch {
+          // Sin la lista no se puede elegir, y escribirla a mano aquí sería la
+          // copia que este endpoint existe para evitar.
+          caja.textContent =
+            "No pude leer las apps del manifiesto. Revisa el token y reabre la pestaña.";
+        }
+      }
+
+      $("#archivoImagen").addEventListener("change", (e) => tomarImagen(e.target.files[0]));
+      $("#nombreImagen").addEventListener("input", repasarPublicar);
+
+      const zona = $("#zonaImagen");
+      ["dragenter", "dragover"].forEach((ev) =>
+        zona.addEventListener(ev, (e) => {
+          e.preventDefault();
+          zona.classList.add("encima");
+        })
+      );
+      ["dragleave", "drop"].forEach((ev) =>
+        zona.addEventListener(ev, (e) => {
+          e.preventDefault();
+          zona.classList.remove("encima");
+        })
+      );
+      zona.addEventListener("drop", (e) => tomarImagen(e.dataTransfer.files[0]));
+
+      $("#btnPublicarImagen").addEventListener("click", async () => {
+        if (!token()) {
+          avisar("Guarda el token antes de publicar.");
+          return;
+        }
+        const boton = $("#btnPublicarImagen");
+        boton.disabled = true;
+        boton.textContent = "Publicando…";
+        const salida = $("#resultadoImagen");
+        salida.innerHTML = "";
+
+        try {
+          const base64 = await new Promise((res, rej) => {
+            const fr = new FileReader();
+            fr.onload = () => res(fr.result);
+            fr.onerror = rej;
+            fr.readAsDataURL(imagenLista.blob);
+          });
+          const r = await fetch("/api/imagen", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Agente-Token": token() },
+            body: JSON.stringify({
+              imagen_base64: base64,
+              nombre: $("#nombreImagen").value.trim(),
+              apps: appsMarcadas(),
+              carpeta: $("#carpetaImagen").value
+            })
+          });
+          const d = await r.json();
+          if (!r.ok) {
+            const detalle = String(d.detail || r.status);
+            salida.className = "resultado-mal";
+            salida.textContent = detalle.startsWith("ya_existe")
+              ? "Ya hay un activo con ese nombre. Ponle otro: si la URL no cambia, quien ya vio la imagen seguiría viendo la vieja."
+              : "No se publicó: " + detalle;
+            return;
+          }
+          salida.className = "resultado-ok";
+          salida.innerHTML =
+            `<b>PR abierto.</b> ${d.ancho}×${d.alto}, ` +
+            `${d.alfa ? "con" : "sin"} transparencia, ${pesar(d.bytes)}.<br>` +
+            `Cuando se mezcle, cítala como <code>${d.ruta_publica}</code> ` +
+            `(la sirven: ${d.apps.join(", ")}).<br>` +
+            `<a href="${d.pr_url}" target="_blank" rel="noopener noreferrer">${d.pr_url}</a>`;
+          imagenLista = null;
+          $("#textoZona").textContent = "Elige una imagen o suéltala aquí — PNG, JPG o WebP";
+          $("#medidaImagen").classList.add("oculto");
+          $("#nombreImagen").value = "";
+        } catch (e) {
+          salida.className = "resultado-mal";
+          salida.textContent = "No pude hablar con el servidor: " + e.message;
+        } finally {
+          boton.textContent = "Publicar y abrir PR";
+          repasarPublicar();
+        }
+      });
+
+      const PANELES = ["previa", "detalles", "registro", "instrucciones", "imagen"];
       function verPanel(cual) {
         document.querySelectorAll(".pestana").forEach((x) => {
           const act = x.dataset.panel === cual;
@@ -1279,6 +1570,7 @@
         for (const id of PANELES.slice(1)) $("#" + id).classList.toggle("oculto", id !== cual);
         if (cual === "registro") pintarRegistro();
         if (cual === "instrucciones") pintarInstrucciones();
+        if (cual === "imagen") pintarAppsImagen();
       }
       document
         .querySelectorAll(".pestana")

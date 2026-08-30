@@ -30,7 +30,7 @@
 
 ## Se abre fuera de esta spec
 
-- [ ] **Corregir `apps/evepay/index.html`.** Publica hoy dos afirmaciones que la
+- [ ] **Corregir `apps/website/evepay/index.html`.** Publica hoy dos afirmaciones que la
       decisión vigente contradice: «Integración con Credibanco y Redeban
       (adquirencia directa)» y «Tokenización como Servicio (TaaS) con proveedores
       como VGS y Basis Theory». Va en PR aparte, con revisión de contenido: es

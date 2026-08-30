@@ -1,0 +1,403 @@
+/* Eve Intelligence — estilos propios de esta landing.
+   El armazón compartido (tokens de respaldo, reset, nav, portada, pie) está en
+   base.css, que se genera desde packages/brand/landing/base.css. Aquí solo va
+   lo que sea exclusivo de esta página.
+
+   Se carga DESPUÉS de base.css: lo que se declare aquí gana.
+   El color de producto no se fija en CSS — va con --p en el marcado. */
+
+/* ── CTA de la portada ───────────────────────────────────────────────────
+   El único botón coral de la página (C2). base.css no lo posiciona, así que
+   aquí le damos aire y su nota honesta debajo. */
+.cta {
+  margin-top: 34px;
+}
+.cta-nota {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  color: var(--eve-azul-noche);
+}
+
+/* ── Ilustración de portada ──────────────────────────────────────────────
+   Un robot ordenando documentos en una bandeja: el tema de la línea contado
+   sin metáforas. Comparte estilo con las otras dos escenas —trazo técnico,
+   halo azul, luz en dos elementos— pero no tema, que es la regla del manual.
+
+   Se monta con las mismas decisiones que EvePay y EveConecta, explicadas allá.
+   En corto:
+
+   - Va como ::after y NO como background de .portada, porque base.css ya usa
+     ese background para el degradado radial.
+   - `contain` y bajada un tramo bajo la base, para que la escena respire por
+     debajo del texto en vez de cruzarlo. **El empujón es mucho menor que el de
+     EvePay** (hasta 20 px, no 60): su dibujo tiene un andén vacío abajo que
+     absorbe el recorte, y este se recortó justo bajo el canto de la mesa para
+     quitarle las patas, así que solo le quedan unos 45 px de franja. Con el
+     empujón de allá, el canto de la mesa se cortaba.
+   - El hueco radial deja limpio el bloque de texto. Aquí el bloque es del
+     tamaño del de EvePay —chip, titular de dos líneas, entrada de cuatro,
+     botón y nota— así que se reutiliza su hueco tal cual.
+   - La URL es del CDN de marca (T1), pero **fijada a la versión exacta y no a
+     `@1`**, que es lo que hacen las otras dos landings. El motivo no es
+     capricho: `@1` funciona para un activo que nace, no para uno que se
+     sustituye. jsDelivr sirve las imágenes con `max-age=604800`, así que quien
+     ya cargó la página se queda **siete días** con el archivo viejo aunque se
+     purgue el CDN —la purga limpia el borde, no el navegador de nadie—. Pasó:
+     se cambió la escena y seguía viéndose la anterior. Con la versión en la
+     URL, cambiar la imagen cambia la dirección y ningún caché puede servir lo
+     de antes. El precio es tener que tocar este archivo al publicar una
+     versión nueva, que es justo el momento en que uno quiere enterarse. WebP de 233 KB, 2048 px de
+     ancho, con el blanco convertido a transparencia. **El alfa no es
+     opcional**: con `contain` sobra ancho a los lados y un fondo blanco opaco
+     dibujaría el rectángulo de la imagen recortado contra el degradado. La
+     primera versión subida no lo tenía y por eso se rehízo.
+   - La ilustración se generó con el prompt del manual (§4). No se dibuja a
+     mano: un dibujo programático sale con todos los ángulos iguales y en una
+     página de producto eso no se lee como minimalismo. */
+.portada {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+/* El dibujo cuelga de `.portada-cuerpo`, no de la sección, y esa es toda la
+   diferencia: **empieza donde empieza el texto de entrada, por debajo del
+   titular**. Antes cubría la sección entera y pasaba por detrás del titular,
+   que es lo que ensuciaba la lectura de lo primero que se lee.
+
+   Por qué un envoltorio y no un `top` en la sección: el titular no mide lo
+   mismo en todas partes —dos líneas en escritorio, hasta cuatro en móvil—, así
+   que cualquier número fijo acierta en una pantalla y falla en las demás. Un
+   elemento que empieza donde tiene que empezar acierta en todas sin medir nada.
+
+   El ancho sí se escapa del `wrap`: el bloque de texto está limitado a la
+   columna de lectura y el dibujo tiene que respirar de borde a borde, de ahí
+   el `100vw` centrado. Lo recorta el `overflow:hidden` de la sección, que
+   además evita la barra horizontal que causaría el ancho del scrollbar.
+
+   El respiro inferior se le quita a la sección y se le da a este bloque
+   (`.portada{padding-bottom:0}`). Si se dejaran los dos, el dibujo terminaría
+   donde termina el bloque y quedarían 88 px de blanco hasta el borde de la
+   sección: el dibujo flotando en lugar de apoyarse en el corte. Poniendo aquí
+   todo el espacio, el bloque acaba exactamente donde acaba la portada y la
+   escena vuelve a llegar al borde, que es donde llegaba antes. */
+.portada-cuerpo {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: clamp(200px, 26vw, 340px);
+}
+.portada-cuerpo::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.2;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: url("/marca/asistente-documental.webp") center calc(100% + clamp(8px, 1.2vw, 20px)) /
+    contain no-repeat;
+  /* **Sin hueco de máscara, a diferencia de EvePay y EveConecta.** Allá el
+     hueco radial existe porque su texto de portada va en gris pizarra y
+     necesita fondo limpio. Aquí el titular, la entrada y la nota están los
+     tres en azul noche —15,39 de contraste sobre blanco, y con el dibujo al
+     20% detrás sigue muy por encima de AA—, así que el hueco no hace falta.
+     Y estorbaba: centrado al 40% de la sección se comía justo la cabeza del
+     robot y la burbuja, que es lo que la escena quiere que se mire. Se
+     comprobó en el navegador, no se dedujo. */
+}
+
+/* La entrada de portada va en azul noche, no en el gris pizarra de base.css.
+   Con el dibujo detrás compuesto al 20 %, pizarra da 4,71 sobre blanco puro y
+   menos aún sobre el dibujo: se queda por debajo del 4,5 que exige AA. El
+   titular y la nota ya estaban en azul noche; a la entrada le faltaba, porque
+   esta regla vivía dentro del bloque de ilustración que se borró al quitar el
+   dibujo prestado de EvePay, y volvió a hacer falta al poner el propio. */
+.portada .entrada {
+  color: var(--eve-azul-noche);
+}
+
+/* ── Secciones ───────────────────────────────────────────────────────────
+   Alternancia clara/tinte según la proporción 60/20/10 (§2): casi todo
+   claro, un solo bloque de peso (el de la demo) en azul noche. */
+.seccion {
+  padding: 84px 0;
+}
+.seccion-tinte {
+  background: var(--eve-tinte);
+}
+.seccion h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+  text-align: center;
+}
+.seccion-intro {
+  margin: 12px auto 0;
+  max-width: 560px;
+  text-align: center;
+  color: var(--eve-pizarra);
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+
+/* ── Pasos numerados ─────────────────────────────────────────────────────
+   El número es Baloo 700 (cifra protagonista, §3) en un círculo hielo;
+   nunca coral: aquí no hay acción que pedir. */
+.pasos {
+  list-style: none;
+  margin: 48px auto 0;
+  padding: 0;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+}
+.paso {
+  text-align: center;
+}
+.paso-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: var(--eve-hielo);
+  color: var(--eve-mezclado);
+  font-family: "Baloo 2", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.paso-num.sm {
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  font-size: 0.86rem;
+  flex: none;
+}
+.paso h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.paso p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
+
+/* ── Características ─────────────────────────────────────────────────────
+   Variante minimalista del manual (§6): sin fondo ni sombra, la jerarquía la
+   da el espacio y el icono de producto teñido con --p. */
+.caracts-grid {
+  list-style: none;
+  margin: 48px auto 0;
+  padding: 0;
+  max-width: 980px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px 36px;
+}
+.caract .p-ico {
+  margin-bottom: 16px;
+}
+.caract h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.caract p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--eve-pizarra);
+}
+
+/* ── Demo (formulario sobre azul noche) ──────────────────────────────────
+   El bloque de peso de la página (§2). El formulario va en tarjeta blanca
+   para conservar el patrón de formularios del manual (§6) con su contraste. */
+.demo {
+  padding: 88px 0;
+  background: var(--eve-azul-noche);
+  color: #fff;
+}
+.demo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.demo-texto h2 {
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+}
+.demo-texto > p {
+  margin-top: 14px;
+  color: #b9cce0;
+  font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+.demo-puntos {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.demo-puntos li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 0.9rem;
+  color: #b9cce0;
+}
+.demo-puntos li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--eve-cian);
+}
+
+/* La tarjeta del formulario (.demo-form, .demo-legal) vive en base.css: la
+   comparten las dos landings. Aquí solo queda la sección que la rodea. */
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+
+@media (max-width: 760px) {
+  .seccion {
+    padding: 64px 0;
+  }
+  .pasos {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    max-width: 420px;
+  }
+  .wa {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .wa-texto h2 {
+    text-align: center;
+  }
+  .wa-pasos {
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .demo {
+    padding: 64px 0;
+  }
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1440px) {
+  .pasos,
+  .caracts-grid,
+  .wa,
+  .demo-grid {
+    max-width: 1060px;
+  }
+}
+
+/* ── Identidad de la línea ───────────────────────────────────────────────
+   El violeta identifica Eve Intelligence y NO se usa en botones (C3). Sobre
+   blanco, el texto va en el violeta oscuro: el base no tiene contraste
+   suficiente (C7). */
+.etiqueta-ia {
+  background: var(--eve-violeta-tinte);
+  color: var(--eve-violeta-texto);
+}
+
+/* ── Las seis capas ──────────────────────────────────────────────────────
+   Lista numerada con el número en violeta. Es el bloque que sostiene la
+   promesa del producto, así que se lee como argumento, no como tabla. */
+.capas {
+  list-style: none;
+  counter-reset: capa;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  max-width: 760px;
+}
+.capas li {
+  counter-increment: capa;
+  position: relative;
+  padding: 14px 18px 14px 56px;
+  background: var(--eve-blanco);
+  border: 1px solid var(--eve-linea);
+  border-radius: 14px;
+  color: var(--eve-pizarra);
+  line-height: 1.6;
+}
+.capas li::before {
+  content: counter(capa);
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--eve-violeta-tinte);
+  color: var(--eve-violeta-texto);
+  font-family: "Baloo 2", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: grid;
+  place-items: center;
+}
+.capas li b {
+  color: var(--eve-azul-noche);
+}
+.capas-nota {
+  margin: 22px 0 0;
+  max-width: 760px;
+  color: var(--eve-pizarra);
+  line-height: 1.65;
+}
+.capas-nota b {
+  color: var(--eve-azul-noche);
+}
+
+/* ── Requisitos ──────────────────────────────────────────────────────────
+   Sin tarjeta ni sombra: es una conversación franca, no un cuadro de
+   características. */
+.requisitos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  max-width: 760px;
+}
+.requisitos li {
+  position: relative;
+  padding-left: 22px;
+  color: var(--eve-pizarra);
+  line-height: 1.65;
+}
+.requisitos li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--eve-violeta);
+}
+.requisitos li b {
+  color: var(--eve-azul-noche);
+}
+
+/* ── Código dentro del texto ─────────────────────────────────────────────
+   Aparece una sola vez, en «se instala con una línea». */
+code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.88em;
+  background: var(--eve-hielo);
+  padding: 1px 6px;
+  border-radius: 5px;
+}

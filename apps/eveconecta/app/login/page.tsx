@@ -1,15 +1,12 @@
 "use client";
 
-import { Button, Card } from "@/lib/ui";
+import { GradientBackground } from "@/components/ui/soft-pastel-blend";
 import { isSafeInternalPath } from "@/lib/auth/permissions";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { ArrowRight, CheckCircle2, Eye, EyeOff, LockKeyhole, ShieldCheck } from "lucide-react";
-import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import mascotaEve from "../../../../packages/brand/assets/mascota/mascota.png";
 import { BrandMark } from "../../components/brand-mark";
-import { Field, TextInput } from "../../components/form-field";
 
 type BusyAction = "login" | "recovery" | null;
 
@@ -77,161 +74,246 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative grid min-h-screen overflow-hidden bg-[var(--eve-azul-noche)] lg:grid-cols-[1.1fr_.9fr]">
-      <section className="relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
-        <div className="absolute -right-32 -top-32 size-[32rem] rounded-full border border-white/10 bg-[var(--eve-electrico)]/15" />
-        <div className="absolute bottom-20 left-1/3 size-72 rounded-full bg-[var(--eve-cian)]/10 blur-3xl" />
-        <Image
-          alt=""
-          aria-hidden="true"
-          className="absolute -bottom-8 right-2 w-52 opacity-25 xl:w-64"
-          priority
-          src={mascotaEve}
-        />
-        <div className="relative flex items-center gap-3">
-          <span className="grid size-11 place-items-center">
-            <BrandMark inverse priority size={42} />
-          </span>
-          <div>
-            <p className="font-brand text-xl font-semibold tracking-[-0.02em]">EveConecta</p>
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[#B9CCE0]">
-              Una vertical de Evetev
-            </p>
-          </div>
-        </div>
-        <div className="relative max-w-xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--eve-cian)]">
-            Confianza operacional
-          </p>
-          <h1 className="mt-5 text-[clamp(2.5rem,5vw,4rem)] font-semibold leading-[1.05] tracking-[-0.04em]">
-            Tu comunidad,
-            <br />
-            clara y conectada.
-          </h1>
-          <p className="mt-6 max-w-lg text-lg leading-8 text-white/65">
-            Dinero conciliado, decisiones reproducibles y servicios que siguen funcionando cuando la
-            red no lo hace.
-          </p>
-          <div className="mt-9 grid gap-4 sm:grid-cols-2">
-            <LoginTrust icon={ShieldCheck} text="Aislamiento por copropiedad" />
-            <LoginTrust icon={CheckCircle2} text="Auditoría que no se borra" />
-          </div>
-        </div>
-        <p className="relative text-xs text-white/35">
-          © 2026 Evetev · Tecnología responsable para comunidades
-        </p>
-      </section>
+    <div style={{ position: "relative", minHeight: "100vh", width: "100%" }}>
+      {/* Fondo pastel */}
+      <GradientBackground className="absolute inset-0" />
 
-      <section className="grid place-items-center bg-[var(--canvas)] px-4 py-10 sm:px-8">
-        <div className="w-full max-w-md">
-          <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <span className="grid size-10 place-items-center">
-              <BrandMark priority size={38} />
+      {/* Contenido centrado */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "1.5rem"
+        }}
+      >
+        {/* Card */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 420,
+            background: "rgba(255,255,255,0.72)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(255,255,255,0.9)",
+            borderRadius: 20,
+            padding: "2.5rem",
+            boxShadow: "0 8px 40px rgba(10,37,64,0.1)"
+          }}
+        >
+          {/* Logo + nombre */}
+          <div
+            style={{
+              marginBottom: "2rem",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "0.625rem",
+              textAlign: "center"
+            }}
+          >
+            <span style={{ display: "grid", placeItems: "center" }}>
+              <BrandMark priority size={42} />
             </span>
-            <div>
-              <p className="font-brand text-lg font-semibold">EveConecta</p>
-              <p className="text-xs text-[var(--muted)]">Una vertical de Evetev</p>
-            </div>
-          </div>
-          <Card className="p-6 sm:p-8">
-            <BadgeCheck />
-            <h2 className="mt-5 text-[clamp(1.6rem,3vw,2rem)] font-semibold tracking-[-0.03em]">
-              Bienvenida de nuevo
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-              Usa las credenciales de acceso enviadas por la administración.
+            <h1
+              style={{
+                fontWeight: 700,
+                fontSize: "1.75rem",
+                color: "#0A2540",
+                margin: 0,
+                letterSpacing: "-0.01em"
+              }}
+            >
+              EveConecta
+            </h1>
+            <p style={{ fontSize: "0.82rem", color: "#64748B", margin: 0 }}>
+              Usa las credenciales enviadas por la administración
             </p>
-            <form className="mt-7 grid gap-5" onSubmit={submit}>
-              <Field label="Correo electrónico">
-                <TextInput
-                  autoComplete="email"
-                  onChange={(event) => setEmail(event.target.value)}
+          </div>
+
+          {/* Formulario */}
+          <form
+            onSubmit={submit}
+            style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}
+          >
+            {/* Correo */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+              <label
+                htmlFor="email"
+                style={{
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  color: "#334155",
+                  letterSpacing: "0.03em"
+                }}
+              >
+                Correo electrónico
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  background: "rgba(255,255,255,0.8)",
+                  border: "1px solid #E2E8F0",
+                  borderRadius: 10,
+                  padding: "0.7rem 0.9rem",
+                  color: "#0A2540",
+                  fontSize: "0.9rem",
+                  outline: "none"
+                }}
+              />
+            </div>
+
+            {/* Contraseña */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+              <label
+                htmlFor="password"
+                style={{
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  color: "#334155",
+                  letterSpacing: "0.03em"
+                }}
+              >
+                Contraseña
+              </label>
+              <div style={{ position: "relative" }}>
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
                   required
-                  type="email"
-                  value={email}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    background: "rgba(255,255,255,0.8)",
+                    border: "1px solid #E2E8F0",
+                    borderRadius: 10,
+                    padding: "0.7rem 2.75rem 0.7rem 0.9rem",
+                    color: "#0A2540",
+                    fontSize: "0.9rem",
+                    outline: "none"
+                  }}
                 />
-              </Field>
-              <Field label="Contraseña">
-                <span className="relative block">
-                  <TextInput
-                    autoComplete="current-password"
-                    className="pr-11"
-                    onChange={(event) => setPassword(event.target.value)}
-                    required
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                  />
-                  <button
-                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                    className="focus-ring absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-[var(--muted)]"
-                    onClick={() => setShowPassword((value) => !value)}
-                    type="button"
-                  >
-                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                  </button>
-                </span>
-              </Field>
-              <div className="flex items-center justify-end text-sm">
                 <button
-                  className="font-bold text-[var(--accent)] disabled:opacity-50"
-                  disabled={busy !== null}
-                  onClick={() => void recoverAccess()}
                   type="button"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  onClick={() => setShowPassword((v) => !v)}
+                  style={{
+                    position: "absolute",
+                    right: 10,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#94A3B8",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: 4
+                  }}
                 >
-                  {busy === "recovery" ? "Enviando…" : "Recuperar acceso"}
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
-              {message ? (
-                <p
-                  aria-live="polite"
-                  className={
-                    message.tone === "error"
-                      ? "rounded-xl bg-[#FEF2F2] p-3 text-sm text-[var(--eve-error)]"
-                      : "rounded-xl bg-[var(--accent-soft)] p-3 text-sm text-[var(--eve-mezclado)]"
-                  }
-                  role={message.tone === "error" ? "alert" : "status"}
-                >
-                  {message.text}
-                </p>
-              ) : null}
-              <Button
-                className="w-full"
-                disabled={busy !== null}
-                size="lg"
-                type="submit"
-                variant="cta"
-              >
-                {busy === "login" ? "Validando…" : "Entrar a EveConecta"}
-                <ArrowRight size={17} />
-              </Button>
-            </form>
-            <div className="mt-6 flex items-start gap-2 rounded-xl bg-[var(--wash)] p-3 text-xs leading-5 text-[var(--muted)]">
-              <LockKeyhole className="mt-0.5 shrink-0 text-[var(--accent)]" size={15} />
-              La sesión se valida con Supabase Auth y cada perfil accede únicamente a la información
-              autorizada para su copropiedad.
             </div>
-          </Card>
+
+            {/* Recuperar acceso */}
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                disabled={busy !== null}
+                onClick={() => void recoverAccess()}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: busy !== null ? "not-allowed" : "pointer",
+                  fontSize: "0.82rem",
+                  fontWeight: 700,
+                  color: "#4b3075",
+                  opacity: busy !== null ? 0.5 : 1,
+                  padding: 0
+                }}
+              >
+                {busy === "recovery" ? "Enviando…" : "Recuperar acceso"}
+              </button>
+            </div>
+
+            {/* Mensaje error / info */}
+            {message && (
+              <p
+                role={message.tone === "error" ? "alert" : "status"}
+                aria-live="polite"
+                style={{
+                  margin: 0,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "0.5rem",
+                  background:
+                    message.tone === "error" ? "rgba(239,68,68,0.08)" : "rgba(75,48,117,0.07)",
+                  border: `1px solid ${message.tone === "error" ? "rgba(239,68,68,0.25)" : "rgba(75,48,117,0.2)"}`,
+                  borderRadius: 9,
+                  padding: "0.6rem 0.875rem",
+                  fontSize: "0.85rem",
+                  color: message.tone === "error" ? "#B91C1C" : "#4b3075"
+                }}
+              >
+                {message.text}
+              </p>
+            )}
+
+            {/* Botón */}
+            <button
+              type="submit"
+              disabled={busy !== null}
+              style={{
+                width: "100%",
+                marginTop: "0.25rem",
+                background:
+                  busy !== null
+                    ? "rgba(10,37,64,0.4)"
+                    : "linear-gradient(135deg, #0a2540 0%, #4b3075 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 10,
+                padding: "0.8rem",
+                fontSize: "0.9rem",
+                fontWeight: 700,
+                cursor: busy !== null ? "not-allowed" : "pointer",
+                letterSpacing: "0.02em",
+                boxShadow: busy !== null ? "none" : "0 4px 20px rgba(75,48,117,0.35)",
+                transition: "opacity 0.15s"
+              }}
+            >
+              {busy === "login" ? "Validando…" : "Entrar a EveConecta"}
+            </button>
+          </form>
+
+          {/* Pie de seguridad */}
+          <p
+            style={{
+              marginTop: "1.25rem",
+              fontSize: "0.72rem",
+              color: "#94A3B8",
+              textAlign: "center",
+              lineHeight: 1.6
+            }}
+          >
+            Sesión validada con Supabase Auth · cada perfil accede solo a su copropiedad
+          </p>
         </div>
-      </section>
-    </main>
-  );
-}
-
-function BadgeCheck() {
-  return (
-    <span className="grid size-11 place-items-center rounded-[var(--eve-radio-md)] bg-[var(--accent-soft)] text-[var(--accent)]">
-      <LockKeyhole size={20} />
-    </span>
-  );
-}
-
-function LoginTrust({ icon: Icon, text }: { icon: typeof ShieldCheck; text: string }) {
-  return (
-    <div className="flex items-center gap-3 text-sm font-bold text-white/75">
-      <span className="grid size-9 place-items-center rounded-[var(--eve-radio-md)] bg-white/10 text-[var(--eve-cian)]">
-        <Icon size={17} />
-      </span>
-      {text}
+      </div>
     </div>
   );
 }

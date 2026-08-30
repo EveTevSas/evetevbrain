@@ -18,9 +18,20 @@ apps/rag-assistant/indice/
 # con que formatee la copia de un modo distinto a como quedó la concatenación
 # para que `landings:check` se ponga en rojo sin que nadie haya tocado nada.
 # La fuente —packages/brand/landing/— sí la formatea, que es donde se edita.
-apps/eve-intelligence/base.css
-apps/eve-intelligence/formularios.js
-apps/eveconecta-landing/base.css
-apps/eveconecta-landing/formularios.js
-apps/evepay/base.css
-apps/evepay/formularios.js
+apps/website/landings/base.css
+apps/website/landings/formularios.js
+
+# Cliente de Prisma de EveLedger: lo escribe `prisma generate` en cada
+# instalación y build. Es código generado, no se edita y no está versionado.
+apps/eveledger/src/generated/
+
+# Enlace del CLI de Vercel al proyecto. Lo genera `vercel link` y lo ignora git;
+# que Prettier lo reformatee no rompe nada, pero es ruido en cada ejecución.
+.vercel/
+
+# Activos de marca copiados a cada app por `pnpm marca:sync`. Son binarios y
+# SVG que salen tal cual de packages/brand; si Prettier reformatea un SVG, la
+# copia deja de ser byte a byte idéntica a la fuente y `marca:check` se pone en
+# rojo sin que nadie haya tocado nada. La fuente sí se formatea.
+apps/*/marca/
+apps/*/public/marca/

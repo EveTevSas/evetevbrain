@@ -17,7 +17,7 @@ marcar() { echo "$1=$2" >> "$GITHUB_OUTPUT"; echo "  $1=$2"; }
 
 todo() {
   echo "$1 → se ejecuta todo el CI."
-  for a in global shared api eveconecta landings; do marcar "$a" true; done
+  for a in global shared api eveconecta eveledger landings; do marcar "$a" true; done
   exit 0
 }
 
@@ -54,7 +54,16 @@ CONECTA=$SHARED
 toca '^apps/eveconecta/' && CONECTA=true
 marcar eveconecta "$CONECTA"
 
-# Las landings comparten base.css, generado desde packages/brand.
+# EveLedger no consume packages/shared: es una aplicación cerrada sobre su
+# propia base. Por eso no arranca desde $SHARED como las dos de arriba.
+EVELEDGER=false
+toca '^apps/eveledger/' && EVELEDGER=true
+marcar eveledger "$EVELEDGER"
+
+# Dos cosas se generan desde packages/brand y el CI vigila que no se desvíen:
+# base.css y formularios.js hacia apps/website/landings/, y los activos de marca
+# hacia la carpeta /marca de cada app. Cualquier app puede tener copias, así que
+# esto ya no mira solo al sitio corporativo.
 LANDINGS=false
-toca '^apps/(evepay|eveconecta-landing)/|^packages/brand/' && LANDINGS=true
+toca '^apps/|^packages/brand/|^scripts/(landings|marca)-sync\.mjs$' && LANDINGS=true
 marcar landings "$LANDINGS"

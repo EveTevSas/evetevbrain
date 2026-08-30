@@ -8,11 +8,26 @@
  * con la secret. Las dos cosas fallan más tarde y con un error que no explica
  * nada.
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import postgres from "postgres";
+
+/* Con `--arreglar` no solo revisa: normaliza la cadena y la reescribe.
+ *
+ * Existe porque las tres formas de equivocarse al copiarla ya nos pasaron las
+ * tres, y ninguna es culpa de quien copia:
+ *
+ *   1. Supabase envuelve el marcador en corchetes y es natural escribir dentro
+ *      sin borrarlos. Postgres se los traga como parte de la contraseña.
+ *   2. La «Direct connection» que ofrece el panel solo resuelve por IPv6, y una
+ *      máquina sin IPv6 falla con ENOTFOUND sin explicar por qué.
+ *   3. Los caracteres especiales de la contraseña hay que escaparlos en la URL.
+ *
+ * Arreglarlo a mano cada vez es pedirle a alguien que recuerde tres trampas.
+ */
+const ARREGLAR = process.argv.includes("--arreglar");
 
 const ruta = join(dirname(fileURLToPath(import.meta.url)), "..", ".env.local");
 if (!existsSync(ruta)) {
@@ -43,7 +58,15 @@ function revisar(clave, comprobaciones) {
 
 revisar("DATABASE_URL", [
   [(v) => !/^postgres(ql)?:\/\//.test(v), "no empieza por postgres:// o postgresql://"],
-  [(v) => v.includes("[YOUR-PASSWORD]"), "falta sustituir [YOUR-PASSWORD] por la contraseña real"],
+  // Cualquier corchete entre ':' y '@' es un marcador sin sustituir —o una
+  // contraseña real a la que se le dejaron los corchetes encima, que es lo que
+  // pasó de verdad: Supabase los pone alrededor y es fácil escribir dentro sin
+  // borrarlos. Postgres los toma como parte de la contraseña y rechaza.
+  [
+    (v) => /:\/\/[^:]+:[^@]*[[\]][^@]*@/.test(v),
+    "la contraseña lleva corchetes: son del marcador de Supabase y hay que quitarlos"
+  ],
+  [(v) => /YOUR.?PASSWORD/i.test(v), "falta sustituir el marcador de contraseña por la real"],
   [(v) => v.includes("usuario:clave@host"), "sigue siendo el ejemplo"]
 ]);
 
@@ -69,6 +92,58 @@ if (problemas.length) {
     "\nFalta completar el archivo. Cada línea de .env.local dice de dónde sale su valor."
   );
   process.exit(1);
+}
+
+/** Devuelve variantes de la cadena, de la más probable a la menos. */
+function variantes(cruda) {
+  const limpia = cruda.replace(/(:\/\/[^:]+:)\[([^\]]*)\](@)/, "$1$2$3");
+  const m = limpia.match(/^postgres(?:ql)?:\/\/([^:]+):(.*)@([^:/]+):(\d+)(\/.*)$/);
+  if (!m) return [cruda];
+  const [, usuario, pass, host, puerto, base] = m;
+  const escapada = encodeURIComponent(decodeURIComponent(pass));
+  const salida = [`postgresql://${usuario}:${escapada}@${host}:${puerto}${base}`];
+
+  // Si es el host directo (solo IPv6), se proponen los poolers equivalentes.
+  const ref = host.match(/^db\.(.+)\.supabase\.co$/)?.[1];
+  if (ref) {
+    for (const region of ["aws-0-us-east-1", "aws-1-us-east-1", "aws-0-us-west-1"]) {
+      salida.push(
+        `postgresql://postgres.${ref}:${escapada}@${region}.pooler.supabase.com:5432${base}`
+      );
+    }
+  }
+  return salida;
+}
+
+if (ARREGLAR) {
+  console.log("\nBuscando una variante que conecte…");
+  let buena = null;
+  for (const url of variantes(env.DATABASE_URL)) {
+    const donde = url.match(/@([^:]+)/)?.[1] ?? "?";
+    try {
+      const sql = postgres(url, { connect_timeout: 12, onnotice: () => {} });
+      await sql`select 1`;
+      await sql.end();
+      console.log(`  ✓ ${donde}`);
+      buena = url;
+      break;
+    } catch (e) {
+      console.log(`  ✗ ${donde} — ${String(e.message).slice(0, 52)}`);
+    }
+  }
+  if (buena && buena !== env.DATABASE_URL) {
+    const texto = readFileSync(ruta, "utf8");
+    writeFileSync(ruta, texto.replace(/^DATABASE_URL=.+$/m, `DATABASE_URL=${buena}`));
+    console.log("  · .env.local actualizado con la variante que funciona");
+    env.DATABASE_URL = buena;
+  } else if (!buena) {
+    console.error(
+      "\nNinguna variante conectó. Si todas dicen «password authentication failed»,\n" +
+        "la contraseña no es la de la base: cópiala de las variables de entorno del\n" +
+        "proyecto eveconecta en Vercel, donde ya está la que funciona."
+    );
+    process.exit(1);
+  }
 }
 
 // La única prueba que vale: conectarse de verdad.

@@ -1,190 +1,93 @@
-/* Pantalla de inicio del panel: la cola de avisos.
+/* La tienda: el catálogo de lo publicado.
  *
- * No es «agregar producto» a propósito. El catálogo ya está importado; lo que
- * no está es revisado. Con los 25 productos bloqueados al importar, lo que desbloquea la
- * apertura de la tienda es resolver avisos, no dar de alta más productos.
- *
- * Todo se renderiza en el servidor. En el panel no es por los agentes —esta
- * página no se indexa— sino porque leer de Postgres desde el servidor evita
- * exponer la base al navegador y ahorra el viaje de hidratación.
+ * Servida desde el servidor, siempre. No es preferencia: ningún rastreador de
+ * IA ejecuta JavaScript, así que una tienda que dependa de hidratación es
+ * invisible para ChatGPT, Perplexity y Claude por buena que sea su experiencia
+ * de compra. Está medido sobre más de 500 millones de peticiones de GPTBot.
  */
-import { sql } from "drizzle-orm";
+import type { Metadata } from "next";
 
-import { db } from "@/db/connection";
+import { Cabecera } from "@/app/cabecera";
+import { FiltroMarcas } from "@/app/filtro-marcas";
+import { Pie } from "@/app/pie";
+import { Rejilla } from "@/app/rejilla";
+import { marcas, publicados } from "@/lib/producto";
 
-export const dynamic = "force-dynamic";
+/* ISR en vez de dinámico. Un catálogo no cambia entre visita y visita, y
+ * servirlo desde caché tiene dos efectos que importan: la base se consulta
+ * una vez por minuto en vez de una por visita, y si la regeneración falla el
+ * visitante recibe la copia anterior en lugar de una página colgada. */
+export const revalidate = 60;
 
-const pesos = new Intl.NumberFormat("es-CO", {
-  style: "currency",
-  currency: "COP",
-  maximumFractionDigits: 0
-});
+/* El `noindex` se decide con el dato, no con la memoria de nadie.
+ *
+ * Con el catálogo vacío no hay nada que indexar y una tienda sin productos
+ * posicionando hace más daño que no aparecer. En cuanto haya un producto
+ * publicado, la restricción se levanta sola — que es justo lo que no pasó en
+ * las landings, donde tres de cuatro arrastraron un `noindex` durante meses
+ * porque nadie recordó quitarlo. */
+export async function generateMetadata(): Promise<Metadata> {
+  const hay = (await publicados()).length > 0;
+  return {
+    title: hay ? "Eve-Store" : "Eve-Store — próximamente",
+    description:
+      "Aceites naturales, cuidado facial y suplementos de marcas colombianas. Envío desde Bogotá.",
+    robots: hay ? undefined : { index: false, follow: false }
+  };
+}
 
-type Fila = {
-  slug: string;
-  nombre: string;
-  marca: string;
-  contenido: string | null;
-  precio_minor: number;
-  existencias: number;
-  publicado: boolean;
-  descripcion_por_confirmar: boolean;
-  pendientes: number;
-  avisos: string[];
-};
+export default async function Tienda() {
+  const productos = await publicados();
 
-export default async function Panel() {
-  const base = db();
+  /* Los nombres salen del dato, no de la memoria de nadie.
+   *
+   * Esta frase decía «Bio Essens, Dermanat, Botanikalia» y las tres cosas
+   * estaban mal a la vez: Botanikalia no tiene nada publicado, y faltaban Allen
+   * Nutrition e Ilovepinch. Con la fila de filtros justo debajo, la copia se
+   * contradecía con la propia pantalla. Escrita a mano, esta lista vuelve a
+   * mentir en cuanto entre o salga una marca. */
+  const nombres = (await marcas()).map((m) => m.marca);
+  const listaDeMarcas =
+    nombres.length > 1
+      ? `${nombres.slice(0, -1).join(", ")} y ${nombres.at(-1)}`
+      : (nombres[0] ?? "");
 
-  const [resumen] = await base.execute<{
-    productos: number;
-    publicados: number;
-    bloqueados: number;
-    avisos: number;
-    inventario: number;
-    unidades: number;
-  }>(sql`
-    select
-      (select count(*)::int from tienda.producto)                                      as productos,
-      (select count(*)::int from tienda.producto where publicado)                      as publicados,
-      (select count(distinct producto_slug)::int from tienda.aviso
-        where resuelto_en is null and bloqueante)                                      as bloqueados,
-      (select count(*)::int from tienda.aviso where resuelto_en is null)               as avisos,
-      (select coalesce(sum(precio_minor * existencias), 0)::bigint from tienda.producto) as inventario,
-      (select coalesce(sum(existencias), 0)::int from tienda.producto)                 as unidades`);
-
-  const filas = await base.execute<Fila>(sql`
-    select p.slug, p.nombre, p.marca, p.contenido, p.precio_minor::int as precio_minor,
-           p.existencias, p.publicado, p.descripcion_por_confirmar,
-           count(a.id) filter (where a.resuelto_en is null)::int as pendientes,
-           coalesce(array_agg(a.texto) filter (where a.resuelto_en is null), '{}') as avisos
-      from tienda.producto p
-      left join tienda.aviso a on a.producto_slug = p.slug
-     group by p.slug
-     order by count(a.id) filter (where a.resuelto_en is null) desc, p.marca, p.nombre`);
-
-  return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
-      <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-linea pb-6">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">
-            Eve-Store · Panel
-          </p>
-          <h1 className="font-display text-3xl font-bold">Qué falta para abrir</h1>
-        </div>
-        <a
-          href="/nuevo"
-          className="rounded-lg border border-linea bg-white px-4 py-2 text-sm font-semibold hover:bg-hielo"
-        >
-          Nuevo producto
-        </a>
-        <p className="max-w-md text-sm text-pizarra">
-          El catálogo ya está importado. Lo que falta es revisarlo: ningún producto sale a la tienda
-          con avisos bloqueantes sin resolver.
+  if (productos.length === 0) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
+        <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">Eve-Store</p>
+        <h1 className="mt-1 font-display text-3xl font-bold">Todavía no hay tienda</h1>
+        <p className="mt-3 text-sm leading-relaxed text-pizarra">
+          El catálogo está cargado y en revisión: ningún producto sale a la venta hasta que sus
+          datos estén completos. Mientras tanto, el panel de administración vive en{" "}
+          <a href="/panel" className="underline">
+            /panel
+          </a>
+          .
         </p>
-      </header>
+      </main>
+    );
+  }
 
-      <section className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        <Dato n={resumen.productos} etiqueta="productos" />
-        <Dato
-          n={resumen.publicados}
-          etiqueta="publicados"
-          tono={resumen.publicados ? "" : "alerta"}
-        />
-        <Dato n={resumen.bloqueados} etiqueta="bloqueados" tono="alerta" />
-        <Dato n={resumen.avisos} etiqueta="avisos pendientes" tono="alerta" />
-        <Dato n={resumen.unidades} etiqueta="unidades en bodega" />
-        <Dato texto={pesos.format(resumen.inventario)} etiqueta="valor del inventario" />
-      </section>
-
-      <h2 className="mt-12 font-display text-xl font-bold">
-        Cola de trabajo · {filas.filter((f) => f.pendientes > 0).length} productos por revisar
-      </h2>
-
-      <ul className="mt-4 flex flex-col gap-3">
-        {filas.map((f) => (
-          <li
-            key={f.slug}
-            className="rounded-xl border border-linea bg-white p-5 shadow-[0_1px_2px_rgba(10,37,64,.05)]"
-          >
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <h3 className="font-semibold">
-                <a href={`/producto/${f.slug}`} className="hover:underline">
-                  {f.nombre}
-                  {f.contenido ? (
-                    <span className="font-normal text-pizarra"> · {f.contenido}</span>
-                  ) : (
-                    <span className="ml-2 rounded bg-[#fdf3e3] px-1.5 py-0.5 text-xs font-medium text-alerta">
-                      sin contenido
-                    </span>
-                  )}
-                </a>
-              </h3>
-              <p className="text-sm tabular-nums text-pizarra">
-                {f.marca} · {pesos.format(f.precio_minor)} · {f.existencias} en bodega
-              </p>
-            </div>
-
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              {f.publicado ? (
-                <Chip tono="exito">publicado</Chip>
-              ) : (
-                <Chip tono="alerta">
-                  {f.pendientes} aviso{f.pendientes === 1 ? "" : "s"} por resolver
-                </Chip>
-              )}
-              {f.descripcion_por_confirmar && <Chip>descripción por confirmar</Chip>}
-            </div>
-
-            {f.avisos.length > 0 && (
-              <ul className="mt-3 flex flex-col gap-1.5 border-l-2 border-linea pl-4">
-                {f.avisos.map((a, i) => (
-                  <li key={i} className="text-sm leading-relaxed text-pizarra">
-                    {a}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ul>
-    </main>
-  );
-}
-
-function Dato({
-  n,
-  texto,
-  etiqueta,
-  tono = ""
-}: {
-  n?: number;
-  texto?: string;
-  etiqueta: string;
-  tono?: string;
-}) {
   return (
-    <div className="rounded-xl border border-linea bg-white px-4 py-3">
-      <p
-        className={`font-display text-2xl font-bold tabular-nums ${
-          tono === "alerta" ? "text-alerta" : ""
-        }`}
-      >
-        {texto ?? n}
-      </p>
-      <p className="mt-0.5 text-xs leading-tight text-pizarra">{etiqueta}</p>
-    </div>
-  );
-}
+    <>
+      <Cabecera />
+      <main className="mx-auto max-w-6xl px-6 py-12">
+        <header className="border-b border-linea pb-8">
+          <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">Eve-Store</p>
+          <h1 className="mt-1 font-display text-4xl font-bold">
+            Aceites naturales y cuidado de la piel
+          </h1>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-pizarra">
+            Marcas colombianas: {listaDeMarcas}. {productos.length} productos, con existencias
+            reales — si dice que hay, hay.
+          </p>
+          <FiltroMarcas />
+        </header>
 
-function Chip({ children, tono = "" }: { children: React.ReactNode; tono?: string }) {
-  const color =
-    tono === "exito"
-      ? "bg-[#e8f6ec] text-exito"
-      : tono === "alerta"
-        ? "bg-[#fdf3e3] text-alerta"
-        : "bg-hielo text-pizarra";
-  return (
-    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}>{children}</span>
+        <Rejilla productos={productos} />
+      </main>
+      <Pie />
+    </>
   );
 }
