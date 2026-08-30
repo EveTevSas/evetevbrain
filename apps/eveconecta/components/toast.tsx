@@ -19,7 +19,7 @@ export function Toast() {
     <div
       aria-atomic="true"
       aria-live="polite"
-      className="fixed bottom-20 left-1/2 z-[80] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 lg:bottom-6"
+      className="fixed bottom-20 left-1/2 z-[100] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 lg:bottom-6"
     >
       <div
         className={cn(

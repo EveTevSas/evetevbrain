@@ -24,7 +24,7 @@ const routeRoles: Record<string, readonly AppRole[]> = {
   "/": ["super_admin", "admin_conjunto", "consejo", "residente"],
   "/finanzas": ["super_admin", "admin_conjunto", "residente"],
   "/presupuesto": ["super_admin", "admin_conjunto", "consejo"],
-  "/comunidad": ["super_admin", "admin_conjunto"],
+  "/comunidad": ["super_admin", "admin_conjunto", "residente"],
   "/comunicaciones": ["super_admin", "admin_conjunto", "consejo", "residente"],
   "/pqrs": ["super_admin", "admin_conjunto", "consejo", "residente"],
   "/reservas": ["super_admin", "admin_conjunto", "consejo", "residente"],
@@ -50,6 +50,10 @@ export function canAccessPath(role: AppRole, pathname: string): boolean {
 
 export function canSeeNavigation(role: AppRole, href: string): boolean {
   return routeRoles[href]?.includes(role) ?? true;
+}
+
+export function canInitiatePayment(role: AppRole): boolean {
+  return role === "residente";
 }
 
 export function isSafeInternalPath(value: string | null): value is string {
