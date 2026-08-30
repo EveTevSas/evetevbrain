@@ -126,7 +126,7 @@ export async function dashboardMensual(anio: number, mes: number): Promise<Dashb
       { clave: "tarjetas", etiqueta: "Tarjetas", valor: tarjetas },
       { clave: "transportadora", etiqueta: "Transportadora", valor: transportadora },
       { clave: "vales", etiqueta: "Vales (cartera)", valor: vales },
-      { clave: "faltantes", etiqueta: "Faltantes netos", valor: faltantesNetos }
+      { clave: "faltantes", etiqueta: "Faltante isleros", valor: faltantesNetos }
     ].filter((s) => s.valor > 0),
     galonesPorProducto,
     alertas
