@@ -34,7 +34,7 @@ export default async function FinancieroPage({
 
   return (
     <div className="space-y-6">
-      <h1>Financiero</h1>
+      <h1>Margen y gastos</h1>
 
       <form method="get" className="card flex flex-wrap items-end gap-4 p-4 sm:p-6">
         <div>

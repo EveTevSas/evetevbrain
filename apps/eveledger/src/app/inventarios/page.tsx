@@ -152,7 +152,7 @@ export default async function InventariosPage({
 
       <p className="text-sm">
         <Link href="/cierres" className="lnk">
-          ← Volver a cierres
+          ← Volver al diario
         </Link>
       </p>
     </div>

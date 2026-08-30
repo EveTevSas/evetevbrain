@@ -31,3 +31,9 @@ test-results/
 /videos/
 .claude/
 .vercel
+
+# Documentos que nos entrega un cliente (Excel de operación, actas de reunión,
+# formatos contables). Son datos suyos —saldos, nombres de sus clientes,
+# transcripciones— y no tienen por qué vivir en el repositorio. Se consultan
+# desde local; si alguna vez hay que versionar algo, se decide a propósito.
+apps/*/Documentos_base/

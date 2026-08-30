@@ -64,7 +64,7 @@ export default async function CierresPage({
           >
             Operación diaria
           </p>
-          <h1 style={{ margin: 0 }}>Cierres</h1>
+          <h1 style={{ margin: 0 }}>Diario</h1>
         </div>
         <Link href="/cierres/nuevo" className="btn btn-cta">
           + Nuevo cierre

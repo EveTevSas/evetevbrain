@@ -204,7 +204,7 @@ export default async function DashboardPage({
       alerta: false
     },
     {
-      etiqueta: "Cartera vencida >90d",
+      etiqueta: "Cartera vencida",
       valor: pesosCorto(data.kpis.carteraVencida),
       full: pesosFull(data.kpis.carteraVencida),
       Ico: IcoAlertaCartera,
@@ -222,7 +222,7 @@ export default async function DashboardPage({
       alerta: false
     },
     {
-      etiqueta: "Faltantes netos",
+      etiqueta: "Faltante isleros",
       valor: pesosCorto(data.kpis.faltantesNetos),
       full: pesosFull(data.kpis.faltantesNetos),
       Ico: IcoFaltantes,

@@ -163,7 +163,7 @@ const SECCIONES = [
     label: "OPERACIÓN",
     items: [
       { href: "/dashboard", texto: "Dashboard", Ico: IcoDashboard },
-      { href: "/cierres", texto: "Cierres", Ico: IcoCierres },
+      { href: "/cierres", texto: "Diario", Ico: IcoCierres },
       { href: "/inventarios", texto: "Inventarios", Ico: IcoInventarios },
       { href: "/cartera", texto: "Cartera", Ico: IcoCartera }
     ]
@@ -171,8 +171,8 @@ const SECCIONES = [
   {
     label: "REPORTES",
     items: [
-      { href: "/financiero", texto: "Financiero", Ico: IcoFinanciero },
-      { href: "/consolidado", texto: "Consolidado", Ico: IcoConsolidado }
+      { href: "/financiero", texto: "Margen y gastos", Ico: IcoFinanciero },
+      { href: "/consolidado", texto: "Ventas", Ico: IcoConsolidado }
     ]
   },
   {
