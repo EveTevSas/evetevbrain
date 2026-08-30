@@ -21,7 +21,27 @@ apps/<app>/…/marca/…        la copia que se despliega con la app
 Cada app sirve su marca desde su propio origen. Ninguna depende del despliegue
 de otra ni de un tercero: si una se cae, se cae sola.
 
-## Añadir un activo
+## Añadir una imagen (lo normal)
+
+```
+pnpm marca:imagen ~/Descargas/escena.png --app website --nombre pasarela-de-pago
+```
+
+Analiza la fuente, la convierte a WebP con la receta medida —2048 px, calidad
+80, alfa 50—, la deja en `packages/brand/`, **la anota en el manifiesto**,
+sincroniza las copias y te imprime la ruta `/marca/<archivo>` lista para pasarle
+a Eve Studio. Añade un `--app` por cada app que la vaya a servir; con `--seco`
+solo convierte y no toca el repositorio.
+
+No amplía una fuente pequeña, no acepta SVG —esos van a mano— y **no deja pisar
+un archivo que ya existe** sin `--reemplazar`: si el contenido cambia pero la
+URL no, ningún navegador que ya la tenga se entera, y lo que se ve es la imagen
+vieja con el CSS nuevo. Para reemplazar, nombre nuevo.
+
+Falta subir el resultado: la imagen, el manifiesto y las copias van en el mismo
+commit.
+
+## Añadir un activo a mano
 
 1. Ponlo en la carpeta que le toque de `packages/brand/assets/` (o de
    `packages/brand/ilustraciones/`, que van aparte por peso).

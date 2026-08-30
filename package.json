@@ -18,6 +18,7 @@
     "format:check": "prettier --check .",
     "landings:sync": "node scripts/landings-sync.mjs",
     "landings:check": "node scripts/landings-sync.mjs --check",
+    "marca:imagen": "node scripts/marca-imagen.mjs",
     "marca:sync": "node scripts/marca-sync.mjs",
     "marca:check": "node scripts/marca-sync.mjs --check"
   },
