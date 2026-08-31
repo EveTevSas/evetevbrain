@@ -44,8 +44,8 @@ interface Props {
 }
 
 const TIPOS_PAGO: { valor: TipoPago; etiqueta: string }[] = [
-  { valor: "TRANSPORTADORA", etiqueta: "Transportadora" },
-  { valor: "CREDIBANCO", etiqueta: "Credibanco" },
+  { valor: "TRANSPORTADORA", etiqueta: "Transportadora caja ancla" },
+  { valor: "CREDIBANCO", etiqueta: "Credibanco PWS" },
   { valor: "REDEBAN", etiqueta: "Redeban" },
   { valor: "OTRO", etiqueta: "Otro" }
 ];
@@ -598,15 +598,15 @@ export default function CierreForm(props: Props) {
               <dd className="tabular-nums">{formatoPesos(efectivo)}</dd>
             </div>
             <div className="flex justify-between text-eve-pizarra">
-              <dt>Tarjetas (Credibanco + Redeban)</dt>
+              <dt>Tarjetas (Credibanco PWS + Redeban)</dt>
               <dd className="tabular-nums">{formatoPesos(tTarjetas)}</dd>
             </div>
             <div className="flex justify-between text-eve-pizarra">
-              <dt>Transportadora</dt>
+              <dt>Transportadora caja ancla</dt>
               <dd className="tabular-nums">{formatoPesos(tTransp)}</dd>
             </div>
             <div className="flex justify-between text-eve-pizarra">
-              <dt>Vales</dt>
+              <dt>Cartera (vales del día)</dt>
               <dd className="tabular-nums">{formatoPesos(tVales)}</dd>
             </div>
             <div className="flex justify-between text-eve-pizarra">
