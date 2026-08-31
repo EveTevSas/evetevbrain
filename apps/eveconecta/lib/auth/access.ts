@@ -3,7 +3,8 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import { appRoleSchema, initialsFor, roleLabels, type AuthenticatedUserView } from "./permissions";
+import { initialsFor, roleLabels, type AuthenticatedUserView } from "./permissions";
+import { fetchActiveMemberships, selectActiveMembership } from "./resolve-membership";
 import { ACTIVE_CONJUNTO_COOKIE } from "./tenant-cookie";
 
 export interface CurrentAccess {
@@ -24,24 +25,17 @@ export async function requireCurrentAccess(): Promise<CurrentAccess> {
     redirect("/login");
   }
 
-  const { data: memberships, error: membershipError } = await supabase
-    .schema("conjuntos")
-    .from("miembros_conjunto")
-    .select("conjunto_id, rol")
-    .eq("usuario_id", user.id)
-    .eq("activo", true)
-    .order("creado_en", { ascending: true });
-
-  if (membershipError || !memberships?.length) {
+  const memberships = await fetchActiveMemberships(supabase, user.id);
+  if (!memberships?.length) {
     redirect("/sin-acceso");
   }
 
   const cookieStore = await cookies();
-  const requestedConjuntoId = cookieStore.get(ACTIVE_CONJUNTO_COOKIE)?.value;
-  const membership =
-    memberships.find((item) => item.conjunto_id === requestedConjuntoId) ?? memberships[0]!;
-  const parsedRole = appRoleSchema.safeParse(membership.rol);
-  if (!parsedRole.success) {
+  const membership = selectActiveMembership(
+    memberships,
+    cookieStore.get(ACTIVE_CONJUNTO_COOKIE)?.value
+  );
+  if (!membership) {
     redirect("/sin-acceso");
   }
 
@@ -51,7 +45,7 @@ export async function requireCurrentAccess(): Promise<CurrentAccess> {
     .from("conjuntos")
     .select("id, nombre")
     .in("id", conjuntoIds);
-  const conjunto = conjuntos?.find((item) => item.id === membership.conjunto_id);
+  const conjunto = conjuntos?.find((item) => item.id === membership.conjuntoId);
   const availableConjuntos = conjuntoIds.map((id) => ({
     id,
     name: conjuntos?.find((item) => item.id === id)?.nombre ?? "EveConecta"
@@ -67,7 +61,7 @@ export async function requireCurrentAccess(): Promise<CurrentAccess> {
   const name = metadataName.trim() || email.split("@")[0] || "Usuario EveConecta";
 
   return {
-    conjuntoId: membership.conjunto_id,
+    conjuntoId: membership.conjuntoId,
     conjuntoName: conjunto?.nombre ?? "EveConecta",
     availableConjuntos,
     user: {
@@ -75,8 +69,8 @@ export async function requireCurrentAccess(): Promise<CurrentAccess> {
       id: user.id,
       initials: initialsFor(name, email),
       name,
-      role: parsedRole.data,
-      roleLabel: roleLabels[parsedRole.data]
+      role: membership.role,
+      roleLabel: roleLabels[membership.role]
     }
   };
 }

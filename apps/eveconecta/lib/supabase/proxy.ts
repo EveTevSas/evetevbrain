@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-import { appRoleSchema, canAccessPath, isSafeInternalPath } from "@/lib/auth/permissions";
+import { canAccessPath, isSafeInternalPath } from "@/lib/auth/permissions";
+import { fetchActiveMemberships, selectActiveMembership } from "@/lib/auth/resolve-membership";
+import { ACTIVE_CONJUNTO_COOKIE } from "@/lib/auth/tenant-cookie";
 import { getSupabasePublicConfig } from "./config";
 
 function responseWithAuthCookies(source: NextResponse, target: NextResponse): NextResponse {
@@ -71,22 +73,16 @@ export async function refreshSessionAndAuthorize(request: NextRequest): Promise<
     return response;
   }
 
-  const { data: membership, error } = await supabase
-    .schema("conjuntos")
-    .from("miembros_conjunto")
-    .select("rol")
-    .eq("usuario_id", user.id)
-    .eq("activo", true)
-    .order("creado_en", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (error || !membership) {
+  const memberships = await fetchActiveMemberships(supabase, user.id);
+  if (!memberships?.length) {
     return responseWithAuthCookies(response, redirectTo(request, "/sin-acceso"));
   }
 
-  const role = appRoleSchema.safeParse(membership.rol);
-  if (!role.success || !canAccessPath(role.data, pathname)) {
+  const membership = selectActiveMembership(
+    memberships,
+    request.cookies.get(ACTIVE_CONJUNTO_COOKIE)?.value
+  );
+  if (!membership || !canAccessPath(membership.role, pathname)) {
     return responseWithAuthCookies(response, redirectTo(request, "/sin-permiso"));
   }
 

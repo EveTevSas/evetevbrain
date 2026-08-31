@@ -465,7 +465,7 @@ insert into conjuntos.escenarios_demo (conjunto_id, snapshot)
 values
   (
     '11111111-1111-4111-8111-111111111111',
-    '{"visitors":[],"reservations":[],"audit":[]}'::jsonb
+    '{"visitors":[],"reservations":[],"audit":[],"expenses":[{"id":"dddddddd-0001-4001-8001-dddddddddddd","concept":"Mantenimiento de ascensores","provider":"Ascensores Andinos","providerIdentification":"900123456-7","budgetLine":"Mantenimiento","amountMinor":250000000,"requestedBy":"Administración","approvals":0,"approvalsRequired":2,"status":"pending_approval","createdAt":"2026-08-30T12:00:00Z"}]}'::jsonb
   ),
   (
     '22222222-2222-4222-8222-222222222222',
@@ -473,7 +473,7 @@ values
   )
 on conflict (conjunto_id) do nothing;
 
-select plan(51);
+select plan(73);
 
 set local role authenticated;
 select set_config(
@@ -576,6 +576,67 @@ select throws_ok(
   '42501',
   'Solo un residente puede reservar zonas comunes desde este perfil',
   'el residente no puede reservar en otra copropiedad'
+);
+
+select lives_ok(
+  $$ select conjuntos.crear_caso_demo(
+       '11111111-1111-4111-8111-111111111111',
+       'Filtración en el parqueadero',
+       'Mantenimiento',
+       '',
+       '',
+       'high'
+     ) $$,
+  'el residente puede crear un caso PQRS para su propia unidad'
+);
+
+select is(
+  (
+    select conjuntos.obtener_escenario_demo(
+      '11111111-1111-4111-8111-111111111111'
+    ) -> 'cases' -> 0 ->> 'unit'
+  ),
+  'A-101',
+  'el caso del residente queda limitado a su unidad vigente'
+);
+
+select is(
+  (
+    select conjuntos.obtener_escenario_demo(
+      '11111111-1111-4111-8111-111111111111'
+    ) -> 'cases' -> 0 ->> 'requester'
+  ),
+  'Residente A',
+  'el solicitante del caso se deriva del padrón y no del navegador'
+);
+
+select throws_ok(
+  $$ select conjuntos.crear_caso_demo(
+       '22222222-2222-4222-8222-222222222222',
+       'Caso indebido en otra copropiedad',
+       'Mantenimiento',
+       '',
+       '',
+       'low'
+     ) $$,
+  '42501',
+  'Tu usuario no pertenece a esta copropiedad',
+  'el residente no puede crear casos en otra copropiedad'
+);
+
+select throws_ok(
+  $$ select conjuntos.crear_caso_demo(
+       '11111111-1111-4111-8111-111111111111',
+       'Caso con evidencia ajena',
+       'Mantenimiento',
+       '',
+       '',
+       'low',
+       array['11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1/cccccccc-cccc-4ccc-8ccc-cccccccccccc/1.jpg']
+     ) $$,
+  '42501',
+  'Una de las imágenes no pertenece a tu sesión',
+  'el residente no puede referenciar evidencias bajo la ruta de otro usuario'
 );
 
 select is(
@@ -726,7 +787,7 @@ select throws_ok(
   'el residente no puede escribir una foto bajo la ruta de otro usuario'
 );
 
-select throws_ok(
+select lives_ok(
   $$ insert into storage.objects (bucket_id, name, owner_id, metadata)
      values (
        'eveconecta-case-images',
@@ -734,9 +795,52 @@ select throws_ok(
        'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
        '{"mimetype":"image/jpeg","size":128}'::jsonb
      ) $$,
+  'el residente puede almacenar evidencias bajo su propia ruta privada'
+);
+
+select throws_ok(
+  $$ insert into storage.objects (bucket_id, name, owner_id, metadata)
+     values (
+       'eveconecta-case-images',
+       '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1/dddddddd-dddd-4ddd-8ddd-dddddddddddd/1.jpg',
+       'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+       '{"mimetype":"image/jpeg","size":128}'::jsonb
+     ) $$,
   '42501',
   'new row violates row-level security policy for table "objects"',
-  'el residente no puede almacenar evidencias en nombre de la administración'
+  'el residente no puede almacenar evidencias bajo la ruta de otro usuario'
+);
+
+select lives_ok(
+  $$ select conjuntos.crear_caso_demo(
+       '11111111-1111-4111-8111-111111111111',
+       'Humedad en el muro con evidencia',
+       'Mantenimiento',
+       '',
+       '',
+       'medium',
+       array['11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/cccccccc-cccc-4ccc-8ccc-cccccccccccc/1.jpg']
+     ) $$,
+  'el residente puede crear un caso con evidencias propias verificadas'
+);
+
+-- El borrado real pasa por la Storage API (el DELETE directo por SQL está
+-- bloqueado por Supabase), así que aquí se prueba el predicado que la política
+-- de borrado usa para proteger evidencias referenciadas.
+select is(
+  conjuntos.evidencia_caso_referenciada(
+    '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/cccccccc-cccc-4ccc-8ccc-cccccccccccc/1.jpg'
+  ),
+  true,
+  'una evidencia referenciada por un caso queda protegida contra el borrado del creador'
+);
+
+select is(
+  conjuntos.evidencia_caso_referenciada(
+    '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/1.jpg'
+  ),
+  false,
+  'una evidencia que ningún caso referencia puede retirarse (reversión tras fallo)'
 );
 
 update conjuntos.mascotas
@@ -876,6 +980,24 @@ select throws_ok(
   'la administración no puede almacenar evidencias bajo la ruta de otro usuario'
 );
 
+select lives_ok(
+  $$ select conjuntos.aprobar_gasto_demo(
+       '11111111-1111-4111-8111-111111111111',
+       'dddddddd-0001-4001-8001-dddddddddddd'
+     ) $$,
+  'la administración registra la primera aprobación del gasto'
+);
+
+select throws_ok(
+  $$ select conjuntos.aprobar_gasto_demo(
+       '11111111-1111-4111-8111-111111111111',
+       'dddddddd-0001-4001-8001-dddddddddddd'
+     ) $$,
+  '23505',
+  'Ya registraste tu aprobación; falta la de otra persona',
+  'la misma persona no puede aprobar dos veces el mismo gasto'
+);
+
 select throws_ok(
   $$ insert into conjuntos.mascotas (
        conjunto_id, persona_id, unidad_id, tipo, anio_nacimiento, tamano, nombre
@@ -902,6 +1024,144 @@ select is(
   (select count(*) from conjuntos.unidades where conjunto_id = '22222222-2222-4222-8222-222222222222'),
   0::bigint,
   'el administrador no ve filas de otro conjunto'
+);
+
+reset role;
+set local role authenticated;
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3","role":"authenticated"}',
+  true
+);
+
+select lives_ok(
+  $$ select conjuntos.crear_caso_demo(
+       '11111111-1111-4111-8111-111111111111',
+       'Hallazgo del consejo en zonas comunes',
+       'Administrativo',
+       'Consejo de administración',
+       'Zonas comunes',
+       'medium'
+     ) $$,
+  'el consejo puede crear un caso PQRS indicando solicitante y unidad'
+);
+
+select is(
+  (
+    select jsonb_array_length(
+      conjuntos.obtener_escenario_demo('11111111-1111-4111-8111-111111111111') -> 'cases'
+    )
+  ),
+  1,
+  'el consejo solo ve los casos que él mismo creó'
+);
+
+select is(
+  (
+    select conjuntos.obtener_escenario_demo(
+      '11111111-1111-4111-8111-111111111111'
+    ) -> 'cases' -> 0 ->> 'requester'
+  ),
+  'Consejo de administración',
+  'el caso del consejo conserva el solicitante indicado'
+);
+
+select throws_ok(
+  $$ select conjuntos.crear_caso_demo(
+       '11111111-1111-4111-8111-111111111111',
+       'Caso sin solicitante',
+       'Administrativo',
+       '',
+       '',
+       'low'
+     ) $$,
+  '22023',
+  'Debes indicar el solicitante y la unidad del caso',
+  'el consejo debe indicar solicitante y unidad del caso'
+);
+
+select lives_ok(
+  $$ select conjuntos.aprobar_gasto_demo(
+       '11111111-1111-4111-8111-111111111111',
+       'dddddddd-0001-4001-8001-dddddddddddd'
+     ) $$,
+  'el consejo puede registrar la segunda aprobación del gasto'
+);
+
+select is(
+  (
+    select conjuntos.obtener_escenario_demo(
+      '11111111-1111-4111-8111-111111111111'
+    ) -> 'expenses' -> 0 ->> 'status'
+  ),
+  'approved',
+  'dos personas distintas completan la aprobación del gasto'
+);
+
+select throws_ok(
+  $$ select conjuntos.aprobar_gasto_demo(
+       '11111111-1111-4111-8111-111111111111',
+       'dddddddd-0001-4001-8001-dddddddddddd'
+     ) $$,
+  '55000',
+  'La solicitud ya no está pendiente de aprobación',
+  'un gasto aprobado no admite más aprobaciones'
+);
+
+reset role;
+set local role authenticated;
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1","role":"authenticated"}',
+  true
+);
+
+select is(
+  (
+    select jsonb_array_length(
+      conjuntos.obtener_escenario_demo('11111111-1111-4111-8111-111111111111') -> 'cases'
+    )
+  ),
+  3,
+  'la administración ve todos los casos del conjunto'
+);
+
+reset role;
+set local role authenticated;
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2","role":"authenticated"}',
+  true
+);
+
+select is(
+  (
+    select jsonb_array_length(
+      conjuntos.obtener_escenario_demo('11111111-1111-4111-8111-111111111111') -> 'cases'
+    )
+  ),
+  2,
+  'el residente solo ve los casos de su unidad'
+);
+
+select is(
+  (
+    select count(*)
+    from storage.objects
+    where bucket_id = 'eveconecta-case-images'
+  ),
+  1::bigint,
+  'el residente solo consulta las evidencias que él mismo cargó'
+);
+
+select throws_ok(
+  $$ select conjuntos.aprobar_gasto_demo(
+       '11111111-1111-4111-8111-111111111111',
+       'dddddddd-0001-4001-8001-dddddddddddd'
+     ) $$,
+  '42501',
+  'Tu rol no permite aprobar gastos',
+  'el residente no puede aprobar gastos'
 );
 
 reset role;

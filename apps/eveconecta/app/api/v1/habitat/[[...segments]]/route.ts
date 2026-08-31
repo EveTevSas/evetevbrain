@@ -21,7 +21,6 @@ import {
   updateCommunityPersonSchema,
   updatePetPhotoSchema,
   updatePetStatusSchema,
-  type CaseItem,
   type AssemblyConvocationRecipient,
   type AssemblyItem,
   type AssemblySupportDocument,
@@ -35,12 +34,13 @@ import {
 import { normalizeAssembly, normalizeAssemblySettings } from "@/lib/assemblies";
 import { ASSEMBLY_SUPPORT_BUCKET, assemblySupportCategoryLabels } from "@/lib/assembly-supports";
 import { ACTIVE_CONJUNTO_COOKIE } from "@/lib/auth/tenant-cookie";
-import { CASE_IMAGE_BUCKET } from "@/lib/case-images";
 import { communityContactChannels } from "@/lib/community-contacts";
 import {
+  approveExpense,
   canSelectConjunto,
   createAmenityReservation,
   createAnnouncement,
+  createCase,
   createResidentPet,
   createResidentVehicle,
   createVisitorAuthorization,
@@ -277,46 +277,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     if (path === "cases") {
       const input = createCaseSchema.parse(body);
-      return NextResponse.json(
-        await mutateDemoSnapshot<CaseItem>(async (snapshot, access) => {
-          const imagePaths = input.imagePaths ?? [];
-          const expectedPrefix = `${access.conjuntoId}/${access.user.id}/`;
-
-          for (const imagePath of imagePaths) {
-            if (!imagePath.startsWith(expectedPrefix)) {
-              throw new DemoApiError("Una de las imágenes no pertenece a tu sesión.", 400);
-            }
-            const segments = imagePath.split("/");
-            const filename = segments.pop();
-            const folder = segments.join("/");
-            const { data, error } = await access.supabase.storage
-              .from(CASE_IMAGE_BUCKET)
-              .list(folder, { limit: 3, search: filename });
-            if (error || !data?.some((item) => item.name === filename)) {
-              throw new DemoApiError("No fue posible verificar una de las imágenes.", 400);
-            }
-          }
-
-          const item: CaseItem = {
-            id: crypto.randomUUID(),
-            code: nextCode("PQRS", snapshot.cases.length),
-            ...input,
-            imagePaths,
-            status: "open",
-            slaHours: input.priority === "high" ? 8 : input.priority === "medium" ? 24 : 48,
-            elapsedHours: 0,
-            createdAt: new Date().toISOString()
-          };
-          snapshot.cases.unshift(item);
-          return {
-            action: "pqrs.caso_creado",
-            detail: `${item.code}: ${item.title}`,
-            resource: item.code,
-            result: item
-          };
-        }),
-        { status: 201 }
-      );
+      return NextResponse.json(await createCase(input), { status: 201 });
     }
 
     if (path === "reservations") {
@@ -583,23 +544,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const expenseMatch = path.match(/^expenses\/([0-9a-f-]+)\/approve$/i);
     if (expenseMatch) {
-      return NextResponse.json(
-        await mutateDemoSnapshot<ExpenseItem>((snapshot) => {
-          const item = snapshot.expenses.find((expense) => expense.id === expenseMatch[1]);
-          if (!item) throw new DemoApiError("La solicitud de gasto no existe.", 404);
-          if (item.status !== "pending_approval") {
-            throw new DemoApiError("La solicitud ya no está pendiente de aprobación.", 409);
-          }
-          item.approvals = Math.min(item.approvals + 1, item.approvalsRequired);
-          if (item.approvals >= item.approvalsRequired) item.status = "approved";
-          return {
-            action: "presupuesto.gasto_aprobado",
-            detail: `${item.concept}: ${item.approvals} de ${item.approvalsRequired} aprobaciones`,
-            resource: item.id,
-            result: item
-          };
-        })
-      );
+      const expenseId = z.string().uuid().parse(expenseMatch[1]);
+      return NextResponse.json(await approveExpense(expenseId));
     }
 
     const feeMatch = path.match(/^fees\/([0-9a-f-]+)\/pay-demo$/i);

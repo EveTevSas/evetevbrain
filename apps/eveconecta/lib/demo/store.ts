@@ -5,12 +5,15 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type {
   AnnouncementItem,
   AssemblyItem,
+  CaseItem,
   CreateAnnouncement,
+  CreateCase,
   CreatePet,
   CreateRegisteredVehicle,
   CreateReservation,
   CreateVisitor,
   DashboardSnapshot,
+  ExpenseItem,
   Payment,
   PetItem,
   RegisteredVehicleItem,
@@ -25,13 +28,8 @@ import {
   normalizeAssembly,
   normalizeAssemblySettings
 } from "@/lib/assemblies";
-import {
-  appRoleSchema,
-  canInitiatePayment,
-  initialsFor,
-  roleLabels,
-  type AppRole
-} from "@/lib/auth/permissions";
+import { canInitiatePayment, initialsFor, roleLabels, type AppRole } from "@/lib/auth/permissions";
+import { fetchActiveMemberships, selectActiveMembership } from "@/lib/auth/resolve-membership";
 import { ACTIVE_CONJUNTO_COOKIE } from "@/lib/auth/tenant-cookie";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { createResidentSnapshot } from "./resident-view";
@@ -86,31 +84,23 @@ export async function getDemoAccess(): Promise<DemoAccess> {
     throw new DemoApiError("Debes iniciar sesión para continuar.", 401);
   }
 
-  const { data: memberships, error: membershipError } = await supabase
-    .schema("conjuntos")
-    .from("miembros_conjunto")
-    .select("conjunto_id, rol")
-    .eq("usuario_id", user.id)
-    .eq("activo", true)
-    .order("creado_en", { ascending: true });
-
-  if (membershipError || !memberships?.length) {
+  const memberships = await fetchActiveMemberships(supabase, user.id);
+  if (!memberships?.length) {
     throw new DemoApiError("Tu usuario no tiene una copropiedad activa.", 403);
   }
 
   const cookieStore = await cookies();
-  const requestedConjuntoId = cookieStore.get(ACTIVE_CONJUNTO_COOKIE)?.value;
-  const membership =
-    memberships.find((item) => item.conjunto_id === requestedConjuntoId) ?? memberships[0]!;
-  const role = appRoleSchema.safeParse(membership.rol);
-
-  if (!role.success) {
+  const membership = selectActiveMembership(
+    memberships,
+    cookieStore.get(ACTIVE_CONJUNTO_COOKIE)?.value
+  );
+  if (!membership) {
     throw new DemoApiError("El rol asignado no es válido.", 403);
   }
 
   return {
-    conjuntoId: membership.conjunto_id,
-    role: role.data,
+    conjuntoId: membership.conjuntoId,
+    role: membership.role,
     supabase,
     user,
     userName: userNameFor(user)
@@ -334,6 +324,53 @@ export async function createVisitorAuthorization(input: CreateVisitor): Promise<
       result: item
     };
   });
+}
+
+export async function createCase(input: CreateCase): Promise<CaseItem> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase.schema("conjuntos").rpc("crear_caso_demo", {
+    p_conjunto_id: access.conjuntoId,
+    p_titulo: input.title,
+    p_categoria: input.category,
+    p_solicitante: input.requester ?? "",
+    p_unidad: input.unit ?? "",
+    p_prioridad: input.priority,
+    p_imagenes: input.imagePaths ?? []
+  });
+
+  if (error) {
+    if (error.code === "42501") throw new DemoApiError(error.message, 403);
+    if (error.code === "22023") throw new DemoApiError(error.message, 400);
+    if (error.code === "P0002") throw new DemoApiError(error.message, 404);
+    throw new DemoApiError("No fue posible crear el caso.", 500);
+  }
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el caso creado.", 500);
+  }
+  return data as CaseItem;
+}
+
+export async function approveExpense(expenseId: string): Promise<ExpenseItem> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase.schema("conjuntos").rpc("aprobar_gasto_demo", {
+    p_conjunto_id: access.conjuntoId,
+    p_gasto_id: expenseId
+  });
+
+  if (error) {
+    if (error.code === "42501") throw new DemoApiError(error.message, 403);
+    if (error.code === "P0002") throw new DemoApiError(error.message, 404);
+    if (error.code === "23505" || error.code === "55000") {
+      throw new DemoApiError(error.message, 409);
+    }
+    throw new DemoApiError("No fue posible registrar la aprobación del gasto.", 500);
+  }
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el gasto aprobado.", 500);
+  }
+  return data as ExpenseItem;
 }
 
 export async function createResidentPet(input: CreatePet): Promise<PetItem> {

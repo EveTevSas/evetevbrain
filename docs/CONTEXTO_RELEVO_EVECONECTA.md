@@ -105,6 +105,12 @@ Flujo acordado:
 3. Revisar localmente y, cuando aplique, en preview.
 4. Solo al cerrar el bloque y con autorización, integrar a `main`.
 
+Este flujo con una rama `conecta` de larga vida es una **excepción consciente** a la
+regla trunk-based de `ESTANDARES_INGENIERIA.md` (§3, ramas cortas), aceptada por el
+responsable del proyecto para poder agrupar bloques de demo. Mitigación: sincronizar
+`origin/main` hacia `conecta` al inicio de cada bloque y no dejar que la divergencia
+crezca más de un bloque de trabajo.
+
 ## 5. Arquitectura actual
 
 ### Stack

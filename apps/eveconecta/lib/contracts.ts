@@ -200,6 +200,7 @@ export interface CaseItem {
   elapsedHours: number;
   createdAt: string;
   imagePaths?: string[];
+  createdBy?: string;
 }
 
 export interface ReservationItem {
@@ -309,6 +310,7 @@ export interface ExpenseItem {
   requestedBy: string;
   approvals: number;
   approvalsRequired: number;
+  approvedBy?: string[];
   status: "draft" | "pending_approval" | "approved" | "paid";
   createdAt: string;
 }
@@ -654,11 +656,13 @@ export const caseImagePathSchema = z
     "La ruta de una imagen del caso no es válida."
   );
 
+// Solicitante y unidad son opcionales porque, cuando el rol es residente, el
+// servidor los deriva del padrón y descarta cualquier valor enviado.
 export const createCaseSchema = z.object({
   title: z.string().min(5).max(120),
   category: z.string().min(2).max(60),
-  requester: z.string().min(3).max(100),
-  unit: z.string().min(1).max(20),
+  requester: z.string().min(3).max(100).optional(),
+  unit: z.string().min(1).max(20).optional(),
   priority: z.enum(["low", "medium", "high"]),
   imagePaths: z.array(caseImagePathSchema).max(3, "Puedes anexar máximo 3 imágenes.").optional()
 });

@@ -882,7 +882,9 @@ function SummaryCard({
 
 export function BudgetPage() {
   const { snapshot, createExpense, approveExpense, busy } = useData();
+  const { user } = useAuthUser();
   const [open, setOpen] = useState(false);
+  const canRegisterExpense = user.role === "super_admin" || user.role === "admin_conjunto";
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -909,7 +911,11 @@ export function BudgetPage() {
         eyebrow="Control y segregación"
         title="Presupuesto y gastos"
         description="Ejecución visible, soportes completos y aprobaciones según la matriz de autoridad."
-        action={{ label: "Registrar gasto", icon: Plus, onClick: () => setOpen(true) }}
+        action={
+          canRegisterExpense
+            ? { label: "Registrar gasto", icon: Plus, onClick: () => setOpen(true) }
+            : undefined
+        }
       />
       <div className="grid gap-5 xl:grid-cols-[1fr_1.6fr]">
         <Card className="p-5 sm:p-6">
@@ -1613,8 +1619,10 @@ function Channel({ label, value }: { label: string; value: string }) {
 
 export function CasesPage() {
   const { snapshot, createCase, busy } = useData();
+  const { user } = useAuthUser();
   const [open, setOpen] = useState(false);
   const [caseImages, setCaseImages] = useState<File[]>([]);
+  const isResident = user.role === "residente";
 
   function closeCaseForm() {
     setOpen(false);
@@ -1628,9 +1636,10 @@ export function CasesPage() {
       {
         title: formValue(form, "title"),
         category: formValue(form, "category"),
-        requester: formValue(form, "requester"),
-        unit: formValue(form, "unit"),
-        priority: formValue(form, "priority") as "low" | "medium" | "high"
+        priority: formValue(form, "priority") as "low" | "medium" | "high",
+        ...(isResident
+          ? {}
+          : { requester: formValue(form, "requester"), unit: formValue(form, "unit") })
       },
       caseImages
     );
@@ -1711,20 +1720,26 @@ export function CasesPage() {
             </Field>
             <Field label="Prioridad">
               <SelectInput name="priority">
-                <option value="low">Baja · 72 horas</option>
-                <option value="medium">Media · 48 horas</option>
-                <option value="high">Alta · 24 horas</option>
+                <option value="low">Baja · 48 horas</option>
+                <option value="medium">Media · 24 horas</option>
+                <option value="high">Alta · 8 horas</option>
               </SelectInput>
             </Field>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Solicitante">
-              <TextInput name="requester" defaultValue="Camila Herrera" required />
-            </Field>
-            <Field label="Unidad">
-              <TextInput name="unit" placeholder="T1 · 301" required />
-            </Field>
-          </div>
+          {isResident ? (
+            <p className="text-sm text-[var(--muted)]">
+              El caso quedará registrado a tu nombre y al de tu unidad.
+            </p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Solicitante">
+                <TextInput name="requester" placeholder="Nombre de quien solicita" required />
+              </Field>
+              <Field label="Unidad">
+                <TextInput name="unit" placeholder="T1 · 301" required />
+              </Field>
+            </div>
+          )}
           <Field
             label="Imágenes del caso"
             hint="Opcional. Anexa hasta 3 imágenes JPG, PNG o WebP de máximo 5 MB cada una."

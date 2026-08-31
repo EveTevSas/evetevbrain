@@ -419,7 +419,7 @@ Dos reglas:
 ### Organización y repositorio en GitHub
 
 - Creamos una **Organización** de GitHub para Evetev (no repos en cuentas personales). La organización se crea desde una cuenta personal, que queda como dueña; marcamos que es **propiedad de una empresa** (Evetev SAS está constituida).
-- El repo `evetev` es **privado**, dentro de la organización: **[github.com/EveTev/evetev](https://github.com/EveTev/evetev)**
+- El repo vive dentro de la organización: **[github.com/EveTevSas/evetevbrain](https://github.com/EveTevSas/evetevbrain)** (nombre real; una versión anterior de esta línea decía `EveTev/evetev`). El estándar sigue siendo que sea **privado**; hoy figura como público y esa visibilidad debe corregirse o ratificarse de forma explícita.
 - **Plan:** arrancamos en **GitHub Free** (repos privados y colaboradores ilimitados, Actions con minutos gratis). Subimos a **Team** cuando queramos blindar la protección de rama en repo privado — es un clic, no se reconfigura nada.
 
 ### Configuración obligatoria (higiene desde el día uno)
