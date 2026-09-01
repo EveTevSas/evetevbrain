@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
@@ -183,6 +184,17 @@ const SECCIONES = [
 
 export default function SidebarNav({ email }: { email?: string }) {
   const pathname = usePathname();
+  const [abierta, setAbierta] = useState(false);
+
+  // Escape cierra, como cualquier panel superpuesto.
+  useEffect(() => {
+    if (!abierta) return;
+    function alPulsar(e: KeyboardEvent) {
+      if (e.key === "Escape") setAbierta(false);
+    }
+    document.addEventListener("keydown", alPulsar);
+    return () => document.removeEventListener("keydown", alPulsar);
+  }, [abierta]);
 
   function isActive(href: string) {
     if (href === "/dashboard") return pathname === "/dashboard" || pathname === "/";
@@ -190,180 +202,210 @@ export default function SidebarNav({ email }: { email?: string }) {
   }
 
   return (
-    <aside
-      style={{
-        width: 240,
-        background: "#fff",
-        borderRight: "1px solid #EDF3FA",
-        display: "flex",
-        flexDirection: "column",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        bottom: 0,
-        zIndex: 40
-      }}
-    >
-      {/* Logo */}
-      <div style={{ padding: "1.25rem 1rem 1rem", borderBottom: "1px solid #EDF3FA" }}>
-        <Link
-          href="/"
-          style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}
+    <>
+      <button
+        type="button"
+        className="eve-abrir"
+        aria-label="Abrir el menú"
+        aria-expanded={abierta}
+        onClick={() => setAbierta(true)}
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`${CDN}/isotipo-azul-noche.svg`} alt="" width={28} height={20} />
-          <div>
-            <div
-              style={{
-                fontFamily: "var(--font-brand)",
-                fontWeight: 700,
-                fontSize: "1rem",
-                color: "#0A2540",
-                lineHeight: 1.2
-              }}
-            >
-              EveLedger
-            </div>
-            <div
-              style={{
-                fontSize: "0.62rem",
-                fontWeight: 600,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                color: "#94A3B8"
-              }}
-            >
-              por Evetev
-            </div>
-          </div>
-        </Link>
-      </div>
+          <path d="M3 6h18M3 12h18M3 18h18" />
+        </svg>
+      </button>
 
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: "0.75rem 0.75rem", overflowY: "auto" }}>
-        {SECCIONES.map((sec) => (
-          <div key={sec.label} style={{ marginBottom: "1.5rem" }}>
-            <p
-              style={{
-                fontSize: "0.62rem",
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: "#94A3B8",
-                padding: "0 0.5rem",
-                marginBottom: "0.375rem"
-              }}
-            >
-              {sec.label}
-            </p>
-            {sec.items.map(({ href, texto, Ico }) => {
-              const active = isActive(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.625rem",
-                    padding: "0.5rem 0.625rem",
-                    marginBottom: "0.125rem",
-                    borderRadius: 8,
-                    textDecoration: "none",
-                    fontSize: "0.855rem",
-                    fontWeight: active ? 600 : 400,
-                    color: active ? "#4b3075" : "#0A2540",
-                    background: active ? "#f3eeff" : "transparent",
-                    transition: "all 0.12s"
-                  }}
-                >
-                  <span style={{ color: active ? "#4b3075" : "#64748B", flexShrink: 0 }}>
-                    <Ico />
-                  </span>
-                  {texto}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
-      </nav>
+      {abierta ? (
+        <button
+          type="button"
+          className="eve-velo"
+          aria-label="Cerrar el menú"
+          onClick={() => setAbierta(false)}
+        />
+      ) : null}
 
-      {/* Usuario + logout */}
-      <div
+      <aside
+        className={"eve-sidebar" + (abierta ? " abierta" : "")}
         style={{
-          padding: "0.875rem 1rem",
-          borderTop: "1px solid #EDF3FA",
+          background: "#fff",
+          borderRight: "1px solid #EDF3FA",
           display: "flex",
-          alignItems: "center",
-          gap: "0.625rem"
+          flexDirection: "column"
         }}
       >
+        {/* Logo */}
+        <div style={{ padding: "1.25rem 1rem 1rem", borderBottom: "1px solid #EDF3FA" }}>
+          <Link
+            href="/"
+            onClick={() => setAbierta(false)}
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`${CDN}/isotipo-azul-noche.svg`} alt="" width={28} height={20} />
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-brand)",
+                  fontWeight: 700,
+                  fontSize: "1rem",
+                  color: "#0A2540",
+                  lineHeight: 1.2
+                }}
+              >
+                EveLedger
+              </div>
+              <div
+                style={{
+                  fontSize: "0.62rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "#94A3B8"
+                }}
+              >
+                por Evetev
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: "0.75rem 0.75rem", overflowY: "auto" }}>
+          {SECCIONES.map((sec) => (
+            <div key={sec.label} style={{ marginBottom: "1.5rem" }}>
+              <p
+                style={{
+                  fontSize: "0.62rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "#94A3B8",
+                  padding: "0 0.5rem",
+                  marginBottom: "0.375rem"
+                }}
+              >
+                {sec.label}
+              </p>
+              {sec.items.map(({ href, texto, Ico }) => {
+                const active = isActive(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    // Cierra el cajón al navegar: en un teléfono, quedarse
+                    // abierto tapando la pantalla recién abierta desconcierta.
+                    onClick={() => setAbierta(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.625rem",
+                      padding: "0.5rem 0.625rem",
+                      marginBottom: "0.125rem",
+                      borderRadius: 8,
+                      textDecoration: "none",
+                      fontSize: "0.855rem",
+                      fontWeight: active ? 600 : 400,
+                      color: active ? "#4b3075" : "#0A2540",
+                      background: active ? "#f3eeff" : "transparent",
+                      transition: "all 0.12s"
+                    }}
+                  >
+                    <span style={{ color: active ? "#4b3075" : "#64748B", flexShrink: 0 }}>
+                      <Ico />
+                    </span>
+                    {texto}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        {/* Usuario + logout */}
         <div
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            background: "#0A2540",
+            padding: "0.875rem 1rem",
+            borderTop: "1px solid #EDF3FA",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            fontSize: "0.7rem",
-            fontWeight: 700,
-            color: "#fff",
-            flexShrink: 0
+            gap: "0.625rem"
           }}
         >
-          AD
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p
+          <div
             style={{
-              margin: 0,
-              fontSize: "0.78rem",
-              fontWeight: 600,
-              color: "#0A2540",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis"
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: "#0A2540",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "0.7rem",
+              fontWeight: 700,
+              color: "#fff",
+              flexShrink: 0
             }}
           >
-            Administrador
-          </p>
-          {email && (
+            AD
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <p
               style={{
                 margin: 0,
-                fontSize: "0.68rem",
-                color: "#94A3B8",
+                fontSize: "0.78rem",
+                fontWeight: 600,
+                color: "#0A2540",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis"
               }}
             >
-              {email}
+              Administrador
             </p>
-          )}
+            {email && (
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "0.68rem",
+                  color: "#94A3B8",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
+                }}
+              >
+                {email}
+              </p>
+            )}
+          </div>
+          <form action={logout}>
+            <button
+              type="submit"
+              title="Cerrar sesión"
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                padding: 6,
+                color: "#64748B",
+                borderRadius: 6,
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center"
+              }}
+            >
+              <IcoLogout />
+            </button>
+          </form>
         </div>
-        <form action={logout}>
-          <button
-            type="submit"
-            title="Cerrar sesión"
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              padding: 6,
-              color: "#64748B",
-              borderRadius: 6,
-              flexShrink: 0,
-              display: "flex",
-              alignItems: "center"
-            }}
-          >
-            <IcoLogout />
-          </button>
-        </form>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

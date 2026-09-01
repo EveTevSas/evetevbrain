@@ -3,6 +3,7 @@ import { inventarioMensual } from "@/lib/inventarios";
 import { fechaAInput } from "@/lib/format";
 import AccordionInventario from "@/components/accordion-inventario";
 import type { ProductoSerial } from "@/components/accordion-inventario";
+import { periodoPorDefecto } from "@/lib/periodo";
 
 export const dynamic = "force-dynamic";
 
@@ -27,9 +28,9 @@ export default async function InventariosPage({
   searchParams: Promise<{ anio?: string; mes?: string }>;
 }) {
   const sp = await searchParams;
-  const ahora = new Date();
-  const anio = Number(sp.anio) || ahora.getUTCFullYear();
-  const mes = Number(sp.mes) || ahora.getUTCMonth() + 1;
+  const porDefecto = await periodoPorDefecto();
+  const anio = Number(sp.anio) || porDefecto.anio;
+  const mes = Number(sp.mes) || porDefecto.mes;
 
   const { diasEnMes, productos } = await inventarioMensual(anio, mes);
   const anios = [anio - 2, anio - 1, anio, anio + 1];
