@@ -825,8 +825,6 @@
             <a class="mini oculto" id="enlacePreview" target="_blank" rel="noopener noreferrer"
               >Preview de Vercel ↗</a
             >
-            <button class="mini" id="btnCopiar" disabled>Copiar código</button>
-            <button class="mini" id="btnDescargar" disabled>Descargar .html</button>
           </div>
         </div>
         <div class="lienzo">
@@ -1233,8 +1231,6 @@
         $("#sinNada").classList.toggle("oculto", !!ultimoCodigo);
         pintarPrevia();
         pintarDetalles(prUrl, prosa);
-        $("#btnCopiar").disabled = !ultimoCodigo;
-        $("#btnDescargar").disabled = !ultimoCodigo;
       }
 
       // ── Envío ────────────────────────────────────────────────────────────────
@@ -1305,11 +1301,23 @@
           // tuviera algo, y ese algo podía venir del texto del agente: se enlazó un
           // PR #58 que no existía. La URL de la herramienta y la inventada eran
           // indistinguibles aquí, así que ahora el origen lo dice el servidor.
+          /* Tres desenlaces distintos, y antes se contaban como dos. El `else`
+             anunciaba «Interfaz generada» siempre que no hubiera PR, incluso
+             cuando el agente había contestado hablando —por ejemplo para decir
+             que NO cambiaba nada—: la interfaz afirmaba algo que no había
+             pasado, y la vista previa enseñaba un párrafo como si fuera una
+             página rota. Si no hay página ni PR, lo que hay que leer es lo que
+             el agente respondió. */
+          const hayInterfaz = !!(
+            (cuerpo.codigo_html || "").trim() || (cuerpo.archivos || []).length
+          );
           if (cuerpo.pr_verificado && cuerpo.pr_url) {
             burbuja("eve", "Abrí un Pull Request con el cambio.", "Eve");
             enlacePR(cuerpo.pr_url);
-          } else {
+          } else if (hayInterfaz) {
             burbuja("eve", "Interfaz generada — la ves a la derecha.", "Eve");
+          } else {
+            burbuja("eve", cuerpo.mensaje_crudo || "El agente no devolvió nada.", "Eve");
           }
           // El aviso va DESPUÉS del resumen y con estilo de error: si el agente dijo
           // que abrió un PR sin abrirlo, eso es lo último que hay que leer.
@@ -1586,8 +1594,6 @@
         ultimosArchivos = [];
         adjuntarRegistro = false;
         $("#sinNada").classList.remove("oculto");
-        $("#btnCopiar").disabled = true;
-        $("#btnDescargar").disabled = true;
         $("#enlacePreview").classList.add("oculto");
         pintarDetalles(null, "");
         verPanel("previa");
@@ -1611,24 +1617,6 @@
         avisar(`Instrucciones guardadas para «${proyecto().nombre}».`);
       });
 
-      $("#btnCopiar").addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(ultimoCodigo);
-          avisar("Código copiado.");
-        } catch {
-          avisar("No se pudo copiar.");
-        }
-      });
-
-      $("#btnDescargar").addEventListener("click", () => {
-        const url = URL.createObjectURL(new Blob([ultimoCodigo], { type: "text/html" }));
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "eve-studio.html";
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-
       $("#btnLimpiar").addEventListener("click", () => {
         if (
           proyecto().completo.length &&
@@ -1645,8 +1633,6 @@
         ultimosArchivos = [];
         adjuntarRegistro = false;
         $("#sinNada").classList.remove("oculto");
-        $("#btnCopiar").disabled = true;
-        $("#btnDescargar").disabled = true;
         $("#enlacePreview").classList.add("oculto");
         pintarDetalles(null, "");
         pintarConversacion();
