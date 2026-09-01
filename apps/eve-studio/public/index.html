@@ -1253,6 +1253,10 @@
         btn.disabled = true;
         btn.textContent = "Generando…";
         burbuja("yo", texto);
+        /* El cuadro se vacía para que se vea que la petición salió, pero el texto
+           se guarda: si la vuelta acaba en error —y un 504 tarda cinco minutos en
+           llegar—, se devuelve. Escribir tres veces lo mismo tras esperar cinco
+           minutos cada vez es lo que pasó el 31 de agosto de 2026. */
         $("#peticion").value = "";
 
         const cargando = document.createElement("div");
@@ -1293,6 +1297,7 @@
             // solo tras una respuesta correcta. (Un pop() aquí borraría la respuesta
             // del intercambio ANTERIOR y corrompería el contexto del agente.)
             burbuja("err", mensajeDeError(r.status, cuerpo.detail));
+            devolverTexto(texto);
             return;
           }
 
@@ -1355,12 +1360,21 @@
         } catch {
           cargando.remove();
           burbuja("err", "Sin conexión con el agente. Revisa tu red e inténtalo de nuevo.");
+          devolverTexto(texto);
         } finally {
           clearInterval(tic);
           enviando = false;
           btn.disabled = false;
           btn.textContent = "Generar";
         }
+      }
+
+      /* Devuelve al cuadro lo que se escribió, si no se ha escrito otra cosa
+         entretanto. Un 504 tarda cinco minutos en llegar, y perder el texto ahí
+         obliga a reescribirlo entero — que es exactamente lo que pasó. */
+      function devolverTexto(texto) {
+        const campo = $("#peticion");
+        if (!campo.value.trim()) campo.value = texto;
       }
 
       function mensajeDeError(estado, detalle) {
@@ -1370,8 +1384,16 @@
         if (detalle === "falta_moonshot_api_key")
           return "Al servidor le falta la MOONSHOT_API_KEY.";
         if (estado === 502) return "El agente falló al generar. Prueba a reformular la petición.";
+        if (estado === 422 || detalle === "peticion_demasiado_grande")
+          return (
+            "La petición dio para más pasos de los que caben en una vuelta. Pídelo por " +
+            "partes —primero la maquetación, luego la imagen— o di en qué archivo hay que tocar."
+          );
         if (estado === 504)
-          return "El agente tardó demasiado. Prueba con una petición más concreta.";
+          return (
+            "El agente tardó demasiado y el servidor cortó. Tocar una landing entera es " +
+            "caro: pídelo por partes. Tu texto sigue en el cuadro."
+          );
         return "No se pudo generar (error " + estado + ").";
       }
 

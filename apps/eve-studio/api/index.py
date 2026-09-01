@@ -20,6 +20,7 @@ vercel.json; añadirlo puede cambiar el path que ve FastAPI y provocar un 404.
 import os
 import re
 import secrets
+import time
 from typing import List, Literal
 
 import requests
@@ -32,6 +33,7 @@ from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 # Nota: en LangGraph 1.x esto emite un aviso de deprecación (la alternativa es
 # langchain.agents.create_agent). Sigue funcionando; migrar cuando se toque.
+from langgraph.errors import GraphRecursionError
 from langgraph.prebuilt import create_react_agent
 
 load_dotenv()  # solo para desarrollo local; en Vercel las vars ya están en el entorno
@@ -85,6 +87,31 @@ ARCHIVOS_PROHIBIDOS = ("base.css", "formularios.js")
 MAX_ARCHIVOS = 5
 MAX_BYTES_ARCHIVO = 100_000
 MAX_PROPUESTAS_POR_PETICION = 3
+
+# ── El presupuesto de tiempo ───────────────────────────────────────────────
+# Vercel corta la función a los 300 s (`maxDuration` en vercel.json) y devuelve
+# un 504, que a la persona le llega como «el agente tardó demasiado» después de
+# cinco minutos de espera. Pasó dos veces seguidas el 31 de agosto de 2026 con
+# la misma petición.
+#
+# La causa no era el modelo yendo lento: era que NADA acotaba el trabajo. En
+# LangGraph 1.x el `recursion_limit` por defecto es 10007 —comprobado en el
+# paquete instalado, no es un número redondo por casualidad—, así que el agente
+# podía encadenar pasos hasta que Vercel lo mataba. Y el arnés podía lanzar una
+# segunda vuelta entera sin mirar cuánto quedaba.
+#
+# Ahora hay tres frenos, y los tres fallan HABLANDO: es mejor una respuesta que
+# explica que se quedó corta que un 504 mudo tras cinco minutos.
+MAX_PASOS_AGENTE = 12
+# Cuánto se le concede a una llamada al modelo. Sin esto, una que se cuelgue
+# arriba se come el presupuesto entero y el resultado es el mismo 504.
+TIMEOUT_MODELO = 90
+# Si al acabar la primera vuelta queda menos que esto, no se lanza la del arnés:
+# arrancarla sabiendo que no cabe garantiza el 504 que se quiere evitar.
+MARGEN_PARA_EL_ARNES = 100
+# Cuándo se considera agotado el presupuesto, con holgura sobre los 300 s de
+# Vercel para que la respuesta salga por la puerta antes del corte.
+PRESUPUESTO_TOTAL = 240
 
 AUTOR_COMMIT = {"name": "Eve Studio", "email": "eve@evetev.com"}
 
@@ -676,6 +703,7 @@ def construir_agente(registro: dict):
         base_url="https://api.moonshot.ai/v1",
         model="kimi-k3",
         temperature=1.0,
+        timeout=TIMEOUT_MODELO,
     )
     return create_react_agent(
         llm,
@@ -944,6 +972,7 @@ def compactar_historial(historial: list[dict]) -> list[dict] | None:
             base_url="https://api.moonshot.ai/v1",
             model="kimi-k3",
             temperature=0.2,
+            timeout=TIMEOUT_MODELO,
         )
         resumen = llm.invoke([HumanMessage(content=peticion)]).content
     except Exception as e:
@@ -985,9 +1014,23 @@ async def generar_interfaz(
 
     registro: dict = {}
     agente = construir_agente(registro)
+    # El presupuesto se cuenta desde aquí, no desde el principio de la función:
+    # leer el historial y compactarlo ya consumió tiempo, y lo que hay que acotar
+    # es lo que falta.
+    arranque = time.monotonic()
+    restante = lambda: PRESUPUESTO_TOTAL - (time.monotonic() - arranque)
+    ajustes = {"recursion_limit": MAX_PASOS_AGENTE}
     try:
-        resultado = agente.invoke({"messages": mensajes})
-        salida = resultado["messages"][-1].content
+        try:
+            resultado = agente.invoke({"messages": mensajes}, config=ajustes)
+            salida = resultado["messages"][-1].content
+        except GraphRecursionError:
+            # Se acabaron los pasos. Antes esto no podía pasar —el tope era
+            # 10007— y lo que ocurría en su lugar era que Vercel mataba la
+            # función a los 300 s: cinco minutos de espera y un 504 mudo. Ahora
+            # se corta antes y se dice, que es recuperable.
+            print(f"tope de pasos alcanzado ({MAX_PASOS_AGENTE})")
+            raise HTTPException(status_code=422, detail="peticion_demasiado_grande")
 
         # ── El arnés ───────────────────────────────────────────────────────
         # Si el agente dice que dejó el cambio y la herramienta no corrió, se le
@@ -1007,12 +1050,29 @@ async def generar_interfaz(
         # la persona; lo que no se hace es dejar al modelo en bucle gastando
         # créditos hasta que acierte.
         if not registro.get("pr_url") and not registro.get("fallos") and dice_que_cambio(salida):
-            print("arnés: el agente dijo haber propuesto un cambio sin llamar a la herramienta")
-            registro["arnes_disparado"] = True
-            resultado = agente.invoke(
-                {"messages": list(resultado["messages"]) + [HumanMessage(content=AVISO_ARNES)]}
-            )
-            salida = resultado["messages"][-1].content
+            if restante() < MARGEN_PARA_EL_ARNES:
+                # Arrancar una vuelta entera sabiendo que no cabe garantiza el
+                # 504 que se quiere evitar, y encima tirando la respuesta que ya
+                # tenemos. Se deja pasar y el aviso de abajo la desmiente ante
+                # la persona, que era el objetivo del arnés.
+                print(f"arnés omitido: quedan {restante():.0f} s")
+                registro.setdefault("fallos", []).append(
+                    "No hubo tiempo de comprobar si el cambio se dejó de verdad."
+                )
+            else:
+                print("arnés: el agente dijo haber propuesto un cambio sin llamar a la herramienta")
+                registro["arnes_disparado"] = True
+                resultado = agente.invoke(
+                    {"messages": list(resultado["messages"]) + [HumanMessage(content=AVISO_ARNES)]},
+                    config=ajustes,
+                )
+                salida = resultado["messages"][-1].content
+    except HTTPException:
+        # Los cortes deliberados —el tope de pasos— ya traen su código y su
+        # motivo. Sin esta rama el `except Exception` de abajo los convertía en
+        # un 502 genérico, y la persona volvía a leer «el agente falló» en vez
+        # de «la petición era demasiado grande», que es lo accionable.
+        raise
     except Exception as e:
         # Sin filtrar la excepción cruda al cliente: puede arrastrar la API key.
         print(f"fallo del agente: {type(e).__name__}: {e}")
