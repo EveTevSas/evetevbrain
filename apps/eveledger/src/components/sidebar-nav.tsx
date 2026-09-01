@@ -186,12 +186,6 @@ export default function SidebarNav({ email }: { email?: string }) {
   const pathname = usePathname();
   const [abierta, setAbierta] = useState(false);
 
-  // Navegar cierra el cajón: en un teléfono, quedarse abierto tapando la
-  // pantalla a la que acabas de entrar es desconcertante.
-  useEffect(() => {
-    setAbierta(false);
-  }, [pathname]);
-
   // Escape cierra, como cualquier panel superpuesto.
   useEffect(() => {
     if (!abierta) return;
@@ -251,6 +245,7 @@ export default function SidebarNav({ email }: { email?: string }) {
         <div style={{ padding: "1.25rem 1rem 1rem", borderBottom: "1px solid #EDF3FA" }}>
           <Link
             href="/"
+            onClick={() => setAbierta(false)}
             style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -305,6 +300,9 @@ export default function SidebarNav({ email }: { email?: string }) {
                   <Link
                     key={href}
                     href={href}
+                    // Cierra el cajón al navegar: en un teléfono, quedarse
+                    // abierto tapando la pantalla recién abierta desconcierta.
+                    onClick={() => setAbierta(false)}
                     style={{
                       display: "flex",
                       alignItems: "center",
