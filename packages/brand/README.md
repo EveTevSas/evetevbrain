@@ -1,7 +1,7 @@
 # @evetev/brand
 
 Identidad de marca de Evetev: **fuente de verdad** de logos, isotipos, favicon,
-mascota y tokens de color.
+mascota, tokens de color y **tono de voz**.
 
 ```
 assets/
@@ -9,7 +9,8 @@ assets/
 ├── tokens/                       # tokens exportables
 ├── logotipos/ · isotipos/ · lockups/
 ├── favicon/ · mascota/ · unidades/
-└── evetev_brand_styles.md        # guía de uso de marca
+├── evetev_brand_styles.md        # guía de uso de marca (lo visual)
+└── tono-de-voz.md                # cómo habla la marca (lo escrito)
 
 patrones/
 └── login/                        # patrón de login (ver abajo)
@@ -17,6 +18,18 @@ patrones/
     ├── soft-pastel-blend.tsx      # componente de fondo (copiable)
     └── login-page.tsx             # plantilla completa (copiable)
 ```
+
+## `tono-de-voz.md` — cómo habla la marca
+
+Manual de voz: los tres carriles (institucional, producto, editorial), la regla
+del tuteo y el usted, el léxico bogotano que sí se usa y el que no, la microcopia
+de errores y estados, y la fauna como escenografía —nunca como segunda mascota,
+que la mascota es Eve—.
+
+El §9 de `assets/evetev_brand_styles.md` es su resumen operativo, el que se le
+entrega a un agente de IA. Cuando los dos se contradigan, manda el manual.
+
+---
 
 ## `patrones/login/` — patrón de pantalla de inicio de sesión
 

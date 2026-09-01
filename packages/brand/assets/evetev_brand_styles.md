@@ -768,12 +768,25 @@ en ultra-wide el contenido **no se estira**, respira.
 
 ## 9. Tono de voz (para el texto que generes)
 
-- **Español claro, sin jerga.** "Estado de cuenta", no "balance ledger".
-- **Directo y honesto.** La marca vende transparencia: nada de letra menuda, promesas vagas ni superlativos vacíos.
-- **Cercano pero profesional.** Tuteo ("tu negocio", "cuéntanos"), sin informalidad excesiva ni emojis en UI.
+> Resumen operativo de [`tono-de-voz.md`](./tono-de-voz.md), que es el manual completo. Si los dos se
+> contradicen, manda ese y este se corrige.
+
+- **La voz en una frase:** Bogotá, en horario de oficina. El cachaco que trabaja ("listo", "cuadrar",
+  "toca", "quitar de encima"), nunca el de costumbrismo ("ala", "carachas", "chirriado", "chusco").
+- **El volumen baja cuando sube el riesgo.** Entre más plata o más miedo hay en la pantalla, más plano
+  el lenguaje. Un mensaje de error **nunca** es gracioso: dice qué pasó, si costó plata y qué hacer ahora.
+- **Español claro, sin jerga.** "Estado de cuenta", no "balance ledger". La jerga técnica se traduce a lo
+  que le pasa al cliente: no "motor de reportes con arquitectura RAG", sino "pregúntale a tus ventas".
+- **Directo y honesto.** La marca vende transparencia: nada de letra menuda, promesas vagas ni superlativos
+  vacíos. No se vende futuro; se muestra lo construido y se dice lo que todavía no.
+- **Tú y usted.** Tuteo a quien usa el producto (comercio, administrador, desarrollador). Usted a quien
+  recibe un cobro (residente, cliente final del link de pago). Nunca los dos en la misma pantalla.
 - **Frases cortas.** Un titular = una idea.
-- PROHIBIDO: "revolucionario", "líderes del mercado", "soluciones 360", "sinergia", exclamaciones múltiples.
-- Ejemplos de la voz correcta: _"Pagos e inteligencia artificial, sin complicaciones"_ · _"Tarifas transparentes. Tecnología propia. Cero letra menuda."_ · _"Construido por ingenieros."_
+- **La fauna es escenografía, no mascota.** Eve es quien habla; la tingua, el colibrí y el copetón son
+  dónde pasa la cosa: sin nombre propio, sin bocadillo, sin mirar al lector.
+- PROHIBIDO: "revolucionario", "líderes del mercado", "soluciones 360", "sinergia", exclamaciones múltiples,
+  emojis en UI, y "de una" y "plata" (son de Nequi: usarlas nos deja sonando a copia).
+- Ejemplos de la voz correcta: _"Pagos e inteligencia artificial, sin complicaciones"_ · _"Tarifas transparentes. Tecnología propia. Cero letra menuda."_ · _"Construido por ingenieros."_ · _"Nada de cruzar extractos en Excel."_
 
 **Dato de negocio:** EvePay cobra **un porcentaje por transacción más un componente fijo**, más suscripción
 mensual del software. NUNCA escribir "tarifa fija sin porcentaje" (información obsoleta).
@@ -794,6 +807,7 @@ Antes de devolver cualquier artefacto, confirma:
 - [ ] ¿Los errores llevan ícono + texto, no solo color?
 - [ ] ¿El modo oscuro usa `#081D33` y no negro puro?
 - [ ] ¿El texto evita jerga y las palabras prohibidas del §9?
+- [ ] ¿El tuteo y el usted siguen la regla del §9, sin mezclarse en una misma pantalla?
 
 ---
 
