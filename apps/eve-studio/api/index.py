@@ -274,14 +274,39 @@ def listar_carpeta_de_marca(ruta_carpeta: str = "") -> str:
     """Lista los activos de marca, diciendo cuáles se sirven de verdad.
 
     Úsala ANTES de citar cualquier imagen, para partir de los archivos que
-    existen de verdad en vez de deducir el nombre. Con cadena vacía lista la
-    raíz; las carpetas son 'mascota', 'isotipos', 'logotipos', 'lockups',
-    'unidades', 'favicon', 'tokens' e 'ilustraciones'.
+    existen de verdad en vez de deducir el nombre.
+
+    LLÁMALA CON CADENA VACÍA: devuelve, de una vez, todos los activos que el
+    sitio sirve. Esa es la respuesta completa a qué puedes citar, y te ahorra
+    adivinar la carpeta. Solo si necesitas ver qué más hay en el repositorio
+    pasa una: 'mascota', 'isotipos', 'logotipos', 'lockups', 'unidades',
+    'favicon', 'tokens' o 'ilustraciones'.
 
     SOLO puedes citar los marcados [se sirve]. Los marcados [NO se sirve] están
     en el repositorio pero el sitio no los publica, así que su ruta daría 404.
     """
     limpia = ruta_carpeta.strip("/")
+
+    # Sin carpeta se responde LO QUE EL SITIO SIRVE, plano y entero, en vez del
+    # índice de packages/brand. Es la respuesta directa a la única pregunta que
+    # esta herramienta contesta —«¿qué puedo citar?»— y evita tener que acertar
+    # la carpeta. Se perdió una petición por esto: la imagen estaba publicada en
+    # `ilustraciones`, el agente miró en `mascota` y en la raíz, no la encontró y
+    # se negó a usarla. Buscar bien no debería depender de adivinar dónde.
+    if not limpia:
+        servidos = _nombres_servidos(TOKEN_CODIGO)
+        if servidos is not None:
+            filas = "\n".join(f"  /marca/{n}" for n in sorted(servidos))
+            return (
+                f"El sitio sirve estos {len(servidos)} activos, y son los ÚNICOS que "
+                f"puedes citar:\n{filas}\n\n"
+                "Cítalos con esa ruta tal cual. Si necesitas ver de dónde sale cada uno "
+                "o qué más hay en el repositorio, lista una carpeta: 'ilustraciones', "
+                "'mascota', 'isotipos', 'logotipos', 'lockups', 'unidades', 'favicon' o "
+                "'tokens' — pero lo que no aparezca en esta lista no se sirve, y su ruta "
+                "daría 404."
+            )
+
     if limpia == "ilustraciones":
         ruta = f"{RAIZ_MARCA}/ilustraciones"
     else:
@@ -536,8 +561,11 @@ REGLAS DE COMPORTAMIENTO:
 1. DEBES usar la herramienta 'obtener_activo_github' para leer 'evetev_brand_styles.md' antes de escribir código si no tienes claro el contexto visual.
 2. Si necesitas verificar un token específico, pide leer 'colores.json'.
 3. NUNCA deduzcas el nombre de un activo de marca. Antes de citar cualquier
-   imagen, lista la carpeta con 'listar_carpeta_de_marca' y elige de lo que
-   exista de verdad; luego pide esa ruta a 'obtener_activo_github' y usa la URL
+   imagen llama a 'listar_carpeta_de_marca' CON CADENA VACÍA: te devuelve de una
+   vez todo lo que el sitio sirve, que es la lista completa de lo que puedes
+   citar. No adivines en qué carpeta buscar —se perdió una petición por eso: la
+   imagen estaba en 'ilustraciones', se miró en 'mascota' y se dio por
+   inexistente—. Elige de lo que exista de verdad; luego pide esa ruta a 'obtener_activo_github' y usa la URL
    que te devuelva TAL CUAL. Será una ruta del propio sitio, de la forma
    `/marca/<archivo>`: el sitio sirve su marca desde su origen, y esa es la
    única forma válida de citarla. NUNCA escribas a mano una URL de un CDN
@@ -683,6 +711,20 @@ def limpiar_markdown(texto: str) -> str:
         .replace("```", "")
         .strip()
     )
+
+
+def parece_html(texto: str) -> bool:
+    """¿Esto es una página, o es el agente hablando?
+
+    Importa porque `limpiar_markdown` solo quita las vallas de código: si el
+    agente responde en prosa —por ejemplo para decir que NO va a cambiar nada—,
+    el texto salía tal cual como `codigo_html` y la interfaz lo metía en el
+    iframe y anunciaba «Interfaz generada». Se veía una página rota que en
+    realidad era un párrafo. La regla 4 pide devolver el documento entero, así
+    que la cabecera es señal suficiente y barata.
+    """
+    cabeza = texto.lstrip()[:400].lower()
+    return "<!doctype" in cabeza or "<html" in cabeza
 
 
 def describir_token(valor: str | None) -> dict:
@@ -1013,8 +1055,11 @@ async def generar_interfaz(
            {"rol": "assistant", "contenido": entrada}]
     )
 
+    codigo = limpiar_markdown(salida)
     return {
-        "codigo_html": limpiar_markdown(salida),
+        # Vacío si el agente contestó hablando: la interfaz distingue así entre
+        # «aquí tienes la página» y «te explico por qué no la hice».
+        "codigo_html": codigo if parece_html(codigo) else "",
         "mensaje_crudo": salida,
         "pr_url": pr_url,
         # `pr_url` a secas no distingue un PR real de uno inventado —fue
