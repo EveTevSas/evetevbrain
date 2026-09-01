@@ -244,14 +244,15 @@
 }
 
 /* ── Link de pago por WhatsApp ───────────────────────────────────────────
-   Dos columnas en escritorio (texto / pasos), una en móvil. Los pasos usan
-   el mismo círculo numerado, en tamaño pequeño, alineado al texto. */
+   Tres columnas en escritorio (texto / pasos / imagen), una en móvil. Los
+   pasos usan el mismo círculo numerado, en tamaño pequeño, alineado al texto.
+   La imagen (tingua-card) es decorativa y ocupa la tercera columna. */
 .wa {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 56px;
+  grid-template-columns: 1fr 1fr 0.85fr;
+  gap: 40px;
   align-items: center;
-  max-width: 980px;
+  max-width: 1060px;
   margin: 0 auto;
 }
 .wa-texto h2 {
@@ -277,6 +278,13 @@
 .wa-pasos p {
   font-size: 0.93rem;
   padding-top: 3px;
+}
+.wa-imagen {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  margin: 0 auto;
 }
 
 /* ── Demo (formulario sobre azul noche) ──────────────────────────────────
@@ -333,7 +341,7 @@
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .wa {
-    gap: 40px;
+    gap: 32px;
   }
   .demo-grid {
     gap: 40px;

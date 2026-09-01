@@ -283,7 +283,8 @@
       </section>
 
       <!-- Link de pago por WhatsApp: beneficio protagonista con su propio
-       bloque, a dos columnas en escritorio y una en móvil. -->
+       bloque, a tres columnas en escritorio (texto / pasos / imagen) y una
+       en móvil. -->
       <section class="seccion seccion-tinte" id="link-de-pago" aria-labelledby="titulo-whatsapp">
         <div class="wrap">
           <div class="wa">
@@ -313,6 +314,15 @@
                 <p>Recibes el dinero directo en tu banco.</p>
               </li>
             </ol>
+            <!-- Imagen decorativa: la sección ya explica el cobro con texto, así
+             que va con alt vacío. loading="lazy" porque está a media página. -->
+            <img
+              class="wa-imagen"
+              src="/marca/tingua-card.webp"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         </div>
       </section>
