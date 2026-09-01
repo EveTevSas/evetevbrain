@@ -245,7 +245,13 @@
 
 /* ── Link de pago por WhatsApp ───────────────────────────────────────────
    Dos columnas en escritorio (texto / pasos), una en móvil. Los pasos usan
-   el mismo círculo numerado, en tamaño pequeño, alineado al texto. */
+   el mismo círculo numerado, en tamaño pequeño, alineado al texto.
+
+   La tingua con la tarjeta va flotada a la derecha (.wa-ilustracion), por
+   fuera de las dos columnas de la retícula: así acompaña a los pasos sin
+   disputarles el ancho y sin que el texto deje de ser lo primero que se lee.
+   En móvil pasa a ser un bloque centrado debajo de los pasos, con ancho
+   tope para no robarle la pantalla al formulario que viene después. */
 .wa {
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
@@ -277,6 +283,12 @@
 .wa-pasos p {
   font-size: 0.93rem;
   padding-top: 3px;
+}
+.wa-ilustracion {
+  float: right;
+  width: clamp(180px, 22vw, 280px);
+  height: auto;
+  margin: 0 0 18px 28px;
 }
 
 /* ── Demo (formulario sobre azul noche) ──────────────────────────────────
@@ -335,6 +347,10 @@
   .wa {
     gap: 40px;
   }
+  .wa-ilustracion {
+    width: clamp(150px, 20vw, 220px);
+    margin-left: 20px;
+  }
   .demo-grid {
     gap: 40px;
   }
@@ -359,6 +375,14 @@
   .wa-pasos {
     max-width: 420px;
     margin: 0 auto;
+  }
+  /* El float se quita: en una sola columna la tingua iría montada sobre el
+     primer paso. Pasa a bloque centrado al final de la sección. */
+  .wa-ilustracion {
+    float: none;
+    display: block;
+    width: min(240px, 60vw);
+    margin: 8px auto 0;
   }
   .demo {
     padding: 64px 0;
