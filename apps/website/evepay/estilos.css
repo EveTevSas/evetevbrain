@@ -250,7 +250,11 @@
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
   gap: 56px;
-  align-items: center;
+  /* `start`, no `center`: la columna de texto es más alta que los 4 pasos
+     porque lleva la ilustración debajo. Centrada, los pasos quedaban
+     flotando a media altura; alineados arriba arrancan en la misma línea
+     que el titular y el dibujo cuelga por debajo del texto. */
+  align-items: start;
   max-width: 980px;
   margin: 0 auto;
 }
@@ -277,6 +281,27 @@
 .wa-pasos p {
   font-size: 0.93rem;
   padding-top: 3px;
+}
+/* Ilustración de la tingua: línea sobre blanco, se apoya limpia sobre
+   --eve-tinte, sin tarjeta ni sombra (ya trae su propia base dibujada). */
+.wa-figura {
+  margin: 28px 0 0;
+}
+.wa-figura img {
+  width: min(420px, 100%);
+  height: auto;
+  display: block;
+  /* El WebP es línea sobre blanco puro (#fff en las esquinas). `multiply`
+     sobre el fondo de la sección hace que ese blanco desaparezca —#fff × X = X—
+     y la escena queda calada sobre --eve-tinte sin recortar el asset.
+     Depende de que esta sección sea clara (.seccion-tinte, #f4f9fd); si algún
+     día va sobre azul noche, hay que exportar el WebP con alfa de verdad. */
+  mix-blend-mode: multiply;
+}
+.wa-figura figcaption {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  color: var(--eve-pizarra);
 }
 
 /* ── Demo (formulario sobre azul noche) ──────────────────────────────────
@@ -354,6 +379,16 @@
     gap: 32px;
   }
   .wa-texto h2 {
+    text-align: center;
+  }
+  .wa-figura {
+    max-width: 420px;
+    margin-inline: auto;
+  }
+  .wa-figura img {
+    margin-inline: auto;
+  }
+  .wa-figura figcaption {
     text-align: center;
   }
   .wa-pasos {
