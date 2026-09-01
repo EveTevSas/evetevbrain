@@ -200,3 +200,107 @@ h2 {
     font-weight: 500;
   }
 }
+
+/* ============================================================
+   Adaptación a tablet y móvil
+   ------------------------------------------------------------
+   El armazón (sidebar fijo de 240 px + contenido con ese mismo
+   margen) estaba escrito con estilos en línea, que no admiten
+   media queries. En un teléfono de 375 px eso dejaba 135 px de
+   contenido. Aquí vive el armazón, y los componentes solo ponen
+   las clases.
+   ============================================================ */
+
+.eve-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 240px;
+  z-index: 40;
+}
+
+.eve-contenido {
+  margin-left: 240px;
+}
+
+/* Botón hamburguesa y velo: solo existen en pantallas estrechas */
+.eve-abrir,
+.eve-velo {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  /* El sidebar se convierte en cajón: fuera de pantalla hasta que se abre. */
+  .eve-sidebar {
+    transform: translateX(-100%);
+    transition: transform 200ms ease-out;
+    box-shadow: 0 0 0 rgb(10 37 64 / 0);
+  }
+  .eve-sidebar.abierta {
+    transform: translateX(0);
+    box-shadow: 0 12px 40px rgb(10 37 64 / 0.18);
+  }
+
+  .eve-contenido {
+    margin-left: 0;
+  }
+
+  /* Fijo, no en el flujo: el botón lo dibuja el sidebar, que es hermano del
+     contenido dentro de un contenedor flex. Dejarlo en el flujo le robaría
+     40 px de ancho a la página en vez de posarse sobre la barra superior.
+     Va por encima de la barra (30) pero por debajo del velo (35), así que al
+     abrir el cajón queda tapado y no estorba. */
+  .eve-abrir {
+    position: fixed;
+    top: 8px;
+    left: 12px;
+    z-index: 32;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--color-eve-linea);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--color-eve-azul-noche);
+    cursor: pointer;
+  }
+  .eve-abrir:focus-visible {
+    outline: 2px solid var(--color-eve-electrico);
+    outline-offset: 2px;
+  }
+
+  .eve-velo {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    background: rgb(10 37 64 / 0.42);
+    border: 0;
+    padding: 0;
+  }
+
+  /* La barra superior aprieta su margen para dejar sitio al botón. */
+  /* Deja hueco al botón fijo para que no se solape con el contenido. */
+  .eve-topbar {
+    padding-left: 64px !important;
+    padding-right: 0.75rem !important;
+  }
+  .eve-main {
+    padding: 1rem !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .eve-main {
+    padding: 0.75rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eve-sidebar {
+    transition: none;
+  }
+}

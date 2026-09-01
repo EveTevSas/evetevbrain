@@ -60,9 +60,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
             {/* Área de contenido */}
             <div
+              className="eve-contenido"
               style={{
                 flex: 1,
-                marginLeft: 240,
+                minWidth: 0,
                 display: "flex",
                 flexDirection: "column",
                 minHeight: "100vh"
@@ -70,6 +71,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             >
               {/* Top bar */}
               <header
+                className="eve-topbar"
                 style={{
                   height: 56,
                   background: "#fff",
@@ -98,10 +100,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
               {/* Contenido principal */}
               <main
+                className="eve-main"
                 style={{
                   flex: 1,
                   padding: "2rem 2.5rem",
-                  width: "100%"
+                  width: "100%",
+                  minWidth: 0
                 }}
               >
                 {children}

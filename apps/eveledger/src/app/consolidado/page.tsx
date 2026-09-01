@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { consolidadoMensual } from "@/lib/cierres";
 import { formatoGalones } from "@/lib/format";
+import { periodoPorDefecto } from "@/lib/periodo";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +26,9 @@ export default async function ConsolidadoPage({
   searchParams: Promise<{ anio?: string; mes?: string }>;
 }) {
   const sp = await searchParams;
-  const ahora = new Date();
-  const anio = Number(sp.anio) || ahora.getUTCFullYear();
-  const mes = Number(sp.mes) || ahora.getUTCMonth() + 1;
+  const porDefecto = await periodoPorDefecto();
+  const anio = Number(sp.anio) || porDefecto.anio;
+  const mes = Number(sp.mes) || porDefecto.mes;
 
   const { diasEnMes, productos, matriz } = await consolidadoMensual(anio, mes);
 

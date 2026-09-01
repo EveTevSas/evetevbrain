@@ -1,4 +1,4 @@
-// Genera un mes de operación completo y coherente, para recorrer la aplicación
+// Genera dos meses de operación completos y coherentes, para recorrer la aplicación
 // entera con datos que se parecen a los de verdad: cierres diarios cuadrados,
 // inventarios con una merma, cartera con facturas en varios rangos de mora y
 // abonos FIFO, y el financiero con su comparativa contra el mes anterior.
@@ -53,12 +53,36 @@ function mesAnterior(): { anio: number; mes: number } {
   return MES === 1 ? { anio: ANIO - 1, mes: 12 } : { anio: ANIO, mes: MES - 1 };
 }
 
+/**
+ * Todas las fechas del periodo: desde el 1 del mes anterior hasta hoy.
+ *
+ * Cubrir dos meses no es capricho. Casi todas las pantallas abren en el mes
+ * corriente, así que generar solo el mes actual dejaba la aplicación en blanco
+ * cada día 1 —y el día 1 es justo cuando alguien la abre para enseñarla—. Con el
+ * mes anterior completo siempre hay un periodo con operación de verdad, y la
+ * comparativa de gastos deja de compararse contra la nada.
+ */
+function fechasDelPeriodo(): Date[] {
+  const ant = mesAnterior();
+  const fin = new Date(Date.UTC(ANIO, MES - 1, DIA_HOY));
+  const fechas: Date[] = [];
+  const d = new Date(Date.UTC(ant.anio, ant.mes - 1, 1));
+  while (d <= fin) {
+    fechas.push(new Date(d));
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+  return fechas;
+}
+
+function comoTexto(d: Date): string {
+  return f(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate());
+}
+
 /** Galones vendidos por manguera y día: variación suave + más venta en fin de semana. */
-function galonesDelDia(dia: number, idx: number): number {
-  const fecha = new Date(Date.UTC(ANIO, MES - 1, dia));
+function galonesDelDia(fecha: Date, i: number, idx: number): number {
   const finde = [0, 6].includes(fecha.getUTCDay());
   const base = 260 + idx * 18;
-  const onda = Math.round(38 * Math.sin((dia + idx) / 2.4));
+  const onda = Math.round(38 * Math.sin((i + idx) / 2.4));
   return base + onda + (finde ? 55 : 0);
 }
 
@@ -110,8 +134,10 @@ async function main() {
   // El inicial de un día es el físico del anterior. Sin esto, el día 1 arrancaría
   // en cero y la teórica saldría negativa en cuanto hubiera ventas.
   const ant = mesAnterior();
-  const diasMesAnterior = new Date(Date.UTC(ANIO, MES - 1, 0)).getUTCDate();
-  const vispera = f(ant.anio, ant.mes, diasMesAnterior);
+  const fechas = fechasDelPeriodo();
+  const anteayer = new Date(fechas[0]);
+  anteayer.setUTCDate(anteayer.getUTCDate() - 1);
+  const vispera = comoTexto(anteayer);
   await guardarInventarioDia(
     vispera,
     productos.map((p) => ({ productId: p.id, galones: 9000 })),
@@ -123,24 +149,27 @@ async function main() {
   // Todos cerrados salvo el de hoy, que queda en borrador para que se vean los
   // dos estados. Los vales se reparten en dos tandas para poder facturar dos
   // veces por cliente y que el FIFO de los abonos tenga contra qué aplicarse.
-  const CORTE_CICLO1 = Math.min(14, DIA_HOY - 1);
+  // Dos cortes de facturación repartidos por el periodo, para que cada cliente
+  // acumule factura vieja y reciente y el FIFO tenga contra qué aplicarse.
+  const CORTE_CICLO1 = Math.floor(fechas.length * 0.45);
   let cerrados = 0;
 
-  for (let dia = 1; dia <= DIA_HOY; dia++) {
-    const fecha = f(ANIO, MES, dia);
-    const esHoy = dia === DIA_HOY;
+  for (let i = 0; i < fechas.length; i++) {
+    const dia = i + 1; // posición en el periodo, no del mes
+    const fecha = comoTexto(fechas[i]);
+    const esHoy = i === fechas.length - 1;
 
     const creado = await crearCierre(fecha);
     if (!creado.ok) throw new Error(`${fecha}: ${creado.errores.join(", ")}`);
     const prep = await prepararNuevoCierre(fecha);
 
     const lecturas = prep.lecturas.map((l, idx) => {
-      const inicial = dia === 1 ? 125_000 + idx * 4_000 : l.lecturaInicial;
+      const inicial = i === 0 ? 125_000 + idx * 4_000 : l.lecturaInicial;
       const calibracion = dia % 7 === 0 ? 4 : 0;
       return {
         nozzleId: l.nozzleId,
         lecturaInicial: inicial,
-        lecturaFinal: inicial + galonesDelDia(dia, idx) + calibracion,
+        lecturaFinal: inicial + galonesDelDia(fechas[i], i, idx) + calibracion,
         calibracion,
         precio: PRECIOS[l.productoNombre] ?? 16_000
       };
@@ -198,7 +227,7 @@ async function main() {
     if (!esHoy) cerrados++;
 
     // Facturación del primer ciclo, en cuanto se pasa el corte.
-    if (dia === CORTE_CICLO1) {
+    if (i === CORTE_CICLO1) {
       for (const c of clientes) {
         const r = await generarFactura(c.id);
         if (r.ok) {
@@ -222,10 +251,12 @@ async function main() {
           }
         }
       }
-      console.log(`Ciclo 1 facturado (corte día ${CORTE_CICLO1})`);
+      console.log(`Ciclo 1 facturado (corte en ${comoTexto(fechas[CORTE_CICLO1])})`);
     }
   }
-  console.log(`Cierres: ${cerrados} cerrados + 1 borrador (hoy)`);
+  console.log(
+    `Cierres: ${cerrados} cerrados + 1 borrador (hoy) · ${comoTexto(fechas[0])} → ${comoTexto(fechas[fechas.length - 1])}`
+  );
 
   // ── 5. Facturación del segundo ciclo ──────────────────────────────────────
   // Sin retrasar: quedan recientes (rango 0-30, verde), que es lo que deja ver
@@ -262,11 +293,13 @@ async function main() {
   // resulta y se digita el físico encima. El físico se pega a la teórica salvo
   // en dos días, donde se hunde lo bastante para disparar la alerta de merma
   // (umbral: 0,5 % de la teórica, mínimo 1 gal).
-  const DIAS_CON_MERMA = [Math.floor(DIA_HOY / 3), Math.floor((DIA_HOY * 2) / 3)];
+  // Una merma en cada mes, para que la alerta se vea mire donde mire.
+  const DIAS_CON_MERMA = [Math.floor(fechas.length * 0.22), Math.floor(fechas.length * 0.78)];
   let diasConAlerta = 0;
 
-  for (let dia = 1; dia < DIA_HOY; dia++) {
-    const fecha = f(ANIO, MES, dia);
+  for (let i = 0; i < fechas.length - 1; i++) {
+    const dia = i + 1;
+    const fecha = comoTexto(fechas[i]);
     const hayDescarga = dia % 4 === 0;
     const compras = hayDescarga
       ? productos.map((p) => ({ productId: p.id, galones: p.nombre === "Extra" ? 2_000 : 5_000 }))
@@ -276,7 +309,7 @@ async function main() {
     const leido = await obtenerInventarioDia(fecha);
     if (!leido) continue;
 
-    const conMerma = DIAS_CON_MERMA.includes(dia);
+    const conMerma = DIAS_CON_MERMA.includes(i);
     const fisicos = leido.productos.map((fila, idx) => {
       // La teórica no viene dada: se deriva igual que en la aplicación.
       const teorica = existenciaTeorica(
@@ -296,7 +329,9 @@ async function main() {
     const r = await guardarInventarioDia(fecha, fisicos, compras);
     if (!r.ok) console.warn(`Inventario ${fecha}: ${r.errores.join(", ")}`);
   }
-  console.log(`Inventarios: ${DIA_HOY - 1} días digitados, ${diasConAlerta} con alerta de merma`);
+  console.log(
+    `Inventarios: ${fechas.length - 1} días digitados, ${diasConAlerta} con alerta de merma`
+  );
 
   // ── 8. Financiero ─────────────────────────────────────────────────────────
   const costosMes = productos.map((p) => ({

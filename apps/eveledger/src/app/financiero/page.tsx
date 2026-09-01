@@ -1,5 +1,6 @@
 import { margenMensual, gastosMensual } from "@/lib/financiero";
 import FinancieroClient from "./FinancieroClient";
+import { periodoPorDefecto } from "@/lib/periodo";
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +25,9 @@ export default async function FinancieroPage({
   searchParams: Promise<{ anio?: string; mes?: string }>;
 }) {
   const sp = await searchParams;
-  const ahora = new Date();
-  const anio = Number(sp.anio) || ahora.getUTCFullYear();
-  const mes = Number(sp.mes) || ahora.getUTCMonth() + 1;
+  const porDefecto = await periodoPorDefecto();
+  const anio = Number(sp.anio) || porDefecto.anio;
+  const mes = Number(sp.mes) || porDefecto.mes;
 
   const margenes = await margenMensual(anio, mes);
   const gastos = await gastosMensual(anio, mes);

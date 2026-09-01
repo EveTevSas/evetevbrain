@@ -1,6 +1,7 @@
 import { dashboardMensual } from "@/lib/dashboard";
 import { formatoGalones } from "@/lib/format";
 import { IconoAlerta, IconoError, IconoExito } from "@/components/iconos";
+import { periodoPorDefecto } from "@/lib/periodo";
 
 export const dynamic = "force-dynamic";
 
@@ -155,9 +156,9 @@ export default async function DashboardPage({
   searchParams: Promise<{ anio?: string; mes?: string }>;
 }) {
   const sp = await searchParams;
-  const ahora = new Date();
-  const anio = Number(sp.anio) || ahora.getUTCFullYear();
-  const mes = Number(sp.mes) || ahora.getUTCMonth() + 1;
+  const porDefecto = await periodoPorDefecto();
+  const anio = Number(sp.anio) || porDefecto.anio;
+  const mes = Number(sp.mes) || porDefecto.mes;
 
   const data = await dashboardMensual(anio, mes);
   const anios = [anio - 2, anio - 1, anio, anio + 1];
@@ -333,7 +334,13 @@ export default async function DashboardPage({
       </div>
 
       {/* ── KPIs ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "1rem" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+          gap: "1rem"
+        }}
+      >
         {kpis.map(({ etiqueta, valor, full, iconColor, alerta }) => (
           <div
             key={etiqueta}
@@ -371,7 +378,13 @@ export default async function DashboardPage({
       </div>
 
       {/* ── Gráficas ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gap: "1rem"
+        }}
+      >
         {/* Torta medios de pago */}
         <section
           style={{
@@ -578,7 +591,7 @@ export default async function DashboardPage({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
           gap: "1rem",
           alignItems: "stretch"
         }}
