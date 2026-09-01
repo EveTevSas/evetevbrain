@@ -520,19 +520,30 @@ norma.
 detrás de un texto. Es línea densa y compite con lo que hay que leer. El patrón
 es `.portada::after` en `apps/website/conecta/estilos.css`.
 
-**Y súbela a `packages/brand/ilustraciones/`**, más la línea que la añade al
-manifiesto de `scripts/marca-sync.mjs` para la app que la vaya a usar. Sin esa
-línea el archivo está en el repositorio y no lo sirve nadie: la página da 404.
-Antes esto era «etiquetar una versión y purgar el CDN», con dos formas conocidas
-de fallar en silencio; ahora falla en el CI, que es donde debe fallar.
+**Y publícala**, que es un solo paso desde septiembre de 2026: la pestaña
+«Imagen» de Eve Studio, o `pnpm marca:imagen <archivo> --app <app>`. Convierte
+con esta receta, deja el archivo en `packages/brand/ilustraciones/` y —lo que se
+olvidaba— **añade la línea al manifiesto de `scripts/marca-sync.mjs`** para la
+app que la vaya a usar. Sin esa línea el archivo está en el repositorio y no lo
+sirve nadie: la página da 404. Antes esto era «etiquetar una versión y purgar el
+CDN», con dos formas conocidas de fallar en silencio; ahora falla en el CI, que
+es donde debe fallar.
 
-> Los archivos publicados de esta carpeta cuentan la historia de estas reglas y
-> **ninguno es la referencia de estilo; la referencia es el prompt.**
-> `conjunto-residencial.webp` es anterior a él y tiene trazos violeta.
-> `conjunto-residencial-color.svg`, `conjunto-residencial.svg`, `comercio.svg` y
-> `flujo-de-pago.svg` son los dibujados a mano, de la época en que esto
-> recomendaba SVG. Siguen publicados porque lo publicado no se retira, pero
-> **hay que reemplazarlos por versiones generadas.**
+> Los archivos de esta carpeta cuentan la historia de estas reglas y **ninguno es
+> la referencia de estilo; la referencia es el prompt.**
+> `conjunto-residencial.webp` es anterior a él y tiene trazos violeta: sigue aquí
+> como fuente, pero el manifiesto no lo copia, así que ninguna página lo sirve.
+>
+> Los cuatro SVG dibujados a mano —`conjunto-residencial.svg`,
+> `conjunto-residencial-color.svg`, `comercio.svg` y `flujo-de-pago.svg`— **se
+> borraron el 1 de septiembre de 2026**, junto con los scripts que los
+> generaban. Esta nota decía que «siguen publicados porque lo publicado no se
+> retira», y eso dejó de ser cierto dos veces: no los servía nadie —no estaban
+> en el manifiesto— y la regla que los protegía era del CDN, cuando una URL
+> publicada podía estar citada y cacheada en cualquier parte y retirarla rompía
+> páginas en silencio. Hoy un activo solo llega al navegador si el manifiesto lo
+> copia, así que retirar uno que no se sirve no le cuesta nada a nadie. Están en
+> el historial si alguna vez hicieran falta.
 
 ### Snippet de logo en encabezado
 
