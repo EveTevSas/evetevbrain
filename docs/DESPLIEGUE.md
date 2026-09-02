@@ -279,15 +279,23 @@ compila todo el workspace pnpm de forma determinista (build de `@evetev/shared` 
 3. **Variables** (Settings → Variables) — nunca en el repo (§4):
    ```
    DATABASE_URL          # rol evepay_api del proyecto Supabase de EvePay (pooler :6543)
-   PAYMENT_PROVIDER=fake # 'akua' cuando lleguen las llaves
-   # ── Variables de Akua (agregar cuando lleguen las llaves del dashboard) ──
+   PAYMENT_PROVIDER=fake # 'combopay' cuando lleguen las llaves ('akua' quedó implementado por si se retoma)
+   # ── Variables de ComboPay (agregar cuando entreguen credenciales) ──
+   # COMBOPAY_API_TOKEN      # Bearer del dashboard de ComboPay (Perfil → Claves API)
+   # COMBOPAY_WEBHOOK_SECRET # secreto NUESTRO para la URL del hook (32 bytes aleatorios);
+   #                         # la URL a registrar en su dashboard (Perfil → URL de
+   #                         # notificación hook) es /v1/webhooks/combopay/<secreto>
+   # COMBOPAY_BASE_URL       # Omitir en producción (api-gateway.combopay.co)
+   # ── Variables de Akua (integración anterior, por si se retoma) ──
    # AKUA_CLIENT_ID      # client_id para OAuth2 (del dashboard de Akua)
    # AKUA_CLIENT_SECRET  # client_secret para OAuth2 (del dashboard de Akua)
    # AKUA_WEBHOOK_SECRET # Secreto del webhook; formato: whsec_<base64>
    # AKUA_BASE_URL       # Omitir en producción; sandbox: https://sandbox.akua.la
    ```
    > `PORT` lo inyecta Railway automáticamente; `main.ts` lo lee (fallback `API_PORT`, luego 3001).
-   > Cuando lleguen las llaves: cambia `PAYMENT_PROVIDER=akua` y agrega las 3 vars de Akua.
+   > Cuando lleguen las llaves de ComboPay: cambia `PAYMENT_PROVIDER=combopay` y
+   > agrega `COMBOPAY_API_TOKEN` + `COMBOPAY_WEBHOOK_SECRET`. La spec de la
+   > integración: `specs/evepay/provider-combopay/`.
 4. **Deploy.** Cuando esté verde: **Settings → Networking → Generate Domain** (URL
    `*.up.railway.app`) para probar, y luego **Custom Domain** → `api.evetev.com`
    (agrega el CNAME que muestre Railway en **name.com**).

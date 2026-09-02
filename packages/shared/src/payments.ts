@@ -5,7 +5,8 @@ import type { CrearMerchantInput, ProviderMerchant } from "./merchants";
  * Contrato de EvePay para la adquirencia.
  *
  * Regla (§4): todo el núcleo habla con pagos SOLO a través de esta interfaz.
- * Su única implementación real es Akua; en local y tests se usa un fake.
+ * Implementaciones reales: ComboPay (la adquirencia negociada hoy) y Akua;
+ * en local y tests se usa un fake. Se elige con PAYMENT_PROVIDER.
  * Ningún módulo importa el SDK del proveedor directamente.
  */
 
@@ -87,8 +88,8 @@ export interface ProviderCobro {
 }
 
 /**
- * Interfaz de adquirencia. Akua es el backbone detrás de ella (§7).
- * Los webhooks del proveedor se normalizan a nuestros eventos internos.
+ * Interfaz de adquirencia. El proveedor (ComboPay/Akua) es el backbone detrás
+ * de ella (§7). Los webhooks del proveedor se normalizan a nuestros eventos internos.
  * Ningún módulo importa el SDK del proveedor: solo la implementación de esta interfaz.
  */
 export interface PaymentProvider {
