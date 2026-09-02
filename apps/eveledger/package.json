@@ -10,10 +10,10 @@
     "lint": "eslint --max-warnings=0",
     "typecheck": "prisma generate && next typegen && tsc --noEmit",
     "test": "vitest run",
-    "db:generar": "prisma generate",
-    "db:migrar": "prisma migrate deploy",
-    "db:migrar:dev": "prisma migrate dev",
-    "db:sembrar": "prisma db seed"
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:seed": "prisma db seed"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

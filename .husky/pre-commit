@@ -1,0 +1,11 @@
+# Prettier sobre lo staged: el fallo de CI más frecuente era commitear sin
+# `pnpm format`. lint-staged solo toca los archivos del commit, así que es
+# rápido y no ensucia el resto del árbol.
+#
+# El fallback con npx cubre las shells donde corepack no puso pnpm en el PATH
+# (p. ej. hooks lanzados desde un editor o un agente).
+if command -v pnpm >/dev/null 2>&1; then
+  pnpm exec lint-staged
+else
+  npx pnpm exec lint-staged
+fi

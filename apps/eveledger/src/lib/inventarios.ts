@@ -4,19 +4,10 @@
 
 import { prisma } from "@/lib/db";
 import { galonesPorDiaProducto } from "@/lib/cierres";
-import { existenciaTeorica, variacion, alertaMerma } from "@/lib/calc";
+import { armarFilaInventario, type FilaInventario } from "@/lib/calc";
 import { inputAFecha } from "@/lib/format";
 
-/** Fila de inventario de un día para un producto. null = dato no digitado. */
-export interface FilaInventario {
-  inicial: number | null;
-  compras: number;
-  ventas: number | null;
-  teorica: number | null;
-  fisico: number | null;
-  variacion: number | null;
-  alerta: boolean;
-}
+export type { FilaInventario };
 
 export interface InventarioDiaData {
   fecha: string;
@@ -39,26 +30,6 @@ async function fisicoDiaAnterior(productId: string, fecha: Date): Promise<number
     where: { fecha_productId: { fecha: anterior, productId } }
   });
   return reg ? Number(reg.galones) : null;
-}
-
-function armarFila(
-  inicial: number | null,
-  compras: number,
-  ventas: number | null,
-  fisico: number | null
-): FilaInventario {
-  const teorica =
-    inicial !== null && ventas !== null ? existenciaTeorica(inicial, compras, ventas) : null;
-  const varGal = fisico !== null && teorica !== null ? variacion(fisico, teorica) : null;
-  return {
-    inicial,
-    compras,
-    ventas,
-    teorica,
-    fisico,
-    variacion: varGal,
-    alerta: varGal !== null && teorica !== null && alertaMerma(varGal, teorica)
-  };
 }
 
 /**
@@ -153,7 +124,7 @@ export async function inventarioMensual(anio: number, mes: number) {
       const fisico = fisicoPorClave.get(clave(fecha)) ?? null;
       const comprasDia = comprasPorDia.get(dia)?.get(p.id) ?? 0;
       const ventas = ventasMatriz.get(dia)?.get(p.id) ?? null;
-      dias.set(dia, armarFila(inicial, comprasDia, ventas, fisico));
+      dias.set(dia, armarFilaInventario(inicial, comprasDia, ventas, fisico));
     }
     return { id: p.id, nombre: p.nombre, dias };
   });
