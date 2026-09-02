@@ -5,20 +5,20 @@ tests derivados de los CA que cita.
 
 ## Fase A — Fundación (sin esto no hay consola)
 
-- [ ] A1 — Scaffold `apps/evepay-admin`: Next.js + Supabase Auth (proyecto
+- [x] A1 — Scaffold `apps/evepay-admin`: Next.js + Supabase Auth (proyecto
       EvePay), login con el patrón de `packages/brand/patrones/login/`,
       layout con navegación de las 4 secciones, puerto 3004, `vercel.json`
       con `ignoreCommand`. (CA-1)
-- [ ] A2 — Guard de rol en la consola y en la API: middleware que exige
+- [x] A2 — Guard de rol en la consola y en la API: proxy que exige
       `super_admin` en toda ruta (CA-2); job de CI para la app nueva
       (`scripts/ci-areas.sh` + workflow).
-- [ ] A3 — Migrar `GET/POST /v1/admin/merchants` de `X-Admin-Secret` a
-      `RolesGuard(super_admin)` con JWT (CA-3). El header sigue aceptándose
-      hasta F1 (doble mecanismo transitorio, con fecha de retiro).
+- [x] A3 — Migrar el acceso admin de `X-Admin-Secret` a JWT de Supabase con
+      rol `super_admin` verificado en la API (CA-3; `supabase-jwt.ts` +
+      `TenantMiddleware`). El header sigue aceptándose hasta F1.
 - [ ] A4 — Auditoría de acciones admin: tabla inmutable (quién/qué/cuándo),
       helper transversal, la acción falla si no audita (CA-4, CA-5).
-- [ ] A5 — Script de aprovisionamiento de usuarios admin (patrón
-      `auth:provision-user` de EveConecta).
+- [x] A5 — Script de aprovisionamiento de usuarios admin
+      (`pnpm auth:provision-admin`, rol en app_metadata).
 
 ## Fase B — Comercios y onboarding
 

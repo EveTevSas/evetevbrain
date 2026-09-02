@@ -81,6 +81,15 @@ const APPS = [
     ]
   },
   {
+    nombre: "evepay-admin",
+    destino: "apps/evepay-admin/public/marca",
+    activos: [
+      "favicon/favicon.svg",
+      "isotipos/isotipo-azul-noche.svg",
+      "ilustraciones/pasarela-de-pago.webp"
+    ]
+  },
+  {
     nombre: "eve-merchants",
     destino: "apps/eve-merchants/public/marca",
     activos: [

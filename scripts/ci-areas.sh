@@ -17,7 +17,7 @@ marcar() { echo "$1=$2" >> "$GITHUB_OUTPUT"; echo "  $1=$2"; }
 
 todo() {
   echo "$1 → se ejecuta todo el CI."
-  for a in global shared api eveconecta eveledger landings; do marcar "$a" true; done
+  for a in global shared api eveconecta eveledger evepayadmin landings; do marcar "$a" true; done
   exit 0
 }
 
@@ -59,6 +59,11 @@ marcar eveconecta "$CONECTA"
 EVELEDGER=false
 toca '^apps/eveledger/' && EVELEDGER=true
 marcar eveledger "$EVELEDGER"
+
+# La consola de EvePay tampoco consume shared (habla con la API por HTTP).
+EVEPAYADMIN=false
+toca '^apps/evepay-admin/' && EVEPAYADMIN=true
+marcar evepayadmin "$EVEPAYADMIN"
 
 # Dos cosas se generan desde packages/brand y el CI vigila que no se desvíen:
 # base.css y formularios.js hacia apps/website/landings/, y los activos de marca

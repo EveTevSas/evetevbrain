@@ -1,0 +1,64 @@
+import { afterEach, describe, expect, it } from "vitest";
+import { ForbiddenException } from "@nestjs/common";
+import { requestStorage, type RequestContext } from "../../common/request-context";
+import { AdminController } from "./admin.controller";
+import type { AdminService, ComercioListado } from "./admin.service";
+
+const LISTADO: ComercioListado[] = [];
+
+function controllerConMock(): AdminController {
+  const service = { listarComercios: async () => LISTADO } as unknown as AdminService;
+  return new AdminController(service);
+}
+
+function conContexto<T>(ctx: RequestContext, fn: () => Promise<T>): Promise<T> {
+  return requestStorage.run(ctx, fn);
+}
+
+const SIN_ROL: RequestContext = { tenantId: "", actor: "", role: "" };
+const SUPER_ADMIN: RequestContext = { tenantId: "", actor: "ops@evetev.com", role: "super_admin" };
+
+afterEach(() => {
+  delete process.env.ADMIN_SECRET;
+});
+
+describe("AdminController — acceso (CA-3 de admin-console)", () => {
+  it("rol super_admin del JWT entra sin X-Admin-Secret", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SUPER_ADMIN, () => controller.listarComercios(undefined))
+    ).resolves.toEqual(LISTADO);
+  });
+
+  it("X-Admin-Secret correcto sigue entrando (transitorio hasta F1)", async () => {
+    process.env.ADMIN_SECRET = "secreto";
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SIN_ROL, () => controller.listarComercios("secreto"))
+    ).resolves.toEqual(LISTADO);
+  });
+
+  it("sin rol y sin secreto → 403", async () => {
+    process.env.ADMIN_SECRET = "secreto";
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SIN_ROL, () => controller.listarComercios(undefined))
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it("otro rol (admin_comercio) no entra a admin", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto({ tenantId: "t1", actor: "x", role: "admin_comercio" }, () =>
+        controller.listarComercios(undefined)
+      )
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it("sin ADMIN_SECRET configurado el secreto no abre nada", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SIN_ROL, () => controller.listarComercios("lo-que-sea"))
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+});

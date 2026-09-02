@@ -4,6 +4,7 @@ import { requestStorage, type RequestContext } from "./request-context";
 import { hashApiKey } from "./api-key.util";
 import { DB, type Db } from "../database/drizzle";
 import { Role } from "../modules/identidad/roles";
+import { pareceJwt, verificarJwtSupabase } from "../modules/identidad/supabase-jwt";
 
 interface RequestLike {
   header(name: string): string | undefined;
@@ -39,6 +40,19 @@ export class TenantMiddleware implements NestMiddleware {
         ? { tenantId: record.tenant_id, actor: key.slice(0, 16), role: Role.ADMIN_COMERCIO }
         : { tenantId: "", actor: "", role: "" }; // RolesGuard rechazará con 401
 
+      requestStorage.run(ctx, () => next());
+      return;
+    }
+
+    // JWT de Supabase (consola de administración, CA-3 de admin-console): el
+    // rol viene de app_metadata del token verificado. Un super_admin opera
+    // cross-tenant, así que no lleva tenantId; los endpoints admin validan el
+    // rol, no el tenant.
+    if (auth.startsWith("Bearer ") && pareceJwt(auth.slice("Bearer ".length))) {
+      const usuario = await verificarJwtSupabase(auth.slice("Bearer ".length));
+      const ctx: RequestContext = usuario
+        ? { tenantId: "", actor: usuario.email ?? usuario.sub, role: usuario.role ?? "" }
+        : { tenantId: "", actor: "", role: "" }; // token inválido: sin rol
       requestStorage.run(ctx, () => next());
       return;
     }
