@@ -1,0 +1,30 @@
+{
+  "name": "@evetev/evepay-admin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Consola de administración de EvePay (equipo Evetev, rol super_admin). Spec: specs/evepay/admin-console/",
+  "scripts": {
+    "dev": "next dev --port 3004",
+    "build": "next build",
+    "start": "next start --port 3004",
+    "lint": "eslint app components lib scripts --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "auth:provision-admin": "node scripts/provision-admin.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.3",
+    "@supabase/supabase-js": "2.110.7",
+    "lucide-react": "1.25.0",
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "vitest": "4.1.10"
+  }
+}

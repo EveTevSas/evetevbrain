@@ -10,6 +10,8 @@ import {
   Post
 } from "@nestjs/common";
 import { z } from "zod";
+import { currentContext } from "../../common/request-context";
+import { Role } from "../identidad/roles";
 import { AdminService, type ComercioCreado, type ComercioListado } from "./admin.service";
 import { ADMIN_HTML } from "./admin-page";
 
@@ -51,9 +53,19 @@ export class AdminController {
     return this.admin.crearComercio(parsed.data);
   }
 
+  /**
+   * Acceso admin (CA-3 de admin-console): la vía principal es el JWT de
+   * Supabase con rol super_admin (lo establece TenantMiddleware en el
+   * contexto). `X-Admin-Secret` sigue aceptándose como mecanismo transitorio
+   * hasta F1 (retiro junto con la página embebida).
+   */
   private verificarAdmin(secret: string | undefined): void {
+    if (currentContext().role === Role.SUPER_ADMIN) {
+      return;
+    }
+
     const expected = process.env.ADMIN_SECRET;
-    if (!expected) throw new ForbiddenException("ADMIN_SECRET no configurado.");
+    if (!expected) throw new ForbiddenException("Acceso de administrador requerido.");
     if (!secret || secret !== expected)
       throw new ForbiddenException("Acceso de administrador requerido.");
   }
