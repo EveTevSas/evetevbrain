@@ -14,17 +14,25 @@ import {
 export interface EventoWebhook {
   id: string;
   type: string;
+  /** Quién lo emitió; ausente = akua (compatibilidad). */
+  provider?: "akua" | "combopay";
   providerPaymentId?: string;
   providerMerchantId?: string;
 }
 
-/** Mapea el tipo de evento de Akua a nuestro estado destino (pagos). */
+/** Mapea el tipo de evento del proveedor a nuestro estado destino (pagos). */
 function estadoDestino(type: string): EstadoCobro | null {
   switch (type) {
+    // Akua
     case "payment.purchase.succeeded":
       return "aprobado";
     case "payment.purchase.rejected":
     case "payment.purchase.failed":
+      return "fallido";
+    // ComboPay (transaction_state del hook, CA-5 de provider-combopay)
+    case "payment_approved":
+      return "aprobado";
+    case "payment_fail":
       return "fallido";
     // payment.purchase.pending, payment.refunded, dispute.created, etc.: Fase 6.
     default:
@@ -69,10 +77,11 @@ export class WebhooksService {
       return; // el evento referencia un pago que no conocemos (EARS 5)
     }
 
+    const provider = evento.provider ?? "akua";
     const esNuevo = await this.repo.registrarEventoIdempotente({
       tenantId: pago.tenantId,
       eventId: evento.id,
-      provider: "akua",
+      provider,
       type: evento.type
     });
     if (!esNuevo) {
@@ -88,7 +97,7 @@ export class WebhooksService {
       paymentId: pago.paymentId,
       desde: pago.estado,
       hacia: destino,
-      actor: "webhook:akua"
+      actor: `webhook:${provider}`
     });
 
     if (destino === "aprobado") {

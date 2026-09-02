@@ -16,9 +16,11 @@ Los demás módulos del destino (`conciliacion`, `merchants`, `webhooks`,
 
 ## Pagos detrás de una interfaz
 
-Todo pasa por `PaymentProvider` (contrato en `@evetev/shared`). En local/CI se usa
-`FakePaymentProvider`; Akua es la implementación real y se enchufa sin tocar el
-núcleo (§4, §7).
+Todo pasa por `PaymentProvider` (contrato en `@evetev/shared`) y el proveedor se
+elige con `PAYMENT_PROVIDER` (`fake` | `akua` | `combopay`), sin tocar el núcleo
+(§4, §7). En local/CI se usa `FakePaymentProvider`. La adquirencia negociada hoy
+es **ComboPay** (spec en `specs/evepay/provider-combopay/`); la integración de
+Akua queda implementada por si se retoma.
 
 ## Correr
 
