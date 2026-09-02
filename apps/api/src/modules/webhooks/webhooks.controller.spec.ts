@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { UnauthorizedException } from "@nestjs/common";
 import { WebhooksController } from "./webhooks.controller";
 import type { WebhookVerifier } from "./webhook-verifier";
@@ -92,6 +92,83 @@ describe("WebhooksController — firma y parseo", () => {
     const res = await controller.akua(req({ hola: "mundo" }), "firma-ok");
 
     expect(res).toEqual({ received: true });
+    expect(sink.evento).toBeUndefined();
+  });
+});
+
+/* Hook real de ComboPay (Recaudos beta): JSON plano, sin firma; la auth es el
+   secreto de la ruta. `id` es el id de la factura que guardamos al crear el
+   cobro. Los campos nulos no se envían. */
+const hookComboPay = {
+  custom: "158790",
+  ticket_id: "851_2146359_20210616210621",
+  id: 1003455,
+  invoice_number: "2146359",
+  payment_method: "pse",
+  transaction_state: "payment_approved",
+  transaction_value: 100000,
+  unique_transaction_code: "77926584888"
+};
+
+describe("WebhooksController — ComboPay (secreto en la ruta)", () => {
+  const SECRETO = "s3creto-combopay";
+
+  beforeEach(() => {
+    process.env.COMBOPAY_WEBHOOK_SECRET = SECRETO;
+  });
+
+  afterEach(() => {
+    delete process.env.COMBOPAY_WEBHOOK_SECRET;
+  });
+
+  it("CA-6: secreto incorrecto → 401 y no procesa", async () => {
+    const sink: { evento?: EventoWebhook } = {};
+    const controller = new WebhooksController(verifier(true), serviceCapturando(sink));
+    await expect(controller.combopay(req(hookComboPay), "otro-secreto")).rejects.toBeInstanceOf(
+      UnauthorizedException
+    );
+    expect(sink.evento).toBeUndefined();
+  });
+
+  it("CA-6: sin COMBOPAY_WEBHOOK_SECRET configurado → 401 siempre", async () => {
+    delete process.env.COMBOPAY_WEBHOOK_SECRET;
+    const controller = new WebhooksController(verifier(true), serviceCapturando({}));
+    await expect(controller.combopay(req(hookComboPay), "")).rejects.toBeInstanceOf(
+      UnauthorizedException
+    );
+  });
+
+  it("CA-5: secreto correcto → normaliza al evento interno con provider combopay", async () => {
+    const sink: { evento?: EventoWebhook } = {};
+    const controller = new WebhooksController(verifier(true), serviceCapturando(sink));
+    const res = await controller.combopay(req(hookComboPay), SECRETO);
+
+    expect(res).toEqual({ received: true });
+    expect(sink.evento).toEqual({
+      id: "851_2146359_20210616210621",
+      type: "payment_approved",
+      provider: "combopay",
+      providerPaymentId: "1003455"
+    });
+  });
+
+  it("CA-7: sin ticket_id usa el CUS como id de evento (reenvío = mismo id)", async () => {
+    const sink: { evento?: EventoWebhook } = {};
+    const controller = new WebhooksController(verifier(true), serviceCapturando(sink));
+    const { ticket_id: _omitido, ...sinTicket } = hookComboPay;
+    await controller.combopay(req(sinTicket), SECRETO);
+
+    expect(sink.evento?.id).toBe("77926584888");
+  });
+
+  it("cuerpo sin transaction_state o sin id de factura: 200 y no procesa", async () => {
+    const sink: { evento?: EventoWebhook } = {};
+    const controller = new WebhooksController(verifier(true), serviceCapturando(sink));
+
+    expect(await controller.combopay(req({ id: 1 }), SECRETO)).toEqual({ received: true });
+    expect(
+      await controller.combopay(req({ transaction_state: "payment_approved" }), SECRETO)
+    ).toEqual({ received: true });
     expect(sink.evento).toBeUndefined();
   });
 });

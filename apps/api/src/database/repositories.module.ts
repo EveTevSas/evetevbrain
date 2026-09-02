@@ -9,6 +9,7 @@ import { InMemoryLedgerRepository } from "../modules/ledger/in-memory-ledger.rep
 import { PAYMENT_PROVIDER } from "../modules/pagos/payment-provider.token";
 import { FakePaymentProvider } from "../modules/pagos/fake-payment.provider";
 import { AkuaPaymentProvider } from "../modules/pagos/akua-payment.provider";
+import { ComboPayPaymentProvider } from "../modules/pagos/combopay-payment.provider";
 import { MERCHANTS_REPOSITORY } from "../modules/merchants/merchants.repository";
 import { DrizzleMerchantsRepository } from "../modules/merchants/drizzle-merchants.repository";
 import { InMemoryMerchantsRepository } from "../modules/merchants/in-memory-merchants.repository";
@@ -39,15 +40,26 @@ import { InMemoryMerchantsRepository } from "../modules/merchants/in-memory-merc
         db ? new DrizzleMerchantsRepository(db) : new InMemoryMerchantsRepository()
     },
     {
+      // El proveedor de adquirencia se elige por configuración (§4): el resto
+      // del núcleo solo conoce la interfaz. fake | akua | combopay.
       provide: PAYMENT_PROVIDER,
-      useFactory: () =>
-        process.env.PAYMENT_PROVIDER === "akua"
-          ? new AkuaPaymentProvider(
+      useFactory: () => {
+        switch (process.env.PAYMENT_PROVIDER) {
+          case "akua":
+            return new AkuaPaymentProvider(
               process.env.AKUA_CLIENT_ID ?? "",
               process.env.AKUA_CLIENT_SECRET ?? "",
               process.env.AKUA_BASE_URL // undefined → usa producción
-            )
-          : new FakePaymentProvider()
+            );
+          case "combopay":
+            return new ComboPayPaymentProvider(
+              process.env.COMBOPAY_API_TOKEN ?? "",
+              process.env.COMBOPAY_BASE_URL // undefined → usa producción
+            );
+          default:
+            return new FakePaymentProvider();
+        }
+      }
     }
   ],
   exports: [PAGOS_REPOSITORY, LEDGER_REPOSITORY, MERCHANTS_REPOSITORY, PAYMENT_PROVIDER]

@@ -163,3 +163,67 @@ describe("WebhooksService — normalización de eventos", () => {
     expect((await merchants.obtener(TENANT, m.id))?.estado).toBe("aprobado");
   });
 });
+
+describe("WebhooksService — eventos de ComboPay", () => {
+  let repo: InMemoryPagosRepository;
+  let ledgerRepo: InMemoryLedgerRepository;
+  let service: WebhooksService;
+
+  beforeEach(() => {
+    repo = new InMemoryPagosRepository();
+    ledgerRepo = new InMemoryLedgerRepository();
+    const merchantsRepo = new InMemoryMerchantsRepository();
+    service = new WebhooksService(
+      repo,
+      new LedgerService(ledgerRepo, repo),
+      new MerchantsService(merchantsRepo, new FakePaymentProvider()),
+      noopDelivery,
+      noopWebhookRepo
+    );
+  });
+
+  it("CA-5: payment_approved aprueba el cobro, audita como webhook:combopay y asienta ledger", async () => {
+    const id = await seedCobro(repo);
+    await service.procesar({
+      id: "851_2146359_20210616210621",
+      type: "payment_approved",
+      provider: "combopay",
+      providerPaymentId: PROV
+    });
+
+    const cobro = await repo.buscarCobro(TENANT, id);
+    expect(cobro?.estado).toBe("aprobado");
+    expect(
+      repo.auditoria.some((a) => a.toStatus === "aprobado" && a.actor === "webhook:combopay")
+    ).toBe(true);
+    expect(await ledgerRepo.contarAsientosPorPago(TENANT, id)).toBe(1);
+  });
+
+  it("payment_fail deja el cobro fallido", async () => {
+    const id = await seedCobro(repo);
+    await service.procesar({
+      id: "tkt-2",
+      type: "payment_fail",
+      provider: "combopay",
+      providerPaymentId: PROV
+    });
+
+    const cobro = await repo.buscarCobro(TENANT, id);
+    expect(cobro?.estado).toBe("fallido");
+  });
+
+  it("CA-7: el reenvío del mismo hook no duplica transiciones ni asientos", async () => {
+    const id = await seedCobro(repo);
+    const evento = {
+      id: "tkt-1",
+      type: "payment_approved",
+      provider: "combopay" as const,
+      providerPaymentId: PROV
+    };
+    await service.procesar(evento);
+    await service.procesar(evento);
+
+    expect(await ledgerRepo.contarAsientosPorPago(TENANT, id)).toBe(1);
+    expect(repo.auditoria.filter((a) => a.toStatus === "aprobado")).toHaveLength(1);
+  });
+});
