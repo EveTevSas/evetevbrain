@@ -20,3 +20,14 @@ export function currentContext(): RequestContext {
   }
   return ctx;
 }
+
+/**
+ * Contexto actual, o null si el middleware no cubre esta ruta.
+ *
+ * Para comprobaciones de autorización: sin contexto no hay identidad, y eso
+ * debe leerse como "no autorizado" (403), no como un 500 que además delata que
+ * el endpoint existe.
+ */
+export function currentContextOrNull(): RequestContext | null {
+  return requestStorage.getStore() ?? null;
+}

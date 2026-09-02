@@ -18,12 +18,40 @@ fase (B–E de `tasks.md`).
   frontera de seguridad, la API sí.
 - La consola **no tiene base de datos**: todo pasa por `/v1/admin/*` de la API.
 
-## Correr
+## Correr en local
+
+La consola necesita un Supabase con Auth. El entorno local de EvePay vive en
+`apps/api` (Docker, serie de puertos **5732x** para no chocar con la de
+EveConecta, que usa 5532x):
 
 ```bash
-cp .env.example .env.local   # valores del proyecto Supabase de EvePay
+cd apps/api && supabase start        # aplica roles.sql + las 8 migraciones
+supabase status                      # muestra API URL y PUBLISHABLE_KEY
+```
+
+Con eso, en esta carpeta:
+
+```bash
+cp .env.example .env.local           # pega la URL y la publishable key de arriba
+pnpm auth:provision-admin --email admin@evetev.com --name "Admin" --password "…"
 pnpm --filter @evetev/evepay-admin dev   # → http://localhost:3004
 ```
+
+`--password` solo funciona contra un Supabase local; contra un proyecto
+alojado el script manda la invitación por correo, que es lo correcto ahí.
+
+La API (opcional en Fase A, necesaria desde la B) se levanta contra esa misma
+base:
+
+```bash
+cd apps/api
+DATABASE_URL="postgresql://evepay_api:postgres@127.0.0.1:57322/postgres" \
+SUPABASE_URL="http://127.0.0.1:57321" PAYMENT_PROVIDER=fake \
+  pnpm exec nest start                   # → http://localhost:3001
+```
+
+`SUPABASE_URL` es lo que le permite a la API verificar el JWT de la consola:
+Supabase firma con claves asimétricas y la API busca la pública en su JWKS.
 
 Verificación: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`
 (el build de CI usa placeholders de Supabase; nada toca la red).

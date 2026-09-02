@@ -12,6 +12,7 @@ import { ConciliacionController } from "./modules/conciliacion/conciliacion.cont
 import { MerchantsModule } from "./modules/merchants/merchants.module";
 import { MerchantsController } from "./modules/merchants/merchants.controller";
 import { AdminModule } from "./modules/admin/admin.module";
+import { AdminController } from "./modules/admin/admin.controller";
 import { OutboundWebhooksModule } from "./modules/outbound-webhooks/outbound-webhooks.module";
 import { OutboundWebhooksController } from "./modules/outbound-webhooks/outbound-webhooks.controller";
 import { HealthController } from "./health/health.controller";
@@ -38,14 +39,18 @@ import { HealthController } from "./health/health.controller";
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    // TenantMiddleware resuelve API keys reales (Bearer evpk_*) o headers internos.
+    // TenantMiddleware resuelve API keys reales (Bearer evpk_*), el JWT de
+    // Supabase de la consola de administración, o los headers internos.
+    // AdminController lo necesita para ver el rol super_admin del JWT: sin el
+    // middleware, sus endpoints solo aceptarían el X-Admin-Secret transitorio.
     consumer
       .apply(TenantMiddleware)
       .forRoutes(
         PagosController,
         ConciliacionController,
         MerchantsController,
-        OutboundWebhooksController
+        OutboundWebhooksController,
+        AdminController
       );
   }
 }

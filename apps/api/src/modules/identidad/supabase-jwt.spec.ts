@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { SignJWT } from "jose";
+import { exportJWK, generateKeyPair, SignJWT } from "jose";
 import { pareceJwt, verificarJwtSupabase } from "./supabase-jwt";
 
 const SECRET = "super-secreto-de-pruebas-con-largo-suficiente";
@@ -68,6 +68,56 @@ describe("verificarJwtSupabase (CA-3 de admin-console)", () => {
     process.env.SUPABASE_JWT_SECRET = SECRET;
     const token = await tokenFirmado({ email: "sin-sub@evetev.com" });
     expect(await verificarJwtSupabase(token)).toBeNull();
+  });
+});
+
+/* Supabase firma con ES256 por omisión y publica la clave en su JWKS. La
+   primera versión elegía el verificador según qué variable estuviera puesta:
+   con SUPABASE_JWT_SECRET configurado nunca miraba el JWKS, así que rechazaba
+   en silencio TODOS los tokens legítimos y nadie podía entrar a la consola.
+   Se descubrió levantando el entorno local, no con los tests. */
+describe("tokens asimétricos (ES256, el modo por omisión de Supabase)", () => {
+  async function proyectoConEs256() {
+    const { privateKey, publicKey } = await generateKeyPair("ES256", { extractable: true });
+    const jwk = { ...(await exportJWK(publicKey)), alg: "ES256", kid: "k1" };
+
+    const original = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify({ keys: [jwk] }), {
+        headers: { "content-type": "application/json" }
+      })) as typeof fetch;
+
+    const token = await new SignJWT({ sub: "user-es", app_metadata: { role: "super_admin" } })
+      .setProtectedHeader({ alg: "ES256", kid: "k1" })
+      .setIssuedAt()
+      .setExpirationTime("1h")
+      .sign(privateKey);
+
+    return { token, restaurar: () => (globalThis.fetch = original) };
+  }
+
+  it("se verifica contra el JWKS aunque SUPABASE_JWT_SECRET esté configurado", async () => {
+    process.env.SUPABASE_URL = "http://127.0.0.1:57321";
+    process.env.SUPABASE_JWT_SECRET = SECRET; // el caso que rompía antes
+    const { token, restaurar } = await proyectoConEs256();
+    try {
+      expect(await verificarJwtSupabase(token)).toMatchObject({
+        sub: "user-es",
+        role: "super_admin"
+      });
+    } finally {
+      restaurar();
+    }
+  });
+
+  it("sin SUPABASE_URL no hay contra qué verificarlo → null", async () => {
+    process.env.SUPABASE_JWT_SECRET = SECRET;
+    const { token, restaurar } = await proyectoConEs256();
+    try {
+      expect(await verificarJwtSupabase(token)).toBeNull();
+    } finally {
+      restaurar();
+    }
   });
 });
 

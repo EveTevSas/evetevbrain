@@ -5,6 +5,25 @@ Base de datos de EvePay (Postgres administrado en Supabase, §7/§10). Schemas
 (§4): el backend ejecuta `SET LOCAL app.tenant_id = '<uuid>'` por transacción y
 las políticas filtran por ese valor.
 
+## Levantar la base en local
+
+Requiere Docker y la Supabase CLI. Usa la serie de puertos **5732x** para no
+interferir con la instancia de EveConecta (5532x) ni con la de por defecto
+(5432x):
+
+```bash
+cd apps/api
+supabase start     # aplica roles.sql y luego migrations/*.sql
+supabase status    # URLs y llaves locales
+supabase stop      # al terminar
+```
+
+`roles.sql` crea el rol `evepay_api` que las migraciones necesitan para sus
+`GRANT`. En los proyectos alojados ese rol se crea a mano una vez (ver abajo);
+en local se recrea en cada arranque para que el entorno se levante solo.
+
+Studio queda en `http://127.0.0.1:57323` y la API de Supabase en `:57321`.
+
 ## Aplicar las migraciones
 
 Con la **Supabase CLI** (recomendado), enlazando al proyecto de la cuenta:

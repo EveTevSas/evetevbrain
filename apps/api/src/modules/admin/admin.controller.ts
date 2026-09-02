@@ -10,7 +10,7 @@ import {
   Post
 } from "@nestjs/common";
 import { z } from "zod";
-import { currentContext } from "../../common/request-context";
+import { currentContextOrNull } from "../../common/request-context";
 import { Role } from "../identidad/roles";
 import { AdminService, type ComercioCreado, type ComercioListado } from "./admin.service";
 import { ADMIN_HTML } from "./admin-page";
@@ -60,7 +60,7 @@ export class AdminController {
    * hasta F1 (retiro junto con la página embebida).
    */
   private verificarAdmin(secret: string | undefined): void {
-    if (currentContext().role === Role.SUPER_ADMIN) {
+    if (currentContextOrNull()?.role === Role.SUPER_ADMIN) {
       return;
     }
 
