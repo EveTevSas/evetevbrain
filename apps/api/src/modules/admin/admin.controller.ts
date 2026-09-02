@@ -11,6 +11,7 @@ import {
   Post,
   Query
 } from "@nestjs/common";
+import type { SaludProvider } from "@evetev/shared";
 import { z } from "zod";
 import { currentContextOrNull } from "../../common/request-context";
 import { Role } from "../identidad/roles";
@@ -21,6 +22,7 @@ import {
   type ComercioListado
 } from "./admin.service";
 import { AdminAuditService, type AccionAdmin } from "./admin-audit.service";
+import { ProvidersService, type EstadoProveedores } from "./providers.service";
 import { ADMIN_HTML } from "./admin-page";
 
 const CrearComercioSchema = z.object({
@@ -46,7 +48,8 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export class AdminController {
   constructor(
     private readonly admin: AdminService,
-    private readonly auditoria: AdminAuditService
+    private readonly auditoria: AdminAuditService,
+    private readonly providers: ProvidersService
   ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
@@ -118,6 +121,41 @@ export class AdminController {
       throw new BadRequestException(parsed.error.flatten());
     }
     return this.admin.cambiarEstadoComercio(tenantId, parsed.data.activo, this.actor(secret));
+  }
+
+  /** GET /v1/admin/providers — estado de la adquirencia (CA-11, CA-13). */
+  @Get("providers")
+  async listarProveedores(
+    @Headers("x-admin-secret") secret: string | undefined
+  ): Promise<EstadoProveedores> {
+    this.verificarAdmin(secret);
+    return this.providers.estado();
+  }
+
+  /**
+   * POST /v1/admin/providers/health — comprobación real contra el proveedor
+   * activo (CA-12). Es de solo lectura, pero va por POST porque sale a la red
+   * del proveedor: no debe dispararse por un prefetch ni quedar cacheada.
+   */
+  @Post("providers/health")
+  @HttpCode(200)
+  async saludProveedor(
+    @Headers("x-admin-secret") secret: string | undefined
+  ): Promise<SaludProvider & { proveedor: string }> {
+    this.verificarAdmin(secret);
+    const salud = await this.providers.salud();
+
+    // Comprobar la adquirencia es una acción de operación: queda registrada,
+    // así se puede reconstruir qué se sabía y cuándo ante un incidente.
+    await this.auditoria.registrar({
+      actor: this.actor(secret),
+      accion: "proveedor.salud",
+      objetoTipo: "proveedor",
+      objetoId: salud.proveedor,
+      detalle: { ok: salud.ok, detalle: salud.detalle, duracionMs: salud.duracionMs }
+    });
+
+    return salud;
   }
 
   /** GET /v1/admin/auditoria — últimas acciones administrativas (CA-4). */

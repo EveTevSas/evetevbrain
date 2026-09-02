@@ -19,7 +19,13 @@ function proveedorAgregador(): PaymentProvider {
     },
     crearMerchant: async () => {
       throw new Error("no debería llamarse cuando la capacidad está en false");
-    }
+    },
+    verificarSalud: async () => ({
+      ok: true,
+      detalle: "doble de prueba",
+      duracionMs: 0,
+      verificadoEn: new Date().toISOString()
+    })
   };
 }
 

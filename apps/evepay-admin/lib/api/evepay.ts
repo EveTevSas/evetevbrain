@@ -125,3 +125,47 @@ export interface ApiKeyRotada {
 export function listarComercios(): Promise<Comercio[]> {
   return apiGet<Comercio[]>("/admin/merchants");
 }
+
+// --- Proveedores de pago (Fase C) ---
+
+export interface VariableConfig {
+  nombre: string;
+  requerida: boolean;
+  presente: boolean;
+  para: string;
+}
+
+export type EstadoPaso = "listo" | "pendiente" | "manual";
+
+export interface PasoHabilitacion {
+  descripcion: string;
+  estado: EstadoPaso;
+  nota?: string;
+}
+
+export interface ProveedorInfo {
+  nombre: string;
+  activo: boolean;
+  descripcion: string;
+  capacidades: { altaDeComercios: boolean; liquidaciones: boolean; monedas: string[] };
+  configuracion: VariableConfig[];
+  webhook: string | null;
+  checklist: PasoHabilitacion[];
+}
+
+export interface EstadoProveedores {
+  activo: string;
+  proveedores: ProveedorInfo[];
+}
+
+export interface SaludProveedor {
+  proveedor: string;
+  ok: boolean;
+  detalle: string;
+  duracionMs: number;
+  verificadoEn: string;
+}
+
+export function estadoProveedores(): Promise<EstadoProveedores> {
+  return apiGet<EstadoProveedores>("/admin/providers");
+}

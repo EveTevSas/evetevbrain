@@ -38,13 +38,22 @@ tests derivados de los CA que cita.
 
 ## Fase C — Proveedores
 
-- [ ] C1 — `GET /v1/admin/providers`: activo, presencia de config y
-      capacidades por proveedor (CA-11, CA-14 en el detalle de cobro).
-- [ ] C2 — Prueba de salud real por proveedor (CA-12): fake = ok; combopay =
-      GET autenticado barato; akua = token OAuth. Sin tocar dinero.
-- [ ] C3 — Checklist de habilitación (CA-13), empezando por los pasos T6 de
-      `provider-combopay`.
-- [ ] C4 — UI de la sección con estado visual (activo / configurado / salud).
+- [x] C1 — `GET /v1/admin/providers`: proveedor activo, capacidades y
+      PRESENCIA de cada credencial —nunca su valor— (CA-11). El nombre del
+      proveedor lo da el propio proveedor, así el histórico conserva quién
+      procesó qué (CA-14).
+- [x] C2 — `POST /v1/admin/providers/health`: comprobación real contra el
+      proveedor activo (CA-12), añadida al contrato como `verificarSalud()`.
+      fake = ok sin red; akua = token OAuth fresco (se salta la caché a
+      propósito); combopay = `GET /api/invoice/0/status`, que exige el token.
+      **No** `/api/bank-list`: resultó ser público y daba un falso "el token es
+      válido" con credenciales inventadas. Cada comprobación queda auditada.
+- [x] C3 — Checklist de habilitación (CA-13) con los pasos T6 de
+      `provider-combopay`. Lo que no se puede verificar desde aquí se marca
+      como manual con su nota, en vez de darlo por hecho.
+- [x] C4 — UI de la sección: tarjeta por proveedor con capacidades,
+      credenciales, forma de la URL del webhook, checklist y botón de
+      comprobación en vivo.
 
 ## Fase D — Pagos y cobros
 

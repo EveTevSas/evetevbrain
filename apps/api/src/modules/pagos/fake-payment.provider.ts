@@ -8,7 +8,8 @@ import type {
   PaymentProvider,
   ProviderCobro,
   ProviderMerchant,
-  RangoFechas
+  RangoFechas,
+  SaludProvider
 } from "@evetev/shared";
 
 /**
@@ -24,6 +25,16 @@ export class FakePaymentProvider implements PaymentProvider {
     liquidaciones: true,
     monedas: ["COP", "USD"]
   };
+
+  /** No hay nada externo que comprobar: el fake siempre está sano. */
+  async verificarSalud(): Promise<SaludProvider> {
+    return {
+      ok: true,
+      detalle: "Proveedor simulado: no hay servicio externo que comprobar.",
+      duracionMs: 0,
+      verificadoEn: new Date().toISOString()
+    };
+  }
 
   async crearCobro(_input: CrearCobroInput, _idempotencyKey: string): Promise<ProviderCobro> {
     const providerPaymentId = randomUUID();

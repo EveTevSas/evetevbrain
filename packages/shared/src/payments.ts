@@ -106,6 +106,16 @@ export interface CapacidadesProvider {
   monedas: Moneda[];
 }
 
+/** Resultado de comprobar que el proveedor responde y acepta las credenciales. */
+export interface SaludProvider {
+  ok: boolean;
+  /** Qué pasó, en una línea: sirve tanto si salió bien como si falló. */
+  detalle: string;
+  /** Milisegundos que tardó la comprobación. */
+  duracionMs: number;
+  verificadoEn: string;
+}
+
 /**
  * Interfaz de adquirencia. El proveedor (ComboPay/Akua) es el backbone detrás
  * de ella (§7). Los webhooks del proveedor se normalizan a nuestros eventos internos.
@@ -121,4 +131,10 @@ export interface PaymentProvider {
   listarLiquidaciones(rango: RangoFechas): Promise<LiquidacionProvider[]>;
   /** Alta del comercio en la adquirencia (Fase 5). */
   crearMerchant(input: CrearMerchantInput): Promise<ProviderMerchant>;
+  /**
+   * Comprueba conectividad y credenciales SIN mover dinero (CA-12 de
+   * admin-console). Cada proveedor elige su llamada más barata de solo
+   * lectura; ninguna crea, cambia ni cobra nada.
+   */
+  verificarSalud(): Promise<SaludProvider>;
 }

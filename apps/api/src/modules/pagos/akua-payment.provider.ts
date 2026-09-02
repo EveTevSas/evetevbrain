@@ -8,7 +8,8 @@ import type {
   PaymentProvider,
   ProviderCobro,
   ProviderMerchant,
-  RangoFechas
+  RangoFechas,
+  SaludProvider
 } from "@evetev/shared";
 
 /**
@@ -154,6 +155,39 @@ export class AkuaPaymentProvider implements PaymentProvider {
       providerPaymentId: s.payment_id,
       montoMinor: s.amount
     }));
+  }
+
+  /**
+   * Salud: pide un token OAuth nuevo. Eso valida credenciales y conectividad
+   * sin tocar ningún recurso. Se salta la caché a propósito: un token guardado
+   * diría que todo va bien aunque las credenciales ya se hubieran revocado,
+   * que es justo el caso que esta comprobación existe para detectar.
+   */
+  async verificarSalud(): Promise<SaludProvider> {
+    const inicio = Date.now();
+    const cerrar = (ok: boolean, detalle: string): SaludProvider => ({
+      ok,
+      detalle,
+      duracionMs: Date.now() - inicio,
+      verificadoEn: new Date().toISOString()
+    });
+
+    if (!this.clientId || !this.clientSecret) {
+      return cerrar(false, "Faltan AKUA_CLIENT_ID o AKUA_CLIENT_SECRET.");
+    }
+
+    this.cachedToken = null;
+    this.tokenExpiresAt = 0;
+
+    try {
+      await this.bearerToken();
+      return cerrar(true, `Akua respondió y emitió un token (${this.baseUrl}).`);
+    } catch (error) {
+      return cerrar(
+        false,
+        error instanceof Error ? error.message : `No se pudo contactar ${this.baseUrl}.`
+      );
+    }
   }
 
   async crearMerchant(input: CrearMerchantInput): Promise<ProviderMerchant> {

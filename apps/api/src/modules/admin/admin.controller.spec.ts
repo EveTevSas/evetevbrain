@@ -4,13 +4,17 @@ import { requestStorage, type RequestContext } from "../../common/request-contex
 import { AdminController } from "./admin.controller";
 import type { AdminService, ComercioListado } from "./admin.service";
 import type { AdminAuditService } from "./admin-audit.service";
+import type { ProvidersService } from "./providers.service";
 
 const LISTADO: ComercioListado[] = [];
 
 function controllerConMock(): AdminController {
   const service = { listarComercios: async () => LISTADO } as unknown as AdminService;
   const auditoria = { listar: async () => [] } as unknown as AdminAuditService;
-  return new AdminController(service, auditoria);
+  const providers = {
+    estado: () => ({ activo: "fake", proveedores: [] })
+  } as unknown as ProvidersService;
+  return new AdminController(service, auditoria, providers);
 }
 
 function conContexto<T>(ctx: RequestContext, fn: () => Promise<T>): Promise<T> {
