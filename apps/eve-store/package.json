@@ -6,9 +6,9 @@
     "vertical": true
   },
   "scripts": {
-    "db:migrar": "for f in db/0*.sql; do psql -v ON_ERROR_STOP=1 -d \"$DATABASE_URL\" -f \"$f\" || exit 1; done",
-    "db:importar": "node scripts/importar.mjs",
-    "db:comprobar": "node scripts/comprobar-schema.mjs",
+    "db:migrate": "for f in db/0*.sql; do psql -v ON_ERROR_STOP=1 -d \"$DATABASE_URL\" -f \"$f\" || exit 1; done",
+    "db:import": "node scripts/importar.mjs",
+    "db:check": "node scripts/comprobar-schema.mjs",
     "lint": "echo \"(eve-store) sin lint todavía\" && exit 0",
     "typecheck": "tsc --noEmit",
     "test": "echo \"(eve-store) sin tests todavía\" && exit 0",

@@ -20,10 +20,16 @@
     "landings:check": "node scripts/landings-sync.mjs --check",
     "marca:imagen": "node scripts/marca-imagen.mjs",
     "marca:sync": "node scripts/marca-sync.mjs",
-    "marca:check": "node scripts/marca-sync.mjs --check"
+    "marca:check": "node scripts/marca-sync.mjs --check",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*": "prettier --write --ignore-unknown"
   },
   "devDependencies": {
     "@evetev/config": "workspace:*",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.4.1",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3"
   }

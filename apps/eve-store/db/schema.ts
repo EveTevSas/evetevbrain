@@ -2,7 +2,7 @@
  *
  * Espeja `0001_tienda.sql`, que es la fuente: la migración se aplica con psql y
  * esto le da tipos a la aplicación. Si los dos se separan, manda el SQL — y el
- * script `db:comprobar` lo detecta comparando contra la base real.
+ * script `db:check` lo detecta comparando contra la base real.
  *
  * El disparador que impide publicar con avisos bloqueantes NO está aquí: vive
  * solo en la base, a propósito. Una regla que se pueda saltar cambiando de

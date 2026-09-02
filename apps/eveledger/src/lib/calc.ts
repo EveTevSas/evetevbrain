@@ -142,6 +142,42 @@ export function alertaMerma(variacionGal: number, teorica: number): boolean {
   return Math.abs(variacionGal) > umbral;
 }
 
+/** Fila de inventario de un día para un producto. null = dato no digitado. */
+export interface FilaInventario {
+  inicial: number | null;
+  compras: number;
+  ventas: number | null;
+  teorica: number | null;
+  fisico: number | null;
+  variacion: number | null;
+  alerta: boolean;
+}
+
+/**
+ * Deriva la fila completa a partir de lo digitado. La regla que protege es la
+ * propagación de null: "no digitado" no es 0, y un dato faltante anula todo lo
+ * que dependa de él (teórica, variación, alerta) en vez de inventar un cero.
+ */
+export function armarFilaInventario(
+  inicial: number | null,
+  compras: number,
+  ventas: number | null,
+  fisico: number | null
+): FilaInventario {
+  const teorica =
+    inicial !== null && ventas !== null ? existenciaTeorica(inicial, compras, ventas) : null;
+  const varGal = fisico !== null && teorica !== null ? variacion(fisico, teorica) : null;
+  return {
+    inicial,
+    compras,
+    ventas,
+    teorica,
+    fisico,
+    variacion: varGal,
+    alerta: varGal !== null && teorica !== null && alertaMerma(varGal, teorica)
+  };
+}
+
 // ── Módulo 3: cartera ──────────────────────────────────────────────────
 
 /** Los 7 rangos de mora del Excel CARTERA POR VECIMIENTO. */

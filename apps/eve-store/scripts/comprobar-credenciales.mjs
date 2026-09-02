@@ -158,7 +158,7 @@ try {
   console.log(
     existe
       ? "  ✓ el schema `tienda` ya existe"
-      : "  · el schema `tienda` todavía no existe: corre `pnpm --filter @evetev/eve-store db:migrar`"
+      : "  · el schema `tienda` todavía no existe: corre `pnpm --filter @evetev/eve-store db:migrate`"
   );
   console.log("\nCredenciales correctas.");
 } catch (e) {

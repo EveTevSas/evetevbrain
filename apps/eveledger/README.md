@@ -50,8 +50,8 @@ Next.js (App Router) + TypeScript + Tailwind + Prisma 7 + PostgreSQL.
 createdb eveledger        # o: psql -d postgres -c "CREATE DATABASE eveledger;"
 cp .env.example .env      # completa DATABASE_URL, AUTH_SECRET y ADMIN_PASSWORD
 corepack pnpm install     # desde la raíz del monorepo
-pnpm --filter @evetev/eveledger db:migrar:dev   # crea las tablas
-pnpm --filter @evetev/eveledger db:sembrar      # crea el admin y datos de ejemplo
+pnpm --filter @evetev/eveledger db:migrate:dev   # crea las tablas
+pnpm --filter @evetev/eveledger db:seed      # crea el admin y datos de ejemplo
 pnpm --filter @evetev/eveledger dev             # http://localhost:3007
 ```
 
@@ -61,7 +61,7 @@ El usuario administrador lo crea la semilla a partir de `ADMIN_EMAIL` y
 `ADMIN_PASSWORD` del `.env`. En desarrollo basta con los valores de
 `.env.example`; **en producción hay que ponerlos antes de sembrar**, porque son
 las credenciales con las que se entra a la aplicación. Para cambiarlos después,
-se ajusta el `.env` y se vuelve a correr `db:sembrar`.
+se ajusta el `.env` y se vuelve a correr `db:seed`.
 
 La sesión es una cookie firmada con `AUTH_SECRET` (HMAC-SHA256, 12 horas). Ese
 secreto no tiene valor por defecto útil: si no se fija, todas las instalaciones
@@ -122,8 +122,8 @@ pnpm build        # build de producción (incluye `prisma generate`)
 pnpm lint         # ESLint, sin advertencias permitidas
 pnpm typecheck    # prisma generate + next typegen + tsc --noEmit
 pnpm test         # tests unitarios (Vitest) de src/lib/calc.ts
-pnpm db:migrar    # aplica migraciones ya escritas (producción)
-pnpm db:sembrar   # crea el admin y datos de ejemplo
+pnpm db:migrate    # aplica migraciones ya escritas (producción)
+pnpm db:seed   # crea el admin y datos de ejemplo
 ```
 
 ### Datos de demostración
@@ -140,7 +140,7 @@ pnpm exec tsx scripts/demo-limpiar.ts --si  # lo borra todo (conserva usuarios)
 `demo-completa` se niega a correr si ya hay cierres: no está pensado para
 mezclarse con datos existentes. `demo-limpiar` **no distingue** lo generado de lo
 digitado a mano —borra toda la operación—, por eso exige el `--si`. Ninguno de
-los dos es la semilla: `db:sembrar` solo crea el administrador.
+los dos es la semilla: `db:seed` solo crea el administrador.
 
 ### Scripts de integración
 

@@ -25,12 +25,17 @@ test-results/
 # Sistema
 .DS_Store
 
-# Artefactos de tooling / skills de agentes (no son parte del monorepo)
+# Artefactos de tooling de agentes (no son parte del monorepo)
 /.agents/
 /skills-lock.json
 /videos/
-.claude/
 .vercel
+
+# .claude/: lo compartido se versiona (permisos del proyecto y skills, para que
+# cualquier agente en cualquier máquina los herede); el estado local, no.
+.claude/*
+!.claude/settings.json
+!.claude/skills/
 
 # Documentos que nos entrega un cliente (Excel de operación, actas de reunión,
 # formatos contables). Son datos suyos —saldos, nombres de sus clientes,

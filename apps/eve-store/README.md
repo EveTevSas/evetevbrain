@@ -39,9 +39,9 @@ imprime ni un carácter de ninguna llave.
 Después:
 
 ```bash
-pnpm --filter @evetev/eve-store db:migrar     # crea el schema `tienda`
-pnpm --filter @evetev/eve-store db:importar   # carga los 25 productos
-pnpm --filter @evetev/eve-store db:comprobar  # confronta base y aplicación
+pnpm --filter @evetev/eve-store db:migrate     # crea el schema `tienda`
+pnpm --filter @evetev/eve-store db:import   # carga los 25 productos
+pnpm --filter @evetev/eve-store db:check  # confronta base y aplicación
 pnpm --filter @evetev/eve-store dev           # arranca en el puerto 3003; el panel está en /panel
 ```
 
@@ -129,10 +129,10 @@ pendientes y sin duplicar ninguno.
 EvePay. Para COP la unidad mínima es el valor face: `52000` son $52.000.
 Guardarlo como pesos×100 mandaría a EvePay pedidos cien veces mayores, y ese
 error no lo atrapa ninguna prueba de la tienda porque dentro de la tienda todo
-cuadra. `db:comprobar` falla si alguien cambia el tipo a `numeric`.
+cuadra. `db:check` falla si alguien cambia el tipo a `numeric`.
 
 **La regla de publicación vive en la base.** Un producto con avisos bloqueantes
-sin resolver no se puede publicar; lo impide un disparador. `db:comprobar` no
+sin resolver no se puede publicar; lo impide un disparador. `db:check` no
 lee el catálogo del sistema para verificarlo: **intenta publicar de verdad** un
 producto bloqueado, dentro de una transacción que deshace. Una regla comprobada
 solo el día que se escribió puede desaparecer en una migración futura sin que

@@ -158,7 +158,7 @@ subdominio se decide cuando el cliente lo apruebe. Por eso este paso no toca DNS
    AUTH_SECRET    # secreto de la cookie de sesión: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
    ```
    > `ADMIN_EMAIL` y `ADMIN_PASSWORD` **no van en Vercel**: solo los lee la
-   > semilla (`db:sembrar`), que se corre una vez desde local contra la base de
+   > semilla (`db:seed`), que se corre una vez desde local contra la base de
    > producción. Ponerlos en Vercel sería dejar la contraseña de administrador
    > en el entorno de todas las funciones sin que nada la use.
 5. **Migraciones y semilla** (una sola vez, desde local). Pon los valores de
