@@ -13,7 +13,10 @@ const merchantDemo: Merchant = {
 };
 
 function makeController(
-  registrar: MerchantsService["registrar"] = async () => merchantDemo
+  registrar: MerchantsService["registrar"] = async () => ({
+    merchant: merchantDemo,
+    pasoManualProveedor: null
+  })
 ): MerchantsController {
   const service = {
     registrar,
@@ -33,7 +36,7 @@ describe("MerchantsController", () => {
     let recibido: { tenantId: string; legalName: string } | undefined;
     const controller = makeController(async (tenantId, input) => {
       recibido = { tenantId, legalName: input.legalName };
-      return merchantDemo;
+      return { merchant: merchantDemo, pasoManualProveedor: null };
     });
 
     await requestStorage.run(

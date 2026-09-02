@@ -1,9 +1,10 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { sql } from "drizzle-orm";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { and, eq, sql } from "drizzle-orm";
 import { DB, type Db } from "../../database/drizzle";
 import { tenants, merchantApiKeys } from "../../database/schema";
-import { generateApiKey } from "../../common/api-key.util";
+import { generateApiKey, type ApiKeyEnv } from "../../common/api-key.util";
 import { MerchantsService } from "../merchants/merchants.service";
+import { AdminAuditService } from "./admin-audit.service";
 
 export interface CrearComercioInput {
   legalName: string;
@@ -17,6 +18,18 @@ export interface ComercioCreado {
   apiKey: string;
   /** API key de sandbox — mostrar UNA SOLA VEZ. */
   testApiKey: string;
+  /** Gestión que queda pendiente en el panel del proveedor, o null (CA-8). */
+  pasoManualProveedor: string | null;
+}
+
+export interface ApiKeyRotada {
+  tenantId: string;
+  environment: ApiKeyEnv;
+  /** La clave nueva — mostrar UNA SOLA VEZ. */
+  apiKey: string;
+  prefix: string;
+  /** Cuántas claves quedaron desactivadas al rotar. */
+  desactivadas: number;
 }
 
 export interface ApiKeyResumen {
@@ -45,10 +58,11 @@ export interface ComercioListado {
 export class AdminService {
   constructor(
     @Inject(DB) private readonly db: Db,
-    private readonly merchants: MerchantsService
+    private readonly merchants: MerchantsService,
+    private readonly auditoria: AdminAuditService
   ) {}
 
-  async crearComercio(input: CrearComercioInput): Promise<ComercioCreado> {
+  async crearComercio(input: CrearComercioInput, actor: string): Promise<ComercioCreado> {
     const inserted = await this.db
       .insert(tenants)
       .values({ legalName: input.legalName, displayName: input.displayName })
@@ -56,11 +70,15 @@ export class AdminService {
 
     const tenantId = inserted[0]!.id;
 
-    const merchant = await this.merchants.registrar(tenantId, { legalName: input.legalName });
+    const { merchant, pasoManualProveedor } = await this.merchants.registrar(tenantId, {
+      legalName: input.legalName
+    });
 
     const live = generateApiKey("live");
     const test = generateApiKey("test");
 
+    // Las claves y su rastro entran en la MISMA transacción: si la auditoría
+    // falla, no queda un comercio operable sin registro de quién lo creó (CA-5).
     await this.db.transaction(async (tx) => {
       await tx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
       await tx.insert(merchantApiKeys).values([
@@ -79,9 +97,135 @@ export class AdminService {
           label: "Sandbox"
         }
       ]);
+      await this.auditoria.registrarEn(tx, {
+        actor,
+        accion: "comercio.crear",
+        objetoTipo: "tenant",
+        objetoId: tenantId,
+        // Prefijos, nunca las claves: el detalle se guarda para siempre.
+        detalle: {
+          legalName: input.legalName,
+          displayName: input.displayName,
+          merchantId: merchant.id,
+          clavePrefijoLive: live.prefix,
+          clavePrefijoTest: test.prefix,
+          pasoManualProveedor
+        }
+      });
     });
 
-    return { tenantId, merchantId: merchant.id, apiKey: live.key, testApiKey: test.key };
+    return {
+      tenantId,
+      merchantId: merchant.id,
+      apiKey: live.key,
+      testApiKey: test.key,
+      pasoManualProveedor
+    };
+  }
+
+  /**
+   * Rota la API key de un entorno: crea la nueva y desactiva las anteriores en
+   * una sola transacción (CA-9). Atómico a propósito — si quedaran las dos
+   * activas, una clave que se creía revocada seguiría cobrando; y si se
+   * desactivara sin crear la nueva, el comercio se queda sin poder cobrar.
+   */
+  async rotarApiKey(
+    tenantId: string,
+    environment: ApiKeyEnv,
+    actor: string
+  ): Promise<ApiKeyRotada> {
+    const existe = await this.db
+      .select({ id: tenants.id })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId));
+    if (existe.length === 0) {
+      throw new NotFoundException("Comercio no encontrado.");
+    }
+
+    const nueva = generateApiKey(environment);
+
+    const desactivadas = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
+
+      const revocadas = await tx
+        .update(merchantApiKeys)
+        .set({ activa: false })
+        .where(
+          and(
+            eq(merchantApiKeys.tenantId, tenantId),
+            eq(merchantApiKeys.environment, environment),
+            eq(merchantApiKeys.activa, true)
+          )
+        )
+        .returning({ prefix: merchantApiKeys.keyPrefix });
+
+      await tx.insert(merchantApiKeys).values({
+        tenantId,
+        keyHash: nueva.hash,
+        keyPrefix: nueva.prefix,
+        environment,
+        label: environment === "live" ? "Producción" : "Sandbox"
+      });
+
+      await this.auditoria.registrarEn(tx, {
+        actor,
+        accion: "api_key.rotar",
+        objetoTipo: "tenant",
+        objetoId: tenantId,
+        detalle: {
+          environment,
+          prefijoNuevo: nueva.prefix,
+          prefijosRevocados: revocadas.map((r) => r.prefix)
+        }
+      });
+
+      return revocadas.length;
+    });
+
+    return {
+      tenantId,
+      environment,
+      apiKey: nueva.key,
+      prefix: nueva.prefix,
+      desactivadas
+    };
+  }
+
+  /**
+   * Activa o desactiva un comercio (CA-10). Desactivar NO borra nada: su
+   * historial y su ledger siguen consultables, porque son la contabilidad de
+   * dinero que ya se movió.
+   */
+  async cambiarEstadoComercio(
+    tenantId: string,
+    activo: boolean,
+    actor: string
+  ): Promise<{ tenantId: string; estado: string }> {
+    const estado = activo ? "activo" : "inactivo";
+
+    const estadoFinal = await this.db.transaction(async (tx) => {
+      const actualizado = await tx
+        .update(tenants)
+        .set({ status: estado, updatedAt: new Date() })
+        .where(eq(tenants.id, tenantId))
+        .returning({ status: tenants.status });
+
+      if (actualizado.length === 0) {
+        throw new NotFoundException("Comercio no encontrado.");
+      }
+
+      await this.auditoria.registrarEn(tx, {
+        actor,
+        accion: activo ? "comercio.activar" : "comercio.desactivar",
+        objetoTipo: "tenant",
+        objetoId: tenantId,
+        detalle: { estado }
+      });
+
+      return actualizado[0]!.status;
+    });
+
+    return { tenantId, estado: estadoFinal };
   }
 
   /** Lista todos los comercios (cross-tenant via SECURITY DEFINER). */

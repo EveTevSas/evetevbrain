@@ -4,7 +4,7 @@ export interface NuevoMerchant {
   tenantId: string;
   legalName: string;
   provider: string;
-  providerMerchantId: string;
+  providerMerchantId: string | null;
   estado: EstadoMerchant;
 }
 

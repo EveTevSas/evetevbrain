@@ -1,4 +1,5 @@
 import type {
+  CapacidadesProvider,
   CrearCobroInput,
   CrearMerchantInput,
   EstadoCobro,
@@ -27,6 +28,18 @@ import type {
  * - La beta de recaudos solo transa COP (CA-3) y no expone settlements (CA-8).
  */
 export class ComboPayPaymentProvider implements PaymentProvider {
+  readonly nombre = "combopay";
+  /**
+   * Agregador: EvePay cobra con la cuenta de Evetev, así que ComboPay no da de
+   * alta comercios por API (su alta es manual) ni expone liquidaciones. La beta
+   * de recaudos solo transa COP.
+   */
+  readonly capacidades: CapacidadesProvider = {
+    altaDeComercios: false,
+    liquidaciones: false,
+    monedas: ["COP"]
+  };
+
   private readonly baseUrl: string;
 
   constructor(

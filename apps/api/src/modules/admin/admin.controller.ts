@@ -7,12 +7,20 @@ import {
   Header,
   Headers,
   HttpCode,
-  Post
+  Param,
+  Post,
+  Query
 } from "@nestjs/common";
 import { z } from "zod";
 import { currentContextOrNull } from "../../common/request-context";
 import { Role } from "../identidad/roles";
-import { AdminService, type ComercioCreado, type ComercioListado } from "./admin.service";
+import {
+  AdminService,
+  type ApiKeyRotada,
+  type ComercioCreado,
+  type ComercioListado
+} from "./admin.service";
+import { AdminAuditService, type AccionAdmin } from "./admin-audit.service";
 import { ADMIN_HTML } from "./admin-page";
 
 const CrearComercioSchema = z.object({
@@ -20,13 +28,26 @@ const CrearComercioSchema = z.object({
   displayName: z.string().min(2).max(100)
 });
 
+const RotarApiKeySchema = z.object({
+  environment: z.enum(["live", "test"])
+});
+
+const CambiarEstadoSchema = z.object({
+  activo: z.boolean()
+});
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * Endpoints de admin (uso exclusivo de Evetev).
- * Protegidos por X-Admin-Secret == ADMIN_SECRET (env var).
+ * Acceso: JWT de Supabase con rol super_admin, o el X-Admin-Secret transitorio.
  */
 @Controller("admin")
 export class AdminController {
-  constructor(private readonly admin: AdminService) {}
+  constructor(
+    private readonly admin: AdminService,
+    private readonly auditoria: AdminAuditService
+  ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
   @Get("merchants")
@@ -50,7 +71,77 @@ export class AdminController {
     if (!parsed.success) {
       throw new BadRequestException(parsed.error.flatten());
     }
-    return this.admin.crearComercio(parsed.data);
+    return this.admin.crearComercio(parsed.data, this.actor(secret));
+  }
+
+  /**
+   * POST /v1/admin/merchants/:tenantId/api-keys/rotate — nueva clave y las
+   * anteriores del mismo entorno revocadas, en una sola operación (CA-9).
+   */
+  @Post("merchants/:tenantId/api-keys/rotate")
+  @HttpCode(200)
+  async rotarApiKey(
+    @Headers("x-admin-secret") secret: string | undefined,
+    @Param("tenantId") tenantId: string,
+    @Body() body: unknown
+  ): Promise<ApiKeyRotada> {
+    this.verificarAdmin(secret);
+    if (!UUID_RE.test(tenantId)) {
+      throw new BadRequestException("tenantId inválido.");
+    }
+
+    const parsed = RotarApiKeySchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.admin.rotarApiKey(tenantId, parsed.data.environment, this.actor(secret));
+  }
+
+  /**
+   * POST /v1/admin/merchants/:tenantId/estado — activa o desactiva el comercio
+   * (CA-10). No borra nada: su historial y su ledger siguen consultables.
+   */
+  @Post("merchants/:tenantId/estado")
+  @HttpCode(200)
+  async cambiarEstado(
+    @Headers("x-admin-secret") secret: string | undefined,
+    @Param("tenantId") tenantId: string,
+    @Body() body: unknown
+  ): Promise<{ tenantId: string; estado: string }> {
+    this.verificarAdmin(secret);
+    if (!UUID_RE.test(tenantId)) {
+      throw new BadRequestException("tenantId inválido.");
+    }
+
+    const parsed = CambiarEstadoSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.admin.cambiarEstadoComercio(tenantId, parsed.data.activo, this.actor(secret));
+  }
+
+  /** GET /v1/admin/auditoria — últimas acciones administrativas (CA-4). */
+  @Get("auditoria")
+  async listarAuditoria(
+    @Headers("x-admin-secret") secret: string | undefined,
+    @Query("limite") limite?: string
+  ): Promise<AccionAdmin[]> {
+    this.verificarAdmin(secret);
+    const n = Number(limite);
+    return this.auditoria.listar(Number.isFinite(n) && n > 0 ? n : 100);
+  }
+
+  /**
+   * Quién queda registrado en la auditoría. Con JWT es la persona; con el
+   * secreto compartido no hay forma de saber quién lo usó, y eso se dice tal
+   * cual en vez de atribuirlo a alguien. Es otra razón para retirarlo (F1).
+   */
+  private actor(secret: string | undefined): string {
+    const ctx = currentContextOrNull();
+    if (ctx?.role === Role.SUPER_ADMIN && ctx.actor) {
+      return ctx.actor;
+    }
+    return secret ? "admin-secret (sin identificar)" : "desconocido";
   }
 
   /**

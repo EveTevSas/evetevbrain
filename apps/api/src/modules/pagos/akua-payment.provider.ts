@@ -1,4 +1,5 @@
 import type {
+  CapacidadesProvider,
   CrearCobroInput,
   CrearMerchantInput,
   EstadoCobro,
@@ -20,6 +21,14 @@ import type {
  * Sandbox: AKUA_BASE_URL=https://sandbox.akua.la; en producción omitir esa var.
  */
 export class AkuaPaymentProvider implements PaymentProvider {
+  readonly nombre = "akua";
+  /** Plataforma completa: onboarding y settlements por API. */
+  readonly capacidades: CapacidadesProvider = {
+    altaDeComercios: true,
+    liquidaciones: true,
+    monedas: ["COP", "USD"]
+  };
+
   private readonly baseUrl: string;
 
   // Token cache: se renueva cuando expira (con 60 s de margen).

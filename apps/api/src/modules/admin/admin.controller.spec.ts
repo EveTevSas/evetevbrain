@@ -3,12 +3,14 @@ import { ForbiddenException } from "@nestjs/common";
 import { requestStorage, type RequestContext } from "../../common/request-context";
 import { AdminController } from "./admin.controller";
 import type { AdminService, ComercioListado } from "./admin.service";
+import type { AdminAuditService } from "./admin-audit.service";
 
 const LISTADO: ComercioListado[] = [];
 
 function controllerConMock(): AdminController {
   const service = { listarComercios: async () => LISTADO } as unknown as AdminService;
-  return new AdminController(service);
+  const auditoria = { listar: async () => [] } as unknown as AdminAuditService;
+  return new AdminController(service, auditoria);
 }
 
 function conContexto<T>(ctx: RequestContext, fn: () => Promise<T>): Promise<T> {
