@@ -41,6 +41,8 @@ export interface RegistrarEventoArgs {
   eventId: string;
   provider: string;
   type: string;
+  /** A qué cobro se refiere: sin esto no se puede reconstruir su historia. */
+  paymentId: string;
 }
 
 export interface AplicarTransicionArgs {

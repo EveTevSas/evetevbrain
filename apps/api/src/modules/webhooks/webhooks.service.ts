@@ -82,7 +82,8 @@ export class WebhooksService {
       tenantId: pago.tenantId,
       eventId: evento.id,
       provider,
-      type: evento.type
+      type: evento.type,
+      paymentId: pago.paymentId
     });
     if (!esNuevo) {
       return; // evento ya procesado (EARS 3)

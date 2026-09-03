@@ -171,11 +171,28 @@ export class DrizzlePagosRepository implements PagosRepository {
           eventId: args.eventId,
           tenantId: args.tenantId,
           provider: args.provider,
-          type: args.type
+          type: args.type,
+          paymentId: args.paymentId
         })
         .onConflictDoNothing()
         .returning({ eventId: webhookEvents.eventId });
-      return inserted.length > 0;
+
+      if (inserted.length > 0) {
+        return true;
+      }
+
+      // Reenvío del mismo evento: no se aplica dos veces, pero se cuenta. Que
+      // un proveedor repita un evento es justo lo que se quiere ver en la
+      // línea de tiempo cuando algo va raro (CA-16).
+      await tx
+        .update(webhookEvents)
+        .set({
+          recibidoVeces: sql`${webhookEvents.recibidoVeces} + 1`,
+          ultimoEn: new Date()
+        })
+        .where(eq(webhookEvents.eventId, args.eventId));
+
+      return false;
     });
   }
 

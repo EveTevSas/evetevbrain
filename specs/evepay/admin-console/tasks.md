@@ -57,12 +57,19 @@ tests derivados de los CA que cita.
 
 ## Fase D — Pagos y cobros
 
-- [ ] D1 — Listado cross-tenant con filtros y paginación: función SECURITY
-      DEFINER + endpoint + UI (CA-15).
-- [ ] D2 — Timeline del cobro: transiciones, eventos webhook (incluidos
-      duplicados descartados) y asientos ligados (CA-16).
-- [ ] D3 — Reverificación manual contra el proveedor, auditada y respetando la
-      máquina de estados (CA-17, CA-18).
+- [x] D1 — Listado cross-tenant con filtros (comercio, estado, referencia) y
+      paginación por keyset, no por OFFSET: con OFFSET, insertar un cobro
+      mientras alguien pagina desplaza las filas y se saltan registros, que en
+      una lista de dinero se lee como un cobro perdido (CA-15).
+- [x] D2 — Línea de tiempo del cobro (CA-16): transiciones con su actor,
+      webhooks y asientos de ledger con sus líneas. Requirió dos columnas en
+      `webhook_events`: `payment_id` —sin ella no se podía saber a qué cobro
+      se refería un evento— y `recibido_veces`, porque un reenvío se
+      descartaba en silencio y que un proveedor repita un evento es justo lo
+      que se busca cuando algo va raro.
+- [x] D3 — Reverificación manual contra el proveedor (CA-17, CA-18): aplica la
+      transición solo si la máquina de estados la permite, y cuando no cambia
+      nada lo dice sin registrar transición. Siempre auditada.
 
 ## Fase E — Conciliación y ledger
 

@@ -169,3 +169,71 @@ export interface SaludProveedor {
 export function estadoProveedores(): Promise<EstadoProveedores> {
   return apiGet<EstadoProveedores>("/admin/providers");
 }
+
+// --- Pagos (Fase D) ---
+
+export interface PagoAdmin {
+  id: string;
+  tenantId: string;
+  tenantNombre: string;
+  merchantId: string;
+  montoMinor: number;
+  moneda: string;
+  referencia: string;
+  descripcion: string | null;
+  estado: string;
+  provider: string;
+  providerPaymentId: string | null;
+  checkoutUrl?: string | null;
+  creadoEn: string;
+  actualizadoEn: string;
+}
+
+export interface PaginaPagos {
+  pagos: PagoAdmin[];
+  siguiente: { at: string; id: string } | null;
+}
+
+export interface EventoTimeline {
+  momento: string;
+  origen: "transicion" | "webhook" | "ledger";
+  titulo: string;
+  detalle: Record<string, unknown>;
+}
+
+export interface ResultadoReverificacion {
+  paymentId: string;
+  estadoLocal: string;
+  estadoProveedor: string;
+  cambio: boolean;
+  detalle: string;
+}
+
+export function listarPagos(filtros: Record<string, string | undefined>): Promise<PaginaPagos> {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(filtros)) {
+    if (v) q.set(k, v);
+  }
+  const cadena = q.toString();
+  return apiGet<PaginaPagos>(`/admin/pagos${cadena ? `?${cadena}` : ""}`);
+}
+
+export function obtenerPago(id: string): Promise<PagoAdmin> {
+  return apiGet<PagoAdmin>(`/admin/pagos/${id}`);
+}
+
+export function timelinePago(id: string): Promise<EventoTimeline[]> {
+  return apiGet<EventoTimeline[]>(`/admin/pagos/${id}/timeline`);
+}
+
+/** Monto en la unidad mínima. Para COP el valor face: no se inventan decimales. */
+export function formatoMonto(montoMinor: number, moneda: string): string {
+  if (moneda === "COP") {
+    return `$ ${montoMinor.toLocaleString("es-CO")}`;
+  }
+  return `${(montoMinor / 100).toLocaleString("es-CO", { minimumFractionDigits: 2 })} ${moneda}`;
+}
+
+export function listarComerciosParaFiltro(): Promise<Comercio[]> {
+  return listarComercios();
+}

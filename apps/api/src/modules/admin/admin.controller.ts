@@ -23,6 +23,13 @@ import {
 } from "./admin.service";
 import { AdminAuditService, type AccionAdmin } from "./admin-audit.service";
 import { ProvidersService, type EstadoProveedores } from "./providers.service";
+import {
+  PagosAdminService,
+  type EventoTimeline,
+  type PagoAdmin,
+  type PaginaPagos,
+  type ResultadoReverificacion
+} from "./pagos-admin.service";
 import { ADMIN_HTML } from "./admin-page";
 
 const CrearComercioSchema = z.object({
@@ -38,6 +45,18 @@ const CambiarEstadoSchema = z.object({
   activo: z.boolean()
 });
 
+/** Filtros del listado de pagos; todo opcional y validado en la frontera (§3). */
+const FiltrosPagosSchema = z.object({
+  tenantId: z.string().uuid().optional(),
+  estado: z.enum(["creado", "pendiente", "aprobado", "fallido", "conciliado"]).optional(),
+  desde: z.string().datetime().optional(),
+  hasta: z.string().datetime().optional(),
+  referencia: z.string().min(1).max(120).optional(),
+  limite: z.coerce.number().int().min(1).max(200).optional(),
+  cursorAt: z.string().datetime().optional(),
+  cursorId: z.string().uuid().optional()
+});
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
@@ -49,7 +68,8 @@ export class AdminController {
   constructor(
     private readonly admin: AdminService,
     private readonly auditoria: AdminAuditService,
-    private readonly providers: ProvidersService
+    private readonly providers: ProvidersService,
+    private readonly pagos: PagosAdminService
   ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
@@ -156,6 +176,61 @@ export class AdminController {
     });
 
     return salud;
+  }
+
+  /** GET /v1/admin/pagos — listado cross-tenant con filtros (CA-15). */
+  @Get("pagos")
+  async listarPagos(
+    @Headers("x-admin-secret") secret: string | undefined,
+    @Query() query: Record<string, string | undefined>
+  ): Promise<PaginaPagos> {
+    this.verificarAdmin(secret);
+
+    const parsed = FiltrosPagosSchema.safeParse(query);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.pagos.listar(parsed.data);
+  }
+
+  /** GET /v1/admin/pagos/:id — un cobro concreto. */
+  @Get("pagos/:id")
+  async obtenerPago(
+    @Headers("x-admin-secret") secret: string | undefined,
+    @Param("id") id: string
+  ): Promise<PagoAdmin> {
+    this.verificarAdmin(secret);
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    return this.pagos.obtener(id);
+  }
+
+  /**
+   * GET /v1/admin/pagos/:id/timeline — transiciones, webhooks (con sus
+   * reenvíos) y asientos de ledger, en orden (CA-16).
+   */
+  @Get("pagos/:id/timeline")
+  async timelinePago(
+    @Headers("x-admin-secret") secret: string | undefined,
+    @Param("id") id: string
+  ): Promise<EventoTimeline[]> {
+    this.verificarAdmin(secret);
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    return this.pagos.timeline(id);
+  }
+
+  /**
+   * POST /v1/admin/pagos/:id/reverify — consulta el estado al proveedor y lo
+   * aplica solo si la máquina de estados lo permite (CA-17, CA-18).
+   */
+  @Post("pagos/:id/reverify")
+  @HttpCode(200)
+  async reverificarPago(
+    @Headers("x-admin-secret") secret: string | undefined,
+    @Param("id") id: string
+  ): Promise<ResultadoReverificacion> {
+    this.verificarAdmin(secret);
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    return this.pagos.reverificar(id, this.actor(secret));
   }
 
   /** GET /v1/admin/auditoria — últimas acciones administrativas (CA-4). */
