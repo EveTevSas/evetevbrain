@@ -80,6 +80,10 @@ export function apiGet<T>(ruta: string): Promise<T> {
   return pedir<T>(ruta);
 }
 
+export function apiPut<T>(ruta: string, cuerpo?: unknown): Promise<T> {
+  return pedir<T>(ruta, { method: "PUT", body: JSON.stringify(cuerpo ?? {}) });
+}
+
 export function apiPost<T>(ruta: string, cuerpo?: unknown): Promise<T> {
   return pedir<T>(ruta, {
     method: "POST",
@@ -104,6 +108,10 @@ export interface Comercio {
   merchantId?: string;
   merchantEstado?: string;
   apiKeys: ApiKeyResumen[];
+  /** false en los comercios creados antes de que se pidiera el perfil. */
+  tienePerfil: boolean;
+  documento: string | null;
+  nombreComercial: string | null;
 }
 
 export interface ComercioCreado {
@@ -294,4 +302,62 @@ export function historicoConciliacion(tenantId?: string): Promise<CorridaConcili
 
 export function ledgerDeComercio(tenantId: string): Promise<LedgerTenant> {
   return apiGet<LedgerTenant>(`/admin/ledger/${tenantId}`);
+}
+
+// --- Perfil del comercio ---
+
+export interface BeneficiarioFinal {
+  nombre: string;
+  tipoDocumento: "CC" | "CE" | "PA" | "NIT";
+  numeroDocumento: string;
+  participacion?: number;
+  esPep: boolean;
+}
+
+/** Espejo de PerfilComercioSchema en la API. */
+export interface PerfilComercio {
+  tipoPersona: "natural" | "juridica";
+  nombreComercial?: string;
+  tipoDocumento: "NIT" | "CC" | "CE" | "PA";
+  numeroDocumento: string;
+  digitoVerificacion?: string;
+  ciiu?: string;
+  responsableIva: boolean;
+  direccion: string;
+  ciudad: string;
+  departamento: string;
+  telefono?: string;
+  sitioWeb?: string;
+  correoNotificaciones: string;
+  correoFacturacion: string;
+  direccionFacturacion?: string;
+  repNombre: string;
+  repTipoDocumento: "CC" | "CE" | "PA";
+  repNumeroDocumento: string;
+  repCorreo?: string;
+  repTelefono?: string;
+  repEsPep: boolean;
+  contactoNombre: string;
+  contactoCargo?: string;
+  contactoCorreo: string;
+  contactoTelefono?: string;
+  banco?: string;
+  tipoCuenta?: "ahorros" | "corriente";
+  numeroCuenta?: string;
+  titularCuenta?: string;
+  titularDocumento?: string;
+  rutVerificado: boolean;
+  camaraComercioVerificada: boolean;
+  cedulaRepVerificada: boolean;
+  certificacionBancariaVerificada: boolean;
+  beneficiarios: BeneficiarioFinal[];
+}
+
+export interface PerfilGuardado {
+  perfil: Record<string, unknown>;
+  beneficiarios: Record<string, unknown>[];
+}
+
+export function obtenerPerfil(tenantId: string): Promise<PerfilGuardado | null> {
+  return apiGet<PerfilGuardado | null>(`/admin/merchants/${tenantId}/perfil`);
 }

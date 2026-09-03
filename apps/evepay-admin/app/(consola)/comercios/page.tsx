@@ -125,6 +125,15 @@ export default async function ComerciosPage() {
                             <div style={{ fontSize: "0.76rem", color: "#64748B" }}>
                               {c.legalName}
                             </div>
+                            {c.documento ? (
+                              <div style={{ fontSize: "0.72rem", color: "#475569" }}>
+                                {c.documento}
+                              </div>
+                            ) : (
+                              <div style={{ marginTop: "0.2rem" }}>
+                                <Etiqueta texto="sin perfil" tono="ambar" />
+                              </div>
+                            )}
                             <div
                               style={{
                                 fontSize: "0.7rem",

@@ -32,6 +32,12 @@ desde la consola. **Un comercio solo cobra si está `aprobado`.**
 
 ## Requisitos funcionales
 
+- **Perfil del comercio** obligatorio al darlo de alta desde la consola:
+  identificación (tipo de persona, documento con su dígito de verificación,
+  CIIU, responsable de IVA), domicilio, **dos correos separados** —el operativo
+  para avisos y el administrativo para la cuenta de cobro—, representante
+  legal, **persona de contacto** con su cargo, **beneficiarios finales**, y la
+  **cuenta de dispersión**. Detalle y motivos en la migración 0012.
 - `POST /v1/merchants { legalName }` (Zod), acotado al tenant (RBAC).
 - Estados KYC/KYB: `pendiente → en_revision → aprobado | rechazado`.
 - Al crear: se consulta `capacidades.altaDeComercios`. Si es `true`, se llama
@@ -64,6 +70,19 @@ desde la consola. **Un comercio solo cobra si está `aprobado`.**
 6. **CUANDO** un `super_admin` aprueba o rechaza el KYC, **EL** sistema **DEBERÁ** aplicar el estado y auditar quién, desde qué estado y hacia cuál.
 7. **CUANDO** se intenta crear un cobro para un comercio que no está `aprobado`, **EL** sistema **DEBERÁ** rechazarlo con 409 sin llamar al proveedor ni dejar rastro de cobro.
 8. **CUANDO** el `merchantId` del cobro no pertenece al tenant que llama, **EL** sistema **DEBERÁ** rechazarlo con 409.
+9. **CUANDO** se da de alta un comercio, **EL** sistema **DEBERÁ** exigir su perfil completo y rechazar el alta si falta algún dato obligatorio, sin crear el comercio.
+10. **CUANDO** el dígito de verificación no corresponde al NIT (algoritmo DIAN), **EL** sistema **DEBERÁ** rechazar el alta señalando ese campo.
+11. **CUANDO** una persona jurídica no declara ningún beneficiario final, **EL** sistema **DEBERÁ** rechazar el alta.
+12. **CUANDO** el documento del titular de la cuenta de dispersión no coincide con el del comercio, **EL** sistema **DEBERÁ** rechazar el alta: no se dispersa a cuentas de terceros.
+13. **CUANDO** ya existe un comercio con el mismo documento, **EL** sistema **DEBERÁ** rechazar el alta con 409 y un mensaje que lo diga, sin dejar registros a medias.
+
+## Qué NO se guarda
+
+Los archivos (RUT, cámara de comercio, cédula, certificación bancaria) no se
+suben: se registra que alguien los verificó, cuándo y quién. Almacenarlos es
+guardar datos personales sensibles, con todo lo que arrastra en consentimiento,
+retención y borrado; se decidirá cuando el volumen lo pida y con su propia
+spec. El expediente documental vive donde ya viva hoy.
 
 ## Restricciones de la constitución
 

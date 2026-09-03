@@ -7,6 +7,7 @@ import {
   HttpCode,
   Param,
   Post,
+  Put,
   Query
 } from "@nestjs/common";
 import { RangoFechasSchema, type SaludProvider } from "@evetev/shared";
@@ -20,6 +21,8 @@ import {
   type ComercioListado
 } from "./admin.service";
 import { AdminAuditService, type AccionAdmin } from "./admin-audit.service";
+import { CrearComercioSchema, PerfilComercioSchema } from "./perfil-comercio.schema";
+import { PerfilComercioService, type PerfilGuardado } from "./perfil-comercio.service";
 import { ProvidersService, type EstadoProveedores } from "./providers.service";
 import {
   ConciliacionAdminService,
@@ -33,11 +36,6 @@ import {
   type PaginaPagos,
   type ResultadoReverificacion
 } from "./pagos-admin.service";
-
-const CrearComercioSchema = z.object({
-  legalName: z.string().min(3).max(200),
-  displayName: z.string().min(2).max(100)
-});
 
 const RotarApiKeySchema = z.object({
   environment: z.enum(["live", "test"])
@@ -77,7 +75,8 @@ export class AdminController {
     private readonly auditoria: AdminAuditService,
     private readonly providers: ProvidersService,
     private readonly pagos: PagosAdminService,
-    private readonly conciliacion: ConciliacionAdminService
+    private readonly conciliacion: ConciliacionAdminService,
+    private readonly perfiles: PerfilComercioService
   ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
@@ -142,6 +141,39 @@ export class AdminController {
       throw new BadRequestException(parsed.error.flatten());
     }
     return this.admin.cambiarEstadoComercio(tenantId, parsed.data.activo, this.actor());
+  }
+
+  /**
+   * GET /v1/admin/merchants/:tenantId/perfil — datos del comercio: quién es,
+   * dónde está, quién lo representa, quién está detrás y dónde se le dispersa.
+   */
+  @Get("merchants/:tenantId/perfil")
+  async obtenerPerfil(@Param("tenantId") tenantId: string): Promise<PerfilGuardado | null> {
+    this.verificarAdmin();
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+    return this.perfiles.obtener(tenantId);
+  }
+
+  /**
+   * PUT /v1/admin/merchants/:tenantId/perfil — crea o reemplaza el perfil.
+   * Es PUT y no PATCH porque se guarda completo: un perfil a medias no se
+   * distingue de uno con campos borrados a propósito.
+   */
+  @Put("merchants/:tenantId/perfil")
+  @HttpCode(200)
+  async guardarPerfil(
+    @Param("tenantId") tenantId: string,
+    @Body() body: unknown
+  ): Promise<{ ok: true }> {
+    this.verificarAdmin();
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+
+    const parsed = PerfilComercioSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    await this.perfiles.guardar(tenantId, parsed.data, this.actor());
+    return { ok: true };
   }
 
   /**

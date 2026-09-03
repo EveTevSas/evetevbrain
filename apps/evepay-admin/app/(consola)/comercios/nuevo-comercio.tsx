@@ -3,6 +3,7 @@
 import { AvisoClaves, ClaveUnaVez } from "@/components/clave-una-vez";
 import { Info, Plus } from "lucide-react";
 import { useActionState, useState } from "react";
+import { CamposPerfil } from "./campos-perfil";
 import { crearComercio, type Resultado } from "./acciones";
 import type { ComercioCreado } from "@/lib/api/evepay";
 
@@ -142,25 +143,40 @@ export function NuevoComercio() {
         marginBottom: "1.5rem",
         display: "flex",
         flexDirection: "column",
-        gap: "1rem",
-        maxWidth: 560
+        gap: "1.1rem"
       }}
     >
-      <h2 style={{ margin: 0, fontSize: "1rem", color: "#0A2540" }}>Nuevo comercio</h2>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-        <label htmlFor="legalName" style={etiqueta}>
-          Razón social
-        </label>
-        <input id="legalName" name="legalName" required minLength={3} style={entrada} />
+      <div>
+        <h2 style={{ margin: 0, fontSize: "1rem", color: "#0A2540" }}>Nuevo comercio</h2>
+        <p style={{ margin: "0.25rem 0 0", fontSize: "0.78rem", color: "#64748B" }}>
+          Estos datos son los que permiten facturarle, notificarle y dispersarle lo recaudado.
+          Pedirlos ahora cuesta un formulario; perseguirlos después, semanas.
+        </p>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-        <label htmlFor="displayName" style={etiqueta}>
-          Nombre visible
-        </label>
-        <input id="displayName" name="displayName" required minLength={2} style={entrada} />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: "0.9rem"
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+          <label htmlFor="legalName" style={etiqueta}>
+            Razón social *
+          </label>
+          <input id="legalName" name="legalName" required minLength={3} style={entrada} />
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+          <label htmlFor="displayName" style={etiqueta}>
+            Nombre visible *
+          </label>
+          <input id="displayName" name="displayName" required minLength={2} style={entrada} />
+        </div>
       </div>
+
+      <CamposPerfil />
 
       {estado && !estado.ok && (
         <p

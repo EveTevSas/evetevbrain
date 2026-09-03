@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq, sql } from "drizzle-orm";
 import { DB, type Db } from "../../database/drizzle";
 import { merchants, tenants, merchantApiKeys } from "../../database/schema";
@@ -6,10 +6,13 @@ import { generateApiKey, type ApiKeyEnv } from "../../common/api-key.util";
 import type { EstadoMerchant } from "@evetev/shared";
 import { MerchantsService } from "../merchants/merchants.service";
 import { AdminAuditService } from "./admin-audit.service";
+import { PerfilComercioService } from "./perfil-comercio.service";
+import type { PerfilComercio } from "./perfil-comercio.schema";
 
 export interface CrearComercioInput {
   legalName: string;
   displayName: string;
+  perfil: PerfilComercio;
 }
 
 export interface ComercioCreado {
@@ -48,6 +51,11 @@ export interface ComercioListado {
   merchantId?: string;
   merchantEstado?: string;
   apiKeys: ApiKeyResumen[];
+  /** false en los comercios creados antes de que se pidiera el perfil. */
+  tienePerfil: boolean;
+  /** "NIT 830053105-3", o null si aún no hay perfil. */
+  documento: string | null;
+  nombreComercial: string | null;
 }
 
 /**
@@ -60,16 +68,35 @@ export class AdminService {
   constructor(
     @Inject(DB) private readonly db: Db,
     private readonly merchants: MerchantsService,
-    private readonly auditoria: AdminAuditService
+    private readonly auditoria: AdminAuditService,
+    private readonly perfiles: PerfilComercioService
   ) {}
 
   async crearComercio(input: CrearComercioInput, actor: string): Promise<ComercioCreado> {
+    /* Antes de crear nada: si el documento ya está, el alta es un duplicado.
+       El índice único lo impediría igual, pero saltando a mitad del proceso y
+       dejando un tenant sin perfil ni claves. */
+    const repetido = await this.perfiles.documentoYaUsado(
+      input.perfil.tipoDocumento,
+      input.perfil.numeroDocumento
+    );
+    if (repetido) {
+      throw new ConflictException(
+        `Ya existe un comercio con el documento ${input.perfil.tipoDocumento} ${input.perfil.numeroDocumento}.`
+      );
+    }
+
     const inserted = await this.db
       .insert(tenants)
       .values({ legalName: input.legalName, displayName: input.displayName })
       .returning({ id: tenants.id });
 
     const tenantId = inserted[0]!.id;
+
+    // El perfil va primero a propósito: su índice único por documento es lo
+    // que rechaza un comercio duplicado, y conviene que reviente antes de
+    // haber emitido claves que ya podrían estar cobrando.
+    await this.perfiles.guardar(tenantId, input.perfil, actor);
 
     const { merchant, pasoManualProveedor } = await this.merchants.registrar(tenantId, {
       legalName: input.legalName
@@ -108,6 +135,7 @@ export class AdminService {
           legalName: input.legalName,
           displayName: input.displayName,
           merchantId: merchant.id,
+          documento: `${input.perfil.tipoDocumento} ${input.perfil.numeroDocumento}`,
           clavePrefijoLive: live.prefix,
           clavePrefijoTest: test.prefix,
           pasoManualProveedor
@@ -297,7 +325,10 @@ export class AdminService {
           creadoEn: row.creado_en,
           merchantId: row.merchant_id ?? undefined,
           merchantEstado: row.merchant_status ?? undefined,
-          apiKeys: []
+          apiKeys: [],
+          tienePerfil: false,
+          documento: null,
+          nombreComercial: null
         });
       }
       if (row.key_prefix) {
@@ -308,6 +339,14 @@ export class AdminService {
         });
       }
     }
+    const perfiles = await this.perfiles.resumenPorTenant();
+    for (const comercio of map.values()) {
+      const p = perfiles.get(comercio.tenantId);
+      comercio.tienePerfil = p?.tienePerfil ?? false;
+      comercio.documento = p?.documento ?? null;
+      comercio.nombreComercial = p?.nombreComercial ?? null;
+    }
+
     return Array.from(map.values());
   }
 }

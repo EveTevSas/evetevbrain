@@ -5,6 +5,7 @@ import { MerchantsModule } from "../merchants/merchants.module";
 import { AdminController } from "./admin.controller";
 import { AdminService } from "./admin.service";
 import { AdminAuditService } from "./admin-audit.service";
+import { PerfilComercioService } from "./perfil-comercio.service";
 import { ProvidersService } from "./providers.service";
 import { PagosAdminService } from "./pagos-admin.service";
 import { ConciliacionAdminService } from "./conciliacion-admin.service";
@@ -17,7 +18,8 @@ import { ConciliacionAdminService } from "./conciliacion-admin.service";
     AdminAuditService,
     ProvidersService,
     PagosAdminService,
-    ConciliacionAdminService
+    ConciliacionAdminService,
+    PerfilComercioService
   ]
 })
 export class AdminModule {}
