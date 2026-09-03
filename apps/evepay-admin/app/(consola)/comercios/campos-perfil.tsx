@@ -162,19 +162,25 @@ export function validarPaso(paso: number, form: HTMLFormElement): string | null 
 export function CamposPaso({
   paso,
   inicial,
+  tipoPersona,
+  onTipoPersona,
   conIdentidadDelTenant = true
 }: {
   paso: number;
   inicial?: Record<string, unknown>;
+  /**
+   * Vive en el componente padre, no aquí. Cada paso es una instancia distinta:
+   * con el estado dentro, elegir "persona natural" en el paso 1 no llegaba al
+   * paso 4, que seguía exigiendo beneficiarios finales.
+   */
+  tipoPersona: string;
+  onTipoPersona: (v: string) => void;
   /** El alta pide razón social y nombre visible; la edición del perfil, no. */
   conIdentidadDelTenant?: boolean;
 }) {
   const v = (k: string) => (inicial?.[k] as string | undefined) ?? "";
   const bool = (k: string) => Boolean(inicial?.[k]);
 
-  const [tipoPersona, setTipoPersona] = useState<string>(
-    (inicial?.tipo_persona as string) ?? "juridica"
-  );
   const [filas, setFilas] = useState(1);
 
   switch (paso) {
@@ -199,7 +205,7 @@ export function CamposPaso({
             <select
               name="tipoPersona"
               value={tipoPersona}
-              onChange={(e) => setTipoPersona(e.target.value)}
+              onChange={(e) => onTipoPersona(e.target.value)}
               style={entrada}
             >
               <option value="juridica">Persona jurídica</option>

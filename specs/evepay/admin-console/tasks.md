@@ -127,6 +127,23 @@ cobrar. La respuesta fue **no**, y de ahí salieron tres cambios:
   ComboPay activo **cada cobro quedaba guardado como "fake"** — y ese es el
   campo contra el que después se concilia.
 
+## CRUD de comercios (3-sep-2026)
+
+- [x] H1 — Ficha del comercio en `/comercios/[tenantId]`, con endpoint propio
+      (`GET /v1/admin/merchants/:tenantId`): mostrar uno no debe costar traer
+      la lista entera con las claves de todos.
+- [x] H2 — Edición del perfil desde la ficha. NO va por pasos como el alta:
+      editando se viene a cambiar un campo concreto, y recorrer cinco
+      pantallas para corregir un teléfono sería peor que el formulario largo.
+- [x] H3 — La "D" del CRUD es desactivar, no borrar (premisa 3). Las llaves
+      foráneas ya lo impedirían para un comercio con cobros, y hacen bien.
+
+  Dos correcciones que salieron al construirlo: el estado de "tipo de persona"
+  vivía dentro de cada paso, así que elegir "persona natural" en el paso 1 no
+  llegaba al paso de beneficiarios; y los campos opcionales devueltos como
+  `null` por la base eran rechazados al volver a guardarlos, de modo que leer
+  un perfil y guardarlo sin tocar nada fallaba (CA-24).
+
 ## Dependencias
 
 - El PR `feat/provider-combopay` mergeado antes de C1–C3.

@@ -1,5 +1,6 @@
 import { Tarjeta, TituloSeccion } from "@/components/seccion";
 import { ErrorApi, listarComercios, type Comercio } from "@/lib/api/evepay";
+import Link from "next/link";
 import { AccionesComercio } from "./acciones-comercio";
 import { NuevoComercio } from "./nuevo-comercio";
 
@@ -121,7 +122,12 @@ export default async function ComerciosPage() {
                       return (
                         <tr key={c.tenantId} style={{ opacity: activo ? 1 : 0.65 }}>
                           <td style={celda}>
-                            <div style={{ fontWeight: 700, color: "#0A2540" }}>{c.displayName}</div>
+                            <Link
+                              href={`/comercios/${c.tenantId}`}
+                              style={{ fontWeight: 700, color: "#4b3075", textDecoration: "none" }}
+                            >
+                              {c.displayName}
+                            </Link>
                             <div style={{ fontSize: "0.76rem", color: "#64748B" }}>
                               {c.legalName}
                             </div>

@@ -18,14 +18,34 @@ const documento = z
   .regex(/^[\d.\s-]+$/, "El documento solo puede llevar dígitos, puntos o guiones");
 
 const texto = (min: number, max: number) => z.string().trim().min(min).max(max);
-const opcional = (max: number) => z.string().trim().max(max).optional().or(z.literal(""));
+
+/**
+ * Campo opcional de texto.
+ *
+ * Acepta null además de ausente o vacío porque eso es lo que devuelve la base
+ * para un campo sin llenar: sin esto, leer un perfil y volver a guardarlo tal
+ * cual fallaba con "Invalid input" en cada campo vacío. Lo que la API entrega
+ * tiene que poder volver a entrar.
+ */
+const opcional = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .nullish()
+    .transform((v) => v ?? "");
 
 export const BeneficiarioFinalSchema = z.object({
   nombre: texto(3, 200),
   tipoDocumento: z.enum(["CC", "CE", "PA", "NIT"]),
   numeroDocumento: documento,
   /** Porcentaje de participación; se declara desde el 5%. */
-  participacion: z.number().min(0).max(100).optional(),
+  participacion: z
+    .number()
+    .min(0)
+    .max(100)
+    .nullish()
+    .transform((v) => v ?? undefined),
   esPep: z.boolean().default(false)
 });
 
@@ -40,8 +60,8 @@ export const PerfilComercioSchema = z
       .string()
       .trim()
       .regex(/^\d?$/, "El dígito de verificación es un solo número")
-      .optional()
-      .or(z.literal("")),
+      .nullish()
+      .transform((v) => v ?? ""),
     /** Código CIIU de la actividad económica (sale del RUT). */
     ciiu: opcional(10),
     responsableIva: z.boolean().default(false),
@@ -62,7 +82,10 @@ export const PerfilComercioSchema = z
     repNombre: texto(3, 200),
     repTipoDocumento: z.enum(["CC", "CE", "PA"]),
     repNumeroDocumento: documento,
-    repCorreo: z.string().trim().email().max(150).optional().or(z.literal("")),
+    repCorreo: z
+      .union([z.string().trim().email().max(150), z.literal(""), z.null()])
+      .optional()
+      .transform((v) => v ?? ""),
     repTelefono: opcional(30),
     repEsPep: z.boolean().default(false),
 
@@ -74,10 +97,18 @@ export const PerfilComercioSchema = z
 
     // Dispersión
     banco: opcional(100),
-    tipoCuenta: z.enum(["ahorros", "corriente"]).optional(),
+    tipoCuenta: z
+      .enum(["ahorros", "corriente"])
+      .nullish()
+      .transform((v) => v ?? undefined),
     numeroCuenta: opcional(40),
     titularCuenta: opcional(200),
-    titularDocumento: z.string().trim().max(20).optional().or(z.literal("")),
+    titularDocumento: z
+      .string()
+      .trim()
+      .max(20)
+      .nullish()
+      .transform((v) => v ?? ""),
 
     // Diligencia documental
     rutVerificado: z.boolean().default(false),

@@ -42,6 +42,20 @@ export interface ApiKeyResumen {
   activa: boolean;
 }
 
+/** Fila cruda de las funciones de comercios: una por API key. */
+interface FilaComercio extends Record<string, unknown> {
+  tenant_id: string;
+  legal_name: string;
+  display_name: string;
+  tenant_status: string;
+  creado_en: string;
+  merchant_id: string | null;
+  merchant_status: string | null;
+  key_prefix: string | null;
+  key_environment: string | null;
+  key_activa: boolean | null;
+}
+
 export interface ComercioListado {
   tenantId: string;
   legalName: string;
@@ -301,19 +315,26 @@ export class AdminService {
 
   /** Lista todos los comercios (cross-tenant via SECURITY DEFINER). */
   async listarComercios(): Promise<ComercioListado[]> {
-    const rows = await this.db.execute<{
-      tenant_id: string;
-      legal_name: string;
-      display_name: string;
-      tenant_status: string;
-      creado_en: string;
-      merchant_id: string | null;
-      merchant_status: string | null;
-      key_prefix: string | null;
-      key_environment: string | null;
-      key_activa: boolean | null;
-    }>(sql`SELECT * FROM identity.admin_listar_comercios()`);
+    const rows = await this.db.execute<FilaComercio>(
+      sql`SELECT * FROM identity.admin_listar_comercios()`
+    );
+    return this.armar(rows);
+  }
 
+  /** Ficha de un comercio, o null si no existe. */
+  async obtenerComercio(tenantId: string): Promise<ComercioListado | null> {
+    const rows = await this.db.execute<FilaComercio>(
+      sql`SELECT * FROM identity.admin_comercio(${tenantId}::uuid)`
+    );
+    const [comercio] = await this.armar(rows);
+    return comercio ?? null;
+  }
+
+  /**
+   * Las funciones devuelven una fila por API key, así que un comercio con dos
+   * claves llega dos veces. Se agrupan por tenant y se les añade el perfil.
+   */
+  private async armar(rows: FilaComercio[]): Promise<ComercioListado[]> {
     const map = new Map<string, ComercioListado>();
     for (const row of rows) {
       if (!map.has(row.tenant_id)) {

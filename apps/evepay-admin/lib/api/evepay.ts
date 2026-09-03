@@ -361,3 +361,7 @@ export interface PerfilGuardado {
 export function obtenerPerfil(tenantId: string): Promise<PerfilGuardado | null> {
   return apiGet<PerfilGuardado | null>(`/admin/merchants/${tenantId}/perfil`);
 }
+
+export function obtenerComercio(tenantId: string): Promise<Comercio> {
+  return apiGet<Comercio>(`/admin/merchants/${tenantId}`);
+}

@@ -60,6 +60,13 @@ se retira al terminar la migración.
   nueva, mostrarla una sola vez y desactivar la anterior de forma atómica.
 - CA-10: CUANDO se desactiva un comercio, EL sistema DEBERÁ rechazar cobros
   nuevos de ese tenant manteniendo consultables su historial y su ledger.
+- CA-23: CUANDO se abre la ficha de un comercio, EL sistema DEBERÁ mostrar sus
+  datos completos —identificación, domicilio, correos, representante legal,
+  persona de contacto, beneficiarios finales, cuenta de dispersión y estado de
+  los documentos— y permitir editarlos, sin poder borrar el comercio: lo que
+  toca dinero se desactiva, no se elimina.
+- CA-24: CUANDO se lee un perfil y se vuelve a guardar sin cambios, EL sistema
+  DEBERÁ aceptarlo. Lo que la API entrega tiene que poder volver a entrar.
 - CA-22: CUANDO el proveedor activo no comunica la aprobación de comercios, EL
   sistema DEBERÁ permitir a un `super_admin` aprobar o rechazar el KYC desde la
   consola, auditando quién, desde qué estado y hacia cuál. Sin esto, con un

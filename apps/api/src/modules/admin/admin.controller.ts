@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -141,6 +142,17 @@ export class AdminController {
       throw new BadRequestException(parsed.error.flatten());
     }
     return this.admin.cambiarEstadoComercio(tenantId, parsed.data.activo, this.actor());
+  }
+
+  /** GET /v1/admin/merchants/:tenantId — ficha del comercio. */
+  @Get("merchants/:tenantId")
+  async obtenerComercio(@Param("tenantId") tenantId: string): Promise<ComercioListado> {
+    this.verificarAdmin();
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+
+    const comercio = await this.admin.obtenerComercio(tenantId);
+    if (!comercio) throw new NotFoundException("Comercio no encontrado.");
+    return comercio;
   }
 
   /**

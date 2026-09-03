@@ -38,6 +38,8 @@ export function NuevoComercio() {
   const [abierto, setAbierto] = useState(false);
   const [paso, setPaso] = useState(0);
   const [errorPaso, setErrorPaso] = useState<string | null>(null);
+  // Compartido entre pasos: el paso de beneficiarios cambia según esto.
+  const [tipoPersona, setTipoPersona] = useState("juridica");
   const formRef = useRef<HTMLFormElement>(null);
 
   const [estado, accion, enviando] = useActionState<Resultado<ComercioCreado> | null, FormData>(
@@ -186,7 +188,7 @@ export function NuevoComercio() {
           escrito no viajaría en el envío. */}
       {PASOS.map((_, i) => (
         <Paso key={i} visible={i === paso}>
-          <CamposPaso paso={i} />
+          <CamposPaso paso={i} tipoPersona={tipoPersona} onTipoPersona={setTipoPersona} />
         </Paso>
       ))}
 

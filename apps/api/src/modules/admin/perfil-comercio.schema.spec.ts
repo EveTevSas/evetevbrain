@@ -189,3 +189,57 @@ describe("PerfilComercioSchema — correos", () => {
     );
   });
 });
+
+/* Lo que la API entrega tiene que poder volver a entrar. La base devuelve null
+   en cada campo opcional sin llenar, y el esquema los rechazaba: leer un perfil
+   y guardarlo tal cual fallaba con "Invalid input" en cada uno. Se descubrió
+   probando el editar del CRUD contra un perfil real. */
+describe("PerfilComercioSchema — un perfil leído se puede volver a guardar", () => {
+  it("acepta null en los campos opcionales, que es como los devuelve la base", () => {
+    const comoVieneDeLaBase = {
+      ...perfil(),
+      nombreComercial: null,
+      ciiu: null,
+      telefono: null,
+      sitioWeb: null,
+      direccionFacturacion: null,
+      repCorreo: null,
+      repTelefono: null,
+      contactoCargo: null,
+      contactoTelefono: null,
+      banco: null,
+      tipoCuenta: null,
+      numeroCuenta: null,
+      titularCuenta: null,
+      titularDocumento: null,
+      digitoVerificacion: null,
+      numeroDocumento: "1020304050",
+      tipoDocumento: "CC"
+    };
+
+    const r = PerfilComercioSchema.safeParse(comoVieneDeLaBase);
+    expect(r.success).toBe(true);
+    if (r.success) {
+      // Los null se normalizan a vacío, no se propagan.
+      expect(r.data.telefono).toBe("");
+      expect(r.data.tipoCuenta).toBeUndefined();
+    }
+  });
+
+  it("un beneficiario sin participación declarada también vuelve a entrar", () => {
+    const r = PerfilComercioSchema.safeParse(
+      perfil({
+        beneficiarios: [
+          {
+            nombre: "Ana Gómez",
+            tipoDocumento: "CC",
+            numeroDocumento: "1020304050",
+            participacion: null,
+            esPep: false
+          }
+        ]
+      })
+    );
+    expect(r.success).toBe(true);
+  });
+});
