@@ -2,9 +2,9 @@
   "name": "@evetev/eve-studio",
   "version": "0.0.0",
   "private": true,
-  "description": "Eve Studio — agente de generación de interfaces (Python + LangGraph). Se despliega en Vercel con Root Directory apps/eve-studio.",
+  "description": "Eve Studio — agente que edita las landings (Python + LangGraph). Corre EN LOCAL: escribe en tu árbol de trabajo, no despliega.",
   "scripts": {
-    "dev": "uvicorn api.index:app --reload --port 3003",
+    "dev": ".venv/bin/uvicorn api.index:app --reload --host 127.0.0.1 --port 3003",
     "lint": "echo \"(eve-studio) app en Python, sin lint de Node\" && exit 0",
     "typecheck": "echo \"(eve-studio) app en Python, sin typecheck de Node\" && exit 0",
     "test": "echo \"(eve-studio) app en Python, sin tests de Node\" && exit 0"

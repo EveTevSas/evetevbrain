@@ -16,7 +16,7 @@ cuando esta guía y la constitución se contradigan, manda la constitución.
 | `apps/rag-assistant` | **Fluxi**, asistente RAG (Kimi + embeddings)               | Producción — `rag-assistant-ochre.vercel.app` | —            |
 | `apps/eve-store`     | Tienda (Postgres schema `tienda`)                          | En desarrollo                                 | —            |
 | `apps/eve-merchants` | Panel de comercios                                         | En desarrollo                                 | —            |
-| `apps/eve-studio`    | Generador con Kimi                                         | Experimental                                  | —            |
+| `apps/eve-studio`    | Generador con Kimi — **solo local**, escribe en tu árbol   | Experimental — no se despliega                | 3003         |
 
 Paquetes: `packages/shared` (contrato de EvePay: tipos + Zod), `packages/config`
 (eslint/prettier/tsconfig base), `packages/brand` (marca: tokens, logos, patrones
