@@ -15,10 +15,13 @@ describe("MerchantsService — onboarding", () => {
   });
 
   it("EARS 1: registrar crea el comercio en revisión con provider_merchant_id", async () => {
-    const m = await service.registrar(TENANT, { legalName: "Comercio Demo" });
+    const { merchant, pasoManualProveedor } = await service.registrar(TENANT, {
+      legalName: "Comercio Demo"
+    });
 
-    expect(m.estado).toBe("en_revision");
-    expect(m.legalName).toBe("Comercio Demo");
+    expect(merchant.estado).toBe("en_revision");
+    expect(merchant.legalName).toBe("Comercio Demo");
+    expect(pasoManualProveedor).toBeNull();
     const row = Array.from(repo.merchants.values())[0];
     expect(row?.providerMerchantId).toBeTruthy();
     expect(row?.tenantId).toBe(TENANT);

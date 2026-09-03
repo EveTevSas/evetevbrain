@@ -38,6 +38,7 @@ export class MerchantsController {
       throw new BadRequestException(parsed.error.flatten());
     }
     const ctx = currentContext();
-    return this.merchants.registrar(ctx.tenantId, parsed.data);
+    const { merchant } = await this.merchants.registrar(ctx.tenantId, parsed.data);
+    return merchant;
   }
 }

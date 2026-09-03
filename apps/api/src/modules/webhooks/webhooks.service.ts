@@ -72,17 +72,18 @@ export class WebhooksService {
       return; // tipo no soportado (EARS 6) o evento sin pago
     }
 
-    const pago = await this.repo.resolverPagoPorProvider(evento.providerPaymentId);
+    const provider = evento.provider ?? "akua";
+    const pago = await this.repo.resolverPagoPorProvider(provider, evento.providerPaymentId);
     if (!pago) {
       return; // el evento referencia un pago que no conocemos (EARS 5)
     }
 
-    const provider = evento.provider ?? "akua";
     const esNuevo = await this.repo.registrarEventoIdempotente({
       tenantId: pago.tenantId,
       eventId: evento.id,
       provider,
-      type: evento.type
+      type: evento.type,
+      paymentId: pago.paymentId
     });
     if (!esNuevo) {
       return; // evento ya procesado (EARS 3)

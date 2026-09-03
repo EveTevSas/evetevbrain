@@ -1,0 +1,14 @@
+-- Roles del entorno LOCAL de EvePay (Supabase CLI los aplica antes de las
+-- migraciones, en `supabase start` y `supabase db reset`).
+--
+-- En los proyectos alojados este rol se crea a mano una sola vez desde el panel
+-- (ver supabase/README.md); aquí se recrea para que el entorno local se levante
+-- solo y las migraciones —que hacen GRANT a este rol— no fallen.
+--
+-- La contraseña es de un Postgres local y desechable: no es un secreto, no sale
+-- de esta máquina y nunca se usa contra un proyecto alojado (§4).
+--
+-- LO IMPORTANTE: sin BYPASSRLS y sin ser owner de las tablas. Si la API
+-- conectara como owner, las políticas RLS se ignorarían y el aislamiento entre
+-- comercios dejaría de existir sin que ningún test lo notara.
+create role evepay_api with login password 'postgres' nobypassrls;

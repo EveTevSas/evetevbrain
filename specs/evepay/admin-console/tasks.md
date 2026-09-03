@@ -15,53 +15,159 @@ tests derivados de los CA que cita.
 - [x] A3 — Migrar el acceso admin de `X-Admin-Secret` a JWT de Supabase con
       rol `super_admin` verificado en la API (CA-3; `supabase-jwt.ts` +
       `TenantMiddleware`). El header sigue aceptándose hasta F1.
-- [ ] A4 — Auditoría de acciones admin: tabla inmutable (quién/qué/cuándo),
-      helper transversal, la acción falla si no audita (CA-4, CA-5).
+- [x] A4 — Auditoría de acciones admin: `audit.admin_actions` inmutable con
+      RLS sin políticas (solo se entra por funciones SECURITY DEFINER),
+      `AdminAuditService.registrarEn(tx)` dentro de la transacción de cada
+      acción, y `GET /v1/admin/auditoria` (CA-4, CA-5).
 - [x] A5 — Script de aprovisionamiento de usuarios admin
       (`pnpm auth:provision-admin`, rol en app_metadata).
 
 ## Fase B — Comercios y onboarding
 
-- [ ] B1 — Listado de comercios (consume el endpoint existente; CA-6).
-- [ ] B2 — Alta de comercio con las claves mostradas una sola vez (CA-7) y el
-      paso manual del proveedor agregador señalado (CA-8).
-- [ ] B3 — Rotación de API key: endpoint atómico + UI (CA-9).
-- [ ] B4 — Desactivar comercio: endpoint + efecto en cobros nuevos + UI (CA-10).
+- [x] B1 — Listado de comercios con estado, KYC y prefijos de sus claves (CA-6).
+- [x] B2 — Alta de comercio con las claves mostradas una sola vez (CA-7) y el
+      paso manual señalado cuando el proveedor es agregador (CA-8). Requirió
+      añadir `capacidades` al contrato `PaymentProvider`: preguntar antes de
+      intentar, para no confundir "no lo ofrece" con "está caído".
+- [x] B3 — Rotación de API key: revoca las anteriores y crea la nueva en una
+      sola transacción, con la clave mostrada una vez (CA-9).
+- [x] B4 — Activar/desactivar comercio (CA-10). El bloqueo de cobros nuevos se
+      resolvió en `identity.validar_api_key`, que ahora exige que el tenant
+      esté activo: es la única puerta por la que entra una API key, así que
+      cubre también los endpoints futuros.
 
 ## Fase C — Proveedores
 
-- [ ] C1 — `GET /v1/admin/providers`: activo, presencia de config y
-      capacidades por proveedor (CA-11, CA-14 en el detalle de cobro).
-- [ ] C2 — Prueba de salud real por proveedor (CA-12): fake = ok; combopay =
-      GET autenticado barato; akua = token OAuth. Sin tocar dinero.
-- [ ] C3 — Checklist de habilitación (CA-13), empezando por los pasos T6 de
-      `provider-combopay`.
-- [ ] C4 — UI de la sección con estado visual (activo / configurado / salud).
+- [x] C1 — `GET /v1/admin/providers`: proveedor activo, capacidades y
+      PRESENCIA de cada credencial —nunca su valor— (CA-11). El nombre del
+      proveedor lo da el propio proveedor, así el histórico conserva quién
+      procesó qué (CA-14).
+- [x] C2 — `POST /v1/admin/providers/health`: comprobación real contra el
+      proveedor activo (CA-12), añadida al contrato como `verificarSalud()`.
+      fake = ok sin red; akua = token OAuth fresco (se salta la caché a
+      propósito); combopay = `GET /api/invoice/0/status`, que exige el token.
+      **No** `/api/bank-list`: resultó ser público y daba un falso "el token es
+      válido" con credenciales inventadas. Cada comprobación queda auditada.
+- [x] C3 — Checklist de habilitación (CA-13) con los pasos T6 de
+      `provider-combopay`. Lo que no se puede verificar desde aquí se marca
+      como manual con su nota, en vez de darlo por hecho.
+- [x] C4 — UI de la sección: tarjeta por proveedor con capacidades,
+      credenciales, forma de la URL del webhook, checklist y botón de
+      comprobación en vivo.
 
 ## Fase D — Pagos y cobros
 
-- [ ] D1 — Listado cross-tenant con filtros y paginación: función SECURITY
-      DEFINER + endpoint + UI (CA-15).
-- [ ] D2 — Timeline del cobro: transiciones, eventos webhook (incluidos
-      duplicados descartados) y asientos ligados (CA-16).
-- [ ] D3 — Reverificación manual contra el proveedor, auditada y respetando la
-      máquina de estados (CA-17, CA-18).
+- [x] D1 — Listado cross-tenant con filtros (comercio, estado, referencia) y
+      paginación por keyset, no por OFFSET: con OFFSET, insertar un cobro
+      mientras alguien pagina desplaza las filas y se saltan registros, que en
+      una lista de dinero se lee como un cobro perdido (CA-15).
+- [x] D2 — Línea de tiempo del cobro (CA-16): transiciones con su actor,
+      webhooks y asientos de ledger con sus líneas. Requirió dos columnas en
+      `webhook_events`: `payment_id` —sin ella no se podía saber a qué cobro
+      se refería un evento— y `recibido_veces`, porque un reenvío se
+      descartaba en silencio y que un proveedor repita un evento es justo lo
+      que se busca cuando algo va raro.
+- [x] D3 — Reverificación manual contra el proveedor (CA-17, CA-18): aplica la
+      transición solo si la máquina de estados la permite, y cuando no cambia
+      nada lo dice sin registrar transición. Siempre auditada.
 
 ## Fase E — Conciliación y ledger
 
-- [ ] E1 — Conciliación por tenant desde la consola + histórico de corridas
-      (CA-19); estado "conciliación manual" cuando el proveedor no da
-      settlements (CA-20).
-- [ ] E2 — Vista de ledger con saldo reconstruido y alarma de descuadre
-      (CA-21).
+- [x] E1 — Conciliación por comercio y rango desde la consola, con histórico
+      inmutable de corridas (CA-19). Cuando el proveedor no expone
+      liquidaciones, la corrida se registra como `no_soportada` con su nota y
+      las cifras en null (CA-20): guardar ceros se leería como "todo cuadra"
+      cuando nadie comprobó nada.
+- [x] E2 — Ledger por comercio con el saldo RECONSTRUIDO desde las líneas —no
+      hay campo "saldo" que pueda quedar desactualizado— y alarma de descuadre
+      global y por asiento (CA-21). Verificado inyectando un asiento corrupto
+      en la base local: la alarma lo detectó y nombró.
+
+  De paso se corrigió la cuenta de compensación del ledger, que estaba escrita
+  a mano como `akua_clearing`. Con ComboPay activo el dinero en tránsito habría
+  seguido cayendo en una cuenta con el nombre de un proveedor que no lo tiene,
+  y con dos adquirencias sería imposible saber cuánto debe cada una. Ahora es
+  `clearing:<proveedor>`; los asientos anteriores conservan su nombre, porque
+  el ledger es inmutable y aquel dinero sí lo tenía Akua.
 
 ## Fase F — Cierre
 
-- [ ] F1 — Retirar `X-Admin-Secret`, `ADMIN_SECRET` y la página embebida
-      `admin-page.ts` (la consola ya cubre sus funciones). Actualizar
-      `docs/DESPLIEGUE.md` y los README.
-- [ ] F2 — Registrar la consola en `docs/DESPLIEGUE.md` (proyecto Vercel) y en
-      el CLAUDE.md raíz (mapa de apps, puerto, criterio de deploy sano).
+- [x] F1 — Retirados `X-Admin-Secret`, `ADMIN_SECRET` y la página embebida
+      `admin-page.ts` (392 líneas de HTML dentro de un `.ts`), junto con el
+      `AdminUIController` y la exclusión del prefijo `/v1` que existía solo
+      para servirla. Un test fija que la variable ya no abre nada, para que la
+      puerta trasera no vuelva por descuido.
+      De paso se quitó del `marca-sync` la maquinaria de activos incrustados:
+      su único caso era esa página, y la consola sirve la marca desde su propia
+      carpeta `/marca` como el resto de las apps.
+- [x] F2 — Consola registrada en `docs/DESPLIEGUE.md` (proyecto Vercel, sus
+      variables, cómo se aprovisionan los usuarios y el retiro de
+      `ADMIN_SECRET`), en el `CLAUDE.md` raíz (mapa de apps, puerto 3004 y
+      criterio de deploy sano) y en el README de la API.
+
+## Posterior — decisión de negocio del 2-sep-2026
+
+Se preguntó si un comercio sin registrar en el panel de ComboPay debería poder
+cobrar. La respuesta fue **no**, y de ahí salieron tres cambios:
+
+- [x] G1 — Crear un cobro exige que el comercio esté `aprobado` (409 en
+      cualquier otro estado, antes de llamar al proveedor). La comprobación
+      busca por (tenant, merchant), así que cierra de paso un hueco de
+      integridad: el `merchantId` venía en el cuerpo y se persistía tal cual,
+      sin comprobar que fuera de quien llamaba.
+- [x] G2 — `POST /v1/admin/merchants/:tenantId/kyc` y su botón en la consola
+      (CA-22). Es el único camino a `aprobado` con un proveedor agregador.
+- [x] G3 — `specs/evepay/merchant-onboarding/` revisada: estaba escrita entera
+      alrededor de Akua y su webhook. Ahora cubre los dos modelos y sube de 4
+      a 8 criterios EARS.
+
+  Se corrigió además el mismo bug del nombre del proveedor que ya se había
+  arreglado en merchants: `PagosService` derivaba el proveedor de
+  `PAYMENT_PROVIDER` con un ternario que solo conocía "akua", así que con
+  ComboPay activo **cada cobro quedaba guardado como "fake"** — y ese es el
+  campo contra el que después se concilia.
+
+## CRUD de comercios (3-sep-2026)
+
+- [x] H1 — Ficha del comercio en `/comercios/[tenantId]`, con endpoint propio
+      (`GET /v1/admin/merchants/:tenantId`): mostrar uno no debe costar traer
+      la lista entera con las claves de todos.
+- [x] H2 — Edición del perfil desde la ficha. NO va por pasos como el alta:
+      editando se viene a cambiar un campo concreto, y recorrer cinco
+      pantallas para corregir un teléfono sería peor que el formulario largo.
+- [x] H3 — La "D" del CRUD es desactivar, no borrar (premisa 3). Las llaves
+      foráneas ya lo impedirían para un comercio con cobros, y hacen bien.
+
+  Dos correcciones que salieron al construirlo: el estado de "tipo de persona"
+  vivía dentro de cada paso, así que elegir "persona natural" en el paso 1 no
+  llegaba al paso de beneficiarios; y los campos opcionales devueltos como
+  `null` por la base eran rechazados al volver a guardarlos, de modo que leer
+  un perfil y guardarlo sin tocar nada fallaba (CA-24).
+
+## Refactor del módulo admin (premisa 6)
+
+Va servicio por servicio, no de una vez: cada uno se puede verificar contra la
+base antes de pasar al siguiente.
+
+- [x] R1 — `AdminService` sobre `ComerciosRepository` (interfaz + adaptador
+      Drizzle + adaptador en memoria). Estrena sus PRIMEROS tests unitarios:
+      antes hablaba SQL directo y lo único posible era simular `db.execute`,
+      con lo que los tests afirmaban sobre el orden de las llamadas.
+      El rastro de auditoría viaja en la firma de cada escritura, no como una
+      llamada aparte: así no se puede escribir sin dejar rastro por descuido, y
+      queda garantizado que van en la misma transacción (CA-5).
+- [x] R2 — `PerfilComercioService` sobre `PerfilesRepository`. Estrena tests:
+      hasta ahora solo se probaba su esquema Zod, y quedaban sin cubrir la
+      traducción a columnas, el sello de verificación de documentos y —lo más
+      delicado— que el rastro NO copie el perfil entero: la auditoría no se
+      puede borrar nunca, y duplicar ahí cédulas, correos y cuentas sería
+      guardarlos para siempre en una tabla pensada para otra cosa.
+- [ ] R3 — `PagosAdminService`.
+- [ ] R4 — `ConciliacionAdminService` (sus tests son los más frágiles: afirman
+      sobre el orden de las llamadas a `db.execute`).
+- [ ] R5 — `AdminAuditService`.
+- [ ] R6 — Partir el módulo por dominio; hoy `admin` son 2.900 líneas haciendo
+      cinco cosas distintas.
 
 ## Dependencias
 

@@ -60,8 +60,9 @@ EVELEDGER=false
 toca '^apps/eveledger/' && EVELEDGER=true
 marcar eveledger "$EVELEDGER"
 
-# La consola de EvePay tampoco consume shared (habla con la API por HTTP).
-EVEPAYADMIN=false
+# La consola habla con la API por HTTP, pero consume packages/shared para las
+# reglas que deben ser idénticas en los dos lados (el dígito del NIT).
+EVEPAYADMIN=$SHARED
 toca '^apps/evepay-admin/' && EVEPAYADMIN=true
 marcar evepayadmin "$EVEPAYADMIN"
 

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { LiquidacionProvider, PaymentProvider, RangoFechas } from "@evetev/shared";
 import { InMemoryPagosRepository } from "../pagos/in-memory-pagos.repository";
 import { InMemoryLedgerRepository } from "../ledger/in-memory-ledger.repository";
+import { FakePaymentProvider } from "../pagos/fake-payment.provider";
 import { LedgerService } from "../ledger/ledger.service";
 import { ReconciliacionService } from "./reconciliacion.service";
 
@@ -47,7 +48,11 @@ describe("ReconciliacionService — settlement", () => {
     pagos = new InMemoryPagosRepository();
     ledgerRepo = new InMemoryLedgerRepository();
     liquidaciones = [];
-    service = new ReconciliacionService(pagos, provider, new LedgerService(ledgerRepo, pagos));
+    service = new ReconciliacionService(
+      pagos,
+      provider,
+      new LedgerService(ledgerRepo, pagos, new FakePaymentProvider())
+    );
   });
 
   it("EARS 1: cobro que cuadra → conciliado + asiento en el ledger", async () => {

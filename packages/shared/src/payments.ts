@@ -88,15 +88,53 @@ export interface ProviderCobro {
 }
 
 /**
+ * Lo que un proveedor sabe hacer. No todos cubren lo mismo: ComboPay opera como
+ * agregador (sin alta de comercios ni liquidaciones por API) y Akua es una
+ * plataforma completa.
+ *
+ * Existe para que el núcleo pregunte ANTES de intentar, en vez de deducirlo de
+ * un error. Deducirlo confundiría "este proveedor no lo ofrece" con "el
+ * proveedor está caído", y esas dos cosas piden reacciones opuestas: la primera
+ * es un paso manual esperado; la segunda, un fallo que hay que reintentar.
+ */
+export interface CapacidadesProvider {
+  /** Da de alta comercios por API (si no, el alta es manual en su panel). */
+  altaDeComercios: boolean;
+  /** Expone liquidaciones para conciliar automáticamente. */
+  liquidaciones: boolean;
+  /** Monedas que acepta. */
+  monedas: Moneda[];
+}
+
+/** Resultado de comprobar que el proveedor responde y acepta las credenciales. */
+export interface SaludProvider {
+  ok: boolean;
+  /** Qué pasó, en una línea: sirve tanto si salió bien como si falló. */
+  detalle: string;
+  /** Milisegundos que tardó la comprobación. */
+  duracionMs: number;
+  verificadoEn: string;
+}
+
+/**
  * Interfaz de adquirencia. El proveedor (ComboPay/Akua) es el backbone detrás
  * de ella (§7). Los webhooks del proveedor se normalizan a nuestros eventos internos.
  * Ningún módulo importa el SDK del proveedor: solo la implementación de esta interfaz.
  */
 export interface PaymentProvider {
+  /** Nombre corto y estable; queda guardado en cada cobro y comercio. */
+  readonly nombre: string;
+  readonly capacidades: CapacidadesProvider;
   crearCobro(input: CrearCobroInput, idempotencyKey: string): Promise<ProviderCobro>;
   verificarEstado(providerPaymentId: string): Promise<EstadoCobro>;
   /** Liquidaciones (settlements) del proveedor en un rango, para conciliar (Fase 4). */
   listarLiquidaciones(rango: RangoFechas): Promise<LiquidacionProvider[]>;
   /** Alta del comercio en la adquirencia (Fase 5). */
   crearMerchant(input: CrearMerchantInput): Promise<ProviderMerchant>;
+  /**
+   * Comprueba conectividad y credenciales SIN mover dinero (CA-12 de
+   * admin-console). Cada proveedor elige su llamada más barata de solo
+   * lectura; ninguna crea, cambia ni cobra nada.
+   */
+  verificarSalud(): Promise<SaludProvider>;
 }

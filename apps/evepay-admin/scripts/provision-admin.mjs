@@ -8,6 +8,11 @@
  *
  * El rol va en app_metadata (solo escribible con la clave secreta; el usuario
  * no puede editarlo). Si el usuario ya existe, solo se asegura el rol.
+ *
+ * `--password` crea la cuenta lista para entrar, sin pasar por el correo de
+ * invitación. Es para levantar un entorno LOCAL: contra un proyecto alojado la
+ * invitación es lo correcto, porque deja que la persona elija su contraseña sin
+ * que nadie más la conozca. Por eso el script lo rechaza si la URL no es local.
  */
 import process from "node:process";
 import { createClient } from "@supabase/supabase-js";
@@ -42,16 +47,28 @@ async function findUserByEmail(supabase, email) {
   throw new Error("La búsqueda superó 10.000 usuarios; usa el panel de Supabase.");
 }
 
+/** Un proyecto alojado nunca corre en localhost; así distinguimos el entorno. */
+function esLocal(url) {
+  return /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(url);
+}
+
 async function main() {
   const args = argumentsFrom(process.argv.slice(2));
   const url = required(process.env.SUPABASE_URL, "SUPABASE_URL");
   const secretKey = required(process.env.SUPABASE_SECRET_KEY, "SUPABASE_SECRET_KEY");
-  const redirectTo = required(
-    process.env.SUPABASE_INVITE_REDIRECT_URL,
-    "SUPABASE_INVITE_REDIRECT_URL"
-  );
   const email = required(args.get("email"), "--email").toLowerCase();
   const name = required(args.get("name"), "--name");
+  const password = args.get("password")?.trim();
+
+  if (password && !esLocal(url)) {
+    throw new Error(
+      "--password solo se permite contra un Supabase local. En un proyecto alojado usa la invitación por correo, para que la persona elija su propia contraseña."
+    );
+  }
+
+  const redirectTo = password
+    ? null
+    : required(process.env.SUPABASE_INVITE_REDIRECT_URL, "SUPABASE_INVITE_REDIRECT_URL");
 
   const supabase = createClient(url, secretKey, {
     auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: false }
@@ -61,10 +78,24 @@ async function main() {
 
   if (existing) {
     const { error } = await supabase.auth.admin.updateUserById(existing.id, {
-      app_metadata: { ...existing.app_metadata, role: "super_admin" }
+      app_metadata: { ...existing.app_metadata, role: "super_admin" },
+      ...(password ? { password } : {})
     });
     if (error) throw error;
     console.log(`Listo: ${email} ya existía; rol super_admin asegurado.`);
+    return;
+  }
+
+  if (password) {
+    const { error } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name },
+      app_metadata: { role: "super_admin" }
+    });
+    if (error) throw error;
+    console.log(`Listo: ${email} creado en el Supabase local con rol super_admin.`);
     return;
   }
 

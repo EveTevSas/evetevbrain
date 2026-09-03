@@ -1,5 +1,6 @@
 import {
   bigint,
+  integer,
   boolean,
   jsonb,
   pgSchema,
@@ -76,6 +77,11 @@ export const webhookEvents = evepay.table("webhook_events", {
   tenantId: uuid("tenant_id").notNull(),
   provider: text("provider").notNull().default("akua"),
   type: text("type").notNull(),
+  /** Cobro al que se refiere; null en los eventos anteriores a 0010. */
+  paymentId: uuid("payment_id"),
+  /** Cuántas veces llegó este mismo evento (los reenvíos no se aplican). */
+  recibidoVeces: integer("recibido_veces").notNull().default(1),
+  ultimoEn: timestamp("ultimo_en", { withTimezone: true }),
   at: timestamp("at", { withTimezone: true }).notNull().defaultNow()
 });
 

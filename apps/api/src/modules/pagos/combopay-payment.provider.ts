@@ -1,4 +1,5 @@
 import type {
+  CapacidadesProvider,
   CrearCobroInput,
   CrearMerchantInput,
   EstadoCobro,
@@ -6,8 +7,14 @@ import type {
   PaymentProvider,
   ProviderCobro,
   ProviderMerchant,
-  RangoFechas
+  RangoFechas,
+  SaludProvider
 } from "@evetev/shared";
+
+/** Mensaje legible de un error desconocido, sin volcar el stack en la UI. */
+function mensajeDe(error: unknown): string {
+  return error instanceof Error ? error.message : "error desconocido";
+}
 
 /**
  * Implementación real sobre ComboPay (API Recaudos beta, combopay.co). ESTE es
@@ -27,6 +34,18 @@ import type {
  * - La beta de recaudos solo transa COP (CA-3) y no expone settlements (CA-8).
  */
 export class ComboPayPaymentProvider implements PaymentProvider {
+  readonly nombre = "combopay";
+  /**
+   * Agregador: EvePay cobra con la cuenta de Evetev, así que ComboPay no da de
+   * alta comercios por API (su alta es manual) ni expone liquidaciones. La beta
+   * de recaudos solo transa COP.
+   */
+  readonly capacidades: CapacidadesProvider = {
+    altaDeComercios: false,
+    liquidaciones: false,
+    monedas: ["COP"]
+  };
+
   private readonly baseUrl: string;
 
   constructor(
@@ -110,6 +129,52 @@ export class ComboPayPaymentProvider implements PaymentProvider {
       "ComboPay (Recaudos beta) no expone liquidaciones por API; " +
         "conciliar con el reporte de transacciones de su dashboard."
     );
+  }
+
+  /**
+   * Salud: consulta el estado de una factura inexistente.
+   *
+   * Suena raro y es a propósito. Hace falta un endpoint que EXIJA el token y
+   * no mueva dinero, y este cumple: sin credenciales válidas responde 401
+   * `Unauthenticated`, y con ellas responde que esa factura no existe. Ese 404
+   * es la señal de que el token sirve.
+   *
+   * El primer intento usó la lista de bancos PSE, que parecía la opción obvia
+   * por barata. Resultó ser pública: devolvía 200 con un token inventado, así
+   * que la comprobación informaba "el token es válido" sin haber validado
+   * nada. Un diagnóstico que miente es peor que no tenerlo, porque manda a
+   * buscar el fallo al lado equivocado.
+   */
+  async verificarSalud(): Promise<SaludProvider> {
+    const inicio = Date.now();
+    const cerrar = (ok: boolean, detalle: string): SaludProvider => ({
+      ok,
+      detalle,
+      duracionMs: Date.now() - inicio,
+      verificadoEn: new Date().toISOString()
+    });
+
+    if (!this.apiToken) {
+      return cerrar(false, "Falta COMBOPAY_API_TOKEN: no hay con qué autenticarse.");
+    }
+
+    try {
+      // El id 0 no corresponde a ninguna factura: la respuesta depende solo de
+      // si el token autentica.
+      const res = await fetch(`${this.baseUrl}/api/invoice/0/status`, {
+        headers: this.headers()
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        return cerrar(false, `ComboPay rechazó el token (HTTP ${res.status}).`);
+      }
+      if (res.status === 404 || res.ok) {
+        return cerrar(true, `ComboPay responde y el token autentica (${this.baseUrl}).`);
+      }
+      return cerrar(false, `ComboPay respondió ${res.status}, que no se esperaba aquí.`);
+    } catch (error) {
+      return cerrar(false, `No se pudo contactar ${this.baseUrl}: ${mensajeDe(error)}`);
+    }
   }
 
   async crearMerchant(_input: CrearMerchantInput): Promise<ProviderMerchant> {

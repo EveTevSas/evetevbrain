@@ -41,6 +41,8 @@ export interface RegistrarEventoArgs {
   eventId: string;
   provider: string;
   type: string;
+  /** A qué cobro se refiere: sin esto no se puede reconstruir su historia. */
+  paymentId: string;
 }
 
 export interface AplicarTransicionArgs {
@@ -99,8 +101,19 @@ export interface PagosRepository {
   contarPorTenant(tenantId: string): Promise<number>;
 
   // --- Webhooks (Fase 2) ---
-  /** Ubica un cobro por el id del proveedor (operación de sistema, cross-tenant). */
-  resolverPagoPorProvider(providerPaymentId: string): Promise<ResolucionPago | null>;
+  /**
+   * Ubica un cobro por el par (proveedor, id del proveedor) — operación de
+   * sistema, cross-tenant.
+   *
+   * El proveedor forma parte de la clave porque el id lo elige él: ComboPay
+   * usa números de factura cortos y Akua cadenas opacas, así que con dos
+   * adquirencias activas dos cobros distintos pueden compartir identificador.
+   * Resolver solo por el id aprobaría el cobro equivocado, el de otro comercio.
+   */
+  resolverPagoPorProvider(
+    provider: string,
+    providerPaymentId: string
+  ): Promise<ResolucionPago | null>;
   /** Registra un evento; devuelve true si es nuevo, false si ya se había visto. */
   registrarEventoIdempotente(args: RegistrarEventoArgs): Promise<boolean>;
   /** Aplica una transición de estado a un cobro y la audita (acotada al tenant). */

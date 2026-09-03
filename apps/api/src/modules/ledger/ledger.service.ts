@@ -1,5 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
+import type { PaymentProvider } from "@evetev/shared";
 import { PAGOS_REPOSITORY, type PagosRepository } from "../pagos/pagos.repository";
+import { PAYMENT_PROVIDER } from "../pagos/payment-provider.token";
 import {
   LEDGER_REPOSITORY,
   LedgerDesbalanceadoError,
@@ -15,8 +17,24 @@ import {
 export class LedgerService {
   constructor(
     @Inject(LEDGER_REPOSITORY) private readonly ledger: LedgerRepository,
-    @Inject(PAGOS_REPOSITORY) private readonly pagos: PagosRepository
+    @Inject(PAGOS_REPOSITORY) private readonly pagos: PagosRepository,
+    @Inject(PAYMENT_PROVIDER) private readonly provider: PaymentProvider
   ) {}
+
+  /**
+   * Cuenta de compensación: el dinero que el proveedor tiene nuestro mientras
+   * no lo liquida. Va nombrada POR PROVEEDOR y no con un nombre fijo.
+   *
+   * Estaba escrita a mano como "akua_clearing", de cuando Akua era la única
+   * adquirencia. Con ComboPay activo, el dinero en tránsito habría seguido
+   * cayendo en una cuenta con el nombre de un proveedor que no lo tiene, y con
+   * dos proveedores sería imposible decir cuánto debe cada uno. Los asientos
+   * anteriores conservan su nombre: el ledger es inmutable y aquel dinero sí
+   * lo tenía Akua.
+   */
+  private get cuentaCompensacion(): string {
+    return `clearing:${this.provider.nombre}`;
+  }
 
   /** Asienta un movimiento validando el balance (Σ débitos == Σ créditos). */
   async postAsiento(args: PostEntryArgs): Promise<{ posted: boolean; entryId?: string }> {
@@ -50,7 +68,7 @@ export class LedgerService {
       kind: "cobro_aprobado",
       memo: `Cobro aprobado ${cobro.referencia}`,
       lines: [
-        { account: "akua_clearing", direction: "debit", amountMinor: cobro.montoMinor },
+        { account: this.cuentaCompensacion, direction: "debit", amountMinor: cobro.montoMinor },
         {
           account: `merchant_payable:${cobro.merchantId}`,
           direction: "credit",
@@ -62,7 +80,8 @@ export class LedgerService {
 
   /**
    * Asiento de conciliación: cierra la compensación del proveedor y reconoce el
-   * ingreso en banco. Débito `banco` / crédito `akua_clearing`. Idempotente por pago.
+   * ingreso en banco. Débito `banco` / crédito la compensación del proveedor.
+   * Idempotente por pago.
    */
   async registrarCobroConciliado(
     tenantId: string,
@@ -79,7 +98,7 @@ export class LedgerService {
       memo: `Cobro conciliado ${cobro.referencia}`,
       lines: [
         { account: "banco", direction: "debit", amountMinor: cobro.montoMinor },
-        { account: "akua_clearing", direction: "credit", amountMinor: cobro.montoMinor }
+        { account: this.cuentaCompensacion, direction: "credit", amountMinor: cobro.montoMinor }
       ]
     });
   }

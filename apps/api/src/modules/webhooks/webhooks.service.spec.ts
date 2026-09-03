@@ -22,7 +22,12 @@ const TENANT = "11111111-1111-4111-8111-111111111111";
 const MERCHANT = "33333333-3333-4333-8333-333333333333";
 const PROV = "prov-abc";
 
-async function seedCobro(repo: InMemoryPagosRepository): Promise<string> {
+/**
+ * Siembra un cobro atribuido a `provider`. El proveedor importa: la resolución
+ * del webhook busca por (proveedor, id del proveedor), porque dos adquirencias
+ * pueden emitir el mismo identificador para cobros distintos.
+ */
+async function seedCobro(repo: InMemoryPagosRepository, provider = "akua"): Promise<string> {
   const res = await repo.crearConIdempotencia({
     nuevo: {
       tenantId: TENANT,
@@ -31,7 +36,7 @@ async function seedCobro(repo: InMemoryPagosRepository): Promise<string> {
       currency: "COP",
       reference: "cuota-marzo",
       estado: "pendiente",
-      provider: "fake",
+      provider,
       providerPaymentId: PROV
     },
     idempotencyKey: "k1",
@@ -56,7 +61,7 @@ describe("WebhooksService — normalización de eventos", () => {
     merchants = new MerchantsService(merchantsRepo, new FakePaymentProvider());
     service = new WebhooksService(
       repo,
-      new LedgerService(ledgerRepo, repo),
+      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
       merchants,
       noopDelivery,
       noopWebhookRepo
@@ -175,7 +180,7 @@ describe("WebhooksService — eventos de ComboPay", () => {
     const merchantsRepo = new InMemoryMerchantsRepository();
     service = new WebhooksService(
       repo,
-      new LedgerService(ledgerRepo, repo),
+      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
       new MerchantsService(merchantsRepo, new FakePaymentProvider()),
       noopDelivery,
       noopWebhookRepo
@@ -183,7 +188,7 @@ describe("WebhooksService — eventos de ComboPay", () => {
   });
 
   it("CA-5: payment_approved aprueba el cobro, audita como webhook:combopay y asienta ledger", async () => {
-    const id = await seedCobro(repo);
+    const id = await seedCobro(repo, "combopay");
     await service.procesar({
       id: "851_2146359_20210616210621",
       type: "payment_approved",
@@ -200,7 +205,7 @@ describe("WebhooksService — eventos de ComboPay", () => {
   });
 
   it("payment_fail deja el cobro fallido", async () => {
-    const id = await seedCobro(repo);
+    const id = await seedCobro(repo, "combopay");
     await service.procesar({
       id: "tkt-2",
       type: "payment_fail",
@@ -213,7 +218,7 @@ describe("WebhooksService — eventos de ComboPay", () => {
   });
 
   it("CA-7: el reenvío del mismo hook no duplica transiciones ni asientos", async () => {
-    const id = await seedCobro(repo);
+    const id = await seedCobro(repo, "combopay");
     const evento = {
       id: "tkt-1",
       type: "payment_approved",
@@ -225,5 +230,104 @@ describe("WebhooksService — eventos de ComboPay", () => {
 
     expect(await ledgerRepo.contarAsientosPorPago(TENANT, id)).toBe(1);
     expect(repo.auditoria.filter((a) => a.toStatus === "aprobado")).toHaveLength(1);
+  });
+});
+
+/* El identificador del cobro lo elige el proveedor: ComboPay usa números de
+   factura cortos (1003455) y Akua cadenas opacas. Con dos adquirencias activas
+   dos cobros distintos pueden compartir identificador, y resolver solo por el
+   id aprobaría el equivocado — el de otro comercio. Se descubrió auditando el
+   esquema para poner el índice de esa búsqueda. */
+describe("WebhooksService — un webhook no cruza de proveedor", () => {
+  const ID_COMPARTIDO = "1003455";
+
+  async function montar() {
+    const repo = new InMemoryPagosRepository();
+    const ledgerRepo = new InMemoryLedgerRepository();
+    const service = new WebhooksService(
+      repo,
+      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
+      new MerchantsService(new InMemoryMerchantsRepository(), new FakePaymentProvider()),
+      noopDelivery,
+      noopWebhookRepo
+    );
+
+    // Dos cobros distintos que, por casualidad, comparten identificador.
+    const akua = await repo.crearConIdempotencia({
+      nuevo: {
+        tenantId: TENANT,
+        merchantId: MERCHANT,
+        amountMinor: 100000,
+        currency: "COP",
+        reference: "cobro-akua",
+        estado: "pendiente",
+        provider: "akua",
+        providerPaymentId: ID_COMPARTIDO
+      },
+      idempotencyKey: "ka",
+      requestHash: "ha",
+      actor: "admin"
+    });
+    const combopay = await repo.crearConIdempotencia({
+      nuevo: {
+        tenantId: TENANT,
+        merchantId: MERCHANT,
+        amountMinor: 250000,
+        currency: "COP",
+        reference: "cobro-combopay",
+        estado: "pendiente",
+        provider: "combopay",
+        providerPaymentId: ID_COMPARTIDO
+      },
+      idempotencyKey: "kc",
+      requestHash: "hc",
+      actor: "admin"
+    });
+
+    if (!akua.creado || !combopay.creado) throw new Error("seed falló");
+    return { repo, service, idAkua: akua.cobro.id, idCombopay: combopay.cobro.id };
+  }
+
+  it("un webhook de ComboPay aprueba SU cobro, no el de Akua", async () => {
+    const { repo, service, idAkua, idCombopay } = await montar();
+
+    await service.procesar({
+      id: "evt-combopay",
+      type: "payment_approved",
+      provider: "combopay",
+      providerPaymentId: ID_COMPARTIDO
+    });
+
+    expect((await repo.buscarCobro(TENANT, idCombopay))?.estado).toBe("aprobado");
+    // El de Akua no se toca: es dinero de otro cobro.
+    expect((await repo.buscarCobro(TENANT, idAkua))?.estado).toBe("pendiente");
+  });
+
+  it("y al revés: un webhook de Akua no toca el de ComboPay", async () => {
+    const { repo, service, idAkua, idCombopay } = await montar();
+
+    await service.procesar({
+      id: "evt-akua",
+      type: "payment.purchase.succeeded",
+      provider: "akua",
+      providerPaymentId: ID_COMPARTIDO
+    });
+
+    expect((await repo.buscarCobro(TENANT, idAkua))?.estado).toBe("aprobado");
+    expect((await repo.buscarCobro(TENANT, idCombopay))?.estado).toBe("pendiente");
+  });
+
+  it("un identificador que ningún proveedor emitió no resuelve nada", async () => {
+    const { repo, service, idAkua, idCombopay } = await montar();
+
+    await service.procesar({
+      id: "evt-x",
+      type: "payment_approved",
+      provider: "combopay",
+      providerPaymentId: "no-existe"
+    });
+
+    expect((await repo.buscarCobro(TENANT, idAkua))?.estado).toBe("pendiente");
+    expect((await repo.buscarCobro(TENANT, idCombopay))?.estado).toBe("pendiente");
   });
 });

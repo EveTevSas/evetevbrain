@@ -29,3 +29,10 @@ pnpm --filter @evetev/api dev     # nest start --watch
 ```
 
 Endpoints: `GET /v1/health`, `POST /v1/pagos` (requiere header `Idempotency-Key`).
+
+## Administración
+
+Los endpoints `/v1/admin/*` son de uso exclusivo del equipo de Evetev y exigen
+un JWT de Supabase con rol `super_admin`. Los consume la consola
+[`apps/evepay-admin`](../evepay-admin/); la spec es
+[`specs/evepay/admin-console/`](../../specs/evepay/admin-console/).

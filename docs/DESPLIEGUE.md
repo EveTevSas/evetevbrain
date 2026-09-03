@@ -16,12 +16,13 @@ decena de proyectos, contando las landings y las apps sin dominio propio. Cada
 push los dispara a todos, y por eso el `ignoreCommand` de cada `vercel.json` no
 es opcional (ver el README de la raíz).
 
-| App            | Root Directory    | Dominio                              | Hosting                        |
-| -------------- | ----------------- | ------------------------------------ | ------------------------------ |
-| `website`      | `apps/website`    | `evetev.com` (+ `www`)               | Vercel (estático)              |
-| `eveconecta`   | `apps/eveconecta` | `conecta.evetev.com`                 | Vercel (Next.js)               |
-| `eveledger`    | `apps/eveledger`  | _sin dominio propio, `*.vercel.app`_ | Vercel (Next.js)               |
-| `api` (EvePay) | `apps/api`        | `api.evetev.com`                     | Railway _(cuando se requiera)_ |
+| App            | Root Directory      | Dominio                              | Hosting                        |
+| -------------- | ------------------- | ------------------------------------ | ------------------------------ |
+| `website`      | `apps/website`      | `evetev.com` (+ `www`)               | Vercel (estático)              |
+| `eveconecta`   | `apps/eveconecta`   | `conecta.evetev.com`                 | Vercel (Next.js)               |
+| `eveledger`    | `apps/eveledger`    | _sin dominio propio, `*.vercel.app`_ | Vercel (Next.js)               |
+| `api` (EvePay) | `apps/api`          | `api.evetev.com`                     | Railway _(cuando se requiera)_ |
+| `evepay-admin` | `apps/evepay-admin` | _sin dominio propio, `*.vercel.app`_ | Vercel (Next.js)               |
 
 ---
 
@@ -217,6 +218,49 @@ subdominio se decide cuando el cliente lo apruebe. Por eso este paso no toca DNS
 > `prisma generate` solo lee el schema. Si un día una página se prerenderiza
 > contra Postgres, el build empezará a depender de `DATABASE_URL` y el job
 > `EveLedger` del CI —que corre sin ella— lo va a delatar antes que Vercel.
+
+## 2 ter. Consola de EvePay → `*.vercel.app`
+
+`apps/evepay-admin` es la consola de operación de la pasarela: la usa el equipo
+de Evetev, no los comercios. **Sin dominio de marca**: mientras se use a diario
+desde la URL de Vercel no hace falta, y un panel administrativo con menos
+superficie pública es una preocupación menos.
+
+1. Vercel → **Add New → Project** → el **mismo** repo.
+2. **Root Directory:** `apps/evepay-admin`. Framework Next.js; su `vercel.json`
+   trae el `ignoreCommand` que evita reconstruir cuando el commit no la toca.
+3. **Environment Variables:**
+   ```
+   NEXT_PUBLIC_SUPABASE_URL              # proyecto Supabase de EVEPAY (no el de la vertical)
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+   NEXT_PUBLIC_API_URL                   # https://api.evetev.com cuando la API esté desplegada
+   ```
+   > La consola **no tiene base de datos**: todo pasa por `/v1/admin/*` de la
+   > API, que verifica el rol en cada llamada. Por eso no lleva `DATABASE_URL`.
+4. **Deploy.** No hay paso de DNS.
+
+### Quién puede entrar
+
+Auth con el proyecto Supabase de EvePay y rol `super_admin` en `app_metadata`
+del JWT. No hay registro público: los usuarios se aprovisionan uno a uno.
+
+```bash
+cd apps/evepay-admin
+SUPABASE_URL=... SUPABASE_SECRET_KEY=... SUPABASE_INVITE_REDIRECT_URL=... \
+  pnpm auth:provision-admin --email persona@evetev.com --name "Nombre"
+```
+
+Para que la API pueda verificar esos JWT necesita alcanzar el JWKS del
+proyecto: basta con que tenga `SUPABASE_URL`. Solo si el proyecto todavía
+firmara con el secreto compartido HS256 haría falta `SUPABASE_JWT_SECRET`.
+
+> **`ADMIN_SECRET` ya no existe.** Hasta que llegó la consola, los endpoints de
+> admin se protegían con un secreto compartido en la cabecera
+> `X-Admin-Secret`, y la API servía un panel HTML en `/admin`. Ambos se
+> retiraron: un secreto que usan varias personas no distingue quién hizo qué
+> —la auditoría no podía nombrar a nadie— y revocarlo obligaba a rotarlo para
+> todos a la vez. Si esa variable sigue puesta en algún entorno, quítala: ya no
+> abre nada, pero un secreto olvidado es un secreto que alguien intentará usar.
 
 ## 3. DNS (en name.com)
 
