@@ -4,8 +4,6 @@ import {
   Controller,
   ForbiddenException,
   Get,
-  Header,
-  Headers,
   HttpCode,
   Param,
   Post,
@@ -35,7 +33,6 @@ import {
   type PaginaPagos,
   type ResultadoReverificacion
 } from "./pagos-admin.service";
-import { ADMIN_HTML } from "./admin-page";
 
 const CrearComercioSchema = z.object({
   legalName: z.string().min(3).max(200),
@@ -66,7 +63,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 /**
  * Endpoints de admin (uso exclusivo de Evetev).
- * Acceso: JWT de Supabase con rol super_admin, o el X-Admin-Secret transitorio.
+ * Acceso: JWT de Supabase con rol super_admin. Los consume apps/evepay-admin.
  */
 @Controller("admin")
 export class AdminController {
@@ -80,27 +77,22 @@ export class AdminController {
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
   @Get("merchants")
-  async listarComercios(
-    @Headers("x-admin-secret") secret: string | undefined
-  ): Promise<ComercioListado[]> {
-    this.verificarAdmin(secret);
+  async listarComercios(): Promise<ComercioListado[]> {
+    this.verificarAdmin();
     return this.admin.listarComercios();
   }
 
   /** POST /v1/admin/merchants — crea tenant + merchant + API keys (live y test). */
   @Post("merchants")
   @HttpCode(201)
-  async crearComercio(
-    @Headers("x-admin-secret") secret: string | undefined,
-    @Body() body: unknown
-  ): Promise<ComercioCreado> {
-    this.verificarAdmin(secret);
+  async crearComercio(@Body() body: unknown): Promise<ComercioCreado> {
+    this.verificarAdmin();
 
     const parsed = CrearComercioSchema.safeParse(body);
     if (!parsed.success) {
       throw new BadRequestException(parsed.error.flatten());
     }
-    return this.admin.crearComercio(parsed.data, this.actor(secret));
+    return this.admin.crearComercio(parsed.data, this.actor());
   }
 
   /**
@@ -110,11 +102,10 @@ export class AdminController {
   @Post("merchants/:tenantId/api-keys/rotate")
   @HttpCode(200)
   async rotarApiKey(
-    @Headers("x-admin-secret") secret: string | undefined,
     @Param("tenantId") tenantId: string,
     @Body() body: unknown
   ): Promise<ApiKeyRotada> {
-    this.verificarAdmin(secret);
+    this.verificarAdmin();
     if (!UUID_RE.test(tenantId)) {
       throw new BadRequestException("tenantId inválido.");
     }
@@ -123,7 +114,7 @@ export class AdminController {
     if (!parsed.success) {
       throw new BadRequestException(parsed.error.flatten());
     }
-    return this.admin.rotarApiKey(tenantId, parsed.data.environment, this.actor(secret));
+    return this.admin.rotarApiKey(tenantId, parsed.data.environment, this.actor());
   }
 
   /**
@@ -133,11 +124,10 @@ export class AdminController {
   @Post("merchants/:tenantId/estado")
   @HttpCode(200)
   async cambiarEstado(
-    @Headers("x-admin-secret") secret: string | undefined,
     @Param("tenantId") tenantId: string,
     @Body() body: unknown
   ): Promise<{ tenantId: string; estado: string }> {
-    this.verificarAdmin(secret);
+    this.verificarAdmin();
     if (!UUID_RE.test(tenantId)) {
       throw new BadRequestException("tenantId inválido.");
     }
@@ -146,15 +136,13 @@ export class AdminController {
     if (!parsed.success) {
       throw new BadRequestException(parsed.error.flatten());
     }
-    return this.admin.cambiarEstadoComercio(tenantId, parsed.data.activo, this.actor(secret));
+    return this.admin.cambiarEstadoComercio(tenantId, parsed.data.activo, this.actor());
   }
 
   /** GET /v1/admin/providers — estado de la adquirencia (CA-11, CA-13). */
   @Get("providers")
-  async listarProveedores(
-    @Headers("x-admin-secret") secret: string | undefined
-  ): Promise<EstadoProveedores> {
-    this.verificarAdmin(secret);
+  async listarProveedores(): Promise<EstadoProveedores> {
+    this.verificarAdmin();
     return this.providers.estado();
   }
 
@@ -165,16 +153,14 @@ export class AdminController {
    */
   @Post("providers/health")
   @HttpCode(200)
-  async saludProveedor(
-    @Headers("x-admin-secret") secret: string | undefined
-  ): Promise<SaludProvider & { proveedor: string }> {
-    this.verificarAdmin(secret);
+  async saludProveedor(): Promise<SaludProvider & { proveedor: string }> {
+    this.verificarAdmin();
     const salud = await this.providers.salud();
 
     // Comprobar la adquirencia es una acción de operación: queda registrada,
     // así se puede reconstruir qué se sabía y cuándo ante un incidente.
     await this.auditoria.registrar({
-      actor: this.actor(secret),
+      actor: this.actor(),
       accion: "proveedor.salud",
       objetoTipo: "proveedor",
       objetoId: salud.proveedor,
@@ -186,11 +172,8 @@ export class AdminController {
 
   /** GET /v1/admin/pagos — listado cross-tenant con filtros (CA-15). */
   @Get("pagos")
-  async listarPagos(
-    @Headers("x-admin-secret") secret: string | undefined,
-    @Query() query: Record<string, string | undefined>
-  ): Promise<PaginaPagos> {
-    this.verificarAdmin(secret);
+  async listarPagos(@Query() query: Record<string, string | undefined>): Promise<PaginaPagos> {
+    this.verificarAdmin();
 
     const parsed = FiltrosPagosSchema.safeParse(query);
     if (!parsed.success) {
@@ -201,11 +184,8 @@ export class AdminController {
 
   /** GET /v1/admin/pagos/:id — un cobro concreto. */
   @Get("pagos/:id")
-  async obtenerPago(
-    @Headers("x-admin-secret") secret: string | undefined,
-    @Param("id") id: string
-  ): Promise<PagoAdmin> {
-    this.verificarAdmin(secret);
+  async obtenerPago(@Param("id") id: string): Promise<PagoAdmin> {
+    this.verificarAdmin();
     if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
     return this.pagos.obtener(id);
   }
@@ -215,11 +195,8 @@ export class AdminController {
    * reenvíos) y asientos de ledger, en orden (CA-16).
    */
   @Get("pagos/:id/timeline")
-  async timelinePago(
-    @Headers("x-admin-secret") secret: string | undefined,
-    @Param("id") id: string
-  ): Promise<EventoTimeline[]> {
-    this.verificarAdmin(secret);
+  async timelinePago(@Param("id") id: string): Promise<EventoTimeline[]> {
+    this.verificarAdmin();
     if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
     return this.pagos.timeline(id);
   }
@@ -230,13 +207,10 @@ export class AdminController {
    */
   @Post("pagos/:id/reverify")
   @HttpCode(200)
-  async reverificarPago(
-    @Headers("x-admin-secret") secret: string | undefined,
-    @Param("id") id: string
-  ): Promise<ResultadoReverificacion> {
-    this.verificarAdmin(secret);
+  async reverificarPago(@Param("id") id: string): Promise<ResultadoReverificacion> {
+    this.verificarAdmin();
     if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
-    return this.pagos.reverificar(id, this.actor(secret));
+    return this.pagos.reverificar(id, this.actor());
   }
 
   /**
@@ -247,28 +221,26 @@ export class AdminController {
   @Post("conciliacion/:tenantId/run")
   @HttpCode(200)
   async correrConciliacion(
-    @Headers("x-admin-secret") secret: string | undefined,
     @Param("tenantId") tenantId: string,
     @Body() body: unknown
   ): Promise<CorridaConciliacion> {
-    this.verificarAdmin(secret);
+    this.verificarAdmin();
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
 
     const parsed = RangoFechasSchema.safeParse(body);
     if (!parsed.success) {
       throw new BadRequestException(parsed.error.flatten());
     }
-    return this.conciliacion.correr(tenantId, parsed.data, this.actor(secret));
+    return this.conciliacion.correr(tenantId, parsed.data, this.actor());
   }
 
   /** GET /v1/admin/conciliacion/reportes — histórico de corridas (CA-19). */
   @Get("conciliacion/reportes")
   async historicoConciliacion(
-    @Headers("x-admin-secret") secret: string | undefined,
     @Query("tenantId") tenantId?: string,
     @Query("limite") limite?: string
   ): Promise<CorridaConciliacion[]> {
-    this.verificarAdmin(secret);
+    this.verificarAdmin();
     if (tenantId && !UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
     const n = Number(limite);
     return this.conciliacion.historico(tenantId, Number.isFinite(n) && n > 0 ? n : 50);
@@ -276,67 +248,39 @@ export class AdminController {
 
   /** GET /v1/admin/ledger/:tenantId — saldos reconstruidos y asientos (CA-21). */
   @Get("ledger/:tenantId")
-  async ledger(
-    @Headers("x-admin-secret") secret: string | undefined,
-    @Param("tenantId") tenantId: string
-  ): Promise<LedgerTenant> {
-    this.verificarAdmin(secret);
+  async ledger(@Param("tenantId") tenantId: string): Promise<LedgerTenant> {
+    this.verificarAdmin();
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
     return this.conciliacion.ledger(tenantId);
   }
 
   /** GET /v1/admin/auditoria — últimas acciones administrativas (CA-4). */
   @Get("auditoria")
-  async listarAuditoria(
-    @Headers("x-admin-secret") secret: string | undefined,
-    @Query("limite") limite?: string
-  ): Promise<AccionAdmin[]> {
-    this.verificarAdmin(secret);
+  async listarAuditoria(@Query("limite") limite?: string): Promise<AccionAdmin[]> {
+    this.verificarAdmin();
     const n = Number(limite);
     return this.auditoria.listar(Number.isFinite(n) && n > 0 ? n : 100);
   }
 
-  /**
-   * Quién queda registrado en la auditoría. Con JWT es la persona; con el
-   * secreto compartido no hay forma de saber quién lo usó, y eso se dice tal
-   * cual en vez de atribuirlo a alguien. Es otra razón para retirarlo (F1).
-   */
-  private actor(secret: string | undefined): string {
-    const ctx = currentContextOrNull();
-    if (ctx?.role === Role.SUPER_ADMIN && ctx.actor) {
-      return ctx.actor;
-    }
-    return secret ? "admin-secret (sin identificar)" : "desconocido";
+  /** Quién queda registrado en la auditoría: siempre una persona con nombre. */
+  private actor(): string {
+    return currentContextOrNull()?.actor || "desconocido";
   }
 
   /**
-   * Acceso admin (CA-3 de admin-console): la vía principal es el JWT de
-   * Supabase con rol super_admin (lo establece TenantMiddleware en el
-   * contexto). `X-Admin-Secret` sigue aceptándose como mecanismo transitorio
-   * hasta F1 (retiro junto con la página embebida).
+   * Acceso admin (CA-3 de admin-console): rol super_admin en el JWT de
+   * Supabase, que TenantMiddleware deja en el contexto. Sin contexto no hay
+   * identidad, y eso se lee como no autorizado (403), nunca como un 500 que
+   * además delate que el endpoint existe.
+   *
+   * Aquí vivía además un `X-Admin-Secret` compartido, retirado en F1. Un
+   * secreto que usan varias personas no distingue quién hizo qué, así que la
+   * auditoría no podía nombrar a nadie, y revocarlo obligaba a rotarlo para
+   * todos a la vez.
    */
-  private verificarAdmin(secret: string | undefined): void {
-    if (currentContextOrNull()?.role === Role.SUPER_ADMIN) {
-      return;
-    }
-
-    const expected = process.env.ADMIN_SECRET;
-    if (!expected) throw new ForbiddenException("Acceso de administrador requerido.");
-    if (!secret || secret !== expected)
+  private verificarAdmin(): void {
+    if (currentContextOrNull()?.role !== Role.SUPER_ADMIN) {
       throw new ForbiddenException("Acceso de administrador requerido.");
-  }
-}
-
-/**
- * Panel HTML de admin — servido en GET /admin (sin prefijo v1).
- * Fuera de este controlador para poder excluirlo del global prefix en AppModule.
- */
-@Controller()
-export class AdminUIController {
-  @Get("admin")
-  @Header("content-type", "text/html; charset=utf-8")
-  @Header("cache-control", "no-store")
-  pagina(): string {
-    return ADMIN_HTML;
+    }
   }
 }

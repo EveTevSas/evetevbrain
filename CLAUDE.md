@@ -11,6 +11,7 @@ cuando esta guía y la constitución se contradigan, manda la constitución.
 | `apps/api`           | **EvePay** — plataforma de pagos (NestJS). El producto.    | Activa (aún sin desplegar)                    | 3001         |
 | `apps/eveconecta`    | Vertical de propiedad horizontal (Next.js + Supabase)      | **Producción** — conecta.evetev.com           | 3002         |
 | `apps/eveledger`     | Operación de estaciones de servicio (Next.js + Prisma)     | **Producción** — `*.vercel.app` (MVP cliente) | 3007         |
+| `apps/evepay-admin`  | Consola de operación de EvePay (Next.js, rol super_admin)  | Activa (aún sin desplegar)                    | 3004         |
 | `apps/website`       | evetev.com + landings `/evepay` `/conecta` `/intelligence` | **Producción**                                | —            |
 | `apps/rag-assistant` | **Fluxi**, asistente RAG (Kimi + embeddings)               | Producción — `rag-assistant-ochre.vercel.app` | —            |
 | `apps/eve-store`     | Tienda (Postgres schema `tienda`)                          | En desarrollo                                 | —            |
@@ -61,6 +62,7 @@ una URL de preview. Verificación por app:
 | website      | https://evetev.com                                  | portada carga; `/evepay` `/conecta` responden 200 |
 | eveconecta   | https://conecta.evetev.com                          | `/login` carga y renderiza el formulario          |
 | eveledger    | URL `*.vercel.app` del proyecto                     | `/login` carga; dashboard tras autenticarse       |
+| evepay-admin | URL `*.vercel.app` del proyecto                     | `/login` carga; sin sesión toda ruta redirige ahí |
 | api (EvePay) | https://api.evetev.com (Railway, aún no desplegada) | `GET /v1/health` → `{"status":"ok"}`              |
 
 Si CI está en rojo en `main`, arreglarlo es la prioridad (§3).

@@ -92,11 +92,18 @@ tests derivados de los CA que cita.
 
 ## Fase F — Cierre
 
-- [ ] F1 — Retirar `X-Admin-Secret`, `ADMIN_SECRET` y la página embebida
-      `admin-page.ts` (la consola ya cubre sus funciones). Actualizar
-      `docs/DESPLIEGUE.md` y los README.
-- [ ] F2 — Registrar la consola en `docs/DESPLIEGUE.md` (proyecto Vercel) y en
-      el CLAUDE.md raíz (mapa de apps, puerto, criterio de deploy sano).
+- [x] F1 — Retirados `X-Admin-Secret`, `ADMIN_SECRET` y la página embebida
+      `admin-page.ts` (392 líneas de HTML dentro de un `.ts`), junto con el
+      `AdminUIController` y la exclusión del prefijo `/v1` que existía solo
+      para servirla. Un test fija que la variable ya no abre nada, para que la
+      puerta trasera no vuelva por descuido.
+      De paso se quitó del `marca-sync` la maquinaria de activos incrustados:
+      su único caso era esa página, y la consola sirve la marca desde su propia
+      carpeta `/marca` como el resto de las apps.
+- [x] F2 — Consola registrada en `docs/DESPLIEGUE.md` (proyecto Vercel, sus
+      variables, cómo se aprovisionan los usuarios y el retiro de
+      `ADMIN_SECRET`), en el `CLAUDE.md` raíz (mapa de apps, puerto 3004 y
+      criterio de deploy sano) y en el README de la API.
 
 ## Dependencias
 

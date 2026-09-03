@@ -6,7 +6,7 @@ import { AppModule } from "./app.module";
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
-  // CORS: permite al portal del comercio y al panel admin llamar al API.
+  // CORS: permite al portal del comercio y a la consola de admin llamar al API.
   // Siempre incluye los orígenes de producción conocidos más lo que venga en CORS_ORIGINS.
   const extraOrigins = (process.env.CORS_ORIGINS ?? "")
     .split(",")
@@ -25,7 +25,9 @@ async function bootstrap(): Promise<void> {
     allowedHeaders: ["Content-Type", "Authorization"]
   });
 
-  app.setGlobalPrefix("v1", { exclude: ["admin"] });
+  // Sin exclusiones: la única ruta fuera de /v1 era la página HTML de admin,
+  // retirada en F1 de admin-console (ahora es apps/evepay-admin).
+  app.setGlobalPrefix("v1");
 
   // Railway/hosts inyectan PORT; en local usamos API_PORT. 0.0.0.0 para aceptar
   // tráfico externo dentro del contenedor (no solo loopback).

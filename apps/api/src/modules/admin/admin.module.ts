@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConciliacionModule } from "../conciliacion/conciliacion.module";
 import { LedgerModule } from "../ledger/ledger.module";
 import { MerchantsModule } from "../merchants/merchants.module";
-import { AdminController, AdminUIController } from "./admin.controller";
+import { AdminController } from "./admin.controller";
 import { AdminService } from "./admin.service";
 import { AdminAuditService } from "./admin-audit.service";
 import { ProvidersService } from "./providers.service";
@@ -11,7 +11,7 @@ import { ConciliacionAdminService } from "./conciliacion-admin.service";
 
 @Module({
   imports: [MerchantsModule, LedgerModule, ConciliacionModule],
-  controllers: [AdminController, AdminUIController],
+  controllers: [AdminController],
   providers: [
     AdminService,
     AdminAuditService,
