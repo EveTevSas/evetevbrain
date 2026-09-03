@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { digitoVerificacionNit, nitCoincideConDv } from "./nit.util";
+import { digitoVerificacionNit, nitCoincideConDv } from "./nit";
 
 describe("digitoVerificacionNit (algoritmo DIAN)", () => {
   /* NITs reales de entidades públicas colombianas, con su DV publicado. Se

@@ -1,22 +1,32 @@
 "use client";
 
 import { Campo, Casilla, Seccion, entrada } from "@/components/campos";
+import { nitCoincideConDv } from "@evetev/shared";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 /**
- * Los campos del perfil del comercio, compartidos entre el alta y la edición.
+ * Campos del perfil del comercio, repartidos en pasos.
  *
  * Qué se pide y por qué está en la migración 0012: es el conocimiento del
  * cliente que exige el marco de la Superintendencia Financiera, más lo que la
  * operación necesita para facturar, notificar y dispersar.
  */
 
+export const PASOS = [
+  "Identificación",
+  "Ubicación y correos",
+  "Personas",
+  "Beneficiarios",
+  "Dinero y documentos"
+] as const;
+
 const DEPARTAMENTOS = [
   "Amazonas",
   "Antioquia",
   "Arauca",
   "Atlántico",
+  "Bogotá D.C.",
   "Bolívar",
   "Boyacá",
   "Caldas",
@@ -44,8 +54,7 @@ const DEPARTAMENTOS = [
   "Tolima",
   "Valle del Cauca",
   "Vaupés",
-  "Vichada",
-  "Bogotá D.C."
+  "Vichada"
 ];
 
 const BANCOS = [
@@ -69,287 +78,408 @@ const BANCOS = [
   "Nubank"
 ];
 
-interface Fila {
-  clave: number;
+/**
+ * Qué campos exige cada paso antes de dejar avanzar. Se comprueba aquí y no
+ * con `required` del navegador porque los pasos ocultos siguen en el DOM: el
+ * navegador se negaría a enviar por un campo que no puede ni mostrar.
+ */
+export const REQUERIDOS_POR_PASO: string[][] = [
+  ["legalName", "displayName", "numeroDocumento"],
+  ["direccion", "ciudad", "departamento", "correoNotificaciones", "correoFacturacion"],
+  ["repNombre", "repNumeroDocumento", "contactoNombre", "contactoCorreo"],
+  [],
+  []
+];
+
+const ETIQUETAS: Record<string, string> = {
+  legalName: "Razón social",
+  displayName: "Nombre visible",
+  numeroDocumento: "Número de documento",
+  direccion: "Dirección",
+  ciudad: "Ciudad",
+  departamento: "Departamento",
+  correoNotificaciones: "Correo de notificaciones",
+  correoFacturacion: "Correo de facturación",
+  repNombre: "Nombre del representante legal",
+  repNumeroDocumento: "Documento del representante legal",
+  contactoNombre: "Nombre de la persona de contacto",
+  contactoCorreo: "Correo de la persona de contacto"
+};
+
+/**
+ * Valida el paso contra el formulario real. Devuelve el primer problema, o
+ * null si puede avanzar.
+ */
+export function validarPaso(paso: number, form: HTMLFormElement): string | null {
+  const valor = (n: string) => String(new FormData(form).get(n) ?? "").trim();
+
+  for (const campo of REQUERIDOS_POR_PASO[paso] ?? []) {
+    if (valor(campo) === "") {
+      return `Falta ${ETIQUETAS[campo] ?? campo}.`;
+    }
+  }
+
+  if (paso === 0) {
+    // Se avisa aquí y no al final: descubrir en el paso 5 que el NIT estaba
+    // mal desde el 1 obliga a recorrer todo el formulario de vuelta.
+    if (
+      valor("tipoDocumento") === "NIT" &&
+      !nitCoincideConDv(valor("numeroDocumento"), valor("digitoVerificacion"))
+    ) {
+      return "El dígito de verificación no corresponde al NIT.";
+    }
+  }
+
+  if (paso === 1) {
+    for (const c of ["correoNotificaciones", "correoFacturacion"]) {
+      if (!valor(c).includes("@")) return `${ETIQUETAS[c]} no parece un correo.`;
+    }
+  }
+
+  if (paso === 2 && !valor("contactoCorreo").includes("@")) {
+    return "El correo de la persona de contacto no parece un correo.";
+  }
+
+  if (paso === 3 && valor("tipoPersona") === "juridica" && valor("ben_nombre_0") === "") {
+    return "Una persona jurídica debe declarar al menos un beneficiario final.";
+  }
+
+  if (paso === 4) {
+    const cuenta = ["banco", "tipoCuenta", "numeroCuenta"].filter((c) => valor(c) !== "");
+    if (cuenta.length > 0 && cuenta.length < 3) {
+      return "Para dispersar hacen falta banco, tipo de cuenta y número; o los tres o ninguno.";
+    }
+    const titular = valor("titularDocumento").replace(/[.\s-]/g, "");
+    const propio = valor("numeroDocumento").replace(/[.\s-]/g, "");
+    if (titular !== "" && titular !== propio) {
+      return "El documento del titular de la cuenta no coincide con el del comercio.";
+    }
+  }
+
+  return null;
 }
 
-export function CamposPerfil({ inicial }: { inicial?: Record<string, unknown> }) {
+export function CamposPaso({
+  paso,
+  inicial,
+  conIdentidadDelTenant = true
+}: {
+  paso: number;
+  inicial?: Record<string, unknown>;
+  /** El alta pide razón social y nombre visible; la edición del perfil, no. */
+  conIdentidadDelTenant?: boolean;
+}) {
   const v = (k: string) => (inicial?.[k] as string | undefined) ?? "";
   const bool = (k: string) => Boolean(inicial?.[k]);
 
   const [tipoPersona, setTipoPersona] = useState<string>(
     (inicial?.tipo_persona as string) ?? "juridica"
   );
-  const [beneficiarios, setBeneficiarios] = useState<Fila[]>([{ clave: 0 }]);
+  const [filas, setFilas] = useState(1);
 
-  const esJuridica = tipoPersona === "juridica";
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
-      <Seccion
-        titulo="Identificación"
-        descripcion="Como figura en el RUT. El dígito de verificación se valida contra el NIT."
-      >
-        <Campo etiqueta="Tipo de persona" requerido>
-          <select
-            name="tipoPersona"
-            value={tipoPersona}
-            onChange={(e) => setTipoPersona(e.target.value)}
-            style={entrada}
-          >
-            <option value="juridica">Persona jurídica</option>
-            <option value="natural">Persona natural</option>
-          </select>
-        </Campo>
-
-        <Campo etiqueta="Tipo de documento" requerido>
-          <select name="tipoDocumento" defaultValue={v("tipo_documento") || "NIT"} style={entrada}>
-            <option value="NIT">NIT</option>
-            <option value="CC">Cédula de ciudadanía</option>
-            <option value="CE">Cédula de extranjería</option>
-            <option value="PA">Pasaporte</option>
-          </select>
-        </Campo>
-
-        <Campo etiqueta="Número" requerido>
-          <input
-            name="numeroDocumento"
-            defaultValue={v("numero_documento")}
-            required
-            style={entrada}
-          />
-        </Campo>
-
-        <Campo etiqueta="Dígito de verificación" ayuda="Solo para NIT">
-          <input
-            name="digitoVerificacion"
-            defaultValue={v("digito_verificacion")}
-            maxLength={1}
-            inputMode="numeric"
-            style={entrada}
-          />
-        </Campo>
-
-        <Campo etiqueta="Nombre comercial" ayuda="Si difiere de la razón social">
-          <input name="nombreComercial" defaultValue={v("nombre_comercial")} style={entrada} />
-        </Campo>
-
-        <Campo etiqueta="Código CIIU" ayuda="Actividad económica, del RUT">
-          <input name="ciiu" defaultValue={v("ciiu")} style={entrada} />
-        </Campo>
-
-        <Casilla
-          etiqueta="Responsable de IVA"
-          nombre="responsableIva"
-          defecto={bool("responsable_iva")}
-          ayuda="Cambia cómo se le factura"
-        />
-      </Seccion>
-
-      <Seccion titulo="Domicilio">
-        <Campo etiqueta="Dirección" requerido>
-          <input name="direccion" defaultValue={v("direccion")} required style={entrada} />
-        </Campo>
-        <Campo etiqueta="Ciudad" requerido>
-          <input name="ciudad" defaultValue={v("ciudad")} required style={entrada} />
-        </Campo>
-        <Campo etiqueta="Departamento" requerido>
-          <select name="departamento" defaultValue={v("departamento")} required style={entrada}>
-            <option value="">Selecciona…</option>
-            {DEPARTAMENTOS.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-        </Campo>
-        <Campo etiqueta="Teléfono">
-          <input name="telefono" defaultValue={v("telefono")} style={entrada} />
-        </Campo>
-        <Campo etiqueta="Sitio web">
-          <input name="sitioWeb" defaultValue={v("sitio_web")} style={entrada} />
-        </Campo>
-      </Seccion>
-
-      <Seccion
-        titulo="Correos"
-        descripcion="Van separados a propósito: los avisos operativos a contabilidad no los lee nadie."
-      >
-        <Campo
-          etiqueta="Correo de notificaciones"
-          requerido
-          ayuda="Cobros, fallos y cambios de estado"
+  switch (paso) {
+    case 0:
+      return (
+        <Seccion
+          titulo="Identificación"
+          descripcion="Como figura en el RUT. El dígito de verificación se comprueba contra el NIT."
         >
-          <input
-            type="email"
-            name="correoNotificaciones"
-            defaultValue={v("correo_notificaciones")}
-            required
-            style={entrada}
-          />
-        </Campo>
-        <Campo etiqueta="Correo de facturación" requerido ayuda="Aquí llega la cuenta de cobro">
-          <input
-            type="email"
-            name="correoFacturacion"
-            defaultValue={v("correo_facturacion")}
-            required
-            style={entrada}
-          />
-        </Campo>
-        <Campo etiqueta="Dirección de facturación" ayuda="Solo si difiere del domicilio">
-          <input
-            name="direccionFacturacion"
-            defaultValue={v("direccion_facturacion")}
-            style={entrada}
-          />
-        </Campo>
-      </Seccion>
+          {conIdentidadDelTenant && (
+            <>
+              <Campo etiqueta="Razón social" requerido>
+                <input name="legalName" minLength={3} style={entrada} />
+              </Campo>
+              <Campo etiqueta="Nombre visible" requerido ayuda="Como se verá en la consola">
+                <input name="displayName" minLength={2} style={entrada} />
+              </Campo>
+            </>
+          )}
 
-      <Seccion titulo="Representante legal" descripcion="Quien firma por el comercio.">
-        <Campo etiqueta="Nombre completo" requerido>
-          <input name="repNombre" defaultValue={v("rep_nombre")} required style={entrada} />
-        </Campo>
-        <Campo etiqueta="Tipo de documento" requerido>
-          <select
-            name="repTipoDocumento"
-            defaultValue={v("rep_tipo_documento") || "CC"}
-            style={entrada}
+          <Campo etiqueta="Tipo de persona" requerido>
+            <select
+              name="tipoPersona"
+              value={tipoPersona}
+              onChange={(e) => setTipoPersona(e.target.value)}
+              style={entrada}
+            >
+              <option value="juridica">Persona jurídica</option>
+              <option value="natural">Persona natural</option>
+            </select>
+          </Campo>
+
+          <Campo etiqueta="Tipo de documento" requerido>
+            <select
+              name="tipoDocumento"
+              defaultValue={v("tipo_documento") || "NIT"}
+              style={entrada}
+            >
+              <option value="NIT">NIT</option>
+              <option value="CC">Cédula de ciudadanía</option>
+              <option value="CE">Cédula de extranjería</option>
+              <option value="PA">Pasaporte</option>
+            </select>
+          </Campo>
+
+          <Campo etiqueta="Número" requerido>
+            <input name="numeroDocumento" defaultValue={v("numero_documento")} style={entrada} />
+          </Campo>
+
+          <Campo etiqueta="Dígito de verificación" ayuda="Solo para NIT">
+            <input
+              name="digitoVerificacion"
+              defaultValue={v("digito_verificacion")}
+              maxLength={1}
+              inputMode="numeric"
+              style={entrada}
+            />
+          </Campo>
+
+          <Campo etiqueta="Nombre comercial" ayuda="Si difiere de la razón social">
+            <input name="nombreComercial" defaultValue={v("nombre_comercial")} style={entrada} />
+          </Campo>
+
+          <Campo etiqueta="Código CIIU" ayuda="Actividad económica, del RUT">
+            <input name="ciiu" defaultValue={v("ciiu")} style={entrada} />
+          </Campo>
+
+          <Casilla
+            etiqueta="Responsable de IVA"
+            nombre="responsableIva"
+            defecto={bool("responsable_iva")}
+            ayuda="Cambia cómo se le factura"
+          />
+        </Seccion>
+      );
+
+    case 1:
+      return (
+        <>
+          <Seccion titulo="Domicilio">
+            <Campo etiqueta="Dirección" requerido>
+              <input name="direccion" defaultValue={v("direccion")} style={entrada} />
+            </Campo>
+            <Campo etiqueta="Ciudad" requerido>
+              <input name="ciudad" defaultValue={v("ciudad")} style={entrada} />
+            </Campo>
+            <Campo etiqueta="Departamento" requerido>
+              <select name="departamento" defaultValue={v("departamento")} style={entrada}>
+                <option value="">Selecciona…</option>
+                {DEPARTAMENTOS.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </Campo>
+            <Campo etiqueta="Teléfono">
+              <input name="telefono" defaultValue={v("telefono")} style={entrada} />
+            </Campo>
+            <Campo etiqueta="Sitio web">
+              <input name="sitioWeb" defaultValue={v("sitio_web")} style={entrada} />
+            </Campo>
+          </Seccion>
+
+          <div style={{ height: "1.1rem" }} />
+
+          <Seccion
+            titulo="Correos"
+            descripcion="Van separados a propósito: los avisos operativos que llegan a contabilidad no los lee nadie."
           >
-            <option value="CC">Cédula de ciudadanía</option>
-            <option value="CE">Cédula de extranjería</option>
-            <option value="PA">Pasaporte</option>
-          </select>
-        </Campo>
-        <Campo etiqueta="Número de documento" requerido>
-          <input
-            name="repNumeroDocumento"
-            defaultValue={v("rep_numero_documento")}
-            required
-            style={entrada}
-          />
-        </Campo>
-        <Campo etiqueta="Correo">
-          <input type="email" name="repCorreo" defaultValue={v("rep_correo")} style={entrada} />
-        </Campo>
-        <Campo etiqueta="Teléfono">
-          <input name="repTelefono" defaultValue={v("rep_telefono")} style={entrada} />
-        </Campo>
-        <Casilla
-          etiqueta="Es persona expuesta políticamente (PEP)"
-          nombre="repEsPep"
-          defecto={bool("rep_es_pep")}
-          ayuda="No descalifica: obliga a diligencia reforzada"
-        />
-      </Seccion>
+            <Campo
+              etiqueta="Correo de notificaciones"
+              requerido
+              ayuda="Cobros, fallos y cambios de estado"
+            >
+              <input
+                type="email"
+                name="correoNotificaciones"
+                defaultValue={v("correo_notificaciones")}
+                style={entrada}
+              />
+            </Campo>
+            <Campo etiqueta="Correo de facturación" requerido ayuda="Aquí llega la cuenta de cobro">
+              <input
+                type="email"
+                name="correoFacturacion"
+                defaultValue={v("correo_facturacion")}
+                style={entrada}
+              />
+            </Campo>
+            <Campo etiqueta="Dirección de facturación" ayuda="Solo si difiere del domicilio">
+              <input
+                name="direccionFacturacion"
+                defaultValue={v("direccion_facturacion")}
+                style={entrada}
+              />
+            </Campo>
+          </Seccion>
+        </>
+      );
 
-      <Seccion
-        titulo="Persona de contacto"
-        descripcion="A quién se llama cuando algo falla. Puede no ser el representante legal."
-      >
-        <Campo etiqueta="Nombre" requerido>
-          <input
-            name="contactoNombre"
-            defaultValue={v("contacto_nombre")}
-            required
-            style={entrada}
-          />
-        </Campo>
-        <Campo etiqueta="Cargo">
-          <input name="contactoCargo" defaultValue={v("contacto_cargo")} style={entrada} />
-        </Campo>
-        <Campo etiqueta="Correo" requerido>
-          <input
-            type="email"
-            name="contactoCorreo"
-            defaultValue={v("contacto_correo")}
-            required
-            style={entrada}
-          />
-        </Campo>
-        <Campo etiqueta="Teléfono">
-          <input name="contactoTelefono" defaultValue={v("contacto_telefono")} style={entrada} />
-        </Campo>
-      </Seccion>
+    case 2:
+      return (
+        <>
+          <Seccion titulo="Representante legal" descripcion="Quien firma por el comercio.">
+            <Campo etiqueta="Nombre completo" requerido>
+              <input name="repNombre" defaultValue={v("rep_nombre")} style={entrada} />
+            </Campo>
+            <Campo etiqueta="Tipo de documento" requerido>
+              <select
+                name="repTipoDocumento"
+                defaultValue={v("rep_tipo_documento") || "CC"}
+                style={entrada}
+              >
+                <option value="CC">Cédula de ciudadanía</option>
+                <option value="CE">Cédula de extranjería</option>
+                <option value="PA">Pasaporte</option>
+              </select>
+            </Campo>
+            <Campo etiqueta="Número de documento" requerido>
+              <input
+                name="repNumeroDocumento"
+                defaultValue={v("rep_numero_documento")}
+                style={entrada}
+              />
+            </Campo>
+            <Campo etiqueta="Correo">
+              <input type="email" name="repCorreo" defaultValue={v("rep_correo")} style={entrada} />
+            </Campo>
+            <Campo etiqueta="Teléfono">
+              <input name="repTelefono" defaultValue={v("rep_telefono")} style={entrada} />
+            </Campo>
+            <Casilla
+              etiqueta="Es persona expuesta políticamente (PEP)"
+              nombre="repEsPep"
+              defecto={bool("rep_es_pep")}
+              ayuda="No descalifica: obliga a diligencia reforzada"
+            />
+          </Seccion>
 
-      {esJuridica && (
-        <BeneficiariosFinales
-          filas={beneficiarios}
-          setFilas={setBeneficiarios}
-          inicial={inicial?.beneficiarios as Record<string, unknown>[] | undefined}
-        />
-      )}
+          <div style={{ height: "1.1rem" }} />
 
-      <Seccion
-        titulo="Cuenta para la dispersión"
-        descripcion="Donde se le gira lo recaudado. Debe estar a nombre del comercio: no se dispersa a cuentas de terceros."
-      >
-        <Campo etiqueta="Banco">
-          <select name="banco" defaultValue={v("banco")} style={entrada}>
-            <option value="">Selecciona…</option>
-            {BANCOS.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </Campo>
-        <Campo etiqueta="Tipo de cuenta">
-          <select name="tipoCuenta" defaultValue={v("tipo_cuenta")} style={entrada}>
-            <option value="">Selecciona…</option>
-            <option value="ahorros">Ahorros</option>
-            <option value="corriente">Corriente</option>
-          </select>
-        </Campo>
-        <Campo etiqueta="Número de cuenta">
-          <input name="numeroCuenta" defaultValue={v("numero_cuenta")} style={entrada} />
-        </Campo>
-        <Campo etiqueta="Titular">
-          <input name="titularCuenta" defaultValue={v("titular_cuenta")} style={entrada} />
-        </Campo>
-        <Campo etiqueta="Documento del titular" ayuda="Debe coincidir con el del comercio">
-          <input name="titularDocumento" defaultValue={v("titular_documento")} style={entrada} />
-        </Campo>
-      </Seccion>
+          <Seccion
+            titulo="Persona de contacto"
+            descripcion="A quién se llama cuando algo falla. Rara vez es el representante legal."
+          >
+            <Campo etiqueta="Nombre" requerido>
+              <input name="contactoNombre" defaultValue={v("contacto_nombre")} style={entrada} />
+            </Campo>
+            <Campo etiqueta="Cargo">
+              <input name="contactoCargo" defaultValue={v("contacto_cargo")} style={entrada} />
+            </Campo>
+            <Campo etiqueta="Correo" requerido>
+              <input
+                type="email"
+                name="contactoCorreo"
+                defaultValue={v("contacto_correo")}
+                style={entrada}
+              />
+            </Campo>
+            <Campo etiqueta="Teléfono">
+              <input
+                name="contactoTelefono"
+                defaultValue={v("contacto_telefono")}
+                style={entrada}
+              />
+            </Campo>
+          </Seccion>
+        </>
+      );
 
-      <Seccion
-        titulo="Documentos verificados"
-        descripcion="No se suben archivos: se registra que alguien los revisó, cuándo y quién."
-      >
-        <Casilla etiqueta="RUT" nombre="rutVerificado" defecto={bool("rut_verificado")} />
-        <Casilla
-          etiqueta="Cámara de comercio"
-          nombre="camaraComercioVerificada"
-          defecto={bool("camara_comercio_verificada")}
-          ayuda="Con menos de 90 días"
+    case 3:
+      return (
+        <Beneficiarios
+          filas={filas}
+          setFilas={setFilas}
+          previos={inicial?.beneficiarios as Record<string, unknown>[] | undefined}
+          esJuridica={tipoPersona === "juridica"}
         />
-        <Casilla
-          etiqueta="Cédula del representante"
-          nombre="cedulaRepVerificada"
-          defecto={bool("cedula_rep_verificada")}
-        />
-        <Casilla
-          etiqueta="Certificación bancaria"
-          nombre="certificacionBancariaVerificada"
-          defecto={bool("certificacion_bancaria_verificada")}
-        />
-      </Seccion>
-    </div>
-  );
+      );
+
+    case 4:
+      return (
+        <>
+          <Seccion
+            titulo="Cuenta para la dispersión"
+            descripcion="Donde se le gira lo recaudado. Debe estar a nombre del comercio: no se dispersa a cuentas de terceros."
+          >
+            <Campo etiqueta="Banco">
+              <select name="banco" defaultValue={v("banco")} style={entrada}>
+                <option value="">Selecciona…</option>
+                {BANCOS.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
+            </Campo>
+            <Campo etiqueta="Tipo de cuenta">
+              <select name="tipoCuenta" defaultValue={v("tipo_cuenta")} style={entrada}>
+                <option value="">Selecciona…</option>
+                <option value="ahorros">Ahorros</option>
+                <option value="corriente">Corriente</option>
+              </select>
+            </Campo>
+            <Campo etiqueta="Número de cuenta">
+              <input name="numeroCuenta" defaultValue={v("numero_cuenta")} style={entrada} />
+            </Campo>
+            <Campo etiqueta="Titular">
+              <input name="titularCuenta" defaultValue={v("titular_cuenta")} style={entrada} />
+            </Campo>
+            <Campo etiqueta="Documento del titular" ayuda="Debe coincidir con el del comercio">
+              <input
+                name="titularDocumento"
+                defaultValue={v("titular_documento")}
+                style={entrada}
+              />
+            </Campo>
+          </Seccion>
+
+          <div style={{ height: "1.1rem" }} />
+
+          <Seccion
+            titulo="Documentos verificados"
+            descripcion="No se suben archivos: se registra que alguien los revisó, cuándo y quién."
+          >
+            <Casilla etiqueta="RUT" nombre="rutVerificado" defecto={bool("rut_verificado")} />
+            <Casilla
+              etiqueta="Cámara de comercio"
+              nombre="camaraComercioVerificada"
+              defecto={bool("camara_comercio_verificada")}
+              ayuda="Con menos de 90 días"
+            />
+            <Casilla
+              etiqueta="Cédula del representante"
+              nombre="cedulaRepVerificada"
+              defecto={bool("cedula_rep_verificada")}
+            />
+            <Casilla
+              etiqueta="Certificación bancaria"
+              nombre="certificacionBancariaVerificada"
+              defecto={bool("certificacion_bancaria_verificada")}
+            />
+          </Seccion>
+        </>
+      );
+
+    default:
+      return null;
+  }
 }
 
-function BeneficiariosFinales({
+function Beneficiarios({
   filas,
   setFilas,
-  inicial
+  previos,
+  esJuridica
 }: {
-  filas: Fila[];
-  setFilas: (f: Fila[]) => void;
-  inicial?: Record<string, unknown>[];
+  filas: number;
+  setFilas: (n: number) => void;
+  previos?: Record<string, unknown>[];
+  esJuridica: boolean;
 }) {
-  const previos = inicial ?? [];
-  const total = Math.max(filas.length, previos.length);
-  const indices = Array.from({ length: total }, (_, i) => i);
+  const anteriores = previos ?? [];
+  const total = Math.max(filas, anteriores.length);
 
   return (
     <fieldset
@@ -360,22 +490,27 @@ function BeneficiariosFinales({
       >
         Beneficiarios finales
       </legend>
-      <p style={{ margin: "0 0 0.9rem", fontSize: "0.76rem", color: "#64748B", lineHeight: 1.5 }}>
+      <p style={{ margin: "0 0 1rem", fontSize: "0.76rem", color: "#64748B", lineHeight: 1.55 }}>
         Quien tiene el 5% o más del capital o de los derechos de voto, o control efectivo aunque no
-        figure como dueño. Una persona jurídica debe declarar al menos uno.
+        figure como dueño.{" "}
+        {esJuridica ? (
+          <strong>Una persona jurídica debe declarar al menos uno.</strong>
+        ) : (
+          "Una persona natural es su propio beneficiario: este paso se puede dejar vacío."
+        )}
       </p>
 
-      {indices.map((i) => {
-        const p = previos[i];
+      {Array.from({ length: total }, (_, i) => {
+        const p = anteriores[i];
         return (
           <div
             key={i}
             style={{
               display: "grid",
-              gridTemplateColumns: "2fr 1fr 1.4fr 0.8fr auto",
+              gridTemplateColumns: "2fr 0.9fr 1.3fr 0.7fr auto",
               gap: "0.6rem",
               alignItems: "end",
-              marginBottom: "0.7rem"
+              marginBottom: "0.8rem"
             }}
           >
             <Campo etiqueta="Nombre">
@@ -385,7 +520,7 @@ function BeneficiariosFinales({
                 style={entrada}
               />
             </Campo>
-            <Campo etiqueta="Documento">
+            <Campo etiqueta="Doc.">
               <select
                 name={`ben_tipoDocumento_${i}`}
                 defaultValue={(p?.tipo_documento as string) ?? "CC"}
@@ -412,12 +547,12 @@ function BeneficiariosFinales({
                 style={entrada}
               />
             </Campo>
-            <div style={{ paddingBottom: "0.4rem", display: "flex", gap: "0.4rem" }}>
+            <div style={{ paddingBottom: "0.35rem", display: "flex", gap: "0.4rem" }}>
               <Casilla etiqueta="PEP" nombre={`ben_esPep_${i}`} defecto={Boolean(p?.es_pep)} />
               {total > 1 && i === total - 1 && (
                 <button
                   type="button"
-                  onClick={() => setFilas(filas.slice(0, -1))}
+                  onClick={() => setFilas(total - 1)}
                   aria-label="Quitar el último beneficiario"
                   style={{
                     border: "1px solid #E2E8F0",
@@ -438,7 +573,7 @@ function BeneficiariosFinales({
 
       <button
         type="button"
-        onClick={() => setFilas([...filas, { clave: Date.now() }])}
+        onClick={() => setFilas(total + 1)}
         style={{
           display: "flex",
           alignItems: "center",

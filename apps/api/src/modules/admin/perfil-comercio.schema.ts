@@ -1,5 +1,5 @@
+import { nitCoincideConDv } from "@evetev/shared";
 import { z } from "zod";
-import { nitCoincideConDv } from "../../common/nit.util";
 
 /**
  * Datos que se le piden a un comercio para darlo de alta.
