@@ -173,17 +173,17 @@ Corre **en paralelo** al desarrollo (no bloquea Fase 0–1 gracias al fake):
 
 ## 5. Lista maestra de specs
 
-| Spec                         | Fase | Cimiento tocado        | Estado                             |
-| ---------------------------- | ---- | ---------------------- | ---------------------------------- |
-| `multi-tenancy-rls`          | 0    | multi-tenant           | por escribir                       |
-| `identidad-rbac`             | 0    | RBAC                   | por escribir                       |
-| `create-payment-idempotency` | 1    | idempotencia/auditoría | **exemplar escrita**               |
-| `provider-webhooks`          | 2    | auditoría              | por escribir                       |
-| `ledger-posting`             | 3    | ledger                 | por escribir                       |
-| `reconciliation`             | 4    | conciliación           | por escribir                       |
-| `merchant-onboarding`        | 5    | —                      | por escribir                       |
-| `provider-combopay`          | 1–2  | idempotencia/auditoría | **escrita** (PR abierto)           |
-| `admin-console`              | 5+   | RBAC/auditoría         | **escrita** (consola de operación) |
+| Spec                         | Fase | Cimiento tocado        | Estado                                  |
+| ---------------------------- | ---- | ---------------------- | --------------------------------------- |
+| `multi-tenancy-rls`          | 0    | multi-tenant           | por escribir                            |
+| `identidad-rbac`             | 0    | RBAC                   | por escribir                            |
+| `create-payment-idempotency` | 1    | idempotencia/auditoría | **exemplar escrita**                    |
+| `provider-webhooks`          | 2    | auditoría              | por escribir                            |
+| `ledger-posting`             | 3    | ledger                 | por escribir                            |
+| `reconciliation`             | 4    | conciliación           | por escribir                            |
+| `merchant-onboarding`        | 5    | —                      | **escrita** (revisada para agregadores) |
+| `provider-combopay`          | 1–2  | idempotencia/auditoría | **escrita** (PR abierto)                |
+| `admin-console`              | 5+   | RBAC/auditoría         | **escrita** (consola de operación)      |
 
 ---
 

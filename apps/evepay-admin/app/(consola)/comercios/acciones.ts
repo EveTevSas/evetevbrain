@@ -69,3 +69,25 @@ export async function cambiarEstadoComercio(
     return comoResultado(error);
   }
 }
+
+/**
+ * Aprueba o rechaza el KYC del comercio (CA-22). Con un proveedor agregador
+ * este es el único camino: nadie va a mandar un evento diciendo que ya se
+ * registró en su panel. Y desde que cobrar exige estar aprobado, es también
+ * lo que habilita al comercio a cobrar.
+ */
+export async function cambiarKyc(
+  tenantId: string,
+  estado: "aprobado" | "rechazado"
+): Promise<Resultado<{ tenantId: string; merchantId: string; estado: string }>> {
+  try {
+    const datos = await apiPost<{ tenantId: string; merchantId: string; estado: string }>(
+      `/admin/merchants/${tenantId}/kyc`,
+      { estado }
+    );
+    revalidatePath("/comercios");
+    return { ok: true, datos };
+  } catch (error) {
+    return comoResultado(error);
+  }
+}

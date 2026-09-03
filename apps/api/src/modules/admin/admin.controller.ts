@@ -47,6 +47,11 @@ const CambiarEstadoSchema = z.object({
   activo: z.boolean()
 });
 
+/** Solo los dos estados que un humano decide; los otros los pone el flujo. */
+const CambiarKycSchema = z.object({
+  estado: z.enum(["aprobado", "rechazado"])
+});
+
 /** Filtros del listado de pagos; todo opcional y validado en la frontera (§3). */
 const FiltrosPagosSchema = z.object({
   tenantId: z.string().uuid().optional(),
@@ -137,6 +142,28 @@ export class AdminController {
       throw new BadRequestException(parsed.error.flatten());
     }
     return this.admin.cambiarEstadoComercio(tenantId, parsed.data.activo, this.actor());
+  }
+
+  /**
+   * POST /v1/admin/merchants/:tenantId/kyc — aprueba o rechaza el comercio a
+   * mano (CA-22). Es el único camino cuando el proveedor no manda eventos de
+   * comercios, y desde que cobrar exige estar aprobado, también el que
+   * habilita a cobrar.
+   */
+  @Post("merchants/:tenantId/kyc")
+  @HttpCode(200)
+  async cambiarKyc(
+    @Param("tenantId") tenantId: string,
+    @Body() body: unknown
+  ): Promise<{ tenantId: string; merchantId: string; estado: string }> {
+    this.verificarAdmin();
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+
+    const parsed = CambiarKycSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.admin.cambiarEstadoKyc(tenantId, parsed.data.estado, this.actor());
   }
 
   /** GET /v1/admin/providers — estado de la adquirencia (CA-11, CA-13). */

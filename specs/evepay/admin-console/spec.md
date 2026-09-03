@@ -60,6 +60,11 @@ se retira al terminar la migración.
   nueva, mostrarla una sola vez y desactivar la anterior de forma atómica.
 - CA-10: CUANDO se desactiva un comercio, EL sistema DEBERÁ rechazar cobros
   nuevos de ese tenant manteniendo consultables su historial y su ledger.
+- CA-22: CUANDO el proveedor activo no comunica la aprobación de comercios, EL
+  sistema DEBERÁ permitir a un `super_admin` aprobar o rechazar el KYC desde la
+  consola, auditando quién, desde qué estado y hacia cuál. Sin esto, con un
+  proveedor agregador el comercio queda `en_revision` para siempre y —desde que
+  cobrar exige estar aprobado— no podría cobrar nunca.
 
 ### C. Proveedores de pago
 

@@ -186,6 +186,7 @@ export default async function ComerciosPage() {
                               tenantId={c.tenantId}
                               nombre={c.displayName}
                               activo={activo}
+                              kyc={c.merchantEstado}
                             />
                           </td>
                         </tr>

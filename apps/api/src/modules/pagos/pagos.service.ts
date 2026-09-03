@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { ConflictException, Inject, Injectable } from "@nestjs/common";
 import type { Cobro, CrearCobroInput, PaymentProvider } from "@evetev/shared";
+import { MERCHANTS_REPOSITORY, type MerchantsRepository } from "../merchants/merchants.repository";
 import { PAYMENT_PROVIDER } from "./payment-provider.token";
 import {
   PAGOS_REPOSITORY,
@@ -22,18 +23,44 @@ export interface CobroContext {
  */
 @Injectable()
 export class PagosService {
-  private readonly providerName = process.env.PAYMENT_PROVIDER === "akua" ? "akua" : "fake";
-
   constructor(
     @Inject(PAYMENT_PROVIDER) private readonly provider: PaymentProvider,
-    @Inject(PAGOS_REPOSITORY) private readonly repo: PagosRepository
+    @Inject(PAGOS_REPOSITORY) private readonly repo: PagosRepository,
+    @Inject(MERCHANTS_REPOSITORY) private readonly merchants: MerchantsRepository
   ) {}
+
+  /**
+   * Un comercio solo cobra si está aprobado.
+   *
+   * Con Akua el KYC lo hacía la adquirencia y un comercio sin aprobar fallaba
+   * allá; con ComboPay, que opera como agregador, el alta en su panel es
+   * manual y nadie de fuera lo impediría. Sin esta comprobación, un comercio
+   * podría cobrar dinero real sin estar registrado donde se liquida — y ese
+   * dinero llegaría a una cuenta sin dueño identificable.
+   *
+   * Se busca por (tenant, merchant), así que valida de paso que el merchantId
+   * del cuerpo sea de quien llama: antes se persistía tal cual como venía.
+   */
+  private async exigirComercioAprobado(tenantId: string, merchantId: string): Promise<void> {
+    const merchant = await this.merchants.buscar(tenantId, merchantId);
+
+    if (!merchant) {
+      throw new ConflictException("El comercio indicado no existe o no pertenece a este tenant.");
+    }
+    if (merchant.estado !== "aprobado") {
+      throw new ConflictException(
+        `El comercio está en estado "${merchant.estado}" y no puede cobrar. Debe quedar aprobado en la consola de EvePay una vez registrado en el panel del proveedor.`
+      );
+    }
+  }
 
   async crearCobro(
     ctx: CobroContext,
     input: CrearCobroInput,
     idempotencyKey: string
   ): Promise<Cobro> {
+    await this.exigirComercioAprobado(ctx.tenantId, input.merchantId);
+
     const requestHash = hashRequest(ctx.tenantId, input);
 
     // Reintento con la misma clave: devolver lo existente sin volver a llamar a Akua.
@@ -58,7 +85,10 @@ export class PagosService {
         reference: input.referencia,
         description: input.descripcion,
         estado: prov.estado,
-        provider: this.providerName,
+        // El nombre lo dice el proveedor, no la variable de entorno: el
+        // histórico debe conservar quién procesó cada cobro aunque después se
+        // cambie de adquirencia (CA-14 de admin-console).
+        provider: this.provider.nombre,
         providerPaymentId: prov.providerPaymentId,
         checkoutUrl: prov.checkoutUrl
       },

@@ -1,9 +1,9 @@
 "use client";
 
 import { AvisoClaves, ClaveUnaVez } from "@/components/clave-una-vez";
-import { KeyRound, Power, PowerOff } from "lucide-react";
+import { BadgeCheck, BadgeX, KeyRound, Power, PowerOff } from "lucide-react";
 import { useState, useTransition } from "react";
-import { cambiarEstadoComercio, rotarApiKey } from "./acciones";
+import { cambiarEstadoComercio, cambiarKyc, rotarApiKey } from "./acciones";
 import type { ApiKeyRotada } from "@/lib/api/evepay";
 
 const boton: React.CSSProperties = {
@@ -23,11 +23,14 @@ const boton: React.CSSProperties = {
 export function AccionesComercio({
   tenantId,
   nombre,
-  activo
+  activo,
+  kyc
 }: {
   tenantId: string;
   nombre: string;
   activo: boolean;
+  /** Estado del merchant; sin "aprobado" el comercio no puede cobrar. */
+  kyc?: string;
 }) {
   const [pendiente, iniciar] = useTransition();
   const [rotada, setRotada] = useState<ApiKeyRotada | null>(null);
@@ -64,11 +67,50 @@ export function AccionesComercio({
     });
   }
 
+  function decidirKyc(estado: "aprobado" | "rechazado") {
+    const seguro = window.confirm(
+      estado === "aprobado"
+        ? `Aprobar el KYC de "${nombre}".\n\nHazlo solo cuando el comercio esté registrado en el panel del proveedor: a partir de aquí PUEDE COBRAR dinero real.\n\n¿Continuar?`
+        : `Rechazar el KYC de "${nombre}".\n\nDejará de poder crear cobros. Su historial y su ledger se conservan.\n\n¿Continuar?`
+    );
+    if (!seguro) return;
+
+    setError(null);
+    iniciar(async () => {
+      const r = await cambiarKyc(tenantId, estado);
+      if (!r.ok) setError(r.error);
+    });
+  }
+
+  const aprobado = kyc === "aprobado";
+
   return (
     <div
       style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "flex-end" }}
     >
       <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", justifyContent: "flex-end" }}>
+        {kyc && !aprobado && (
+          <button
+            type="button"
+            onClick={() => decidirKyc("aprobado")}
+            disabled={pendiente}
+            style={{ ...boton, color: "#15803D", borderColor: "#BBF7D0", background: "#F0FDF4" }}
+          >
+            <BadgeCheck size={13} />
+            Aprobar KYC
+          </button>
+        )}
+        {kyc && aprobado && (
+          <button
+            type="button"
+            onClick={() => decidirKyc("rechazado")}
+            disabled={pendiente}
+            style={{ ...boton, color: "#B45309" }}
+          >
+            <BadgeX size={13} />
+            Rechazar KYC
+          </button>
+        )}
         <button
           type="button"
           onClick={() => rotar("live")}

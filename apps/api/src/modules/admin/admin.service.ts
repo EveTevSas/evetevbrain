@@ -1,8 +1,9 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq, sql } from "drizzle-orm";
 import { DB, type Db } from "../../database/drizzle";
-import { tenants, merchantApiKeys } from "../../database/schema";
+import { merchants, tenants, merchantApiKeys } from "../../database/schema";
 import { generateApiKey, type ApiKeyEnv } from "../../common/api-key.util";
+import type { EstadoMerchant } from "@evetev/shared";
 import { MerchantsService } from "../merchants/merchants.service";
 import { AdminAuditService } from "./admin-audit.service";
 
@@ -189,6 +190,48 @@ export class AdminService {
       prefix: nueva.prefix,
       desactivadas
     };
+  }
+
+  /**
+   * Aprueba o rechaza el KYC de un comercio a mano (CA-22).
+   *
+   * Con Akua el estado lo movía su webhook. Con un proveedor agregador no
+   * llega ningún evento —el alta en su panel es manual y EvePay no se entera—,
+   * así que sin esto un comercio se quedaba en `en_revision` para siempre y,
+   * desde que cobrar exige estar aprobado, no podría cobrar nunca.
+   *
+   * Se permite mover el estado en cualquier dirección, incluso deshacer un
+   * rechazo. La alternativa —que rechazar fuera definitivo— convertiría un
+   * clic equivocado en tener que recrear el comercio, perdiendo su historial
+   * y sus claves. Queda auditado, que es la garantía que importa aquí.
+   */
+  async cambiarEstadoKyc(
+    tenantId: string,
+    estado: EstadoMerchant,
+    actor: string
+  ): Promise<{ tenantId: string; merchantId: string; estado: EstadoMerchant }> {
+    const merchant = await this.merchants.obtenerPorTenant(tenantId);
+    if (!merchant) {
+      throw new NotFoundException("Este comercio no tiene un merchant registrado.");
+    }
+
+    return this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
+      await tx
+        .update(merchants)
+        .set({ status: estado })
+        .where(and(eq(merchants.tenantId, tenantId), eq(merchants.id, merchant.id)));
+
+      await this.auditoria.registrarEn(tx, {
+        actor,
+        accion: estado === "aprobado" ? "comercio.kyc.aprobar" : "comercio.kyc.rechazar",
+        objetoTipo: "merchant",
+        objetoId: merchant.id,
+        detalle: { tenantId, estadoAnterior: merchant.estado, estado }
+      });
+
+      return { tenantId, merchantId: merchant.id, estado };
+    });
   }
 
   /**

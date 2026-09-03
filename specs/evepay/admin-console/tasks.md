@@ -105,6 +105,28 @@ tests derivados de los CA que cita.
       `ADMIN_SECRET`), en el `CLAUDE.md` raíz (mapa de apps, puerto 3004 y
       criterio de deploy sano) y en el README de la API.
 
+## Posterior — decisión de negocio del 2-sep-2026
+
+Se preguntó si un comercio sin registrar en el panel de ComboPay debería poder
+cobrar. La respuesta fue **no**, y de ahí salieron tres cambios:
+
+- [x] G1 — Crear un cobro exige que el comercio esté `aprobado` (409 en
+      cualquier otro estado, antes de llamar al proveedor). La comprobación
+      busca por (tenant, merchant), así que cierra de paso un hueco de
+      integridad: el `merchantId` venía en el cuerpo y se persistía tal cual,
+      sin comprobar que fuera de quien llamaba.
+- [x] G2 — `POST /v1/admin/merchants/:tenantId/kyc` y su botón en la consola
+      (CA-22). Es el único camino a `aprobado` con un proveedor agregador.
+- [x] G3 — `specs/evepay/merchant-onboarding/` revisada: estaba escrita entera
+      alrededor de Akua y su webhook. Ahora cubre los dos modelos y sube de 4
+      a 8 criterios EARS.
+
+  Se corrigió además el mismo bug del nombre del proveedor que ya se había
+  arreglado en merchants: `PagosService` derivaba el proveedor de
+  `PAYMENT_PROVIDER` con un ternario que solo conocía "akua", así que con
+  ComboPay activo **cada cobro quedaba guardado como "fake"** — y ese es el
+  campo contra el que después se concilia.
+
 ## Dependencias
 
 - El PR `feat/provider-combopay` mergeado antes de C1–C3.
