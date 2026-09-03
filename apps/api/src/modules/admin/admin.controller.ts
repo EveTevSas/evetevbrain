@@ -11,7 +11,7 @@ import {
   Post,
   Query
 } from "@nestjs/common";
-import type { SaludProvider } from "@evetev/shared";
+import { RangoFechasSchema, type SaludProvider } from "@evetev/shared";
 import { z } from "zod";
 import { currentContextOrNull } from "../../common/request-context";
 import { Role } from "../identidad/roles";
@@ -23,6 +23,11 @@ import {
 } from "./admin.service";
 import { AdminAuditService, type AccionAdmin } from "./admin-audit.service";
 import { ProvidersService, type EstadoProveedores } from "./providers.service";
+import {
+  ConciliacionAdminService,
+  type CorridaConciliacion,
+  type LedgerTenant
+} from "./conciliacion-admin.service";
 import {
   PagosAdminService,
   type EventoTimeline,
@@ -69,7 +74,8 @@ export class AdminController {
     private readonly admin: AdminService,
     private readonly auditoria: AdminAuditService,
     private readonly providers: ProvidersService,
-    private readonly pagos: PagosAdminService
+    private readonly pagos: PagosAdminService,
+    private readonly conciliacion: ConciliacionAdminService
   ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
@@ -231,6 +237,52 @@ export class AdminController {
     this.verificarAdmin(secret);
     if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
     return this.pagos.reverificar(id, this.actor(secret));
+  }
+
+  /**
+   * POST /v1/admin/conciliacion/:tenantId/run — concilia el rango y guarda la
+   * corrida (CA-19). Si el proveedor no da liquidaciones, la registra como
+   * "no soportada" en vez de un reporte vacío que parezca cuadrado (CA-20).
+   */
+  @Post("conciliacion/:tenantId/run")
+  @HttpCode(200)
+  async correrConciliacion(
+    @Headers("x-admin-secret") secret: string | undefined,
+    @Param("tenantId") tenantId: string,
+    @Body() body: unknown
+  ): Promise<CorridaConciliacion> {
+    this.verificarAdmin(secret);
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+
+    const parsed = RangoFechasSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.conciliacion.correr(tenantId, parsed.data, this.actor(secret));
+  }
+
+  /** GET /v1/admin/conciliacion/reportes — histórico de corridas (CA-19). */
+  @Get("conciliacion/reportes")
+  async historicoConciliacion(
+    @Headers("x-admin-secret") secret: string | undefined,
+    @Query("tenantId") tenantId?: string,
+    @Query("limite") limite?: string
+  ): Promise<CorridaConciliacion[]> {
+    this.verificarAdmin(secret);
+    if (tenantId && !UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+    const n = Number(limite);
+    return this.conciliacion.historico(tenantId, Number.isFinite(n) && n > 0 ? n : 50);
+  }
+
+  /** GET /v1/admin/ledger/:tenantId — saldos reconstruidos y asientos (CA-21). */
+  @Get("ledger/:tenantId")
+  async ledger(
+    @Headers("x-admin-secret") secret: string | undefined,
+    @Param("tenantId") tenantId: string
+  ): Promise<LedgerTenant> {
+    this.verificarAdmin(secret);
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+    return this.conciliacion.ledger(tenantId);
   }
 
   /** GET /v1/admin/auditoria — últimas acciones administrativas (CA-4). */

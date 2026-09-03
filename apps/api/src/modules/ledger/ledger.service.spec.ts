@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryPagosRepository } from "../pagos/in-memory-pagos.repository";
 import { InMemoryLedgerRepository } from "./in-memory-ledger.repository";
+import { FakePaymentProvider } from "../pagos/fake-payment.provider";
 import { LedgerService } from "./ledger.service";
 import { LedgerDesbalanceadoError } from "./ledger.repository";
 
@@ -36,7 +37,7 @@ describe("LedgerService — doble partida inmutable", () => {
   beforeEach(() => {
     pagos = new InMemoryPagosRepository();
     ledgerRepo = new InMemoryLedgerRepository();
-    service = new LedgerService(ledgerRepo, pagos);
+    service = new LedgerService(ledgerRepo, pagos, new FakePaymentProvider());
   });
 
   it("EARS 1 y 3: cobro_aprobado asienta débito/crédito y el saldo se reconstruye", async () => {
@@ -45,7 +46,10 @@ describe("LedgerService — doble partida inmutable", () => {
 
     expect(res.posted).toBe(true);
     expect(await service.saldo(TENANT, `merchant_payable:${MERCHANT}`)).toBe(MONTO); // crédito
-    expect(await service.saldo(TENANT, "akua_clearing")).toBe(-MONTO); // débito
+    // La compensación va nombrada por proveedor: con dos adquirencias hay que
+    // poder decir cuánto tiene cada una sin mezclarlo en una cuenta común.
+    expect(await service.saldo(TENANT, "clearing:fake")).toBe(-MONTO); // débito
+    expect(await service.saldo(TENANT, "akua_clearing")).toBe(0);
   });
 
   it("EARS 2: un asiento desbalanceado se rechaza sin persistir", async () => {

@@ -56,7 +56,7 @@ describe("WebhooksService — normalización de eventos", () => {
     merchants = new MerchantsService(merchantsRepo, new FakePaymentProvider());
     service = new WebhooksService(
       repo,
-      new LedgerService(ledgerRepo, repo),
+      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
       merchants,
       noopDelivery,
       noopWebhookRepo
@@ -175,7 +175,7 @@ describe("WebhooksService — eventos de ComboPay", () => {
     const merchantsRepo = new InMemoryMerchantsRepository();
     service = new WebhooksService(
       repo,
-      new LedgerService(ledgerRepo, repo),
+      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
       new MerchantsService(merchantsRepo, new FakePaymentProvider()),
       noopDelivery,
       noopWebhookRepo

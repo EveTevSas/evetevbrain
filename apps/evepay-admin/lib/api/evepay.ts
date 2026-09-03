@@ -237,3 +237,61 @@ export function formatoMonto(montoMinor: number, moneda: string): string {
 export function listarComerciosParaFiltro(): Promise<Comercio[]> {
   return listarComercios();
 }
+
+// --- Conciliación y ledger (Fase E) ---
+
+export type ModoConciliacion = "automatica" | "no_soportada";
+
+export interface CorridaConciliacion {
+  id: string;
+  tenantId: string;
+  tenantNombre: string;
+  desde: string;
+  hasta: string;
+  modo: ModoConciliacion;
+  provider: string;
+  conciliados: number | null;
+  diferencias: number | null;
+  huerfanosProveedor: number | null;
+  noConciliados: number | null;
+  nota: string | null;
+  actor: string;
+  corridoEn: string;
+}
+
+export interface SaldoCuenta {
+  cuenta: string;
+  debitos: number;
+  creditos: number;
+  saldoMinor: number;
+  movimientos: number;
+}
+
+export interface AsientoLedger {
+  id: string;
+  paymentId: string | null;
+  kind: string;
+  memo: string;
+  posteadoEn: string;
+  lineas: { cuenta: string; direccion: string; montoMinor: number }[];
+  cuadra: boolean;
+}
+
+export interface LedgerTenant {
+  saldos: SaldoCuenta[];
+  asientos: AsientoLedger[];
+  totalDebitos: number;
+  totalCreditos: number;
+  cuadra: boolean;
+  asientosDescuadrados: string[];
+}
+
+export function historicoConciliacion(tenantId?: string): Promise<CorridaConciliacion[]> {
+  return apiGet<CorridaConciliacion[]>(
+    `/admin/conciliacion/reportes${tenantId ? `?tenantId=${tenantId}` : ""}`
+  );
+}
+
+export function ledgerDeComercio(tenantId: string): Promise<LedgerTenant> {
+  return apiGet<LedgerTenant>(`/admin/ledger/${tenantId}`);
+}

@@ -73,11 +73,22 @@ tests derivados de los CA que cita.
 
 ## Fase E — Conciliación y ledger
 
-- [ ] E1 — Conciliación por tenant desde la consola + histórico de corridas
-      (CA-19); estado "conciliación manual" cuando el proveedor no da
-      settlements (CA-20).
-- [ ] E2 — Vista de ledger con saldo reconstruido y alarma de descuadre
-      (CA-21).
+- [x] E1 — Conciliación por comercio y rango desde la consola, con histórico
+      inmutable de corridas (CA-19). Cuando el proveedor no expone
+      liquidaciones, la corrida se registra como `no_soportada` con su nota y
+      las cifras en null (CA-20): guardar ceros se leería como "todo cuadra"
+      cuando nadie comprobó nada.
+- [x] E2 — Ledger por comercio con el saldo RECONSTRUIDO desde las líneas —no
+      hay campo "saldo" que pueda quedar desactualizado— y alarma de descuadre
+      global y por asiento (CA-21). Verificado inyectando un asiento corrupto
+      en la base local: la alarma lo detectó y nombró.
+
+  De paso se corrigió la cuenta de compensación del ledger, que estaba escrita
+  a mano como `akua_clearing`. Con ComboPay activo el dinero en tránsito habría
+  seguido cayendo en una cuenta con el nombre de un proveedor que no lo tiene,
+  y con dos adquirencias sería imposible saber cuánto debe cada una. Ahora es
+  `clearing:<proveedor>`; los asientos anteriores conservan su nombre, porque
+  el ledger es inmutable y aquel dinero sí lo tenía Akua.
 
 ## Fase F — Cierre
 

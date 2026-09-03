@@ -6,6 +6,7 @@ import type { AdminService, ComercioListado } from "./admin.service";
 import type { AdminAuditService } from "./admin-audit.service";
 import type { ProvidersService } from "./providers.service";
 import type { PagosAdminService } from "./pagos-admin.service";
+import type { ConciliacionAdminService } from "./conciliacion-admin.service";
 
 const LISTADO: ComercioListado[] = [];
 
@@ -16,7 +17,8 @@ function controllerConMock(): AdminController {
     estado: () => ({ activo: "fake", proveedores: [] })
   } as unknown as ProvidersService;
   const pagos = {} as unknown as PagosAdminService;
-  return new AdminController(service, auditoria, providers, pagos);
+  const conciliacion = {} as unknown as ConciliacionAdminService;
+  return new AdminController(service, auditoria, providers, pagos, conciliacion);
 }
 
 function conContexto<T>(ctx: RequestContext, fn: () => Promise<T>): Promise<T> {
