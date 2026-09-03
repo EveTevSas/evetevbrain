@@ -1,8 +1,12 @@
 import { ConflictException, Inject, Injectable } from "@nestjs/common";
-import { sql } from "drizzle-orm";
-import { DB, type Db } from "../../database/drizzle";
-import { AdminAuditService } from "./admin-audit.service";
+import {
+  PERFILES_REPOSITORY,
+  type PerfilGuardado,
+  type PerfilesRepository
+} from "./perfiles.repository";
 import type { PerfilComercio } from "./perfil-comercio.schema";
+
+export type { PerfilGuardado };
 
 /**
  * Perfil del comercio: identificación, domicilio, representante legal, persona
@@ -12,11 +16,6 @@ import type { PerfilComercio } from "./perfil-comercio.schema";
  * tablas tienen RLS sin políticas, así que no hay otro camino. Es dato
  * cross-tenant de operación, no del comercio.
  */
-
-export interface PerfilGuardado {
-  perfil: Record<string, unknown>;
-  beneficiarios: Record<string, unknown>[];
-}
 
 /** Las columnas van en snake_case; el resto de la aplicación, en camelCase. */
 function aColumnas(p: PerfilComercio): Record<string, unknown> {
@@ -72,10 +71,7 @@ function beneficiariosAColumnas(p: PerfilComercio): Record<string, unknown>[] {
 
 @Injectable()
 export class PerfilComercioService {
-  constructor(
-    @Inject(DB) private readonly db: Db,
-    private readonly auditoria: AdminAuditService
-  ) {}
+  constructor(@Inject(PERFILES_REPOSITORY) private readonly repo: PerfilesRepository) {}
 
   /**
    * Guarda el perfil y sus beneficiarios. `verificado_por` y `verificado_en`
@@ -83,56 +79,43 @@ export class PerfilComercioService {
    * haber visto los documentos, y eso no lo puede escribir el formulario.
    */
   async guardar(tenantId: string, perfil: PerfilComercio, actor: string): Promise<void> {
-    const columnas = aColumnas(perfil);
     const algunoVerificado =
       perfil.rutVerificado ||
       perfil.camaraComercioVerificada ||
       perfil.cedulaRepVerificada ||
       perfil.certificacionBancariaVerificada;
 
-    const conDiligencia = {
-      ...columnas,
+    const columnas = {
+      ...aColumnas(perfil),
+      // Quién dijo haber visto los documentos y cuándo lo pone el sistema con
+      // quien está operando: eso no lo puede escribir el formulario.
       verificado_en: algunoVerificado ? new Date().toISOString() : null,
       verificado_por: algunoVerificado ? actor : null
     };
 
     try {
-      await this.guardarEn(tenantId, conDiligencia, perfil, actor);
+      await this.repo.guardar({
+        tenantId,
+        columnas,
+        beneficiarios: beneficiariosAColumnas(perfil),
+        rastro: {
+          actor,
+          accion: "comercio.perfil.guardar",
+          objetoTipo: "tenant",
+          objetoId: tenantId,
+          // El detalle NO repite el perfil entero: sería duplicar datos
+          // personales en una tabla que nunca se puede borrar.
+          detalle: {
+            documento: `${perfil.tipoDocumento} ${perfil.numeroDocumento}`,
+            tipoPersona: perfil.tipoPersona,
+            beneficiarios: perfil.beneficiarios.length,
+            conCuentaDispersion: Boolean(perfil.numeroCuenta)
+          }
+        }
+      });
     } catch (error) {
       this.comoConflicto(error, perfil);
     }
-  }
-
-  private async guardarEn(
-    tenantId: string,
-    conDiligencia: Record<string, unknown>,
-    perfil: PerfilComercio,
-    actor: string
-  ): Promise<void> {
-    await this.db.transaction(async (tx) => {
-      await tx.execute(sql`
-        SELECT identity.admin_guardar_perfil_comercio(
-          ${tenantId}::uuid,
-          ${JSON.stringify(conDiligencia)}::jsonb,
-          ${JSON.stringify(beneficiariosAColumnas(perfil))}::jsonb
-        )
-      `);
-
-      await this.auditoria.registrarEn(tx, {
-        actor,
-        accion: "comercio.perfil.guardar",
-        objetoTipo: "tenant",
-        objetoId: tenantId,
-        // El detalle no repite el perfil entero: sería duplicar datos
-        // personales en una tabla que nunca se puede borrar.
-        detalle: {
-          documento: `${perfil.tipoDocumento} ${perfil.numeroDocumento}`,
-          tipoPersona: perfil.tipoPersona,
-          beneficiarios: perfil.beneficiarios.length,
-          conCuentaDispersion: Boolean(perfil.numeroCuenta)
-        }
-      });
-    });
   }
 
   /**
@@ -146,12 +129,7 @@ export class PerfilComercioService {
     numeroDocumento: string,
     exceptoTenant?: string
   ): Promise<string | null> {
-    const filas = await this.db.execute<{ tenant_id: string }>(sql`
-      SELECT tenant_id FROM identity.admin_buscar_por_documento(
-        ${tipoDocumento}, ${numeroDocumento.trim()}
-      )
-    `);
-    const encontrado = filas[0]?.tenant_id ?? null;
+    const encontrado = await this.repo.buscarPorDocumento(tipoDocumento, numeroDocumento.trim());
     return encontrado && encontrado !== exceptoTenant ? encontrado : null;
   }
 
@@ -168,36 +146,11 @@ export class PerfilComercioService {
 
   /** Perfil completo del comercio, o null si todavía no se ha capturado. */
   async obtener(tenantId: string): Promise<PerfilGuardado | null> {
-    const filas = await this.db.execute<{
-      perfil: Record<string, unknown>;
-      beneficiarios: Record<string, unknown>[];
-    }>(sql`SELECT * FROM identity.admin_perfil_comercio(${tenantId}::uuid)`);
-
-    const fila = filas[0];
-    if (!fila) return null;
-    return { perfil: fila.perfil, beneficiarios: fila.beneficiarios ?? [] };
+    return this.repo.obtener(tenantId);
   }
 
   /** Qué comercios tienen perfil y cuáles no, para marcarlo en el listado. */
-  async resumenPorTenant(): Promise<
-    Map<string, { tienePerfil: boolean; documento: string | null; nombreComercial: string | null }>
-  > {
-    const filas = await this.db.execute<{
-      tenant_id: string;
-      tiene_perfil: boolean;
-      documento: string | null;
-      nombre_comercial: string | null;
-    }>(sql`SELECT * FROM identity.admin_comercios_con_perfil()`);
-
-    return new Map(
-      filas.map((f) => [
-        f.tenant_id,
-        {
-          tienePerfil: f.tiene_perfil,
-          documento: f.documento,
-          nombreComercial: f.nombre_comercial
-        }
-      ])
-    );
+  async resumenPorTenant() {
+    return this.repo.resumenPorTenant();
   }
 }

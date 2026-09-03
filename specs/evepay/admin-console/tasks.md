@@ -156,7 +156,12 @@ base antes de pasar al siguiente.
       El rastro de auditoría viaja en la firma de cada escritura, no como una
       llamada aparte: así no se puede escribir sin dejar rastro por descuido, y
       queda garantizado que van en la misma transacción (CA-5).
-- [ ] R2 — `PerfilComercioService` (hoy sin tests propios).
+- [x] R2 — `PerfilComercioService` sobre `PerfilesRepository`. Estrena tests:
+      hasta ahora solo se probaba su esquema Zod, y quedaban sin cubrir la
+      traducción a columnas, el sello de verificación de documentos y —lo más
+      delicado— que el rastro NO copie el perfil entero: la auditoría no se
+      puede borrar nunca, y duplicar ahí cédulas, correos y cuentas sería
+      guardarlos para siempre en una tabla pensada para otra cosa.
 - [ ] R3 — `PagosAdminService`.
 - [ ] R4 — `ConciliacionAdminService` (sus tests son los más frágiles: afirman
       sobre el orden de las llamadas a `db.execute`).
