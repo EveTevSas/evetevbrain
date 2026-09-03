@@ -106,9 +106,12 @@ export class InMemoryPagosRepository implements PagosRepository {
     return n;
   }
 
-  async resolverPagoPorProvider(providerPaymentId: string): Promise<ResolucionPago | null> {
+  async resolverPagoPorProvider(
+    provider: string,
+    providerPaymentId: string
+  ): Promise<ResolucionPago | null> {
     for (const fila of this.pagos.values()) {
-      if (fila.providerPaymentId === providerPaymentId) {
+      if (fila.provider === provider && fila.providerPaymentId === providerPaymentId) {
         return { paymentId: fila.id, tenantId: fila.tenantId, estado: fila.estado };
       }
     }

@@ -141,10 +141,13 @@ export class DrizzlePagosRepository implements PagosRepository {
     });
   }
 
-  async resolverPagoPorProvider(providerPaymentId: string): Promise<ResolucionPago | null> {
+  async resolverPagoPorProvider(
+    provider: string,
+    providerPaymentId: string
+  ): Promise<ResolucionPago | null> {
     // Función SECURITY DEFINER: resuelve el cobro sin necesidad de tenant (cross-tenant).
     const result = await this.db.execute(
-      sql`select payment_id, tenant_id, status from evepay.tenant_of_payment(${providerPaymentId})`
+      sql`select payment_id, tenant_id, status from evepay.tenant_of_payment(${provider}, ${providerPaymentId})`
     );
     const rows = result as unknown as Array<{
       payment_id: string;
