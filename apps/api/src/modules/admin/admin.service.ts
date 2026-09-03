@@ -1,12 +1,10 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { and, eq, sql } from "drizzle-orm";
-import { DB, type Db } from "../../database/drizzle";
-import { merchants, tenants, merchantApiKeys } from "../../database/schema";
 import { generateApiKey, type ApiKeyEnv } from "../../common/api-key.util";
 import type { EstadoMerchant } from "@evetev/shared";
 import { MerchantsService } from "../merchants/merchants.service";
-import { AdminAuditService } from "./admin-audit.service";
+import { COMERCIOS_REPOSITORY, type ComerciosRepository } from "./comercios.repository";
 import { PerfilComercioService } from "./perfil-comercio.service";
+import type { FilaComercio } from "./comercios.repository";
 import type { PerfilComercio } from "./perfil-comercio.schema";
 
 export interface CrearComercioInput {
@@ -42,20 +40,6 @@ export interface ApiKeyResumen {
   activa: boolean;
 }
 
-/** Fila cruda de las funciones de comercios: una por API key. */
-interface FilaComercio extends Record<string, unknown> {
-  tenant_id: string;
-  legal_name: string;
-  display_name: string;
-  tenant_status: string;
-  creado_en: string;
-  merchant_id: string | null;
-  merchant_status: string | null;
-  key_prefix: string | null;
-  key_environment: string | null;
-  key_activa: boolean | null;
-}
-
 export interface ComercioListado {
   tenantId: string;
   legalName: string;
@@ -80,9 +64,8 @@ export interface ComercioListado {
 @Injectable()
 export class AdminService {
   constructor(
-    @Inject(DB) private readonly db: Db,
+    @Inject(COMERCIOS_REPOSITORY) private readonly repo: ComerciosRepository,
     private readonly merchants: MerchantsService,
-    private readonly auditoria: AdminAuditService,
     private readonly perfiles: PerfilComercioService
   ) {}
 
@@ -100,12 +83,7 @@ export class AdminService {
       );
     }
 
-    const inserted = await this.db
-      .insert(tenants)
-      .values({ legalName: input.legalName, displayName: input.displayName })
-      .returning({ id: tenants.id });
-
-    const tenantId = inserted[0]!.id;
+    const tenantId = await this.repo.crearTenant(input.legalName, input.displayName);
 
     // El perfil va primero a propósito: su índice único por documento es lo
     // que rechaza un comercio duplicado, y conviene que reviente antes de
@@ -119,27 +97,16 @@ export class AdminService {
     const live = generateApiKey("live");
     const test = generateApiKey("test");
 
-    // Las claves y su rastro entran en la MISMA transacción: si la auditoría
-    // falla, no queda un comercio operable sin registro de quién lo creó (CA-5).
-    await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
-      await tx.insert(merchantApiKeys).values([
-        {
-          tenantId,
-          keyHash: live.hash,
-          keyPrefix: live.prefix,
-          environment: "live",
-          label: "Producción"
-        },
-        {
-          tenantId,
-          keyHash: test.hash,
-          keyPrefix: test.prefix,
-          environment: "test",
-          label: "Sandbox"
-        }
-      ]);
-      await this.auditoria.registrarEn(tx, {
+    // Las claves y su rastro entran en la MISMA transacción (lo garantiza el
+    // repositorio): si la auditoría falla, no queda un comercio operable sin
+    // registro de quién lo creó (CA-5).
+    await this.repo.emitirClaves({
+      tenantId,
+      claves: [
+        { ...live, environment: "live", label: "Producción" },
+        { ...test, environment: "test", label: "Sandbox" }
+      ],
+      rastro: {
         actor,
         accion: "comercio.crear",
         objetoTipo: "tenant",
@@ -154,7 +121,7 @@ export class AdminService {
           clavePrefijoTest: test.prefix,
           pasoManualProveedor
         }
-      });
+      }
     });
 
     return {
@@ -177,52 +144,27 @@ export class AdminService {
     environment: ApiKeyEnv,
     actor: string
   ): Promise<ApiKeyRotada> {
-    const existe = await this.db
-      .select({ id: tenants.id })
-      .from(tenants)
-      .where(eq(tenants.id, tenantId));
-    if (existe.length === 0) {
+    if (!(await this.repo.existeTenant(tenantId))) {
       throw new NotFoundException("Comercio no encontrado.");
     }
 
     const nueva = generateApiKey(environment);
 
-    const desactivadas = await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
-
-      const revocadas = await tx
-        .update(merchantApiKeys)
-        .set({ activa: false })
-        .where(
-          and(
-            eq(merchantApiKeys.tenantId, tenantId),
-            eq(merchantApiKeys.environment, environment),
-            eq(merchantApiKeys.activa, true)
-          )
-        )
-        .returning({ prefix: merchantApiKeys.keyPrefix });
-
-      await tx.insert(merchantApiKeys).values({
-        tenantId,
-        keyHash: nueva.hash,
-        keyPrefix: nueva.prefix,
+    const revocados = await this.repo.rotarClave({
+      tenantId,
+      environment,
+      nueva: {
+        ...nueva,
         environment,
         label: environment === "live" ? "Producción" : "Sandbox"
-      });
-
-      await this.auditoria.registrarEn(tx, {
+      },
+      rastro: {
         actor,
         accion: "api_key.rotar",
         objetoTipo: "tenant",
         objetoId: tenantId,
-        detalle: {
-          environment,
-          prefijoNuevo: nueva.prefix,
-          prefijosRevocados: revocadas.map((r) => r.prefix)
-        }
-      });
-
-      return revocadas.length;
+        detalle: { environment, prefijoNuevo: nueva.prefix }
+      }
     });
 
     return {
@@ -230,7 +172,7 @@ export class AdminService {
       environment,
       apiKey: nueva.key,
       prefix: nueva.prefix,
-      desactivadas
+      desactivadas: revocados.length
     };
   }
 
@@ -257,23 +199,20 @@ export class AdminService {
       throw new NotFoundException("Este comercio no tiene un merchant registrado.");
     }
 
-    return this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
-      await tx
-        .update(merchants)
-        .set({ status: estado })
-        .where(and(eq(merchants.tenantId, tenantId), eq(merchants.id, merchant.id)));
-
-      await this.auditoria.registrarEn(tx, {
+    await this.repo.cambiarEstadoMerchant({
+      tenantId,
+      merchantId: merchant.id,
+      estado,
+      rastro: {
         actor,
         accion: estado === "aprobado" ? "comercio.kyc.aprobar" : "comercio.kyc.rechazar",
         objetoTipo: "merchant",
         objetoId: merchant.id,
         detalle: { tenantId, estadoAnterior: merchant.estado, estado }
-      });
-
-      return { tenantId, merchantId: merchant.id, estado };
+      }
     });
+
+    return { tenantId, merchantId: merchant.id, estado };
   }
 
   /**
@@ -288,45 +227,33 @@ export class AdminService {
   ): Promise<{ tenantId: string; estado: string }> {
     const estado = activo ? "activo" : "inactivo";
 
-    const estadoFinal = await this.db.transaction(async (tx) => {
-      const actualizado = await tx
-        .update(tenants)
-        .set({ status: estado, updatedAt: new Date() })
-        .where(eq(tenants.id, tenantId))
-        .returning({ status: tenants.status });
-
-      if (actualizado.length === 0) {
-        throw new NotFoundException("Comercio no encontrado.");
-      }
-
-      await this.auditoria.registrarEn(tx, {
+    const estadoFinal = await this.repo.cambiarEstadoTenant({
+      tenantId,
+      estado,
+      rastro: {
         actor,
         accion: activo ? "comercio.activar" : "comercio.desactivar",
         objetoTipo: "tenant",
         objetoId: tenantId,
         detalle: { estado }
-      });
-
-      return actualizado[0]!.status;
+      }
     });
+
+    if (estadoFinal === null) {
+      throw new NotFoundException("Comercio no encontrado.");
+    }
 
     return { tenantId, estado: estadoFinal };
   }
 
   /** Lista todos los comercios (cross-tenant via SECURITY DEFINER). */
   async listarComercios(): Promise<ComercioListado[]> {
-    const rows = await this.db.execute<FilaComercio>(
-      sql`SELECT * FROM identity.admin_listar_comercios()`
-    );
-    return this.armar(rows);
+    return this.armar(await this.repo.listarComercios());
   }
 
   /** Ficha de un comercio, o null si no existe. */
   async obtenerComercio(tenantId: string): Promise<ComercioListado | null> {
-    const rows = await this.db.execute<FilaComercio>(
-      sql`SELECT * FROM identity.admin_comercio(${tenantId}::uuid)`
-    );
-    const [comercio] = await this.armar(rows);
+    const [comercio] = await this.armar(await this.repo.obtenerComercio(tenantId));
     return comercio ?? null;
   }
 

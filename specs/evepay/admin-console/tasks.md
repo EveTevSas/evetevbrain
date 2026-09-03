@@ -144,6 +144,26 @@ cobrar. La respuesta fue **no**, y de ahí salieron tres cambios:
   `null` por la base eran rechazados al volver a guardarlos, de modo que leer
   un perfil y guardarlo sin tocar nada fallaba (CA-24).
 
+## Refactor del módulo admin (premisa 6)
+
+Va servicio por servicio, no de una vez: cada uno se puede verificar contra la
+base antes de pasar al siguiente.
+
+- [x] R1 — `AdminService` sobre `ComerciosRepository` (interfaz + adaptador
+      Drizzle + adaptador en memoria). Estrena sus PRIMEROS tests unitarios:
+      antes hablaba SQL directo y lo único posible era simular `db.execute`,
+      con lo que los tests afirmaban sobre el orden de las llamadas.
+      El rastro de auditoría viaja en la firma de cada escritura, no como una
+      llamada aparte: así no se puede escribir sin dejar rastro por descuido, y
+      queda garantizado que van en la misma transacción (CA-5).
+- [ ] R2 — `PerfilComercioService` (hoy sin tests propios).
+- [ ] R3 — `PagosAdminService`.
+- [ ] R4 — `ConciliacionAdminService` (sus tests son los más frágiles: afirman
+      sobre el orden de las llamadas a `db.execute`).
+- [ ] R5 — `AdminAuditService`.
+- [ ] R6 — Partir el módulo por dominio; hoy `admin` son 2.900 líneas haciendo
+      cinco cosas distintas.
+
 ## Dependencias
 
 - El PR `feat/provider-combopay` mergeado antes de C1–C3.
