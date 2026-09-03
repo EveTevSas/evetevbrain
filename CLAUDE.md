@@ -73,6 +73,12 @@ Si CI está en rojo en `main`, arreglarlo es la prioridad (§3).
   `pnpm format` es el fallo de CI más frecuente. El hook de pre-commit lo cubre,
   pero no dependas de él si haces commit por fuera.
 - ESLint corre con `--max-warnings=0`: una variable sin usar rompe CI.
+- **`packages/shared` hay que compilarlo antes de usar la app que lo consume.**
+  Sus tipos salen de `src/` pero el import en ejecución resuelve a `dist/`, así
+  que `typecheck` pasa sin haberlo compilado y el `build` falla. En local no se
+  nota porque `dist/` ya existe; en CI, que parte de un clon limpio, sí. Toda
+  app que importe de `@evetev/shared` necesita el paso «Build shared» en su job
+  y `needs: [cambios, shared]`.
 - Las apps Next usan una versión con breaking changes: lee
   `node_modules/next/dist/docs/` antes de escribir código de framework.
 - `next dev` regenera `AGENTS.md`/`next-env.d.ts` dentro de cada app Next; si
