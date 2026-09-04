@@ -11,7 +11,6 @@ commitea y no abre Pull Requests: eso lo haces tú cuando el cambio te guste.
 apps/eve-studio/
 ├── public/index.html   # la interfaz: chat + previsualización en vivo
 ├── api/index.py        # el servidor (FastAPI + LangGraph): API e interfaz
-├── agente_cli.py       # el REPL original (ver «Lo que queda por limpiar»)
 ├── requirements.txt
 ├── package.json        # el script `dev`
 └── .env.example
@@ -234,12 +233,17 @@ imposición de la plataforma —aquí hay disco de sobra— pero se mantiene por
 funciona y porque mover la memoria al servidor es un cambio con su propio
 diseño, no un efecto secundario de bajarlo a local.
 
-## Lo que queda por limpiar
+## Hubo un REPL, y por qué ya no está
 
-**`agente_cli.py`** es el REPL original y sigue leyendo de la API de GitHub, con
-su propia copia de las herramientas. El README de antes lo llamaba «duplicación
-consciente» y justificaba el precio: `api/index.py` mantenía todo en un módulo
-para no añadirle importaciones relativas al montaje de Vercel. Esa razón ya no
-existe, así que hoy es solo una segunda implementación más lenta del mismo
-agente. **Se ha dejado sin tocar en este cambio a propósito** —una cosa cada
-vez— pero lo que corresponde es borrarlo, no mantenerlo al día.
+`agente_cli.py` era el agente original de línea de comandos, con su propia copia
+de las herramientas. El README lo llamaba «duplicación consciente» y justificaba
+el precio: `api/index.py` mantenía todo en un solo módulo para no añadirle
+importaciones relativas al montaje de Vercel, así que la copia la pagaba el
+REPL. Sin Vercel esa razón desapareció, y lo que quedaba era una segunda
+implementación **más lenta** —seguía leyendo por la API de GitHub— y **ya
+desviada**: su prompt aún mandaba citar `cdn.jsdelivr.net`, un CDN que se apagó
+en agosto de 2026, así que cualquier imagen que produjera venía rota.
+
+Es justo el fallo que la duplicación invitaba a cometer, y el motivo por el que
+ahora hay una sola implementación. Si algún día hace falta un REPL, que llame a
+`/api/chat` en vez de reimplementar las herramientas.

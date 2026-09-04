@@ -1,21 +1,15 @@
-# Dependencias del agente. Va en la RAÍZ de la app, no en api/: Vercel detecta
-# el framework y las dependencias desde la raíz del Root Directory.
+# Dependencias del agente. Va en la raíz de la app y no en api/ porque desde
+# aquí se crea el entorno virtual y desde aquí lo lee el script `dev`.
 #
-# Versiones al día (jul-2026). Ojo: langchain-core exige pydantic>=2.7.4, así
+# Versiones al día (sep-2026). Ojo: langchain-core exige pydantic>=2.7.4, así
 # que no se puede fijar pydantic 2.5.x — la instalación falla.
 # langchain-core se deja sin fijar a propósito: es dependencia transitiva de
 # langgraph y langchain-openai, y que ellos resuelvan la versión compatible
 # evita conflictos de pip.
 fastapi==0.141.1
 pydantic>=2.7.4,<3
-requests==2.34.2
 python-dotenv==1.2.2
 langchain-openai==1.4.2
 langgraph==1.2.10
-# Conversión de imágenes a WebP para /api/imagen. Sustituye a `cwebp`, que en el
-# Mac lo pone Homebrew y en una función de Vercel no existe. Soporta
-# `alpha_quality`, que es lo que permite reproducir aquí la receta medida.
-pillow==11.3.0
-# El servidor ASGI. En Vercel lo ponía la plataforma y por eso no estaba aquí;
-# corriendo en local hay que arrancarlo nosotros, así que es una dependencia más.
+# El servidor ASGI: la interfaz y la API se sirven desde el mismo proceso.
 uvicorn[standard]==0.42.0
