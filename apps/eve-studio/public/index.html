@@ -650,35 +650,6 @@
         padding: 24px;
       }
 
-      /* ── Aviso del token ── */
-      .aviso-token {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-        padding: 11px 20px;
-        background: #fef8ec;
-        border-bottom: 1px solid #f3d9a6;
-        font-size: 0.82rem;
-        color: #7a5a1e;
-      }
-      .aviso-token svg {
-        width: 16px;
-        height: 16px;
-        flex: none;
-      }
-      .aviso-token input {
-        flex: 1;
-        min-width: 200px;
-        padding: 7px 11px;
-        border: 1px solid #e4cfa0;
-        border-radius: 8px;
-        font-family: "JetBrains Mono", monospace;
-        font-size: 0.78rem;
-        background: #fff;
-        color: var(--eve-azul-noche);
-      }
-
       .toast {
         position: fixed;
         bottom: 22px;
@@ -749,31 +720,6 @@
       </div>
     </header>
 
-    <!-- Solo aparece si falta el token. La API responde 401 sin él. -->
-    <div class="aviso-token oculto" id="avisoToken">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        aria-hidden="true"
-      >
-        <circle cx="12" cy="12" r="10"></circle>
-        <path d="M12 8v4"></path>
-        <path d="M12 16h.01"></path>
-      </svg>
-      <label for="campoToken">Pega el token del agente para poder generar:</label>
-      <input
-        type="password"
-        id="campoToken"
-        placeholder="AGENTE_API_TOKEN"
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <button class="btn btn-ghost" id="btnGuardarToken">Guardar</button>
-    </div>
-
     <main>
       <section class="chat" aria-label="Conversación con el agente">
         <div class="mensajes" id="mensajes">
@@ -819,13 +765,6 @@
               Imagen
             </button>
           </div>
-          <div class="acciones-previa">
-            <!-- La preview de Vercel no se puede incrustar: responde 302 al SSO y
-             manda X-Frame-Options: DENY. Por eso es un enlace, no un iframe. -->
-            <a class="mini oculto" id="enlacePreview" target="_blank" rel="noopener noreferrer"
-              >Preview de Vercel ↗</a
-            >
-          </div>
         </div>
         <div class="lienzo">
           <iframe
@@ -852,8 +791,8 @@
             <h3>Publicar una imagen de marca</h3>
             <p>
               La convierte a WebP, la deja en <code>packages/brand</code>, la anota en el manifiesto
-              y abre un PR con las copias de cada app. Cuando se mezcle podrás citarla como
-              <code>/marca/&lt;archivo&gt;</code> en cualquier página.
+              y sincroniza las copias de cada app. Queda en tu árbol de trabajo, sin commitear, y ya
+              puedes citarla como <code>/marca/&lt;archivo&gt;</code> en cualquier página.
             </p>
 
             <label class="soltar" id="zonaImagen" for="archivoImagen">
@@ -885,7 +824,7 @@
             </p>
             <div id="appsImagen" class="apps">Cargando…</div>
 
-            <button class="btn btn-cta" id="btnPublicarImagen" disabled>Publicar y abrir PR</button>
+            <button class="btn btn-cta" id="btnPublicarImagen" disabled>Publicar</button>
             <div id="resultadoImagen"></div>
           </div>
           <div class="sin-nada" id="sinNada">La interfaz generada aparecerá aquí.</div>
@@ -896,7 +835,6 @@
     <div class="toast" id="toast" role="status"></div>
 
     <script>
-      const CLAVE_TOKEN = "eve-studio-token";
       const $ = (s) => document.querySelector(s);
 
       /* El historial vive en el cliente y se reenvía en cada petición: la función de
@@ -949,7 +887,7 @@
 
       /* Todo el texto va por textContent: lo que llega del agente nunca se interpola
    como HTML fuera del iframe en sandbox. */
-      function pintarDetalles(prUrl, prosa) {
+      function pintarDetalles(prosa) {
         const d = $("#detalles");
         d.innerHTML = "";
         if (!ultimosArchivos.length && !prosa) {
@@ -963,7 +901,7 @@
         }
         if (ultimosArchivos.length) {
           d.appendChild(
-            Object.assign(document.createElement("h3"), { textContent: "Archivos propuestos" })
+            Object.assign(document.createElement("h3"), { textContent: "Archivos escritos" })
           );
           const ul = document.createElement("ul");
           for (const a of ultimosArchivos) {
@@ -980,28 +918,14 @@
           }
           d.appendChild(ul);
         }
-        const en = $("#enlacePreview");
-        if (prUrl) {
-          d.appendChild(
-            Object.assign(document.createElement("h3"), { textContent: "Pull Request" })
-          );
-          const a = document.createElement("a");
-          a.href = prUrl;
-          a.target = "_blank";
-          a.rel = "noopener noreferrer";
-          a.textContent = prUrl;
-          d.appendChild(a);
+        if (ultimosArchivos.length) {
           d.appendChild(
             Object.assign(document.createElement("p"), {
               className: "nota",
               textContent:
-                "La preview de Vercel aparece en el PR en cuanto termina de construir. No se puede incrustar aquí: Vercel la protege con login y prohíbe el iframe."
+                "Ya están escritos en tu árbol de trabajo, sin commitear. Revísalos con `git diff` y, si te gustan, commitea tú."
             })
           );
-          en.href = prUrl;
-          en.classList.remove("oculto");
-        } else {
-          en.classList.add("oculto");
         }
         if (prosa) {
           d.appendChild(
@@ -1116,26 +1040,6 @@
         $("#mensajes").scrollTop = $("#mensajes").scrollHeight;
       }
 
-      // ── Token ────────────────────────────────────────────────────────────────
-      function token() {
-        return localStorage.getItem(CLAVE_TOKEN) || "";
-      }
-      function pintarAvisoToken() {
-        $("#avisoToken").classList.toggle("oculto", !!token());
-      }
-
-      $("#btnGuardarToken").addEventListener("click", () => {
-        const v = $("#campoToken").value.trim();
-        if (!v) {
-          avisar("Pega el token primero.");
-          return;
-        }
-        localStorage.setItem(CLAVE_TOKEN, v);
-        $("#campoToken").value = "";
-        pintarAvisoToken();
-        avisar("Token guardado en este navegador.");
-      });
-
       // ── Utilidades ───────────────────────────────────────────────────────────
       function avisar(texto) {
         const t = $("#toast");
@@ -1171,20 +1075,27 @@
    revisa de verdad es la preview de Vercel del PR, que sirve la carpeta
    entera. Elegir un contexto a mano era un ajuste que se olvidaba y fallaba
    en silencio. */
-      /* El PR es donde se revisa de verdad, así que se muestra como enlace y no
-   enterrado en el texto. Se construye con createElement y href asignado por
-   propiedad: la URL viene del servidor, pero nunca se interpola en HTML. */
-      function enlacePR(url) {
+      /* Lo que el agente dejó ESCRITO en el árbol de trabajo. Antes aquí iba el
+   enlace al Pull Request; ahora no hay PR —el agente escribe en el disco y
+   para—, así que lo que hace falta saber es qué archivos mirar con `git diff`.
+   Se construye con createElement y textContent: las rutas vienen del servidor,
+   pero nunca se interpolan en HTML. */
+      function listaEscritos(archivos) {
         const d = document.createElement("div");
         d.className = "burbuja eve pr";
-        const a = document.createElement("a");
-        a.href = url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.textContent = "Ver el Pull Request →";
-        d.appendChild(a);
+        const t = document.createElement("strong");
+        t.textContent =
+          archivos.length === 1 ? "1 archivo tocado" : archivos.length + " archivos tocados";
+        d.appendChild(t);
+        const ul = document.createElement("ul");
+        for (const a of archivos) {
+          const li = document.createElement("li");
+          li.textContent = a.ruta;
+          ul.appendChild(li);
+        }
+        d.appendChild(ul);
         const p = document.createElement("small");
-        p.textContent = "Revisa la preview de Vercel antes de mezclar.";
+        p.textContent = "Están en tu árbol de trabajo, sin commitear. Míralos con git diff.";
         d.appendChild(p);
         $("#mensajes").appendChild(d);
         $("#mensajes").scrollTop = $("#mensajes").scrollHeight;
@@ -1224,13 +1135,13 @@
         return salida.replace(/<head[^>]*>/i, (m) => m + '\n<base href="' + origen + '">');
       }
 
-      function mostrarResultado(codigo, archivos, prUrl, prosa) {
+      function mostrarResultado(codigo, archivos, prosa) {
         ultimosArchivos = archivos || [];
         ultimoCodigo =
           codigo || (ultimosArchivos.find((a) => a.ruta.endsWith(".html")) || {}).contenido || "";
         $("#sinNada").classList.toggle("oculto", !!ultimoCodigo);
         pintarPrevia();
-        pintarDetalles(prUrl, prosa);
+        pintarDetalles(prosa);
       }
 
       // ── Envío ────────────────────────────────────────────────────────────────
@@ -1241,13 +1152,6 @@
           $("#peticion").focus();
           return;
         }
-        if (!token()) {
-          pintarAvisoToken();
-          $("#campoToken").focus();
-          avisar("Falta el token del agente.");
-          return;
-        }
-
         enviando = true;
         const btn = $("#btnGenerar");
         btn.disabled = true;
@@ -1277,7 +1181,7 @@
         try {
           const r = await fetch("/api/chat", {
             method: "POST",
-            headers: { "Content-Type": "application/json", "X-Agente-Token": token() },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               historial: proyecto().historial,
               mensaje_nuevo: adjuntarRegistro ? texto + "\n\n" + registroComoTexto() : texto,
@@ -1302,35 +1206,32 @@
           }
 
           // En el chat va un resumen: volcar todo el HTML lo haría ilegible.
-          // Solo `pr_verificado` anuncia un PR. Antes bastaba con que `pr_url`
-          // tuviera algo, y ese algo podía venir del texto del agente: se enlazó un
-          // PR #58 que no existía. La URL de la herramienta y la inventada eran
-          // indistinguibles aquí, así que ahora el origen lo dice el servidor.
+          // Solo `escrito` anuncia un cambio, y lo pone el servidor mirando qué
+          // escribió la herramienta de verdad — no lo que el agente diga.
           /* Tres desenlaces distintos, y antes se contaban como dos. El `else`
-             anunciaba «Interfaz generada» siempre que no hubiera PR, incluso
-             cuando el agente había contestado hablando —por ejemplo para decir
-             que NO cambiaba nada—: la interfaz afirmaba algo que no había
-             pasado, y la vista previa enseñaba un párrafo como si fuera una
-             página rota. Si no hay página ni PR, lo que hay que leer es lo que
-             el agente respondió. */
-          const hayInterfaz = !!(
-            (cuerpo.codigo_html || "").trim() || (cuerpo.archivos || []).length
-          );
-          if (cuerpo.pr_verificado && cuerpo.pr_url) {
-            burbuja("eve", "Abrí un Pull Request con el cambio.", "Eve");
-            enlacePR(cuerpo.pr_url);
+             anunciaba «Interfaz generada» siempre que no hubiera escritura,
+             incluso cuando el agente había contestado hablando —por ejemplo
+             para decir que NO cambiaba nada—: la interfaz afirmaba algo que no
+             había pasado, y la vista previa enseñaba un párrafo como si fuera
+             una página rota. Si no hay página ni escritura, lo que hay que leer
+             es lo que el agente respondió. */
+          const escritos = cuerpo.archivos || [];
+          const hayInterfaz = !!((cuerpo.codigo_html || "").trim() || escritos.length);
+          if (cuerpo.escrito && escritos.length) {
+            burbuja("eve", cuerpo.resumen || "Dejé el cambio escrito.", "Eve");
+            listaEscritos(escritos);
           } else if (hayInterfaz) {
             burbuja("eve", "Interfaz generada — la ves a la derecha.", "Eve");
           } else {
             burbuja("eve", cuerpo.mensaje_crudo || "El agente no devolvió nada.", "Eve");
           }
           // El aviso va DESPUÉS del resumen y con estilo de error: si el agente dijo
-          // que abrió un PR sin abrirlo, eso es lo último que hay que leer.
+          // que escribió sin haberlo hecho, eso es lo último que hay que leer.
           if (cuerpo.aviso) {
             burbuja("err", cuerpo.aviso);
           }
           // El servidor decide qué merece recordarse: quita el código, que ya vive en
-          // el repositorio, y deja intención, decisiones y el PR.
+          // el disco, y deja intención, decisiones y los archivos tocados.
           const p = proyecto();
           const recordar = cuerpo.historial_entrada || cuerpo.mensaje_crudo || "";
           p.historial.push({ rol: "user", contenido: texto });
@@ -1349,14 +1250,7 @@
           } // se gasta una sola vez
           guardar();
           pintarSelector();
-          // Al panel de detalles solo va la URL verificada, por lo mismo: ahí es donde
-          // está el enlace «Preview de Vercel», y mandar a nadie a un PR inexistente.
-          mostrarResultado(
-            cuerpo.codigo_html || "",
-            cuerpo.archivos || [],
-            cuerpo.pr_verificado ? cuerpo.pr_url : null,
-            cuerpo.mensaje_crudo || ""
-          );
+          mostrarResultado(cuerpo.codigo_html || "", escritos, cuerpo.mensaje_crudo || "");
         } catch {
           cargando.remove();
           burbuja("err", "Sin conexión con el agente. Revisa tu red e inténtalo de nuevo.");
@@ -1377,23 +1271,15 @@
         if (!campo.value.trim()) campo.value = texto;
       }
 
+      /* Corriendo en local ya no hay 504 de plataforma ni token que pegar: los
+   dos mensajes que había para eso se han ido con ellos. Lo que queda son
+   fallos de configuración —que se arreglan en el .env— y del propio agente. */
       function mensajeDeError(estado, detalle) {
-        if (estado === 401) return "Token inválido. Revísalo en «Nueva sesión» o vuelve a pegarlo.";
-        if (detalle === "agente_sin_token_configurado")
-          return "El servidor no tiene AGENTE_API_TOKEN configurado en Vercel.";
         if (detalle === "falta_moonshot_api_key")
-          return "Al servidor le falta la MOONSHOT_API_KEY.";
+          return "Falta MOONSHOT_API_KEY en apps/eve-studio/.env. Ponla y reinicia el servidor.";
         if (estado === 502) return "El agente falló al generar. Prueba a reformular la petición.";
-        if (estado === 422 || detalle === "peticion_demasiado_grande")
-          return (
-            "La petición dio para más pasos de los que caben en una vuelta. Pídelo por " +
-            "partes —primero la maquetación, luego la imagen— o di en qué archivo hay que tocar."
-          );
-        if (estado === 504)
-          return (
-            "El agente tardó demasiado y el servidor cortó. Tocar una landing entera es " +
-            "caro: pídelo por partes. Tu texto sigue en el cuadro."
-          );
+        if (estado === 503)
+          return "El servidor no está listo. Mira la consola donde corre uvicorn.";
         return "No se pudo generar (error " + estado + ").";
       }
 
@@ -1494,7 +1380,7 @@
         const caja = $("#appsImagen");
         if (caja.dataset.listo) return;
         try {
-          const r = await fetch("/api/imagen/apps", { headers: { "X-Agente-Token": token() } });
+          const r = await fetch("/api/imagen/apps");
           if (!r.ok) throw new Error(r.status);
           const { apps } = await r.json();
           caja.innerHTML = apps
@@ -1532,10 +1418,6 @@
       zona.addEventListener("drop", (e) => tomarImagen(e.dataTransfer.files[0]));
 
       $("#btnPublicarImagen").addEventListener("click", async () => {
-        if (!token()) {
-          avisar("Guarda el token antes de publicar.");
-          return;
-        }
         const boton = $("#btnPublicarImagen");
         boton.disabled = true;
         boton.textContent = "Publicando…";
@@ -1551,7 +1433,7 @@
           });
           const r = await fetch("/api/imagen", {
             method: "POST",
-            headers: { "Content-Type": "application/json", "X-Agente-Token": token() },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               imagen_base64: base64,
               nombre: $("#nombreImagen").value.trim(),
@@ -1563,18 +1445,15 @@
           if (!r.ok) {
             const detalle = String(d.detail || r.status);
             salida.className = "resultado-mal";
-            salida.textContent = detalle.startsWith("ya_existe")
-              ? "Ya hay un activo con ese nombre. Ponle otro: si la URL no cambia, quien ya vio la imagen seguiría viendo la vieja."
+            salida.textContent = detalle.startsWith("marca_imagen_fallo")
+              ? detalle.slice("marca_imagen_fallo:".length)
               : "No se publicó: " + detalle;
             return;
           }
           salida.className = "resultado-ok";
-          salida.innerHTML =
-            `<b>PR abierto.</b> ${d.ancho}×${d.alto}, ` +
-            `${d.alfa ? "con" : "sin"} transparencia, ${pesar(d.bytes)}.<br>` +
-            `Cuando se mezcle, cítala como <code>${d.ruta_publica}</code> ` +
-            `(la sirven: ${d.apps.join(", ")}).<br>` +
-            `<a href="${d.pr_url}" target="_blank" rel="noopener noreferrer">${d.pr_url}</a>`;
+          salida.textContent =
+            `Publicada. Cítala como ${d.ruta_publica} (la sirven: ${d.apps.join(", ")}). ` +
+            `La fuente, el manifiesto y las copias quedan en tu árbol de trabajo, sin commitear.`;
           imagenLista = null;
           $("#textoZona").textContent = "Elige una imagen o suéltala aquí — PNG, JPG o WebP";
           $("#medidaImagen").classList.add("oculto");
@@ -1583,7 +1462,7 @@
           salida.className = "resultado-mal";
           salida.textContent = "No pude hablar con el servidor: " + e.message;
         } finally {
-          boton.textContent = "Publicar y abrir PR";
+          boton.textContent = "Publicar";
           repasarPublicar();
         }
       });
@@ -1616,8 +1495,7 @@
         ultimosArchivos = [];
         adjuntarRegistro = false;
         $("#sinNada").classList.remove("oculto");
-        $("#enlacePreview").classList.add("oculto");
-        pintarDetalles(null, "");
+        pintarDetalles("");
         verPanel("previa");
       });
 
@@ -1655,13 +1533,11 @@
         ultimosArchivos = [];
         adjuntarRegistro = false;
         $("#sinNada").classList.remove("oculto");
-        $("#enlacePreview").classList.add("oculto");
-        pintarDetalles(null, "");
+        pintarDetalles("");
         pintarConversacion();
       });
 
       // ── Arranque ─────────────────────────────────────────────────────────────
-      pintarAvisoToken();
       pintarSelector();
       pintarConversacion();
     </script>

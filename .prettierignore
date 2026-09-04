@@ -35,3 +35,10 @@ apps/eveledger/src/generated/
 # rojo sin que nadie haya tocado nada. La fuente sí se formatea.
 apps/*/marca/
 apps/*/public/marca/
+
+# Entorno virtual de Python de Eve Studio. Lo crea quien lo va a usar en local
+# (`python3 -m venv .venv`) y git lo ignora, pero Prettier no mira .gitignore:
+# sin esta línea `pnpm format` entra a reescribir site-packages y
+# `pnpm format:check` sale en rojo en cualquier máquina que lo tenga creado. En
+# CI no se nota, porque parte de un clon limpio donde el venv no existe.
+**/.venv/

@@ -97,8 +97,9 @@ Dos detalles que no son arbitrarios:
   silencio, que es exactamente el fallo que esto viene a evitar.
 - **Las apps de Next añaden `../../pnpm-lock.yaml`** a las rutas vigiladas. Una
   subida de dependencia cambia lo que se despliega sin tocar su carpeta. Las
-  landings estáticas y `eve-studio` no lo necesitan: no instalan nada del
-  workspace.
+  landings estáticas no lo necesitan: no instalan nada del workspace.
+  (`eve-studio` ya no aparece aquí: desde septiembre de 2026 corre solo en
+  local y no tiene proyecto de Vercel.)
 
 Nota sobre la cuota: el plan es Hobby, con **100 builds en una ventana móvil de
 24 horas**, y cada PR cuenta doble (preview y merge). El `ignoreCommand` es lo

@@ -16,3 +16,6 @@ langgraph==1.2.10
 # Mac lo pone Homebrew y en una función de Vercel no existe. Soporta
 # `alpha_quality`, que es lo que permite reproducir aquí la receta medida.
 pillow==11.3.0
+# El servidor ASGI. En Vercel lo ponía la plataforma y por eso no estaba aquí;
+# corriendo en local hay que arrancarlo nosotros, así que es una dependencia más.
+uvicorn[standard]==0.42.0
