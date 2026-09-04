@@ -17,7 +17,7 @@ marcar() { echo "$1=$2" >> "$GITHUB_OUTPUT"; echo "  $1=$2"; }
 
 todo() {
   echo "$1 → se ejecuta todo el CI."
-  for a in global shared api eveconecta eveledger evepayadmin landings; do marcar "$a" true; done
+  for a in global shared api eveconecta eveledger evepayadmin evestudio landings; do marcar "$a" true; done
   exit 0
 }
 
@@ -65,6 +65,13 @@ marcar eveledger "$EVELEDGER"
 EVEPAYADMIN=$SHARED
 toca '^apps/evepay-admin/' && EVEPAYADMIN=true
 marcar evepayadmin "$EVEPAYADMIN"
+
+# Eve Studio corre solo en local, así que no tiene despliegue que vigilar; lo
+# que sí tiene son las pruebas del arnés de escritura, que es lo único que
+# impide que el agente escriba fuera de las tres landings.
+EVESTUDIO=false
+toca '^apps/eve-studio/' && EVESTUDIO=true
+marcar evestudio "$EVESTUDIO"
 
 # Dos cosas se generan desde packages/brand y el CI vigila que no se desvíen:
 # base.css y formularios.js hacia apps/website/landings/, y los activos de marca

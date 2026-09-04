@@ -7,6 +7,6 @@
     "dev": ".venv/bin/uvicorn api.index:app --reload --host 127.0.0.1 --port 3003",
     "lint": "echo \"(eve-studio) app en Python, sin lint de Node\" && exit 0",
     "typecheck": "echo \"(eve-studio) app en Python, sin typecheck de Node\" && exit 0",
-    "test": "echo \"(eve-studio) app en Python, sin tests de Node\" && exit 0"
+    "test": "if [ -x .venv/bin/pytest ]; then .venv/bin/pytest -q tests; elif command -v pytest >/dev/null 2>&1; then pytest -q tests; else echo \"(eve-studio) sin pytest: pip install -r requirements-dev.txt\"; fi"
   }
 }
