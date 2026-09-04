@@ -1277,6 +1277,12 @@
       function mensajeDeError(estado, detalle) {
         if (detalle === "falta_moonshot_api_key")
           return "Falta MOONSHOT_API_KEY en apps/eve-studio/.env. Ponla y reinicia el servidor.";
+        if (estado === 422 || detalle === "el_agente_dio_vueltas")
+          return (
+            "El agente se quedó dando vueltas y se cortó antes de gastar más. Suele pasar " +
+            "cuando no acierta el fragmento a sustituir: dile en qué archivo y en qué sección " +
+            "hay que tocar. Tu texto sigue en el cuadro."
+          );
         if (estado === 502) return "El agente falló al generar. Prueba a reformular la petición.";
         if (estado === 503)
           return "El servidor no está listo. Mira la consola donde corre uvicorn.";
