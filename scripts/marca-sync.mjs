@@ -61,7 +61,7 @@ const APPS = [
       "ilustraciones/pasarela-de-pago.webp",
       "ilustraciones/asistente-documental.webp",
       "ilustraciones/datafono.webp",
-      "ilustraciones/tingua-con-celular.webp",
+      "ilustraciones/tingua.webp",
       "ilustraciones/colibri.webp"
     ]
   },

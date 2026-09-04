@@ -288,7 +288,7 @@
   margin: 28px 0 0;
 }
 .wa-figura img {
-  width: min(420px, 100%);
+  width: min(500px, 100%);
   height: auto;
   display: block;
   /* El WebP es línea sobre blanco puro (#fff en las esquinas). `multiply`
@@ -297,6 +297,10 @@
      Depende de que esta sección sea clara (.seccion-tinte, #f4f9fd); si algún
      día va sobre azul noche, hay que exportar el WebP con alfa de verdad. */
   mix-blend-mode: multiply;
+  /* Un punto de transparencia afina el trazo sin abrir un rectángulo: el
+     blanco ya se funde por el `multiply`, así que la opacidad solo aligera
+     las líneas sobre el tinte. */
+  opacity: 0.85;
 }
 .wa-figura figcaption {
   margin-top: 12px;
