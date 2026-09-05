@@ -48,6 +48,7 @@ from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 # Nota: en LangGraph 1.x esto emite un aviso de deprecación (la alternativa es
 # langchain.agents.create_agent). Sigue funcionando; migrar cuando se toque.
+from langgraph.errors import GraphRecursionError
 from langgraph.prebuilt import create_react_agent
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -82,10 +83,25 @@ EXTENSIONES_ESCRIBIBLES = (".html", ".css")
 ARCHIVOS_PROHIBIDOS = ("base.css", "formularios.js")
 MAX_ARCHIVOS = 5
 MAX_BYTES_ARCHIVO = 100_000
-# Cuántas escrituras admite una petición. Ya no es un freno de tiempo —escribir
-# es instantáneo— sino de daño: si el agente entra en bucle, que no reescriba la
-# landing veinte veces antes de que te des cuenta.
-MAX_ESCRITURAS_POR_PETICION = 10
+# Cuántas veces puede INTENTAR escribir en una petición. Cuenta los intentos y
+# no las escrituras, y la diferencia importa: el fallo típico de 'editar_bloque'
+# es un 'buscar' cuya sangría no casa, y ese camino no escribe nada. Cuando el
+# tope contaba solo escrituras, un modelo reintentando el mismo fragmento mal
+# copiado no gastaba presupuesto y podía dar vueltas indefinidamente.
+MAX_INTENTOS_DE_ESCRITURA = 10
+
+# El tope de pasos del agente. Volvió a hacer falta al bajar a local: se quitó
+# junto con el presupuesto de tiempo porque «ya no hay reloj externo que corte»,
+# y eso dejó como único freno el valor por defecto de LangGraph, que son 10007
+# —comprobado en el paquete instalado, no es un número redondo por casualidad—.
+# Diez mil pasos son diez mil llamadas al modelo: horas de espera y la factura
+# de Moonshot detrás.
+#
+# 60 es holgado a propósito. En un grafo ReAct cada llamada a una herramienta
+# gasta dos pasos, así que esto da para unas 30: listar la marca, leer el HTML y
+# el CSS, y editar varias veces, con margen de sobra. Lo que corta es el bucle,
+# no el trabajo.
+MAX_PASOS_AGENTE = 60
 
 # Lo que NUNCA se lee, aunque esté dentro del repositorio. El `.env` es el que
 # importa: basta con que alguien le pida «lee apps/eve-studio/.env» para que las
@@ -371,12 +387,25 @@ def crear_herramientas_de_escritura(registro: dict):
         registro.setdefault("fallos", []).append(motivo)
         return motivo
 
+    def _cobrar_intento() -> str | None:
+        """Apunta un intento de escritura y dice si ya no quedan.
+
+        Se llama al ENTRAR en cada herramienta, no al escribir: un intento que
+        falla —la ruta no vale, el 'buscar' no casa— es exactamente el que puede
+        repetirse en bucle, así que es el que hay que contar. El mensaje se
+        dirige al modelo y le dice qué hacer, porque el objetivo es que pare y
+        responda, no que lo intente una vez más."""
+        hechas["n"] += 1
+        if hechas["n"] > MAX_INTENTOS_DE_ESCRITURA:
+            return _falla(
+                f"Llevas {hechas['n']} intentos de escritura en esta petición y el tope "
+                f"son {MAX_INTENTOS_DE_ESCRITURA}. No lo intentes otra vez: para, y "
+                "explica en tu respuesta qué querías cambiar y con qué te has atascado."
+            )
+        return None
+
     def _guardar(ruta: str, contenido: str, resumen: str) -> str:
         """El tramo común: valida, escribe al disco y apunta qué quedó."""
-        hechas["n"] += 1
-        if hechas["n"] > MAX_ESCRITURAS_POR_PETICION:
-            return _falla("Límite de escrituras para esta petición alcanzado. Termina y responde.")
-
         motivo = validar_ruta(ruta)
         if motivo:
             return _falla("No se escribió nada. " + motivo)
@@ -418,6 +447,9 @@ def crear_herramientas_de_escritura(registro: dict):
         El archivo queda en el árbol de trabajo, SIN commitear: la persona lo
         revisa con `git diff` y decide. No hay Pull Request y no hace falta.
         """
+        agotado = _cobrar_intento()
+        if agotado:
+            return agotado
         if not contenido.strip():
             return _falla("'contenido' está vacío; no voy a dejar el archivo en blanco.")
         if len(resumen.strip()) < 5:
@@ -443,6 +475,9 @@ def crear_herramientas_de_escritura(registro: dict):
         no aparece, o aparece más de una vez, no se escribe nada y te digo por
         qué para que ajustes el fragmento.
         """
+        agotado = _cobrar_intento()
+        if agotado:
+            return agotado
         motivo = validar_ruta(ruta)
         if motivo:
             return _falla("No se escribió nada. " + motivo)
@@ -818,12 +853,12 @@ async def generar_interfaz(peticion: PeticionChat):
 
     registro: dict = {}
     agente = construir_agente(registro)
-    # Sin `recursion_limit` y sin presupuesto de tiempo: en local no hay ningún
-    # reloj externo que corte, y el motivo por el que existían —Vercel matando
-    # la función a los 300 s— ya no aplica. Si una petición necesita veinte
-    # pasos, que los dé.
+    # Sin presupuesto de TIEMPO: en local no hay reloj externo que corte, así que
+    # una petición puede tardar lo que necesite. Pero sí con tope de PASOS, que
+    # es otra cosa: acota el bucle, no el trabajo.
+    ajustes = {"recursion_limit": MAX_PASOS_AGENTE}
     try:
-        resultado = agente.invoke({"messages": mensajes})
+        resultado = agente.invoke({"messages": mensajes}, config=ajustes)
         salida = resultado["messages"][-1].content
 
         # ── El arnés ───────────────────────────────────────────────────────
@@ -836,9 +871,16 @@ async def generar_interfaz(peticion: PeticionChat):
             print("arnés: el agente dijo haber escrito sin llamar a la herramienta")
             registro["arnes_disparado"] = True
             resultado = agente.invoke(
-                {"messages": list(resultado["messages"]) + [HumanMessage(content=AVISO_ARNES)]}
+                {"messages": list(resultado["messages"]) + [HumanMessage(content=AVISO_ARNES)]},
+                config=ajustes,
             )
             salida = resultado["messages"][-1].content
+    except GraphRecursionError:
+        # Se acabaron los pasos. Sin esta rama caía en el `except Exception` de
+        # abajo y la persona leía «el agente falló», que no dice qué hacer. Dar
+        # vueltas es un desenlace distinto de romperse, y se cuenta distinto.
+        print(f"tope de pasos alcanzado ({MAX_PASOS_AGENTE})", file=sys.stderr)
+        raise HTTPException(status_code=422, detail="el_agente_dio_vueltas")
     except HTTPException:
         raise
     except Exception as e:
