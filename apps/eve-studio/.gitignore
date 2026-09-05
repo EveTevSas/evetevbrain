@@ -3,6 +3,3 @@
 venv/
 __pycache__/
 *.pyc
-# Artefactos de ejecución del agente en local, no código:
-contexto/
-salida/
