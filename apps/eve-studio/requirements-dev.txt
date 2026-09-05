@@ -1,0 +1,4 @@
+# Solo para correr las pruebas. Va aparte de requirements.txt para que el
+# entorno con el que se usa la app no cargue con pytest.
+-r requirements.txt
+pytest==8.4.2
