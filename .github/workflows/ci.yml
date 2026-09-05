@@ -22,6 +22,7 @@ jobs:
       eveconecta: ${{ steps.areas.outputs.eveconecta }}
       eveledger: ${{ steps.areas.outputs.eveledger }}
       evepayadmin: ${{ steps.areas.outputs.evepayadmin }}
+      evestudio: ${{ steps.areas.outputs.evestudio }}
       landings: ${{ steps.areas.outputs.landings }}
     steps:
       - uses: actions/checkout@v4
@@ -269,6 +270,40 @@ jobs:
       - name: Build
         run: pnpm --filter @evetev/evepay-admin build
 
+  # ── Eve Studio: el arnés de escritura ──────────────────────────────────────
+  # La única app en Python del repo, y la única que no se despliega: corre en el
+  # portátil de quien la usa. Lo que se prueba aquí no es la interfaz, es el
+  # arnés — `validar_ruta`, `_resolver` y `_guardar`—, que es lo que separa «un
+  # agente que edita tres landings» de «un agente con permiso de escritura sobre
+  # tu disco». Vive en código y no en el prompt porque a un `if` no se le
+  # convence; esta prueba existe para que ese `if` no se pueda borrar en
+  # silencio.
+  evestudio:
+    name: Eve Studio
+    runs-on: ubuntu-latest
+    needs: cambios
+    if: ${{ needs.cambios.outputs.evestudio == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+          cache-dependency-path: apps/eve-studio/requirements-dev.txt
+
+      - name: Instalar dependencias
+        working-directory: apps/eve-studio
+        run: pip install -r requirements-dev.txt
+
+      # Se llama a pytest directamente y NO por `pnpm test`: ese script sale 0
+      # cuando no encuentra pytest, para no romper `pnpm -r test` a quien solo
+      # toca el lado Node. Aquí eso sería justo el fallo que esto viene a
+      # evitar —CI en verde porque la prueba no llegó a correr—.
+      - name: Pruebas del arnés
+        working-directory: apps/eve-studio
+        run: pytest -q tests
+
   # ── El único check que debe exigir la protección de rama ───────────────────
   # Corre siempre, y solo se pone en rojo si algo falló o se canceló. Un job
   # omitido no es un fallo: es que ese área no se tocó.
@@ -276,7 +311,7 @@ jobs:
     name: CI completo
     runs-on: ubuntu-latest
     if: always()
-    needs: [cambios, formato, landings, shared, api, eveconecta, eveledger, evepayadmin]
+    needs: [cambios, formato, landings, shared, api, eveconecta, eveledger, evepayadmin, evestudio]
     steps:
       - name: Comprobar los resultados
         run: |
