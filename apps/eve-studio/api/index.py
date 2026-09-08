@@ -30,6 +30,7 @@ Se sirve entero con uvicorn —la interfaz estática y la API en el mismo
 proceso— en 127.0.0.1:3003. Ver el README.
 """
 
+import asyncio
 import os
 import re
 import subprocess
@@ -114,10 +115,22 @@ LIMITE_CARACTERES = 60_000
 
 EXTENSIONES_IMAGEN = (".png", ".webp", ".jpg", ".jpeg", ".svg", ".gif", ".ico", ".mp4")
 
-# Cuánto se le concede a una llamada al modelo. Generoso a propósito: en local no
-# hay ningún reloj externo que corte, así que el único motivo para tener timeout
-# es que una llamada colgada no deje el proceso esperando para siempre.
-TIMEOUT_MODELO = 600
+# Cuánto se le concede a una llamada al modelo. 600 era demasiado generoso: el
+# día que algo va mal —una llamada colgada, un error que no se propaga— la
+# persona se queda diez minutos mirando el contador sin saber que ya no va a
+# pasar nada. Un turno normal de kimi-k3 son segundos, así que 120 deja margen
+# de sobra y convierte un cuelgue en un fallo que se ve.
+TIMEOUT_MODELO = 120
+
+# kimi-k3 SOLO admite temperature=1. No es una preferencia afinable: cualquier
+# otro valor lo rechaza la API con
+#   400 invalid temperature: only 1 is allowed for this model
+# y la petición no llega a ejecutarse. Se bajó una vez a 0.2 razonando que
+# evitaría la «deriva» al copiar archivos verbatim —razonamiento plausible, y
+# el resultado fue que ninguna petición funcionaba durante días—. Vive en una
+# constante para que haya UN solo sitio que cambiar si algún día se cambia de
+# modelo, y para que la prueba pueda fijarlo.
+TEMPERATURA_MODELO = 1.0
 
 
 # ── Rutas: una sola puerta, y que no se salga del repositorio ──────────────
@@ -638,10 +651,7 @@ def construir_agente(registro: dict):
         api_key=os.getenv("MOONSHOT_API_KEY"),
         base_url="https://api.moonshot.ai/v1",
         model="kimi-k3",
-        # 0.2 y no 1.0: este agente reproduce archivos verbatim y a temperatura
-        # alta el modelo «deriva» al copiar texto largo. Para redactar prosa 1.0
-        # estaba bien; para no perder un trozo de un archivo al copiarlo, no.
-        temperature=0.2,
+        temperature=TEMPERATURA_MODELO,
         timeout=TIMEOUT_MODELO,
     )
     escribir_archivo, editar_bloque = crear_herramientas_de_escritura(registro)
@@ -815,7 +825,7 @@ def compactar_historial(historial: list[dict]) -> list[dict] | None:
             api_key=os.getenv("MOONSHOT_API_KEY"),
             base_url="https://api.moonshot.ai/v1",
             model="kimi-k3",
-            temperature=0.2,
+            temperature=TEMPERATURA_MODELO,
             timeout=TIMEOUT_MODELO,
         )
         resumen = llm.invoke([HumanMessage(content=peticion)]).content
@@ -858,7 +868,9 @@ async def generar_interfaz(peticion: PeticionChat):
     # es otra cosa: acota el bucle, no el trabajo.
     ajustes = {"recursion_limit": MAX_PASOS_AGENTE}
     try:
-        resultado = agente.invoke({"messages": mensajes}, config=ajustes)
+        resultado = await asyncio.to_thread(
+            agente.invoke, {"messages": mensajes}, config=ajustes
+        )
         salida = resultado["messages"][-1].content
 
         # ── El arnés ───────────────────────────────────────────────────────
@@ -870,7 +882,8 @@ async def generar_interfaz(peticion: PeticionChat):
         if not registro.get("tocados") and not registro.get("fallos") and dice_que_cambio(salida):
             print("arnés: el agente dijo haber escrito sin llamar a la herramienta")
             registro["arnes_disparado"] = True
-            resultado = agente.invoke(
+            resultado = await asyncio.to_thread(
+                agente.invoke,
                 {"messages": list(resultado["messages"]) + [HumanMessage(content=AVISO_ARNES)]},
                 config=ajustes,
             )
