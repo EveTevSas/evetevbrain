@@ -12,6 +12,13 @@ export interface NuevoCobro {
   provider: string;
   providerPaymentId: string;
   checkoutUrl?: string;
+  /**
+   * Versiones de tarifa con las que se creó el cobro (spec `comisiones`).
+   * Opcionales solo porque los cobros anteriores a la Fase 6 no las tienen;
+   * el servicio siempre las fija.
+   */
+  tarifaId?: string;
+  tarifaProveedorId?: string;
 }
 
 export interface IdempotencyHit {

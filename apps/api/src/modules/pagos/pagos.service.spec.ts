@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConflictException } from "@nestjs/common";
-import type { CrearCobroInput, EstadoMerchant } from "@evetev/shared";
+import { BadRequestException, ConflictException } from "@nestjs/common";
+import type { CrearCobroInput, EstadoMerchant, TarifaComercio } from "@evetev/shared";
 import { PagosService, type CobroContext } from "./pagos.service";
 import { FakePaymentProvider } from "./fake-payment.provider";
 import { InMemoryPagosRepository } from "./in-memory-pagos.repository";
 import { InMemoryMerchantsRepository } from "../merchants/in-memory-merchants.repository";
+import { InMemoryTarifasRepository } from "../tarifas/in-memory-tarifas.repository";
 
 const TENANT_A = "11111111-1111-4111-8111-111111111111";
 const TENANT_B = "22222222-2222-4222-8222-222222222222";
@@ -50,6 +51,51 @@ function merchantsCon(
   return repo;
 }
 
+/** 2,90 % + $300 con IVA del 19 %: una tarifa cualquiera que deja margen. */
+const TARIFA_COMERCIO: TarifaComercio = { bps: 290, fijoMinor: 30_000, ivaBps: 1900 };
+
+/**
+ * Siembra las dos tarifas que un cobro necesita: la de cada comercio y la del
+ * proveedor que atiende. Sin ellas el cobro se rechaza antes de llamar al
+ * proveedor, así que montar el escenario incluye ponerlas, igual que en
+ * producción las pone operación desde la consola.
+ */
+function tarifasCon(
+  opciones: { comercio?: boolean; proveedor?: boolean; tarifa?: TarifaComercio } = {}
+): InMemoryTarifasRepository {
+  const { comercio = true, proveedor = true, tarifa = TARIFA_COMERCIO } = opciones;
+  const repo = new InMemoryTarifasRepository();
+  const ahora = new Date().toISOString();
+  for (const tenantId of [TENANT_A, TENANT_B]) {
+    repo.tenants.add(tenantId);
+    if (comercio) {
+      repo.comercio.push({
+        ...tarifa,
+        id: `tarifa-${tenantId.slice(0, 4)}`,
+        tenantId,
+        vigenteDesde: ahora,
+        creadaPor: "seed",
+        creadaEn: ahora
+      });
+    }
+  }
+  if (proveedor) {
+    for (const provider of ["fake", "combopay"]) {
+      repo.proveedor.push({
+        id: `tarifa-${provider}`,
+        provider,
+        bps: 0,
+        fijoMinor: 80_000,
+        descuentaEnConsignacion: true,
+        vigenteDesde: ahora,
+        creadaPor: "seed",
+        creadaEn: ahora
+      });
+    }
+  }
+  return repo;
+}
+
 describe("PagosService — crear cobro idempotente", () => {
   let repo: InMemoryPagosRepository;
   let provider: FakePaymentProvider;
@@ -58,7 +104,7 @@ describe("PagosService — crear cobro idempotente", () => {
   beforeEach(() => {
     repo = new InMemoryPagosRepository();
     provider = new FakePaymentProvider();
-    service = new PagosService(provider, repo, merchantsCon());
+    service = new PagosService(provider, repo, merchantsCon(), tarifasCon());
   });
 
   it("EARS 1: crea cobro pendiente y llama al proveedor una sola vez", async () => {
@@ -131,7 +177,12 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
   const provider = new FakePaymentProvider();
 
   it("un comercio aprobado cobra normalmente", async () => {
-    const service = new PagosService(provider, new InMemoryPagosRepository(), merchantsCon());
+    const service = new PagosService(
+      provider,
+      new InMemoryPagosRepository(),
+      merchantsCon(),
+      tarifasCon()
+    );
     await expect(service.crearCobro(ctxA, input(), "k-ok")).resolves.toMatchObject({
       estado: "pendiente"
     });
@@ -141,7 +192,7 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
     "un comercio en estado %s NO puede cobrar",
     async (estado) => {
       const repo = new InMemoryPagosRepository();
-      const service = new PagosService(provider, repo, merchantsCon(estado));
+      const service = new PagosService(provider, repo, merchantsCon(estado), tarifasCon());
       const spy = vi.spyOn(provider, "crearCobro");
       spy.mockClear();
 
@@ -158,7 +209,8 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
     const service = new PagosService(
       provider,
       new InMemoryPagosRepository(),
-      merchantsCon("en_revision")
+      merchantsCon("en_revision"),
+      tarifasCon()
     );
     await expect(service.crearCobro(ctxA, input(), "k-2")).rejects.toThrow(/en_revision/);
     await expect(service.crearCobro(ctxA, input(), "k-3")).rejects.toThrow(/consola de EvePay/);
@@ -168,7 +220,12 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
      se persistía tal cual, sin comprobar que fuera de quien llamaba. Un cobro
      podía quedar atribuido al comercio de otro. */
   it("usar el comercio de OTRO tenant se rechaza, aunque esté aprobado", async () => {
-    const service = new PagosService(provider, new InMemoryPagosRepository(), merchantsCon());
+    const service = new PagosService(
+      provider,
+      new InMemoryPagosRepository(),
+      merchantsCon(),
+      tarifasCon()
+    );
     // MERCHANT_B está aprobado, pero es de TENANT_B y quien llama es TENANT_A.
     await expect(
       service.crearCobro(ctxA, input({ merchantId: MERCHANT_B }), "k-4")
@@ -176,7 +233,12 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
   });
 
   it("un merchantId inexistente se rechaza", async () => {
-    const service = new PagosService(provider, new InMemoryPagosRepository(), merchantsCon());
+    const service = new PagosService(
+      provider,
+      new InMemoryPagosRepository(),
+      merchantsCon(),
+      tarifasCon()
+    );
     await expect(
       service.crearCobro(ctxA, input({ merchantId: "44444444-4444-4444-8444-444444444444" }), "k-5")
     ).rejects.toBeInstanceOf(ConflictException);
@@ -191,10 +253,124 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
     const combopay = new FakePaymentProvider();
     Object.defineProperty(combopay, "nombre", { value: "combopay" });
     const espia = vi.spyOn(repo, "crearConIdempotencia");
-    const service = new PagosService(combopay, repo, merchantsCon());
+    const service = new PagosService(combopay, repo, merchantsCon(), tarifasCon());
 
     await service.crearCobro(ctxA, input(), "k-6");
 
     expect(espia.mock.calls[0]?.[0].nuevo.provider).toBe("combopay");
+  });
+});
+
+/* Sin tarifas no hay forma de saber cuánto es del comercio, cuánto de EvePay y
+   cuánto del proveedor, así que el cobro no se podría asentar ni cuadrar. Se
+   rechaza antes de llamar al proveedor: si se creara allá, habría plata en
+   camino que nadie sabe repartir (spec `comisiones`, CA-3 a CA-7). */
+describe("PagosService — las tarifas viajan con el cobro", () => {
+  const provider = new FakePaymentProvider();
+
+  it("CA-5: el cobro guarda las versiones vigentes de las dos tarifas", async () => {
+    const repo = new InMemoryPagosRepository();
+    const tarifas = tarifasCon();
+    const espia = vi.spyOn(repo, "crearConIdempotencia");
+    const service = new PagosService(provider, repo, merchantsCon(), tarifas);
+
+    await service.crearCobro(ctxA, input(), "k-t1");
+
+    const nuevo = espia.mock.calls[0]?.[0].nuevo;
+    expect(nuevo?.tarifaId).toBe((await tarifas.tarifaVigente(TENANT_A))!.id);
+    expect(nuevo?.tarifaProveedorId).toBe((await tarifas.tarifaProveedorVigente("fake"))!.id);
+  });
+
+  it("CA-5: cambiar una tarifa después no altera el cobro ya creado", async () => {
+    const repo = new InMemoryPagosRepository();
+    const tarifas = tarifasCon();
+    const espia = vi.spyOn(repo, "crearConIdempotencia");
+    const service = new PagosService(provider, repo, merchantsCon(), tarifas);
+
+    await service.crearCobro(ctxA, input(), "k-t2");
+    const versionVieja = espia.mock.calls[0]?.[0].nuevo.tarifaId;
+
+    const versionNueva = await tarifas.asignarTarifa({
+      tenantId: TENANT_A,
+      tarifa: { bps: 100, fijoMinor: 0, ivaBps: 0 },
+      actor: "ops@evetev.com"
+    });
+    await service.crearCobro(ctxA, input(), "k-t3");
+
+    expect(espia.mock.calls[0]?.[0].nuevo.tarifaId).toBe(versionVieja);
+    expect(espia.mock.calls[1]?.[0].nuevo.tarifaId).toBe(versionNueva);
+    expect(versionNueva).not.toBe(versionVieja);
+  });
+
+  it("CA-3: un comercio sin tarifa no cobra (409) y no se llama al proveedor", async () => {
+    const repo = new InMemoryPagosRepository();
+    const spy = vi.spyOn(provider, "crearCobro");
+    spy.mockClear();
+    const service = new PagosService(
+      provider,
+      repo,
+      merchantsCon(),
+      tarifasCon({ comercio: false })
+    );
+
+    await expect(service.crearCobro(ctxA, input(), "k-t4")).rejects.toBeInstanceOf(
+      ConflictException
+    );
+    await expect(service.crearCobro(ctxA, input(), "k-t4")).rejects.toThrow(/tarifa/);
+    expect(spy).not.toHaveBeenCalled();
+    expect(await repo.contarPorTenant(TENANT_A)).toBe(0);
+  });
+
+  it("CA-4: sin tarifa del proveedor activo no se cobra (409) ni se le llama", async () => {
+    const repo = new InMemoryPagosRepository();
+    const spy = vi.spyOn(provider, "crearCobro");
+    spy.mockClear();
+    const service = new PagosService(
+      provider,
+      repo,
+      merchantsCon(),
+      tarifasCon({ proveedor: false })
+    );
+
+    await expect(service.crearCobro(ctxA, input(), "k-t5")).rejects.toBeInstanceOf(
+      ConflictException
+    );
+    await expect(service.crearCobro(ctxA, input(), "k-t5")).rejects.toThrow(/proveedor "fake"/);
+    expect(spy).not.toHaveBeenCalled();
+    expect(await repo.contarPorTenant(TENANT_A)).toBe(0);
+  });
+
+  /* Una tarifa fija igual al monto deja al comercio en cero; con IVA, en
+     negativo. Las dos son una tarifa mal puesta, no un cobro válido. */
+  it.each([
+    { caso: "igual al monto", tarifa: { bps: 0, fijoMinor: 150_000, ivaBps: 0 as const } },
+    {
+      caso: "más su IVA supera el monto",
+      tarifa: { bps: 0, fijoMinor: 150_000, ivaBps: 1900 as const }
+    },
+    { caso: "del 100 %", tarifa: { bps: 10_000, fijoMinor: 0, ivaBps: 0 as const } }
+  ])("CA-7: comisión $caso → 400 sin llamar al proveedor", async ({ tarifa }) => {
+    const repo = new InMemoryPagosRepository();
+    const spy = vi.spyOn(provider, "crearCobro");
+    spy.mockClear();
+    const service = new PagosService(provider, repo, merchantsCon(), tarifasCon({ tarifa }));
+
+    await expect(
+      service.crearCobro(ctxA, input({ montoMinor: 150_000 }), "k-t6")
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(spy).not.toHaveBeenCalled();
+    expect(await repo.contarPorTenant(TENANT_A)).toBe(0);
+  });
+
+  it("una comisión que deja un centavo al comercio sí pasa", async () => {
+    const service = new PagosService(
+      provider,
+      new InMemoryPagosRepository(),
+      merchantsCon(),
+      tarifasCon({ tarifa: { bps: 0, fijoMinor: 149_999, ivaBps: 0 } })
+    );
+    await expect(
+      service.crearCobro(ctxA, input({ montoMinor: 150_000 }), "k-t7")
+    ).resolves.toMatchObject({ estado: "pendiente" });
   });
 });

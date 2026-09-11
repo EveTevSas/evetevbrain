@@ -97,7 +97,9 @@ export class DrizzlePagosRepository implements PagosRepository {
             status: nuevo.estado,
             provider: nuevo.provider,
             providerPaymentId: nuevo.providerPaymentId,
-            checkoutUrl: nuevo.checkoutUrl ?? null
+            checkoutUrl: nuevo.checkoutUrl ?? null,
+            tarifaId: nuevo.tarifaId ?? null,
+            tarifaProveedorId: nuevo.tarifaProveedorId ?? null
           })
           .returning();
         const fila = inserted[0]!;
