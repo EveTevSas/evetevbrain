@@ -95,6 +95,19 @@ export interface ComerciosRepository {
     rastro: RastroAdmin;
   }): Promise<string | null>;
 
+  /**
+   * Cambia la razón social y el nombre visible. Devuelve los nombres que
+   * quedaron, o null si el comercio no existe. El rastro guarda los de antes:
+   * un comercio renombrado sin saber cómo se llamaba deja cobros históricos
+   * que nadie reconoce.
+   */
+  renombrarTenant(args: {
+    tenantId: string;
+    legalName: string;
+    displayName: string;
+    rastro: RastroAdmin;
+  }): Promise<{ legalName: string; displayName: string } | null>;
+
   listarComercios(): Promise<FilaComercio[]>;
 
   /** Filas de un comercio concreto; vacío si no existe. */

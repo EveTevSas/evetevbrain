@@ -9,6 +9,7 @@ import {
 import { ArrowLeft, CircleAlert } from "lucide-react";
 import Link from "next/link";
 import { AccionesComercio } from "../acciones-comercio";
+import { EditarNombre } from "./editar-nombre";
 import { EditarPerfil } from "./editar-perfil";
 
 export const dynamic = "force-dynamic";
@@ -127,6 +128,12 @@ export default async function FichaComercioPage({
       <TituloSeccion
         titulo={comercio.displayName}
         descripcion={`${comercio.legalName}${comercio.documento ? ` · ${comercio.documento}` : ""}`}
+      />
+
+      <EditarNombre
+        tenantId={comercio.tenantId}
+        legalName={comercio.legalName}
+        displayName={comercio.displayName}
       />
 
       {!puedeCobrar && (

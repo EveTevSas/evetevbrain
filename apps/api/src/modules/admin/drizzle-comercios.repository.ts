@@ -138,6 +138,40 @@ export class DrizzleComerciosRepository implements ComerciosRepository {
     });
   }
 
+  async renombrarTenant(args: {
+    tenantId: string;
+    legalName: string;
+    displayName: string;
+    rastro: RastroAdmin;
+  }): Promise<{ legalName: string; displayName: string } | null> {
+    return this.db.transaction(async (tx) => {
+      /* Los nombres de antes se leen en la misma transacción y con bloqueo,
+         para que el rastro diga exactamente qué se reemplazó aunque dos
+         personas editen el mismo comercio a la vez. */
+      const antes = await tx
+        .select({ legalName: tenants.legalName, displayName: tenants.displayName })
+        .from(tenants)
+        .where(eq(tenants.id, args.tenantId))
+        .for("update");
+
+      if (antes.length === 0) {
+        return null;
+      }
+
+      await tx
+        .update(tenants)
+        .set({ legalName: args.legalName, displayName: args.displayName, updatedAt: new Date() })
+        .where(eq(tenants.id, args.tenantId));
+
+      await this.auditoria.registrarEn(tx, {
+        ...args.rastro,
+        detalle: { ...args.rastro.detalle, antes: antes[0] }
+      });
+
+      return { legalName: args.legalName, displayName: args.displayName };
+    });
+  }
+
   async listarComercios(): Promise<FilaComercio[]> {
     return this.db.execute<FilaComercio>(sql`SELECT * FROM identity.admin_listar_comercios()`);
   }

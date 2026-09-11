@@ -63,6 +63,9 @@ const FiltrosPagosSchema = z.object({
   cursorId: z.string().uuid().optional()
 });
 
+/** Las mismas reglas del alta: un nombre que no se podría crear tampoco se puede poner. */
+const RenombrarComercioSchema = CrearComercioSchema.pick({ legalName: true, displayName: true });
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
@@ -142,6 +145,32 @@ export class AdminController {
       throw new BadRequestException(parsed.error.flatten());
     }
     return this.admin.cambiarEstadoComercio(tenantId, parsed.data.activo, this.actor());
+  }
+
+  /**
+   * PUT /v1/admin/merchants/:tenantId/nombre — corrige la razón social y el
+   * nombre visible. Es PUT porque se mandan los dos juntos, y el rastro guarda
+   * cómo se llamaba antes.
+   */
+  @Put("merchants/:tenantId/nombre")
+  @HttpCode(200)
+  async renombrarComercio(
+    @Param("tenantId") tenantId: string,
+    @Body() body: unknown
+  ): Promise<{ tenantId: string; legalName: string; displayName: string }> {
+    this.verificarAdmin();
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+
+    const parsed = RenombrarComercioSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.admin.renombrarComercio(
+      tenantId,
+      parsed.data.legalName,
+      parsed.data.displayName,
+      this.actor()
+    );
   }
 
   /** GET /v1/admin/merchants/:tenantId — ficha del comercio. */
