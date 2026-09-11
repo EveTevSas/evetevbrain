@@ -1,5 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { desglosarCobro, type DesgloseCobro, type PaymentProvider } from "@evetev/shared";
+import {
+  CUENTAS,
+  desglosarCobro,
+  naturalezaDeCuenta,
+  saldoNatural,
+  type DesgloseCobro,
+  type PaymentProvider
+} from "@evetev/shared";
 import {
   PAGOS_REPOSITORY,
   type CobroConTarifas,
@@ -7,7 +14,6 @@ import {
 } from "../pagos/pagos.repository";
 import { PAYMENT_PROVIDER } from "../pagos/payment-provider.token";
 import { TARIFAS_REPOSITORY, type TarifasRepository } from "../tarifas/tarifas.repository";
-import { CUENTAS } from "./cuentas";
 import {
   LEDGER_REPOSITORY,
   LedgerDesbalanceadoError,
@@ -184,8 +190,15 @@ export class LedgerService {
     });
   }
 
-  /** Saldo reconstruido de una cuenta (créditos − débitos). */
+  /**
+   * Saldo reconstruido de una cuenta con el signo de su naturaleza: un activo
+   * (clearing, recaudo) o un gasto crecen con débitos; un pasivo (lo que se le
+   * debe al comercio, el IVA) o un ingreso (la comisión), con créditos. La
+   * consola usa la misma regla de @evetev/shared, así que un número aquí y en
+   * pantalla se leen igual.
+   */
   async saldo(tenantId: string, account: string): Promise<number> {
-    return this.ledger.saldoCuenta(tenantId, account);
+    const { debitos, creditos } = await this.ledger.movimientosCuenta(tenantId, account);
+    return saldoNatural(debitos, creditos, naturalezaDeCuenta(account));
   }
 }

@@ -1,17 +1,27 @@
 import { Tarjeta, TituloSeccion } from "@/components/seccion";
 import {
+  cobrosPorConsignar,
+  cuadreCustodia,
   ErrorApi,
-  formatoMonto,
+  estadoProveedores,
   historicoConciliacion,
   ledgerDeComercio,
   listarComercios,
+  listarConsignaciones,
+  type CobroPorConsignar,
   type Comercio,
+  type Consignacion,
   type CorridaConciliacion,
+  type CuadreCustodia,
   type LedgerTenant
 } from "@/lib/api/evepay";
+import { formatoMonto } from "@/lib/formato";
+import { naturalezaDeCuenta, saldoNatural } from "@evetev/shared";
 import { CircleAlert, CircleCheck, Hand } from "lucide-react";
 import Link from "next/link";
 import { CorrerConciliacion } from "./correr";
+import { CuadreDeCustodia } from "./cuadre-custodia";
+import { RegistrarConsignacion } from "./registrar-consignacion";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +111,56 @@ function Historico({ corridas }: { corridas: CorridaConciliacion[] }) {
   );
 }
 
+function Consignaciones({ consignaciones }: { consignaciones: Consignacion[] }) {
+  if (consignaciones.length === 0) {
+    return (
+      <p style={{ margin: 0, fontSize: "0.84rem", color: "#64748B" }}>
+        Todavía no se ha registrado ninguna consignación.
+      </p>
+    );
+  }
+
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 720 }}>
+        <thead>
+          <tr>
+            <th style={encabezado}>Fecha</th>
+            <th style={encabezado}>Proveedor · referencia</th>
+            <th style={{ ...encabezado, textAlign: "right" }}>Monto</th>
+            <th style={encabezado}>Cubre</th>
+            <th style={encabezado}>Registrada</th>
+          </tr>
+        </thead>
+        <tbody>
+          {consignaciones.map((c) => (
+            <tr key={c.id}>
+              <td style={{ ...celda, whiteSpace: "nowrap" }}>{c.fecha}</td>
+              <td style={celda}>
+                <span style={{ fontWeight: 600 }}>{c.provider}</span>{" "}
+                <code style={{ fontSize: "0.76rem", fontFamily: "ui-monospace, Menlo, monospace" }}>
+                  {c.referenciaBancaria}
+                </code>
+                {c.nota && <div style={{ fontSize: "0.74rem", color: "#64748B" }}>{c.nota}</div>}
+              </td>
+              <td style={{ ...celda, textAlign: "right", fontWeight: 700, whiteSpace: "nowrap" }}>
+                {formatoMonto(c.montoMinor, "COP")}
+              </td>
+              <td style={{ ...celda, fontSize: "0.78rem", color: "#64748B" }}>
+                {c.cobros} cobro(s) de {c.comercios} comercio(s)
+              </td>
+              <td style={{ ...celda, fontSize: "0.76rem", color: "#94A3B8" }}>
+                {new Date(c.registradaEn).toLocaleString("es-CO")}
+                <div>{c.registradaPor}</div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function LedgerComercio({ comercio, ledger }: { comercio: Comercio; ledger: LedgerTenant }) {
   return (
     <div style={{ marginBottom: "1.5rem" }}>
@@ -159,6 +219,7 @@ function LedgerComercio({ comercio, ledger }: { comercio: Comercio; ledger: Ledg
             <thead>
               <tr>
                 <th style={encabezado}>Cuenta</th>
+                <th style={encabezado}>Naturaleza</th>
                 <th style={{ ...encabezado, textAlign: "right" }}>Débitos</th>
                 <th style={{ ...encabezado, textAlign: "right" }}>Créditos</th>
                 <th style={{ ...encabezado, textAlign: "right" }}>Saldo</th>
@@ -166,39 +227,53 @@ function LedgerComercio({ comercio, ledger }: { comercio: Comercio; ledger: Ledg
               </tr>
             </thead>
             <tbody>
-              {ledger.saldos.map((s) => (
-                <tr key={s.cuenta}>
-                  <td
-                    style={{
-                      ...celda,
-                      fontFamily: "ui-monospace, Menlo, monospace",
-                      fontSize: "0.76rem"
-                    }}
-                  >
-                    {s.cuenta}
-                  </td>
-                  <td style={{ ...celda, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                    {s.debitos.toLocaleString("es-CO")}
-                  </td>
-                  <td style={{ ...celda, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                    {s.creditos.toLocaleString("es-CO")}
-                  </td>
-                  <td
-                    style={{
-                      ...celda,
-                      textAlign: "right",
-                      fontVariantNumeric: "tabular-nums",
-                      fontWeight: 700,
-                      color: s.saldoMinor < 0 ? "#B45309" : "#0A2540"
-                    }}
-                  >
-                    {formatoMonto(s.saldoMinor, "COP")}
-                  </td>
-                  <td style={{ ...celda, textAlign: "right", color: "#94A3B8" }}>
-                    {s.movimientos}
-                  </td>
-                </tr>
-              ))}
+              {ledger.saldos.map((s) => {
+                // El mismo signo que usa la API (saldoNatural de @evetev/shared):
+                // un pasivo o un ingreso crecen con créditos, un activo o un
+                // gasto con débitos. Negativo = del lado que no le toca.
+                const naturaleza = naturalezaDeCuenta(s.cuenta);
+                const saldo = saldoNatural(s.debitos, s.creditos, naturaleza);
+                return (
+                  <tr key={s.cuenta}>
+                    <td
+                      style={{
+                        ...celda,
+                        fontFamily: "ui-monospace, Menlo, monospace",
+                        fontSize: "0.76rem"
+                      }}
+                    >
+                      {s.cuenta}
+                    </td>
+                    <td style={{ ...celda, fontSize: "0.74rem", color: "#64748B" }}>
+                      {naturaleza}
+                    </td>
+                    <td
+                      style={{ ...celda, textAlign: "right", fontVariantNumeric: "tabular-nums" }}
+                    >
+                      {s.debitos.toLocaleString("es-CO")}
+                    </td>
+                    <td
+                      style={{ ...celda, textAlign: "right", fontVariantNumeric: "tabular-nums" }}
+                    >
+                      {s.creditos.toLocaleString("es-CO")}
+                    </td>
+                    <td
+                      style={{
+                        ...celda,
+                        textAlign: "right",
+                        fontVariantNumeric: "tabular-nums",
+                        fontWeight: 700,
+                        color: saldo < 0 ? "#B45309" : "#0A2540"
+                      }}
+                    >
+                      {formatoMonto(saldo, "COP")}
+                    </td>
+                    <td style={{ ...celda, textAlign: "right", color: "#94A3B8" }}>
+                      {s.movimientos}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -217,10 +292,23 @@ export default async function ConciliacionPage() {
   let comercios: Comercio[] = [];
   let corridas: CorridaConciliacion[] = [];
   let ledgers: { comercio: Comercio; ledger: LedgerTenant }[] = [];
+  let cuadre: CuadreCustodia | null = null;
+  let consignaciones: Consignacion[] = [];
+  let pendientes: CobroPorConsignar[] = [];
+  let proveedorActivo = "";
   let error: string | null = null;
 
   try {
-    [comercios, corridas] = await Promise.all([listarComercios(), historicoConciliacion()]);
+    let proveedores;
+    [comercios, corridas, cuadre, consignaciones, proveedores] = await Promise.all([
+      listarComercios(),
+      historicoConciliacion(),
+      cuadreCustodia(),
+      listarConsignaciones(),
+      estadoProveedores()
+    ]);
+    proveedorActivo = proveedores.activo;
+    pendientes = await cobrosPorConsignar(proveedorActivo);
     // Solo los comercios activos: el ledger de uno desactivado sigue
     // consultable desde su propia ficha, pero no satura esta vista.
     const activos = comercios.filter((c) => c.estado === "activo").slice(0, 10);
@@ -239,8 +327,8 @@ export default async function ConciliacionPage() {
   return (
     <>
       <TituloSeccion
-        titulo="Conciliación y ledger"
-        descripcion="Lo cobrado cuadra con lo liquidado, y cada peso es reconstruible."
+        titulo="Conciliación y custodia"
+        descripcion="Lo que el proveedor consigna cuadra con lo que debía, el banco con el libro, y cada peso es reconstruible."
       />
 
       {error ? (
@@ -251,6 +339,8 @@ export default async function ConciliacionPage() {
         </Tarjeta>
       ) : (
         <>
+          {cuadre && <CuadreDeCustodia cuadre={cuadre} />}
+
           {conDescuadre.length > 0 && (
             <div
               role="alert"
@@ -279,11 +369,30 @@ export default async function ConciliacionPage() {
             </div>
           )}
 
-          <CorrerConciliacion comercios={comercios.filter((c) => c.estado === "activo")} />
+          <Tarjeta>
+            <h2 style={{ margin: "0 0 0.4rem", fontSize: "0.98rem", color: "#0A2540" }}>
+              Consignaciones de {proveedorActivo}
+            </h2>
+            <p
+              style={{ margin: "0 0 1rem", fontSize: "0.8rem", color: "#64748B", lineHeight: 1.5 }}
+            >
+              {proveedorActivo} consigna todo el recaudo a la cuenta de EvePay. Cada consignación
+              del extracto se registra aquí marcando qué cobros cubre; el monto tiene que cuadrar
+              exacto con lo que el proveedor debía por ellos.
+            </p>
+            <RegistrarConsignacion provider={proveedorActivo} cobros={pendientes} />
+            <div style={{ marginTop: "1.2rem" }}>
+              <Consignaciones consignaciones={consignaciones} />
+            </div>
+          </Tarjeta>
+
+          <div style={{ marginTop: "1rem" }}>
+            <CorrerConciliacion comercios={comercios.filter((c) => c.estado === "activo")} />
+          </div>
 
           <Tarjeta>
             <h2 style={{ margin: "0 0 0.9rem", fontSize: "0.98rem", color: "#0A2540" }}>
-              Histórico de corridas
+              Histórico de corridas automáticas
             </h2>
             <Historico corridas={corridas} />
           </Tarjeta>

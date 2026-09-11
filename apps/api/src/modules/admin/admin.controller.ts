@@ -41,6 +41,14 @@ import type {
   VersionTarifaProveedor
 } from "../tarifas/tarifas.repository";
 import {
+  CustodiaAdminService,
+  type BalanceComercio,
+  type CobroPorConsignar,
+  type Consignacion,
+  type CuadreCustodia,
+  type RegistrarConsignacionInput
+} from "./custodia-admin.service";
+import {
   ConciliacionAdminService,
   type CorridaConciliacion,
   type LedgerTenant
@@ -83,6 +91,25 @@ const RenombrarComercioSchema = CrearComercioSchema.pick({ legalName: true, disp
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Una fecha de calendario, la del extracto: sin hora ni zona. */
+const FechaSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha va como AAAA-MM-DD");
+
+/** Lo que operación copia del extracto más los cobros que marca (ledger-custodia CA-4). */
+const RegistrarConsignacionSchema = z.object({
+  provider: z.string().trim().min(1).max(40),
+  referenciaBancaria: z.string().trim().min(1).max(120),
+  fecha: FechaSchema,
+  montoMinor: z.number().int().positive(),
+  paymentIds: z.array(z.string().uuid()).min(1).max(500),
+  nota: z.string().trim().max(500).optional()
+});
+
+const RegistrarSaldoSchema = z.object({
+  fecha: FechaSchema,
+  saldoMinor: z.number().int().nonnegative(),
+  nota: z.string().trim().max(500).optional()
+});
+
 /**
  * Endpoints de admin (uso exclusivo de Evetev).
  * Acceso: JWT de Supabase con rol super_admin. Los consume apps/evepay-admin.
@@ -96,7 +123,8 @@ export class AdminController {
     private readonly pagos: PagosAdminService,
     private readonly conciliacion: ConciliacionAdminService,
     private readonly perfiles: PerfilComercioService,
-    private readonly tarifas: TarifasAdminService
+    private readonly tarifas: TarifasAdminService,
+    private readonly custodia: CustodiaAdminService
   ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
@@ -287,6 +315,17 @@ export class AdminController {
     return this.tarifas.asignarTarifaComercio(tenantId, parsed.data, this.actor());
   }
 
+  /**
+   * GET /v1/admin/merchants/:tenantId/balance — de quién es cada peso del
+   * comercio, reconstruido desde el ledger (ledger-custodia CA-9).
+   */
+  @Get("merchants/:tenantId/balance")
+  async balanceComercio(@Param("tenantId") tenantId: string): Promise<BalanceComercio> {
+    this.verificarAdmin();
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+    return this.custodia.balanceComercio(tenantId);
+  }
+
   /** GET /v1/admin/tarifas — la tarifa vigente de cada comercio que tiene una. */
   @Get("tarifas")
   async tarifasVigentes(): Promise<TarifaVigenteDeComercio[]> {
@@ -436,6 +475,68 @@ export class AdminController {
     this.verificarAdmin();
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
     return this.conciliacion.ledger(tenantId);
+  }
+
+  /** GET /v1/admin/consignaciones — las registradas, la más reciente primero. */
+  @Get("consignaciones")
+  async listarConsignaciones(@Query("limite") limite?: string): Promise<Consignacion[]> {
+    this.verificarAdmin();
+    const n = Number(limite);
+    return this.custodia.listarConsignaciones(Number.isFinite(n) && n > 0 ? n : 50);
+  }
+
+  /**
+   * GET /v1/admin/consignaciones/pendientes?provider= — cobros aprobados del
+   * proveedor que aún no están en ninguna consignación, con lo que debe por
+   * cada uno. Sin proveedor, el activo.
+   */
+  @Get("consignaciones/pendientes")
+  async cobrosPorConsignar(@Query("provider") provider?: string): Promise<CobroPorConsignar[]> {
+    this.verificarAdmin();
+    return this.custodia.cobrosPorConsignar(provider?.trim() || this.providers.nombreActivo());
+  }
+
+  /**
+   * POST /v1/admin/consignaciones — registra una consignación del proveedor y
+   * concilia los cobros que cubre, todo o nada (ledger-custodia CA-4 a CA-7).
+   */
+  @Post("consignaciones")
+  @HttpCode(201)
+  async registrarConsignacion(
+    @Body() body: unknown
+  ): Promise<{ id: string } & RegistrarConsignacionInput> {
+    this.verificarAdmin();
+
+    const parsed = RegistrarConsignacionSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.custodia.registrarConsignacion(parsed.data, this.actor());
+  }
+
+  /** GET /v1/admin/recaudo/cuadre?fecha= — libro vs banco al cierre de la fecha (CA-8). */
+  @Get("recaudo/cuadre")
+  async cuadreCustodia(@Query("fecha") fecha?: string): Promise<CuadreCustodia> {
+    this.verificarAdmin();
+    if (fecha !== undefined && !FechaSchema.safeParse(fecha).success) {
+      throw new BadRequestException("La fecha va como AAAA-MM-DD.");
+    }
+    return this.custodia.cuadreCustodia(fecha);
+  }
+
+  /** POST /v1/admin/recaudo/saldos — el saldo del banco a una fecha, del extracto (CA-8). */
+  @Post("recaudo/saldos")
+  @HttpCode(201)
+  async registrarSaldoRecaudo(
+    @Body() body: unknown
+  ): Promise<{ id: string; cuadre: CuadreCustodia }> {
+    this.verificarAdmin();
+
+    const parsed = RegistrarSaldoSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.custodia.registrarSaldoRecaudo(parsed.data, this.actor());
   }
 
   /** GET /v1/admin/auditoria — últimas acciones administrativas (CA-4). */

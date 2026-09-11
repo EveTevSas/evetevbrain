@@ -5,7 +5,7 @@ import { InMemoryTarifasRepository } from "../tarifas/in-memory-tarifas.reposito
 import { FakePaymentProvider } from "../pagos/fake-payment.provider";
 import { LedgerService, ModeloSinCustodiaError } from "./ledger.service";
 import { LedgerDesbalanceadoError } from "./ledger.repository";
-import { CUENTAS } from "./cuentas";
+import { CUENTAS } from "@evetev/shared";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
 const MERCHANT = "33333333-3333-4333-8333-333333333333";
@@ -90,10 +90,12 @@ describe("LedgerService — doble partida inmutable", () => {
     const res = await service.registrarCobroAprobado(TENANT, id);
 
     expect(res.posted).toBe(true);
-    expect(await service.saldo(TENANT, PAYABLE)).toBe(MONTO); // crédito
+    // Cada saldo con el signo de su naturaleza: lo que se le debe al comercio
+    // (pasivo) y lo que el proveedor nos debe (activo) son positivos los dos.
+    expect(await service.saldo(TENANT, PAYABLE)).toBe(MONTO);
     // La compensación va nombrada por proveedor: con dos adquirencias hay que
     // poder decir cuánto tiene cada una sin mezclarlo en una cuenta común.
-    expect(await service.saldo(TENANT, CLEARING)).toBe(-MONTO); // débito
+    expect(await service.saldo(TENANT, CLEARING)).toBe(MONTO);
     expect(await service.saldo(TENANT, "akua_clearing")).toBe(0);
     expect(ledgerRepo.lines).toHaveLength(2);
   });
@@ -156,10 +158,10 @@ describe("LedgerService — cobro aprobado con custodia (ledger-custodia CA-1 a 
     expect(lineas(ledgerRepo, CUENTAS.porPagar("fake"))).toEqual([]);
 
     // Lo que ComboPay nos debe es exactamente lo que va a consignar: $49.200.
-    expect(await service.saldo(TENANT, CLEARING)).toBe(-4_920_000);
+    expect(await service.saldo(TENANT, CLEARING)).toBe(4_920_000);
     // Y el margen es $400: la comisión menos el costo. El IVA no es de EvePay.
     expect(
-      (await service.saldo(TENANT, CUENTAS.comisionEvepay)) +
+      (await service.saldo(TENANT, CUENTAS.comisionEvepay)) -
         (await service.saldo(TENANT, CUENTAS.costoProveedor("fake")))
     ).toBe(40_000);
     expect(ledgerRepo.lines).toHaveLength(6);
@@ -173,7 +175,8 @@ describe("LedgerService — cobro aprobado con custodia (ledger-custodia CA-1 a 
 
     expect(lineas(ledgerRepo, CLEARING)).toEqual(["debit:5000000"]);
     expect(lineas(ledgerRepo, CUENTAS.porPagar("fake"))).toEqual(["credit:80000"]);
-    expect(await service.saldo(TENANT, CLEARING)).toBe(-5_000_000);
+    expect(await service.saldo(TENANT, CLEARING)).toBe(5_000_000);
+    expect(await service.saldo(TENANT, CUENTAS.porPagar("fake"))).toBe(80_000);
   });
 
   it("CA-2: con IVA en 0 % no hay línea de IVA y el asiento sigue cuadrado", async () => {

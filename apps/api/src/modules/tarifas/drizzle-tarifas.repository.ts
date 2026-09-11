@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import type { IvaBps, TarifaComercio, TarifaProveedor } from "@evetev/shared";
 import type { Db } from "../../database/drizzle";
+import { errorDeBase } from "../../database/errores";
 import type {
   TarifaVigenteDeComercio,
   TarifasRepository,
@@ -96,7 +97,7 @@ export class DrizzleTarifasRepository implements TarifasRepository {
       return filas[0]?.admin_asignar_tarifa ?? null;
     } catch (error) {
       // P0002 = no_data_found: la función avisa que el comercio no existe.
-      if ((error as { code?: string }).code === "P0002") {
+      if (errorDeBase(error).code === "P0002") {
         return null;
       }
       throw error;

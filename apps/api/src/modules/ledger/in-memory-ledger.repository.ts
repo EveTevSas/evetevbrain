@@ -54,14 +54,19 @@ export class InMemoryLedgerRepository implements LedgerRepository {
     return { posted: true, entryId: id };
   }
 
-  async saldoCuenta(tenantId: string, account: string): Promise<number> {
-    let net = 0;
+  async movimientosCuenta(
+    tenantId: string,
+    account: string
+  ): Promise<{ debitos: number; creditos: number }> {
+    let debitos = 0;
+    let creditos = 0;
     for (const l of this.lines) {
       if (l.tenantId === tenantId && l.account === account) {
-        net += l.direction === "credit" ? l.amountMinor : -l.amountMinor;
+        if (l.direction === "debit") debitos += l.amountMinor;
+        else creditos += l.amountMinor;
       }
     }
-    return net;
+    return { debitos, creditos };
   }
 
   async contarAsientosPorPago(tenantId: string, paymentId: string): Promise<number> {

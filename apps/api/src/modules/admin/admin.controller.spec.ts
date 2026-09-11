@@ -9,11 +9,13 @@ import type { PagosAdminService } from "./pagos-admin.service";
 import type { ConciliacionAdminService } from "./conciliacion-admin.service";
 import type { PerfilComercioService } from "./perfil-comercio.service";
 import type { TarifasAdminService } from "./tarifas-admin.service";
+import type { CustodiaAdminService } from "./custodia-admin.service";
 
 const LISTADO: ComercioListado[] = [];
 
 /** Lo que el controller le pasó al servicio de tarifas, para afirmar sobre ello. */
 const llamadasTarifas: unknown[][] = [];
+const llamadasCustodia: unknown[][] = [];
 
 function controllerConMock(): AdminController {
   const service = { listarComercios: async () => LISTADO } as unknown as AdminService;
@@ -27,6 +29,16 @@ function controllerConMock(): AdminController {
       return { id: "v-nueva" };
     }
   } as unknown as TarifasAdminService;
+  const custodia = {
+    registrarConsignacion: async (...args: unknown[]) => {
+      llamadasCustodia.push(args);
+      return { id: "c-1" };
+    },
+    registrarSaldoRecaudo: async (...args: unknown[]) => {
+      llamadasCustodia.push(args);
+      return { id: "s-1" };
+    }
+  } as unknown as CustodiaAdminService;
   const auditoria = { listar: async () => [] } as unknown as AdminAuditService;
   const providers = {
     estado: () => ({ activo: "fake", proveedores: [] })
@@ -34,7 +46,16 @@ function controllerConMock(): AdminController {
   const pagos = {} as unknown as PagosAdminService;
   const conciliacion = {} as unknown as ConciliacionAdminService;
   const perfiles = {} as unknown as PerfilComercioService;
-  return new AdminController(service, auditoria, providers, pagos, conciliacion, perfiles, tarifas);
+  return new AdminController(
+    service,
+    auditoria,
+    providers,
+    pagos,
+    conciliacion,
+    perfiles,
+    tarifas,
+    custodia
+  );
 }
 
 function conContexto<T>(ctx: RequestContext, fn: () => Promise<T>): Promise<T> {
@@ -203,6 +224,79 @@ describe("AdminController — tarifas (comisiones CA-8, CA-11)", () => {
     const controller = controllerConMock();
     await expect(
       conContexto(SUPER_ADMIN, () => controller.tarifaComercio("no-es-uuid"))
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+});
+
+describe("AdminController — consignaciones y saldo del banco (ledger-custodia)", () => {
+  const CONSIGNACION = {
+    provider: "combopay",
+    referenciaBancaria: "TRX-0001",
+    fecha: "2026-09-11",
+    montoMinor: 49_200,
+    paymentIds: ["11111111-1111-4111-8111-111111111111"]
+  };
+
+  it("sin el rol no se registra nada", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SIN_ROL, () => controller.registrarConsignacion(CONSIGNACION))
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      conContexto(SIN_ROL, () =>
+        controller.registrarSaldoRecaudo({ fecha: "2026-09-11", saldoMinor: 1 })
+      )
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it("una consignación sin cobros, sin monto o con fecha rara → 400 antes de tocar la base", async () => {
+    llamadasCustodia.length = 0;
+    const controller = controllerConMock();
+    for (const mala of [
+      { ...CONSIGNACION, paymentIds: [] },
+      { ...CONSIGNACION, montoMinor: 0 },
+      { ...CONSIGNACION, montoMinor: 49_200.5 },
+      { ...CONSIGNACION, fecha: "11/09/2026" },
+      { ...CONSIGNACION, referenciaBancaria: "   " },
+      { ...CONSIGNACION, paymentIds: ["no-es-uuid"] }
+    ]) {
+      await expect(
+        conContexto(SUPER_ADMIN, () => controller.registrarConsignacion(mala))
+      ).rejects.toBeInstanceOf(BadRequestException);
+    }
+    expect(llamadasCustodia).toHaveLength(0);
+  });
+
+  it("una consignación bien formada llega al servicio con el actor del JWT", async () => {
+    llamadasCustodia.length = 0;
+    const controller = controllerConMock();
+    await conContexto(SUPER_ADMIN, () => controller.registrarConsignacion(CONSIGNACION));
+    expect(llamadasCustodia[0]).toEqual([CONSIGNACION, "ops@evetev.com"]);
+  });
+
+  it("el saldo del banco no puede ser negativo ni traer decimales", async () => {
+    const controller = controllerConMock();
+    for (const malo of [
+      { fecha: "2026-09-11", saldoMinor: -1 },
+      { fecha: "2026-09-11", saldoMinor: 10.5 },
+      { fecha: "ayer", saldoMinor: 10 }
+    ]) {
+      await expect(
+        conContexto(SUPER_ADMIN, () => controller.registrarSaldoRecaudo(malo))
+      ).rejects.toBeInstanceOf(BadRequestException);
+    }
+    // Cero sí: una cuenta recién abierta tiene saldo cero, y hay que poder decirlo.
+    await expect(
+      conContexto(SUPER_ADMIN, () =>
+        controller.registrarSaldoRecaudo({ fecha: "2026-09-11", saldoMinor: 0 })
+      )
+    ).resolves.toEqual({ id: "s-1" });
+  });
+
+  it("el cuadre exige una fecha de calendario si se manda", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SUPER_ADMIN, () => controller.cuadreCustodia("2026-9-1"))
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

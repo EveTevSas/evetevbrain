@@ -21,8 +21,11 @@ export interface PostEntryArgs {
 export interface LedgerRepository {
   /** Inserta asiento + líneas atómicamente. `posted:false` si ya existía (idempotente). */
   postEntry(args: PostEntryArgs): Promise<{ posted: boolean; entryId?: string }>;
-  /** Saldo de una cuenta = Σ créditos − Σ débitos (reconstruido). */
-  saldoCuenta(tenantId: string, account: string): Promise<number>;
+  /** Σ débitos y Σ créditos de una cuenta, reconstruidos desde las líneas. */
+  movimientosCuenta(
+    tenantId: string,
+    account: string
+  ): Promise<{ debitos: number; creditos: number }>;
   /** Cantidad de asientos de un pago (para verificación/idempotencia). */
   contarAsientosPorPago(tenantId: string, paymentId: string): Promise<number>;
 }

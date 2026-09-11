@@ -1,6 +1,7 @@
 import { and, count, eq, gte, lte, sql, sum, desc } from "drizzle-orm";
 import type { Cobro, EstadoCobro, RangoFechas } from "@evetev/shared";
 import type { Db } from "../../database/drizzle";
+import { errorDeBase } from "../../database/errores";
 import { paymentAudit, paymentIdempotency, payments, webhookEvents } from "../../database/schema";
 import {
   type AplicarTransicionArgs,
@@ -149,11 +150,7 @@ export class DrizzlePagosRepository implements PagosRepository {
       });
     } catch (error) {
       // 23505 = unique_violation → otra transacción ganó la carrera.
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        (error as { code?: string }).code === "23505"
-      ) {
+      if (errorDeBase(error).code === "23505") {
         return { creado: false };
       }
       throw error;

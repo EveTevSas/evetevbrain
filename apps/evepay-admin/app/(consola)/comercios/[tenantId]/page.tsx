@@ -1,5 +1,6 @@
 import { Tarjeta, TituloSeccion } from "@/components/seccion";
 import {
+  balanceDeComercio,
   ErrorApi,
   estadoProveedores,
   obtenerComercio,
@@ -7,6 +8,7 @@ import {
   tarifaDeComercio,
   tarifaDeProveedor,
   type Comercio,
+  type BalanceComercio,
   type PerfilGuardado,
   type TarifaComercioAdmin,
   type VersionTarifaProveedor
@@ -14,6 +16,7 @@ import {
 import { ArrowLeft, CircleAlert } from "lucide-react";
 import Link from "next/link";
 import { AccionesComercio } from "../acciones-comercio";
+import { Balance } from "./balance";
 import { Comision } from "./comision";
 import { EditarNombre } from "./editar-nombre";
 import { EditarPerfil } from "./editar-perfil";
@@ -82,6 +85,7 @@ export default async function FichaComercioPage({
   let comercio: Comercio | null = null;
   let datos: PerfilGuardado | null = null;
   let tarifa: TarifaComercioAdmin = { vigente: null, historial: [] };
+  let balance: BalanceComercio | null = null;
   let proveedor: { nombre: string; tarifa: VersionTarifaProveedor | null } = {
     nombre: "",
     tarifa: null
@@ -90,11 +94,12 @@ export default async function FichaComercioPage({
 
   try {
     let proveedores;
-    [comercio, datos, tarifa, proveedores] = await Promise.all([
+    [comercio, datos, tarifa, proveedores, balance] = await Promise.all([
       obtenerComercio(tenantId),
       obtenerPerfil(tenantId),
       tarifaDeComercio(tenantId),
-      estadoProveedores()
+      estadoProveedores(),
+      balanceDeComercio(tenantId)
     ]);
     // La vista previa necesita lo que nos cobra el proveedor que atiende.
     const tarifaProveedor = await tarifaDeProveedor(proveedores.activo);
@@ -236,6 +241,12 @@ export default async function FichaComercioPage({
             kyc={comercio.merchantEstado}
           />
         </Tarjeta>
+
+        {balance && (
+          <Tarjeta>
+            <Balance balance={balance} proveedor={proveedor.nombre} />
+          </Tarjeta>
+        )}
 
         <Tarjeta>
           <Comision tenantId={comercio.tenantId} tarifa={tarifa} proveedor={proveedor} />

@@ -45,16 +45,20 @@ export class DrizzleLedgerRepository implements LedgerRepository {
     });
   }
 
-  async saldoCuenta(tenantId: string, account: string): Promise<number> {
-    return this.db.transaction(async (tx): Promise<number> => {
+  async movimientosCuenta(
+    tenantId: string,
+    account: string
+  ): Promise<{ debitos: number; creditos: number }> {
+    return this.db.transaction(async (tx): Promise<{ debitos: number; creditos: number }> => {
       await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
       const rows = await tx
         .select({
-          net: sql<number>`coalesce(sum(case when ${ledgerLines.direction} = 'credit' then ${ledgerLines.amountMinor} else -${ledgerLines.amountMinor} end), 0)`
+          debitos: sql<number>`coalesce(sum(case when ${ledgerLines.direction} = 'debit' then ${ledgerLines.amountMinor} else 0 end), 0)`,
+          creditos: sql<number>`coalesce(sum(case when ${ledgerLines.direction} = 'credit' then ${ledgerLines.amountMinor} else 0 end), 0)`
         })
         .from(ledgerLines)
         .where(and(eq(ledgerLines.tenantId, tenantId), eq(ledgerLines.account, account)));
-      return Number(rows[0]?.net ?? 0);
+      return { debitos: Number(rows[0]?.debitos ?? 0), creditos: Number(rows[0]?.creditos ?? 0) };
     });
   }
 

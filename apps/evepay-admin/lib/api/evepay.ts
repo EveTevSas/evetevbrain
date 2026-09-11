@@ -421,3 +421,71 @@ export function tarifaDeProveedor(provider: string): Promise<TarifaProveedorAdmi
 export function tarifasVigentes(): Promise<TarifaVigenteDeComercio[]> {
   return apiGet<TarifaVigenteDeComercio[]>("/admin/tarifas");
 }
+
+// --- Custodia del recaudo (Fase 6, spec ledger-custodia) ---
+
+export interface Consignacion {
+  id: string;
+  provider: string;
+  referenciaBancaria: string;
+  /** YYYY-MM-DD, la fecha del extracto. */
+  fecha: string;
+  montoMinor: number;
+  nota: string | null;
+  cobros: number;
+  comercios: number;
+  registradaPor: string;
+  registradaEn: string;
+}
+
+export interface CobroPorConsignar {
+  paymentId: string;
+  tenantId: string;
+  tenantNombre: string;
+  referencia: string;
+  providerPaymentId: string | null;
+  montoMinor: number;
+  /** Lo que el proveedor debe por este cobro con la tarifa fijada en él. */
+  esperadoMinor: number;
+  creadoEn: string;
+}
+
+export interface CuadreCustodia {
+  fecha: string;
+  saldoLibro: number;
+  /** null si nadie registró el saldo del banco para esa fecha. */
+  saldoBanco: number | null;
+  /** banco − libro; null si no hay saldo registrado. 0 es cuadre. */
+  diferencia: number | null;
+  registradoPor: string | null;
+  registradoEn: string | null;
+}
+
+export interface BalanceComercio {
+  porPagar: number;
+  comision: number;
+  ivaPorPagar: number;
+  costoProveedor: number;
+  margen: number;
+  enTransito: number;
+  enRecaudo: number;
+  porPagarProveedor: number;
+}
+
+export function listarConsignaciones(): Promise<Consignacion[]> {
+  return apiGet<Consignacion[]>("/admin/consignaciones");
+}
+
+export function cobrosPorConsignar(provider: string): Promise<CobroPorConsignar[]> {
+  return apiGet<CobroPorConsignar[]>(
+    `/admin/consignaciones/pendientes?provider=${encodeURIComponent(provider)}`
+  );
+}
+
+export function cuadreCustodia(fecha?: string): Promise<CuadreCustodia> {
+  return apiGet<CuadreCustodia>(`/admin/recaudo/cuadre${fecha ? `?fecha=${fecha}` : ""}`);
+}
+
+export function balanceDeComercio(tenantId: string): Promise<BalanceComercio> {
+  return apiGet<BalanceComercio>(`/admin/merchants/${tenantId}/balance`);
+}
