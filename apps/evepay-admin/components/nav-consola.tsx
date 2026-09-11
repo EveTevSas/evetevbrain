@@ -10,7 +10,8 @@ import {
   Plug,
   Scale,
   ScrollText,
-  ShieldAlert
+  ShieldAlert,
+  FileSpreadsheet
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,6 +25,7 @@ const SECCIONES = [
   { href: "/conciliacion", etiqueta: "Conciliación", Icono: Scale },
   { href: "/dispersion", etiqueta: "Dispersión", Icono: ArrowUpRight },
   { href: "/riesgo", etiqueta: "Riesgo", Icono: ShieldAlert },
+  { href: "/reportes", etiqueta: "Reportes", Icono: FileSpreadsheet },
   { href: "/auditoria", etiqueta: "Auditoría", Icono: ScrollText }
 ] as const;
 

@@ -720,3 +720,102 @@ export function listaRestrictiva(): Promise<EntradaListaRestrictiva[]> {
 export function listarAuditoria(limite = 200): Promise<AccionAdmin[]> {
   return apiGet<AccionAdmin[]>(`/admin/auditoria?limite=${limite}`);
 }
+
+// --- Command Center y reportes (Fase 10) ---
+
+export interface Resumen {
+  volumenHoyMinor: number;
+  cobrosHoy: number;
+  volumenMesMinor: number;
+  cobrosMes: number;
+  aprobacionMesPct: number | null;
+  comisionMesMinor: number;
+  costoMesMinor: number;
+  margenMesMinor: number;
+  ivaMesMinor: number;
+  porPagarMinor: number;
+  retenidoMinor: number;
+  enRecaudoMinor: number;
+  enTransitoMinor: number;
+  pendientesConsignar: number;
+  pendientesConsignarMinor: number;
+  lotesAbiertos: number;
+  colaRiesgo: number;
+  comerciosActivos: number;
+  comerciosSinTarifa: number;
+  comerciosSinKyc: number;
+  asientosDescuadrados: number;
+}
+
+export interface LineaEstadoCuenta {
+  posteadoEn: string;
+  asientoId: string;
+  kind: string;
+  memo: string;
+  paymentId: string | null;
+  referencia: string | null;
+  cuenta: string;
+  naturaleza: string;
+  direccion: "debit" | "credit";
+  montoMinor: number;
+}
+
+export interface EstadoCuenta {
+  tenantId: string;
+  desde: string;
+  hasta: string;
+  lineas: LineaEstadoCuenta[];
+  porCuenta: {
+    cuenta: string;
+    naturaleza: string;
+    debitos: number;
+    creditos: number;
+    netoMinor: number;
+  }[];
+}
+
+export interface FilaFiscal {
+  tenantId: string;
+  tenantNombre: string;
+  documento: string | null;
+  cobros: number;
+  baseMinor: number;
+  comisionMinor: number;
+  ivaMinor: number;
+  costoMinor: number;
+  margenMinor: number;
+}
+
+export function resumenOperativo(): Promise<Resumen> {
+  return apiGet<Resumen>("/admin/resumen");
+}
+export function estadoDeCuenta(
+  tenantId: string,
+  desde: string,
+  hasta: string
+): Promise<EstadoCuenta> {
+  return apiGet<EstadoCuenta>(
+    `/admin/merchants/${tenantId}/estado-cuenta?desde=${desde}&hasta=${hasta}`
+  );
+}
+export function reporteFiscal(mes: string): Promise<FilaFiscal[]> {
+  return apiGet<FilaFiscal[]>(`/admin/reportes/fiscal?mes=${mes}`);
+}
+
+/** Descarga un CSV de la API con la sesión de la persona: el navegador no tiene el JWT. */
+export async function descargarCsv(
+  recurso: string,
+  query: Record<string, string | undefined>
+): Promise<Response> {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(query)) if (v) q.set(k, v);
+  const supabase = await getSupabaseServerClient();
+  const {
+    data: { session }
+  } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new ErrorApi("La sesión expiró. Vuelve a entrar.", 401);
+  return fetch(`${baseUrl()}/v1/admin/exportar/${recurso}.csv${q.toString() ? `?${q}` : ""}`, {
+    headers: { authorization: `Bearer ${session.access_token}` },
+    cache: "no-store"
+  });
+}

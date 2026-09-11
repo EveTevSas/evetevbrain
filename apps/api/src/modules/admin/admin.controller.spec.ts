@@ -12,6 +12,7 @@ import type { TarifasAdminService } from "./tarifas-admin.service";
 import type { CustodiaAdminService } from "./custodia-admin.service";
 import type { DispersionAdminService } from "./dispersion-admin.service";
 import type { RiesgoAdminService } from "./riesgo-admin.service";
+import type { ReportesAdminService } from "./reportes-admin.service";
 
 const LISTADO: ComercioListado[] = [];
 
@@ -57,6 +58,22 @@ function controllerConMock(): AdminController {
       return { id: "r-1" };
     }
   } as unknown as RiesgoAdminService;
+  const reportes = {
+    resumen: async () => ({ cobrosHoy: 0 }),
+    fiscal: async (mes: string) => [
+      {
+        tenantNombre: `mes ${mes}`,
+        documento: null,
+        cobros: 1,
+        baseMinor: 50000,
+        comisionMinor: 1200,
+        ivaMinor: 228,
+        costoMinor: 800,
+        margenMinor: 400,
+        tenantId: "t"
+      }
+    ]
+  } as unknown as ReportesAdminService;
   const auditoria = { listar: async () => [] } as unknown as AdminAuditService;
   const providers = {
     estado: () => ({ activo: "fake", proveedores: [] })
@@ -74,7 +91,8 @@ function controllerConMock(): AdminController {
     tarifas,
     custodia,
     dispersion,
-    riesgo
+    riesgo,
+    reportes
   );
 }
 
@@ -428,5 +446,48 @@ describe("AdminController — reglas de riesgo (riesgo-comercio CA-8, CA-11)", (
       REGLA,
       "ops@evetev.com"
     ]);
+  });
+});
+
+describe("AdminController — reportes y exportes (Fase 10)", () => {
+  function res() {
+    const headers: Record<string, string> = {};
+    return {
+      headers,
+      res: { setHeader: (k: string, v: string) => void (headers[k] = v) } as never
+    };
+  }
+
+  it("el exporte fiscal sale como CSV con BOM, punto y coma y nombre de archivo", async () => {
+    const controller = controllerConMock();
+    const r = res();
+    const csv = await conContexto(SUPER_ADMIN, () =>
+      controller.exportar("fiscal.csv", { mes: "2026-09" }, r.res)
+    );
+    expect(
+      csv.startsWith("\uFEFFComercio;Documento;Cobros;Base;Comisión;IVA;Costo proveedor;Margen")
+    ).toBe(true);
+    expect(csv).toContain("mes 2026-09;;1;50000;1200;228;800;400");
+    expect(r.headers["Content-Type"]).toMatch(/text\/csv/);
+    expect(r.headers["Content-Disposition"]).toMatch(/evepay-fiscal-.*\.csv/);
+  });
+
+  it("un mes mal escrito o un recurso inexistente → 400 / 404", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SUPER_ADMIN, () =>
+        controller.exportar("fiscal.csv", { mes: "septiembre" }, res().res)
+      )
+    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(
+      conContexto(SUPER_ADMIN, () => controller.exportar("secretos.csv", {}, res().res))
+    ).rejects.toThrow(/No hay exporte/);
+  });
+
+  it("los exportes exigen un rol interno", async () => {
+    const controller = controllerConMock();
+    await expect(conContexto(SIN_ROL, () => controller.resumen())).rejects.toBeInstanceOf(
+      ForbiddenException
+    );
   });
 });

@@ -19,6 +19,7 @@ import { TarifasAdminService } from "./tarifas-admin.service";
 import { CustodiaAdminService } from "./custodia-admin.service";
 import { DispersionAdminService } from "./dispersion-admin.service";
 import { RiesgoAdminService } from "./riesgo-admin.service";
+import { ReportesAdminService } from "./reportes-admin.service";
 
 @Module({
   imports: [MerchantsModule, LedgerModule, ConciliacionModule, RiesgoModule],
@@ -47,7 +48,8 @@ import { RiesgoAdminService } from "./riesgo-admin.service";
     TarifasAdminService,
     CustodiaAdminService,
     DispersionAdminService,
-    RiesgoAdminService
+    RiesgoAdminService,
+    ReportesAdminService
   ]
 })
 export class AdminModule {}

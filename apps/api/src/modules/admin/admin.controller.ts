@@ -9,8 +9,15 @@ import {
   Param,
   Post,
   Put,
-  Query
+  Query,
+  Res
 } from "@nestjs/common";
+import { aCsv, type ColumnaCsv } from "../../common/csv";
+
+/** Lo único que el exporte necesita de la respuesta HTTP: poner dos cabeceras. */
+interface RespuestaConCabeceras {
+  setHeader(nombre: string, valor: string): void;
+}
 import {
   EstadoLoteSchema,
   PoliticaDispersionSchema,
@@ -26,6 +33,12 @@ import { currentContextOrNull } from "../../common/request-context";
 import { ROLES_INTERNOS, type Role } from "../identidad/roles";
 import { puede, rolesPara, type Accion } from "./permisos";
 import { RiesgoAdminService } from "./riesgo-admin.service";
+import {
+  ReportesAdminService,
+  type EstadoCuenta,
+  type FilaFiscal,
+  type Resumen
+} from "./reportes-admin.service";
 import type {
   CasoRiesgo,
   Coincidencia,
@@ -125,6 +138,8 @@ const RegistrarConsignacionSchema = z.object({
   nota: z.string().trim().max(500).optional()
 });
 
+const MesSchema = z.string().regex(/^\d{4}-\d{2}$/, "El mes va como AAAA-MM");
+
 const RegistrarSaldoSchema = z.object({
   fecha: FechaSchema,
   saldoMinor: z.number().int().nonnegative(),
@@ -147,7 +162,8 @@ export class AdminController {
     private readonly tarifas: TarifasAdminService,
     private readonly custodia: CustodiaAdminService,
     private readonly dispersion: DispersionAdminService,
-    private readonly riesgo: RiesgoAdminService
+    private readonly riesgo: RiesgoAdminService,
+    private readonly reportes: ReportesAdminService
   ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
@@ -792,6 +808,173 @@ export class AdminController {
       .safeParse(body);
     if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
     return this.riesgo.coincidencias(parsed.data.documentos);
+  }
+
+  // --- Command Center y reportes (Fase 10) ---
+
+  /** GET /v1/admin/resumen — la portada: cifras reales de hoy, del mes y de la custodia. */
+  @Get("resumen")
+  async resumen(): Promise<Resumen> {
+    this.exigir("leer");
+    return this.reportes.resumen();
+  }
+
+  /** GET /v1/admin/merchants/:tenantId/estado-cuenta?desde&hasta — movimientos del ledger del comercio. */
+  @Get("merchants/:tenantId/estado-cuenta")
+  async estadoCuenta(
+    @Param("tenantId") tenantId: string,
+    @Query("desde") desde?: string,
+    @Query("hasta") hasta?: string
+  ): Promise<EstadoCuenta> {
+    this.exigir("leer");
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+    const rango = this.rango(desde, hasta);
+    return this.reportes.estadoCuenta(tenantId, rango.desde, rango.hasta);
+  }
+
+  /** GET /v1/admin/reportes/fiscal?mes=AAAA-MM — base, comisión, IVA, costo y margen por comercio. */
+  @Get("reportes/fiscal")
+  async reporteFiscal(@Query("mes") mes?: string): Promise<FilaFiscal[]> {
+    this.exigir("leer");
+    return this.reportes.fiscal(this.mes(mes));
+  }
+
+  /**
+   * GET /v1/admin/exportar/:recurso.csv — pagos, consignaciones, lotes,
+   * estado de cuenta o fiscal, en CSV para Excel. Los montos van en la unidad
+   * mínima como enteros; la moneda, en su columna.
+   */
+  @Get("exportar/:recurso")
+  async exportar(
+    @Param("recurso") recurso: string,
+    @Query() query: Record<string, string | undefined>,
+    @Res({ passthrough: true }) res: RespuestaConCabeceras
+  ): Promise<string> {
+    this.exigir("leer");
+    const nombre = recurso.replace(/\.csv$/, "");
+    let csv: string;
+    switch (nombre) {
+      case "pagos": {
+        const parsed = FiltrosPagosSchema.safeParse({ ...query, limite: "200" });
+        if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+        const filas = [];
+        let cursor: { at: string; id: string } | null = null;
+        // Hasta 5 000 filas: un exporte contable, no una réplica de la base.
+        for (let pagina = 0; pagina < 25; pagina++) {
+          const p = await this.pagos.listar({
+            ...parsed.data,
+            cursorAt: cursor?.at,
+            cursorId: cursor?.id
+          });
+          filas.push(...p.pagos);
+          if (!p.siguiente) break;
+          cursor = p.siguiente;
+        }
+        csv = aCsv(filas, [
+          { titulo: "Cobro", valor: (f) => f.id },
+          { titulo: "Comercio", valor: (f) => f.tenantNombre },
+          { titulo: "Referencia", valor: (f) => f.referencia },
+          { titulo: "Monto", valor: (f) => f.montoMinor },
+          { titulo: "Moneda", valor: (f) => f.moneda },
+          { titulo: "Estado", valor: (f) => f.estado },
+          { titulo: "Proveedor", valor: (f) => f.provider },
+          { titulo: "Id proveedor", valor: (f) => f.providerPaymentId },
+          { titulo: "Creado", valor: (f) => f.creadoEn },
+          { titulo: "Actualizado", valor: (f) => f.actualizadoEn }
+        ]);
+        break;
+      }
+      case "consignaciones":
+        csv = aCsv(await this.custodia.listarConsignaciones(200), [
+          { titulo: "Fecha", valor: (f) => f.fecha },
+          { titulo: "Proveedor", valor: (f) => f.provider },
+          { titulo: "Referencia bancaria", valor: (f) => f.referenciaBancaria },
+          { titulo: "Monto", valor: (f) => f.montoMinor },
+          { titulo: "Cobros", valor: (f) => f.cobros },
+          { titulo: "Comercios", valor: (f) => f.comercios },
+          { titulo: "Nota", valor: (f) => f.nota },
+          { titulo: "Registrada por", valor: (f) => f.registradaPor },
+          { titulo: "Registrada en", valor: (f) => f.registradaEn }
+        ]);
+        break;
+      case "lotes":
+        csv = aCsv(await this.dispersion.listarLotes(undefined, 200), [
+          { titulo: "Lote", valor: (f) => f.id },
+          { titulo: "Comercio", valor: (f) => f.tenantNombre },
+          { titulo: "Estado", valor: (f) => f.estado },
+          { titulo: "Monto", valor: (f) => f.montoMinor },
+          { titulo: "Reserva", valor: (f) => f.reservaMinor },
+          { titulo: "Cobros", valor: (f) => f.cobros },
+          { titulo: "Banco", valor: (f) => f.cuenta.banco },
+          { titulo: "Cuenta", valor: (f) => f.cuenta.numeroCuenta },
+          { titulo: "Titular", valor: (f) => f.cuenta.titularCuenta },
+          { titulo: "Preparó", valor: (f) => f.preparadoPor },
+          { titulo: "Aprobó", valor: (f) => f.aprobadoPor },
+          { titulo: "Fecha pago", valor: (f) => f.fechaPago },
+          { titulo: "Referencia pago", valor: (f) => f.referenciaPago },
+          { titulo: "Pagó", valor: (f) => f.pagadoPor },
+          { titulo: "Fallo", valor: (f) => f.falloMotivo }
+        ]);
+        break;
+      case "estado-cuenta": {
+        const tenantId = query.tenantId ?? "";
+        if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+        const rango = this.rango(query.desde, query.hasta);
+        const ec = await this.reportes.estadoCuenta(tenantId, rango.desde, rango.hasta);
+        csv = aCsv(ec.lineas, [
+          { titulo: "Fecha", valor: (f) => f.posteadoEn },
+          { titulo: "Asiento", valor: (f) => f.asientoId },
+          { titulo: "Tipo", valor: (f) => f.kind },
+          { titulo: "Detalle", valor: (f) => f.memo },
+          { titulo: "Referencia cobro", valor: (f) => f.referencia },
+          { titulo: "Cuenta", valor: (f) => f.cuenta },
+          { titulo: "Naturaleza", valor: (f) => f.naturaleza },
+          { titulo: "Débito", valor: (f) => (f.direccion === "debit" ? f.montoMinor : "") },
+          { titulo: "Crédito", valor: (f) => (f.direccion === "credit" ? f.montoMinor : "") }
+        ] as ColumnaCsv<(typeof ec.lineas)[number]>[]);
+        break;
+      }
+      case "fiscal":
+        csv = aCsv(await this.reportes.fiscal(this.mes(query.mes)), [
+          { titulo: "Comercio", valor: (f) => f.tenantNombre },
+          { titulo: "Documento", valor: (f) => f.documento },
+          { titulo: "Cobros", valor: (f) => f.cobros },
+          { titulo: "Base", valor: (f) => f.baseMinor },
+          { titulo: "Comisión", valor: (f) => f.comisionMinor },
+          { titulo: "IVA", valor: (f) => f.ivaMinor },
+          { titulo: "Costo proveedor", valor: (f) => f.costoMinor },
+          { titulo: "Margen", valor: (f) => f.margenMinor }
+        ]);
+        break;
+      default:
+        throw new NotFoundException(`No hay exporte "${nombre}".`);
+    }
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="evepay-${nombre}-${new Date().toISOString().slice(0, 10)}.csv"`
+    );
+    return csv;
+  }
+
+  /** Rango de fechas de calendario; por defecto los últimos 30 días. */
+  private rango(desde?: string, hasta?: string): { desde: string; hasta: string } {
+    const hoy = new Date().toISOString().slice(0, 10);
+    const hace30 = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
+    const d = desde || hace30;
+    const h = hasta || hoy;
+    if (!FechaSchema.safeParse(d).success || !FechaSchema.safeParse(h).success || d > h) {
+      throw new BadRequestException(
+        "El rango va como desde=AAAA-MM-DD&hasta=AAAA-MM-DD, con desde ≤ hasta."
+      );
+    }
+    return { desde: d, hasta: h };
+  }
+
+  private mes(mes?: string): string {
+    const m = mes || new Date().toISOString().slice(0, 7);
+    if (!MesSchema.safeParse(m).success) throw new BadRequestException("El mes va como AAAA-MM.");
+    return m;
   }
 
   /** GET /v1/admin/auditoria — últimas acciones administrativas (CA-4). */
