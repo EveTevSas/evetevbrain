@@ -1,14 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { validarTarifaComercio } from "@evetev/shared";
 import {
   apiPost,
   apiPut,
   ErrorApi,
   type ApiKeyRotada,
   type ComercioCreado,
-  type PerfilComercio
+  type PerfilComercio,
+  type VersionTarifaComercio
 } from "@/lib/api/evepay";
+import { describirErrores, leerTarifaComercio } from "@/lib/tarifas";
 
 /**
  * Server Actions de la sección de comercios. Cada una devuelve un resultado
@@ -206,6 +209,32 @@ export async function renombrarComercio(
     const datos = await apiPut<{ tenantId: string; legalName: string; displayName: string }>(
       `/admin/merchants/${tenantId}/nombre`,
       { legalName, displayName }
+    );
+    revalidatePath("/comercios");
+    return { ok: true, datos };
+  } catch (error) {
+    return comoResultado(error);
+  }
+}
+
+/**
+ * Agrega una versión de la tarifa del comercio. Se valida aquí con el MISMO
+ * esquema de la API para devolver el error en español y por campo; la API y
+ * la base lo validan otra vez, que es lo que manda.
+ */
+export async function asignarTarifaComercio(
+  tenantId: string,
+  formulario: FormData
+): Promise<Resultado<VersionTarifaComercio>> {
+  const validacion = validarTarifaComercio(leerTarifaComercio(formulario));
+  if (!validacion.ok) {
+    return { ok: false, error: describirErrores(validacion.errores) };
+  }
+
+  try {
+    const datos = await apiPut<VersionTarifaComercio>(
+      `/admin/merchants/${tenantId}/tarifa`,
+      validacion.tarifa
     );
     revalidatePath("/comercios");
     return { ok: true, datos };

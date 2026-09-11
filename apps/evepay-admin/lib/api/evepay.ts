@@ -234,13 +234,7 @@ export function timelinePago(id: string): Promise<EventoTimeline[]> {
   return apiGet<EventoTimeline[]>(`/admin/pagos/${id}/timeline`);
 }
 
-/** Monto en la unidad mínima. Para COP el valor face: no se inventan decimales. */
-export function formatoMonto(montoMinor: number, moneda: string): string {
-  if (moneda === "COP") {
-    return `$ ${montoMinor.toLocaleString("es-CO")}`;
-  }
-  return `${(montoMinor / 100).toLocaleString("es-CO", { minimumFractionDigits: 2 })} ${moneda}`;
-}
+export { formatoMonto } from "@/lib/formato";
 
 export function listarComerciosParaFiltro(): Promise<Comercio[]> {
   return listarComercios();
@@ -364,4 +358,59 @@ export function obtenerPerfil(tenantId: string): Promise<PerfilGuardado | null> 
 
 export function obtenerComercio(tenantId: string): Promise<Comercio> {
   return apiGet<Comercio>(`/admin/merchants/${tenantId}`);
+}
+
+// --- Tarifas (Fase 6, spec comisiones) ---
+
+export interface VersionTarifaComercio {
+  id: string;
+  /** Puntos básicos: 290 = 2,90 %. */
+  bps: number;
+  /** Fijo por transacción en la unidad mínima (COP: pesos). */
+  fijoMinor: number;
+  /** IVA sobre la comisión: 0 (0 %) o 1900 (19 %). */
+  ivaBps: 0 | 1900;
+  vigenteDesde: string;
+  creadaPor: string;
+  creadaEn: string;
+}
+
+export interface VersionTarifaProveedor {
+  id: string;
+  provider: string;
+  bps: number;
+  fijoMinor: number;
+  /** true: consigna monto − su tarifa. false: consigna todo y factura aparte. */
+  descuentaEnConsignacion: boolean;
+  vigenteDesde: string;
+  creadaPor: string;
+  creadaEn: string;
+}
+
+export interface TarifaComercioAdmin {
+  vigente: VersionTarifaComercio | null;
+  historial: VersionTarifaComercio[];
+}
+
+export interface TarifaProveedorAdmin {
+  provider: string;
+  vigente: VersionTarifaProveedor | null;
+  historial: VersionTarifaProveedor[];
+}
+
+export interface TarifaVigenteDeComercio extends VersionTarifaComercio {
+  tenantId: string;
+}
+
+export function tarifaDeComercio(tenantId: string): Promise<TarifaComercioAdmin> {
+  return apiGet<TarifaComercioAdmin>(`/admin/merchants/${tenantId}/tarifa`);
+}
+
+export function tarifaDeProveedor(provider: string): Promise<TarifaProveedorAdmin> {
+  return apiGet<TarifaProveedorAdmin>(`/admin/providers/${encodeURIComponent(provider)}/tarifa`);
+}
+
+/** La vigente de cada comercio que tiene una; quien no aparece no puede cobrar. */
+export function tarifasVigentes(): Promise<TarifaVigenteDeComercio[]> {
+  return apiGet<TarifaVigenteDeComercio[]>("/admin/tarifas");
 }

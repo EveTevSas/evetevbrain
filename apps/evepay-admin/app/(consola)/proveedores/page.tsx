@@ -2,13 +2,18 @@ import { Tarjeta, TituloSeccion } from "@/components/seccion";
 import {
   ErrorApi,
   estadoProveedores,
+  tarifaDeProveedor,
+  tarifasVigentes,
   type EstadoProveedores,
   type PasoHabilitacion,
   type ProveedorInfo,
+  type TarifaProveedorAdmin,
+  type TarifaVigenteDeComercio,
   type VariableConfig
 } from "@/lib/api/evepay";
 import { Check, CircleDot, Hand, Minus } from "lucide-react";
 import { PruebaSalud } from "./prueba-salud";
+import { TarifaProveedor } from "./tarifa-proveedor";
 
 export const dynamic = "force-dynamic";
 
@@ -96,7 +101,15 @@ function Variable({ v }: { v: VariableConfig }) {
   );
 }
 
-function TarjetaProveedor({ p }: { p: ProveedorInfo }) {
+function TarjetaProveedor({
+  p,
+  tarifa,
+  tarifasComercios
+}: {
+  p: ProveedorInfo;
+  tarifa: TarifaProveedorAdmin;
+  tarifasComercios: TarifaVigenteDeComercio[];
+}) {
   return (
     <div
       style={{
@@ -141,6 +154,8 @@ function TarjetaProveedor({ p }: { p: ProveedorInfo }) {
           Monedas: {p.capacidades.monedas.join(", ")}
         </span>
       </div>
+
+      <TarifaProveedor tarifa={tarifa} tarifasComercios={tarifasComercios} />
 
       {p.configuracion.length > 0 && (
         <div>
@@ -212,10 +227,16 @@ function TarjetaProveedor({ p }: { p: ProveedorInfo }) {
 
 export default async function ProveedoresPage() {
   let estado: EstadoProveedores | null = null;
+  const tarifas = new Map<string, TarifaProveedorAdmin>();
+  let tarifasComercios: TarifaVigenteDeComercio[] = [];
   let error: string | null = null;
 
   try {
-    estado = await estadoProveedores();
+    [estado, tarifasComercios] = await Promise.all([estadoProveedores(), tarifasVigentes()]);
+    const porProveedor = await Promise.all(
+      estado.proveedores.map((p) => tarifaDeProveedor(p.nombre))
+    );
+    for (const t of porProveedor) tarifas.set(t.provider, t);
   } catch (e) {
     error =
       e instanceof ErrorApi ? e.message : "No se pudo consultar el estado de los proveedores.";
@@ -238,7 +259,14 @@ export default async function ProveedoresPage() {
         <>
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {estado.proveedores.map((p) => (
-              <TarjetaProveedor key={p.nombre} p={p} />
+              <TarjetaProveedor
+                key={p.nombre}
+                p={p}
+                tarifa={
+                  tarifas.get(p.nombre) ?? { provider: p.nombre, vigente: null, historial: [] }
+                }
+                tarifasComercios={tarifasComercios}
+              />
             ))}
           </div>
 

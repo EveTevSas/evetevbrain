@@ -1,5 +1,5 @@
 import { Tarjeta, TituloSeccion } from "@/components/seccion";
-import { ErrorApi, listarComercios, type Comercio } from "@/lib/api/evepay";
+import { ErrorApi, listarComercios, tarifasVigentes, type Comercio } from "@/lib/api/evepay";
 import Link from "next/link";
 import { AccionesComercio } from "./acciones-comercio";
 import { NuevoComercio } from "./nuevo-comercio";
@@ -63,10 +63,15 @@ function tonoMerchant(estado: string | undefined) {
 
 export default async function ComerciosPage() {
   let comercios: Comercio[] = [];
+  // Quién tiene tarifa: sin ella el comercio no puede cobrar, y conviene verlo
+  // en el listado y no solo al abrir la ficha.
+  const conTarifa = new Set<string>();
   let error: string | null = null;
 
   try {
-    comercios = await listarComercios();
+    const [lista, tarifas] = await Promise.all([listarComercios(), tarifasVigentes()]);
+    comercios = lista;
+    for (const t of tarifas) conTarifa.add(t.tenantId);
   } catch (e) {
     error = e instanceof ErrorApi ? e.message : "No se pudo cargar la lista de comercios.";
   }
@@ -131,13 +136,17 @@ export default async function ComerciosPage() {
                             <div style={{ fontSize: "0.76rem", color: "#64748B" }}>
                               {c.legalName}
                             </div>
-                            {c.documento ? (
+                            {c.documento && (
                               <div style={{ fontSize: "0.72rem", color: "#475569" }}>
                                 {c.documento}
                               </div>
-                            ) : (
-                              <div style={{ marginTop: "0.2rem" }}>
-                                <Etiqueta texto="sin perfil" tono="ambar" />
+                            )}
+                            {(!c.documento || !conTarifa.has(c.tenantId)) && (
+                              <div style={{ marginTop: "0.2rem", display: "flex", gap: "0.3rem" }}>
+                                {!c.documento && <Etiqueta texto="sin perfil" tono="ambar" />}
+                                {!conTarifa.has(c.tenantId) && (
+                                  <Etiqueta texto="sin tarifa" tono="ambar" />
+                                )}
                               </div>
                             )}
                             <div

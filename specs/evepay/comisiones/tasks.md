@@ -5,6 +5,6 @@
 - [x] C3 — Repositorio de tarifas (puerto + Drizzle + in-memory).
 - [x] C4 — `PagosService`: exigir las dos tarifas (CA-3, CA-4), rechazar comisión + IVA ≥ monto (CA-7) y fijarlas en el cobro (CA-5).
 - [x] C5 — Endpoints admin de las dos tarifas, con auditoría (CA-1, CA-8, CA-11).
-- [ ] C6 — Consola: bloque Comisión en la ficha y tarifa en Proveedores, con el desglose compartido y la advertencia de margen negativo (CA-9, CA-10).
+- [x] C6 — Consola: bloque Comisión en la ficha y tarifa en Proveedores, con el desglose compartido y la advertencia de margen negativo (CA-9, CA-10).
 - [ ] C7 — Cargar la tarifa de ComboPay y asignar tarifa a los comercios existentes: sin ellas nadie puede cobrar.
 - [ ] C8 — Validar typecheck · lint · test · build, y el CA-2 contra la base local.
