@@ -12,13 +12,22 @@ const NOMBRES: Record<ReglaRiesgo["tipo"], string> = {
   limite_transaccion: "Límite por transacción",
   limite_diario: "Límite diario",
   limite_mensual: "Límite mensual",
-  monto_atipico: "Monto atípico"
+  monto_atipico: "Monto atípico",
+  geo_mismatch: "Tarjeta: país de la tarjeta ≠ país de la IP",
+  intentos_tarjeta: "Tarjeta: intentos con la misma tarjeta",
+  score_proveedor: "Tarjeta: score del proveedor"
 };
 
 function describir(r: ReglaRiesgo): string {
-  if ("factor" in r.parametros)
-    return `más de ${r.parametros.factor}× el ticket promedio (mínimo ${r.parametros.minimoCobros} cobros)`;
-  return `más de ${formatoMonto(r.parametros.limiteMinor, "COP")}`;
+  const p = r.parametros;
+  if ("factor" in p)
+    return `más de ${p.factor}× el ticket promedio (mínimo ${p.minimoCobros} cobros)`;
+  if ("limiteMinor" in p) return `más de ${formatoMonto(p.limiteMinor, "COP")}`;
+  if ("montoMinimoMinor" in p)
+    return `países distintos en cobros desde ${formatoMonto(p.montoMinimoMinor, "COP")} (al aprobar, si el proveedor manda la señal)`;
+  if ("maxIntentos" in p)
+    return `más de ${p.maxIntentos} intentos (al aprobar, si el proveedor lo cuenta)`;
+  return `score del proveedor mayor que ${p.scoreMaximo} (al aprobar, si lo manda)`;
 }
 
 /** Selector activa / shadow / inactiva. Shadow: evalúa y anota, no actúa. */
@@ -231,6 +240,40 @@ export function Reglas({
                   />
                 </Campo>
               </>
+            ) : tipo === "geo_mismatch" ? (
+              <Campo etiqueta="Desde qué monto (COP)" requerido ayuda="0 = cualquier monto">
+                <input
+                  name="montoMinimo"
+                  inputMode="numeric"
+                  required
+                  defaultValue="200000"
+                  style={entrada}
+                />
+              </Campo>
+            ) : tipo === "intentos_tarjeta" ? (
+              <Campo etiqueta="Máximo de intentos" requerido>
+                <input
+                  name="maxIntentos"
+                  type="number"
+                  min={1}
+                  max={100}
+                  defaultValue={3}
+                  required
+                  style={entrada}
+                />
+              </Campo>
+            ) : tipo === "score_proveedor" ? (
+              <Campo etiqueta="Score máximo (0–100)" requerido>
+                <input
+                  name="scoreMaximo"
+                  type="number"
+                  min={1}
+                  max={100}
+                  defaultValue={80}
+                  required
+                  style={entrada}
+                />
+              </Campo>
             ) : (
               <Campo etiqueta="Límite (COP)" requerido ayuda="En pesos, sin decimales">
                 <input name="limite" inputMode="numeric" required style={entrada} />
@@ -243,7 +286,7 @@ export function Reglas({
             >
               <select
                 name="accion"
-                defaultValue={tipo === "monto_atipico" ? "retener" : "rechazar"}
+                defaultValue={tipo.startsWith("limite") ? "rechazar" : "retener"}
                 style={entrada}
               >
                 <option value="rechazar">Rechazar</option>

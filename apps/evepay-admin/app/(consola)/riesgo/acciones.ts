@@ -49,7 +49,13 @@ export async function guardarRegla(formulario: FormData): Promise<Resultado<Regl
   const parametros =
     tipo === "monto_atipico"
       ? { factor: Number(t("factor")), minimoCobros: Number(t("minimoCobros")) }
-      : { limiteMinor: montoDigitado(t("limite")) };
+      : tipo === "geo_mismatch"
+        ? { montoMinimoMinor: montoDigitado(t("montoMinimo")) }
+        : tipo === "intentos_tarjeta"
+          ? { maxIntentos: Number(t("maxIntentos")) }
+          : tipo === "score_proveedor"
+            ? { scoreMaximo: Number(t("scoreMaximo")) }
+            : { limiteMinor: montoDigitado(t("limite")) };
   try {
     const datos = await apiPut<ReglaRiesgo>("/admin/riesgo/reglas", {
       id: t("id") || null,

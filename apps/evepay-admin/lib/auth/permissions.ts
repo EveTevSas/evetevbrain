@@ -29,7 +29,10 @@ export type Accion =
   | "retenciones.liberar_reserva"
   | "retenciones.liberar_riesgo"
   | "riesgo.reglas"
-  | "riesgo.listas";
+  | "riesgo.listas"
+  | "reembolsos.registrar"
+  | "contracargos.gestionar"
+  | "contracargos.resolver";
 
 const TODOS: RolInterno[] = ["super_admin", "ops", "finanzas"];
 const OPS: RolInterno[] = ["super_admin", "ops"];
@@ -53,7 +56,10 @@ export const PERMISOS: Record<Accion, RolInterno[]> = {
   "retenciones.liberar_reserva": FINANZAS,
   "retenciones.liberar_riesgo": TODOS,
   "riesgo.reglas": SOLO_SUPER,
-  "riesgo.listas": OPS
+  "riesgo.listas": OPS,
+  "reembolsos.registrar": FINANZAS,
+  "contracargos.gestionar": TODOS,
+  "contracargos.resolver": FINANZAS
 };
 
 /** El rol interno del usuario, o null si no tiene uno (y por tanto no entra). */

@@ -7,3 +7,4 @@ export * from "./tarifa";
 export * from "./cuentas";
 export * from "./dispersion";
 export * from "./riesgo";
+export * from "./reembolsos";

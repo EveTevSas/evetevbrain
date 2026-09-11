@@ -156,6 +156,7 @@ function TarjetaProveedor({
         <Capacidad etiqueta="Liquidaciones por API" tiene={p.capacidades.liquidaciones} />
         <Capacidad etiqueta="Custodia del recaudo" tiene={p.capacidades.custodia} />
         <Capacidad etiqueta="Dispersión por API" tiene={p.capacidades.dispersion} />
+        <Capacidad etiqueta="Reembolsos por API" tiene={p.capacidades.reembolsos} />
         <span style={{ fontSize: "0.76rem", color: "#64748B" }}>
           Monedas: {p.capacidades.monedas.join(", ")} · Métodos:{" "}
           {p.capacidades.metodos.length ? p.capacidades.metodos.join(", ") : "—"}

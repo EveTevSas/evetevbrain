@@ -3,11 +3,13 @@ import {
   colaRiesgo,
   ErrorApi,
   listaRestrictiva,
+  listarContracargos,
   listarComercios,
   listarEvaluacionesRiesgo,
   listarReglasRiesgo,
   type CasoRiesgo,
   type Comercio,
+  type Contracargo,
   type EntradaListaRestrictiva,
   type EvaluacionRiesgo,
   type ReglaRiesgo
@@ -46,16 +48,18 @@ export default async function RiesgoPage() {
   let cola: CasoRiesgo[] = [];
   let lista: EntradaListaRestrictiva[] = [];
   let comercios: Comercio[] = [];
+  let contracargos: Contracargo[] = [];
   let error: string | null = null;
   const { rol } = await sesionActual();
 
   try {
-    [reglas, evaluaciones, cola, lista, comercios] = await Promise.all([
+    [reglas, evaluaciones, cola, lista, comercios, contracargos] = await Promise.all([
       listarReglasRiesgo(),
       listarEvaluacionesRiesgo(50),
       colaRiesgo(),
       listaRestrictiva(),
-      listarComercios()
+      listarComercios(),
+      listarContracargos()
     ]);
   } catch (e) {
     error = e instanceof ErrorApi ? e.message : "No se pudo cargar el riesgo.";
@@ -152,6 +156,59 @@ export default async function RiesgoPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </Tarjeta>
+          <Tarjeta>
+            <h2 style={{ margin: "0 0 0.9rem", fontSize: "0.98rem", color: "#0A2540" }}>
+              Contracargos abiertos (
+              {
+                contracargos.filter((c) => c.estado === "recibido" || c.estado === "en_evidencia")
+                  .length
+              }
+              )
+            </h2>
+            {contracargos.filter((c) => c.estado === "recibido" || c.estado === "en_evidencia")
+              .length === 0 ? (
+              <p style={{ margin: 0, fontSize: "0.84rem", color: "#64748B" }}>Ninguno abierto.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+                {contracargos
+                  .filter((c) => c.estado === "recibido" || c.estado === "en_evidencia")
+                  .map((c) => (
+                    <div
+                      key={c.id}
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "#0A2540",
+                        display: "flex",
+                        gap: "0.6rem",
+                        flexWrap: "wrap",
+                        alignItems: "baseline"
+                      }}
+                    >
+                      <Link
+                        href={`/pagos/${c.paymentId}`}
+                        style={{ color: "#4b3075", fontWeight: 700, textDecoration: "none" }}
+                      >
+                        {c.tenantNombre} · {c.referencia}
+                      </Link>
+                      <span>{formatoMonto(c.montoMinor, "COP")}</span>
+                      <span style={{ fontSize: "0.74rem", color: "#64748B" }}>
+                        {c.estado.replace("_", " ")} · {c.motivoRed}
+                      </span>
+                      <strong
+                        style={{
+                          fontSize: "0.74rem",
+                          color: c.diasParaEvidencia <= 2 ? "#B91C1C" : "#B45309"
+                        }}
+                      >
+                        {c.diasParaEvidencia < 0
+                          ? `venció hace ${-c.diasParaEvidencia} día(s)`
+                          : `vence en ${c.diasParaEvidencia} día(s)`}
+                      </strong>
+                    </div>
+                  ))}
               </div>
             )}
           </Tarjeta>

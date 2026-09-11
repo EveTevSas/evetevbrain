@@ -162,6 +162,7 @@ export interface ProveedorInfo {
     custodia: boolean;
     dispersion: boolean;
     metodos: string[];
+    reembolsos: boolean;
   };
   configuracion: VariableConfig[];
   webhook: string | null;
@@ -509,6 +510,8 @@ export interface BalanceDispersion {
   pendienteMinor: number;
   retenidoMinor: number;
   enLoteMinor: number;
+  /** Lo que el comercio debe por reembolsos de cobros ya pagados; se descuenta del siguiente lote. */
+  deudaMinor: number;
   cuentaCertificada: boolean;
   cuentaDetalle: string | null;
   cobrosDisponibles: number;
@@ -531,6 +534,7 @@ export interface Lote {
   estado: EstadoLote;
   montoMinor: number;
   reservaMinor: number;
+  deudaMinor: number;
   cuenta: {
     banco: string;
     tipoCuenta: string;
@@ -555,7 +559,7 @@ export interface Lote {
 
 export interface ItemLote {
   id: string;
-  tipo: "cobro" | "reserva_liberada";
+  tipo: "cobro" | "reserva_liberada" | "deuda";
   paymentId: string | null;
   referencia: string | null;
   montoCobroMinor: number | null;
@@ -611,7 +615,13 @@ export function listarRetenciones(tenantId?: string): Promise<Retencion[]> {
 // --- Riesgo del comercio (Fase 9, spec riesgo-comercio) ---
 
 export type TipoReglaRiesgo =
-  "limite_transaccion" | "limite_diario" | "limite_mensual" | "monto_atipico";
+  | "limite_transaccion"
+  | "limite_diario"
+  | "limite_mensual"
+  | "monto_atipico"
+  | "geo_mismatch"
+  | "intentos_tarjeta"
+  | "score_proveedor";
 export type ModoRegla = "activa" | "shadow" | "inactiva";
 
 export interface ReglaRiesgo {
@@ -620,7 +630,12 @@ export interface ReglaRiesgo {
   tipo: TipoReglaRiesgo;
   tenantId: string | null;
   tenantNombre: string | null;
-  parametros: { limiteMinor: number } | { factor: number; minimoCobros: number };
+  parametros:
+    | { limiteMinor: number }
+    | { factor: number; minimoCobros: number }
+    | { montoMinimoMinor: number }
+    | { maxIntentos: number }
+    | { scoreMaximo: number };
   accion: "rechazar" | "retener";
   modo: ModoRegla;
   prioridad: number;
@@ -818,4 +833,59 @@ export async function descargarCsv(
     headers: { authorization: `Bearer ${session.access_token}` },
     cache: "no-store"
   });
+}
+
+// --- Reembolsos y contracargos (Fase 11) ---
+
+export interface Reembolso {
+  id: string;
+  tenantId: string;
+  tenantNombre: string;
+  paymentId: string;
+  referencia: string;
+  montoMinor: number;
+  origen: "reembolso" | "contracargo";
+  contracargoId: string | null;
+  motivo: string;
+  fechaPago: string;
+  referenciaPago: string;
+  comprobante: string | null;
+  parteComercio: number;
+  parteComision: number;
+  parteIva: number;
+  registradoPor: string;
+  registradoEn: string;
+}
+
+export type EstadoContracargo = "recibido" | "en_evidencia" | "ganado" | "perdido";
+
+export interface Contracargo {
+  id: string;
+  tenantId: string;
+  tenantNombre: string;
+  paymentId: string;
+  referencia: string;
+  estadoCobro: string;
+  montoCobroMinor: number;
+  montoMinor: number;
+  motivoRed: string;
+  referenciaRed: string | null;
+  fechaLimiteEvidencia: string;
+  estado: EstadoContracargo;
+  evidencia: string | null;
+  recibidoPor: string;
+  recibidoEn: string;
+  evidenciaPor: string | null;
+  evidenciaEn: string | null;
+  resueltoPor: string | null;
+  resueltoEn: string | null;
+  resolucionNota: string | null;
+  diasParaEvidencia: number;
+}
+
+export function listarReembolsos(paymentId: string): Promise<Reembolso[]> {
+  return apiGet<Reembolso[]>(`/admin/pagos/${paymentId}/reembolsos`);
+}
+export function listarContracargos(paymentId?: string): Promise<Contracargo[]> {
+  return apiGet<Contracargo[]>(`/admin/contracargos${paymentId ? `?paymentId=${paymentId}` : ""}`);
 }

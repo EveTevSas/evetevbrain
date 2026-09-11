@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { SenalesTarjeta } from "./payments";
 
 /**
  * Motor de reglas de riesgo del comercio (spec `riesgo-comercio`).
@@ -14,7 +15,12 @@ export const TipoReglaRiesgoSchema = z.enum([
   "limite_transaccion",
   "limite_diario",
   "limite_mensual",
-  "monto_atipico"
+  "monto_atipico",
+  // Reglas de tarjeta (Fase 11): leen las señales que manda el proveedor al
+  // aprobar; sin señal no disparan.
+  "geo_mismatch",
+  "intentos_tarjeta",
+  "score_proveedor"
 ]);
 export type TipoReglaRiesgo = z.infer<typeof TipoReglaRiesgoSchema>;
 
@@ -31,6 +37,20 @@ const ParametrosAtipico = z.object({
   /** Sin este mínimo de cobros el promedio no dice nada y la regla no aplica. */
   minimoCobros: z.number().int().min(1).max(10_000)
 });
+/** País de la tarjeta ≠ país de la IP, y solo si el monto pasa de un mínimo. */
+const ParametrosGeo = z.object({ montoMinimoMinor: z.number().int().min(0) });
+const ParametrosIntentos = z.object({ maxIntentos: z.number().int().min(1).max(100) });
+const ParametrosScore = z.object({ scoreMaximo: z.number().int().min(1).max(100) });
+
+const PARAMETROS_POR_TIPO: Record<TipoReglaRiesgo, z.ZodTypeAny> = {
+  limite_transaccion: ParametrosLimite,
+  limite_diario: ParametrosLimite,
+  limite_mensual: ParametrosLimite,
+  monto_atipico: ParametrosAtipico,
+  geo_mismatch: ParametrosGeo,
+  intentos_tarjeta: ParametrosIntentos,
+  score_proveedor: ParametrosScore
+};
 
 export const ReglaRiesgoSchema = z
   .object({
@@ -38,21 +58,23 @@ export const ReglaRiesgoSchema = z
     tipo: TipoReglaRiesgoSchema,
     /** null = global; un comercio con regla propia del mismo tipo reemplaza la global. */
     tenantId: z.string().uuid().nullable(),
-    parametros: z.union([ParametrosLimite, ParametrosAtipico]),
+    parametros: z.union([
+      ParametrosLimite,
+      ParametrosAtipico,
+      ParametrosGeo,
+      ParametrosIntentos,
+      ParametrosScore
+    ]),
     accion: AccionRiesgoSchema,
     modo: ModoReglaSchema,
     prioridad: z.number().int().min(0).max(1000)
   })
   .superRefine((r, ctx) => {
-    const esAtipico = r.tipo === "monto_atipico";
-    const trae = "factor" in r.parametros;
-    if (esAtipico !== trae) {
+    if (!PARAMETROS_POR_TIPO[r.tipo].safeParse(r.parametros).success) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["parametros"],
-        message: esAtipico
-          ? "monto_atipico necesita factor y minimoCobros"
-          : "un límite necesita limiteMinor"
+        message: `los parámetros no corresponden al tipo ${r.tipo}`
       });
     }
   });
@@ -68,6 +90,8 @@ export interface SenalesRiesgo {
   ticketPromedioMinor: number;
   /** Cuántos cobros aprobados o conciliados tiene. */
   cobrosHistoricos: number;
+  /** Lo que el proveedor contó de la tarjeta al aprobar; ausente antes de eso. */
+  tarjeta?: SenalesTarjeta;
 }
 
 export type DecisionRiesgo = "permitir" | "retener" | "rechazar";
@@ -109,6 +133,27 @@ function dispara(regla: ReglaRiesgo, montoMinor: number, s: SenalesRiesgo): stri
       const umbral = s.ticketPromedioMinor * p.factor;
       return montoMinor > umbral
         ? `monto ${montoMinor} > ${p.factor}× ticket promedio ${s.ticketPromedioMinor} (${umbral})`
+        : null;
+    }
+    case "geo_mismatch": {
+      const t = s.tarjeta;
+      if (!("montoMinimoMinor" in p) || !t?.paisTarjeta || !t.paisIp) return null;
+      return t.paisTarjeta !== t.paisIp && montoMinor >= p.montoMinimoMinor
+        ? `tarjeta de ${t.paisTarjeta} pagando desde ${t.paisIp} por ${montoMinor}`
+        : null;
+    }
+    case "intentos_tarjeta": {
+      const t = s.tarjeta;
+      if (!("maxIntentos" in p) || t?.intentos === undefined) return null;
+      return t.intentos > p.maxIntentos
+        ? `${t.intentos} intentos con la misma tarjeta (máximo ${p.maxIntentos})`
+        : null;
+    }
+    case "score_proveedor": {
+      const t = s.tarjeta;
+      if (!("scoreMaximo" in p) || t?.scoreProveedor === undefined) return null;
+      return t.scoreProveedor > p.scoreMaximo
+        ? `score del proveedor ${t.scoreProveedor} > ${p.scoreMaximo}`
         : null;
     }
   }

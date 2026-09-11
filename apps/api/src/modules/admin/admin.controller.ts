@@ -34,6 +34,11 @@ import { ROLES_INTERNOS, type Role } from "../identidad/roles";
 import { puede, rolesPara, type Accion } from "./permisos";
 import { RiesgoAdminService } from "./riesgo-admin.service";
 import {
+  ReembolsosAdminService,
+  type Contracargo,
+  type Reembolso
+} from "./reembolsos-admin.service";
+import {
   ReportesAdminService,
   type EstadoCuenta,
   type FilaFiscal,
@@ -163,7 +168,8 @@ export class AdminController {
     private readonly custodia: CustodiaAdminService,
     private readonly dispersion: DispersionAdminService,
     private readonly riesgo: RiesgoAdminService,
-    private readonly reportes: ReportesAdminService
+    private readonly reportes: ReportesAdminService,
+    private readonly reembolsos: ReembolsosAdminService
   ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
@@ -808,6 +814,98 @@ export class AdminController {
       .safeParse(body);
     if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
     return this.riesgo.coincidencias(parsed.data.documentos);
+  }
+
+  // --- Reembolsos y contracargos (spec reembolsos-contracargos) ---
+
+  /** GET /v1/admin/pagos/:id/reembolsos — lo devuelto de un cobro, con el reparto de cada uno. */
+  @Get("pagos/:id/reembolsos")
+  async listarReembolsos(@Param("id") id: string): Promise<Reembolso[]> {
+    this.exigir("leer");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    return this.reembolsos.listarReembolsos(id);
+  }
+
+  /** POST /v1/admin/pagos/:id/reembolsos — finanzas registra un reembolso ya pagado desde el banco (CA-1, CA-2). */
+  @Post("pagos/:id/reembolsos")
+  @HttpCode(201)
+  async registrarReembolso(@Param("id") id: string, @Body() body: unknown): Promise<Reembolso> {
+    this.exigir("reembolsos.registrar");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    const parsed = z
+      .object({
+        montoMinor: z.number().int().positive(),
+        motivo: z.string().trim().min(3).max(500),
+        fecha: FechaSchema,
+        referenciaPago: z.string().trim().min(1).max(120),
+        comprobante: z.string().trim().max(500).optional()
+      })
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    return this.reembolsos.registrarReembolso(id, parsed.data, this.quien());
+  }
+
+  /** GET /v1/admin/contracargos?estado=&paymentId= — los abiertos primero, por fecha límite. */
+  @Get("contracargos")
+  async listarContracargos(
+    @Query("estado") estado?: string,
+    @Query("paymentId") paymentId?: string
+  ): Promise<Contracargo[]> {
+    this.exigir("leer");
+    const est = z
+      .enum(["recibido", "en_evidencia", "ganado", "perdido"])
+      .optional()
+      .safeParse(estado || undefined);
+    if (!est.success) throw new BadRequestException("Estado de contracargo inválido.");
+    if (paymentId && !UUID_RE.test(paymentId)) throw new BadRequestException("paymentId inválido.");
+    return this.reembolsos.listarContracargos(est.data, paymentId || undefined);
+  }
+
+  /** POST /v1/admin/pagos/:id/contracargos — registra el reclamo de la red con su fecha límite (CA-3). */
+  @Post("pagos/:id/contracargos")
+  @HttpCode(201)
+  async registrarContracargo(@Param("id") id: string, @Body() body: unknown): Promise<Contracargo> {
+    this.exigir("contracargos.gestionar");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    const parsed = z
+      .object({
+        montoMinor: z.number().int().positive(),
+        motivoRed: z.string().trim().min(3).max(500),
+        referenciaRed: z.string().trim().max(120).optional(),
+        fechaLimiteEvidencia: FechaSchema
+      })
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    return this.reembolsos.registrarContracargo(id, parsed.data, this.quien());
+  }
+
+  /** POST /v1/admin/contracargos/:id/evidencia — lo que se le envía a la red. */
+  @Post("contracargos/:id/evidencia")
+  @HttpCode(200)
+  async evidenciaContracargo(@Param("id") id: string, @Body() body: unknown): Promise<Contracargo> {
+    this.exigir("contracargos.gestionar");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    const parsed = z.object({ evidencia: z.string().trim().min(3).max(4000) }).safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    return this.reembolsos.evidencia(id, parsed.data.evidencia, this.quien());
+  }
+
+  /** POST /v1/admin/contracargos/:id/resolver — ganado o perdido; perdido saca el dinero (CA-3). */
+  @Post("contracargos/:id/resolver")
+  @HttpCode(200)
+  async resolverContracargo(@Param("id") id: string, @Body() body: unknown): Promise<Contracargo> {
+    this.exigir("contracargos.resolver");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    const parsed = z
+      .object({
+        resultado: z.enum(["ganado", "perdido"]),
+        nota: z.string().trim().max(500).optional(),
+        fecha: FechaSchema.optional(),
+        referenciaPago: z.string().trim().max(120).optional()
+      })
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    return this.reembolsos.resolver(id, parsed.data, this.quien());
   }
 
   // --- Command Center y reportes (Fase 10) ---

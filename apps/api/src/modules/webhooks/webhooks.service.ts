@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { EstadoCobro } from "@evetev/shared";
+import type { EstadoCobro, SenalesTarjeta } from "@evetev/shared";
+import { RiesgoService } from "../riesgo/riesgo.service";
 import { PAGOS_REPOSITORY, type PagosRepository } from "../pagos/pagos.repository";
 import { puedeTransicionar } from "../pagos/payment-state";
 import { LedgerService } from "../ledger/ledger.service";
@@ -18,6 +19,8 @@ export interface EventoWebhook {
   provider?: "akua" | "combopay";
   providerPaymentId?: string;
   providerMerchantId?: string;
+  /** Lo que el proveedor contó de la tarjeta, si lo cuenta (Fase 11). Sin PAN. */
+  senalesTarjeta?: SenalesTarjeta;
 }
 
 /** Mapea el tipo de evento del proveedor a nuestro estado destino (pagos). */
@@ -48,7 +51,8 @@ export class WebhooksService {
     private readonly merchants: MerchantsService,
     private readonly delivery: OutboundWebhookDeliveryService,
     @Inject(OUTBOUND_WEBHOOKS_REPOSITORY)
-    private readonly webhookRepo: OutboundWebhooksRepository
+    private readonly webhookRepo: OutboundWebhooksRepository,
+    private readonly riesgo: RiesgoService
   ) {}
 
   /**
@@ -103,6 +107,18 @@ export class WebhooksService {
 
     if (destino === "aprobado") {
       await this.ledger.registrarCobroAprobado(pago.tenantId, pago.paymentId);
+      // Antifraude de tarjeta: ya autorizado por el proveedor, lo único que
+      // se puede hacer es retener la salida del dinero si una señal dispara.
+      const cobro = await this.repo.buscarCobroConTarifas(pago.tenantId, pago.paymentId);
+      if (cobro) {
+        await this.riesgo.evaluarPostEvento(
+          pago.tenantId,
+          pago.paymentId,
+          cobro.montoMinor,
+          evento.senalesTarjeta,
+          `webhook:${provider}`
+        );
+      }
     }
 
     void this.enviarWebhookSaliente(pago.tenantId, pago.paymentId, destino);

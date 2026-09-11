@@ -2,14 +2,23 @@ import { Tarjeta, TituloSeccion } from "@/components/seccion";
 import { EstadoCobro } from "@/components/estado-cobro";
 import {
   ErrorApi,
+  estadoProveedores,
   formatoMonto,
+  listarContracargos,
+  listarReembolsos,
   obtenerPago,
   timelinePago,
+  type Contracargo,
   type EventoTimeline,
-  type PagoAdmin
+  type PagoAdmin,
+  type Reembolso
 } from "@/lib/api/evepay";
+import { puede } from "@/lib/auth/permissions";
+import { sesionActual } from "@/lib/auth/rol";
 import { ArrowLeft, BookOpen, GitCommitHorizontal, Webhook } from "lucide-react";
 import Link from "next/link";
+import { Contracargos } from "./contracargos";
+import { Reembolsos } from "./reembolsos";
 import { Reverificar } from "./reverificar";
 
 export const dynamic = "force-dynamic";
@@ -80,10 +89,24 @@ export default async function DetallePagoPage({ params }: { params: Promise<{ id
 
   let pago: PagoAdmin | null = null;
   let eventos: EventoTimeline[] = [];
+  let reembolsos: Reembolso[] = [];
+  let contracargos: Contracargo[] = [];
+  let reembolsaPorApi = false;
   let error: string | null = null;
+  const { rol } = await sesionActual();
 
   try {
-    [pago, eventos] = await Promise.all([obtenerPago(id), timelinePago(id)]);
+    let proveedores;
+    [pago, eventos, reembolsos, contracargos, proveedores] = await Promise.all([
+      obtenerPago(id),
+      timelinePago(id),
+      listarReembolsos(id),
+      listarContracargos(id),
+      estadoProveedores()
+    ]);
+    reembolsaPorApi =
+      proveedores.proveedores.find((p) => p.nombre === pago?.provider)?.capacidades.reembolsos ??
+      false;
   } catch (e) {
     error = e instanceof ErrorApi ? e.message : "No se pudo cargar el cobro.";
   }
@@ -156,6 +179,30 @@ export default async function DetallePagoPage({ params }: { params: Promise<{ id
           <div style={{ marginTop: "1.3rem" }}>
             <Reverificar paymentId={pago.id} />
           </div>
+        </Tarjeta>
+
+        <Tarjeta>
+          <Reembolsos
+            paymentId={pago.id}
+            montoCobro={pago.montoMinor}
+            moneda={pago.moneda}
+            estadoCobro={pago.estado}
+            reembolsos={reembolsos}
+            puedeRegistrar={puede(rol, "reembolsos.registrar")}
+            proveedorReembolsaPorApi={reembolsaPorApi}
+          />
+        </Tarjeta>
+
+        <Tarjeta>
+          <Contracargos
+            paymentId={pago.id}
+            montoCobro={pago.montoMinor}
+            moneda={pago.moneda}
+            estadoCobro={pago.estado}
+            contracargos={contracargos}
+            puedeGestionar={puede(rol, "contracargos.gestionar")}
+            puedeResolver={puede(rol, "contracargos.resolver")}
+          />
         </Tarjeta>
 
         <Tarjeta>

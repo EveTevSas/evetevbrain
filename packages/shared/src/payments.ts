@@ -33,7 +33,9 @@ export const EstadoCobroSchema = z.enum([
   "pendiente",
   "aprobado",
   "fallido",
-  "conciliado"
+  "conciliado",
+  /** Devuelto al pagador, total, por reembolso o contracargo perdido (Fase 11). */
+  "reembolsado"
 ]);
 
 export const CobroSchema = z.object({
@@ -119,6 +121,29 @@ export interface CapacidadesProvider {
   dispersion: boolean;
   /** Métodos que el pagador puede elegir en su checkout. */
   metodos: MetodoPago[];
+  /**
+   * Ejecuta reembolsos por API. Si no, el reembolso es asistido: se paga desde
+   * el banco y se registra (spec reembolsos-contracargos).
+   */
+  reembolsos: boolean;
+}
+
+/**
+ * Lo que un proveedor puede contar de la tarjeta al aprobar un cobro, sin el
+ * PAN: alimenta las reglas de tarjeta del motor de riesgo. Todo opcional
+ * porque cada proveedor trae lo que trae; lo que no viene, no dispara.
+ */
+export interface SenalesTarjeta {
+  /** País del emisor según el BIN (ISO-3166 alfa-2). */
+  paisTarjeta?: string;
+  /** País de la IP del pagador. */
+  paisIp?: string;
+  /** Intentos de pago con la misma tarjeta en la sesión o ventana del proveedor. */
+  intentos?: number;
+  /** Score de riesgo del proveedor, 0 (seguro) a 100 (fraude). */
+  scoreProveedor?: number;
+  /** El proveedor sabe que esa tarjeta ya tuvo contracargos. */
+  tarjetaConContracargo?: boolean;
 }
 
 /** Resultado de comprobar que el proveedor responde y acepta las credenciales. */
@@ -152,4 +177,6 @@ export interface PaymentProvider {
    * lectura; ninguna crea, cambia ni cobra nada.
    */
   verificarSalud(): Promise<SaludProvider>;
+  /** Devuelve dinero al pagador por API; solo si `capacidades.reembolsos`. */
+  reembolsar?(providerPaymentId: string, montoMinor: number): Promise<{ providerRefundId: string }>;
 }

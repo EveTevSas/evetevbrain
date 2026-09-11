@@ -13,6 +13,7 @@ import type { CustodiaAdminService } from "./custodia-admin.service";
 import type { DispersionAdminService } from "./dispersion-admin.service";
 import type { RiesgoAdminService } from "./riesgo-admin.service";
 import type { ReportesAdminService } from "./reportes-admin.service";
+import type { ReembolsosAdminService } from "./reembolsos-admin.service";
 
 const LISTADO: ComercioListado[] = [];
 
@@ -74,6 +75,16 @@ function controllerConMock(): AdminController {
       }
     ]
   } as unknown as ReportesAdminService;
+  const reembolsos = {
+    registrarReembolso: async (...args: unknown[]) => {
+      llamadasCustodia.push(["reembolso", ...args]);
+      return { id: "rb-1" };
+    },
+    resolver: async (...args: unknown[]) => {
+      llamadasCustodia.push(["resolver", ...args]);
+      return { id: "cb-1" };
+    }
+  } as unknown as ReembolsosAdminService;
   const auditoria = { listar: async () => [] } as unknown as AdminAuditService;
   const providers = {
     estado: () => ({ activo: "fake", proveedores: [] })
@@ -92,7 +103,8 @@ function controllerConMock(): AdminController {
     custodia,
     dispersion,
     riesgo,
-    reportes
+    reportes,
+    reembolsos
   );
 }
 
@@ -489,5 +501,59 @@ describe("AdminController — reportes y exportes (Fase 10)", () => {
     await expect(conContexto(SIN_ROL, () => controller.resumen())).rejects.toBeInstanceOf(
       ForbiddenException
     );
+  });
+});
+
+describe("AdminController — reembolsos y contracargos (Fase 11)", () => {
+  const PAGO = "11111111-1111-4111-8111-111111111111";
+  const OPS: RequestContext = { tenantId: "", actor: "ops@evetev.com", role: "ops" };
+  const FIN: RequestContext = { tenantId: "", actor: "fin@evetev.com", role: "finanzas" };
+  const REEMBOLSO = {
+    montoMinor: 10_000,
+    motivo: "Devolución parcial",
+    fecha: "2026-09-11",
+    referenciaPago: "RB-1"
+  };
+
+  it("ops no registra reembolsos ni resuelve contracargos; finanzas sí", async () => {
+    llamadasCustodia.length = 0;
+    const controller = controllerConMock();
+    await expect(
+      conContexto(OPS, () => controller.registrarReembolso(PAGO, REEMBOLSO))
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      conContexto(OPS, () => controller.resolverContracargo(PAGO, { resultado: "perdido" }))
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await conContexto(FIN, () => controller.registrarReembolso(PAGO, REEMBOLSO));
+    expect(llamadasCustodia[0]).toEqual([
+      "reembolso",
+      PAGO,
+      REEMBOLSO,
+      { actor: "fin@evetev.com", rol: "finanzas" }
+    ]);
+  });
+
+  it("un reembolso sin referencia, con monto cero o fecha rara → 400", async () => {
+    const controller = controllerConMock();
+    for (const malo of [
+      { ...REEMBOLSO, montoMinor: 0 },
+      { ...REEMBOLSO, referenciaPago: "" },
+      { ...REEMBOLSO, fecha: "11/09/2026" },
+      { ...REEMBOLSO, motivo: "x" }
+    ]) {
+      await expect(
+        conContexto(FIN, () => controller.registrarReembolso(PAGO, malo))
+      ).rejects.toBeInstanceOf(BadRequestException);
+    }
+  });
+
+  it("resolver exige ganado o perdido", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(FIN, () => controller.resolverContracargo(PAGO, { resultado: "empate" }))
+    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(
+      conContexto(FIN, () => controller.listarContracargos("abierto"))
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

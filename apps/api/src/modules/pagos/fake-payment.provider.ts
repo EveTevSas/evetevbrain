@@ -28,7 +28,8 @@ export class FakePaymentProvider implements PaymentProvider {
     // producción.
     custodia: true,
     dispersion: false,
-    metodos: ["pse", "tarjeta", "efectivo"]
+    metodos: ["pse", "tarjeta", "efectivo"],
+    reembolsos: true
   };
 
   /** No hay nada externo que comprobar: el fake siempre está sano. */
@@ -60,5 +61,13 @@ export class FakePaymentProvider implements PaymentProvider {
 
   async crearMerchant(_input: CrearMerchantInput): Promise<ProviderMerchant> {
     return { providerMerchantId: randomUUID(), estado: "en_revision" };
+  }
+
+  /** El fake devuelve por API al instante; en producción esto lo hace el banco. */
+  async reembolsar(
+    _providerPaymentId: string,
+    _montoMinor: number
+  ): Promise<{ providerRefundId: string }> {
+    return { providerRefundId: randomUUID() };
   }
 }

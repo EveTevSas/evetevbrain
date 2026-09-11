@@ -25,6 +25,8 @@ export interface BalanceDispersion {
   pendienteMinor: number;
   retenidoMinor: number;
   enLoteMinor: number;
+  /** Lo que el comercio debe por reembolsos de cobros ya pagados; el siguiente lote lo descuenta. */
+  deudaMinor: number;
   cuentaCertificada: boolean;
   cuentaDetalle: string | null;
   cobrosDisponibles: number;
@@ -47,6 +49,7 @@ export interface Lote {
   estado: EstadoLote;
   montoMinor: number;
   reservaMinor: number;
+  deudaMinor: number;
   cuenta: {
     banco: string;
     tipoCuenta: string;
@@ -71,7 +74,7 @@ export interface Lote {
 
 export interface ItemLote {
   id: string;
-  tipo: "cobro" | "reserva_liberada";
+  tipo: "cobro" | "reserva_liberada" | "deuda";
   paymentId: string | null;
   referencia: string | null;
   montoCobroMinor: number | null;
@@ -128,6 +131,7 @@ export class DispersionAdminService {
       pendienteMinor: Number(f.pendiente_minor ?? 0),
       retenidoMinor: Number(f.retenido_minor ?? 0),
       enLoteMinor: Number(f.en_lote_minor ?? 0),
+      deudaMinor: Number(f.deuda_minor ?? 0),
       cuentaCertificada: Boolean(f.cuenta_certificada),
       cuentaDetalle: texto(f.cuenta_detalle),
       cobrosDisponibles: Number(f.cobros_disponibles ?? 0),
@@ -145,6 +149,7 @@ export class DispersionAdminService {
       estado: String(f.estado) as EstadoLote,
       montoMinor: Number(f.monto_minor),
       reservaMinor: Number(f.reserva_minor),
+      deudaMinor: Number(f.deuda_minor ?? 0),
       cuenta: {
         banco: String(f.banco),
         tipoCuenta: String(f.tipo_cuenta ?? ""),

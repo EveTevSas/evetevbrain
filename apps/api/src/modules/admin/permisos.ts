@@ -29,7 +29,10 @@ export type Accion =
   | "retenciones.liberar_reserva"
   | "retenciones.liberar_riesgo"
   | "riesgo.reglas"
-  | "riesgo.listas";
+  | "riesgo.listas"
+  | "reembolsos.registrar"
+  | "contracargos.gestionar"
+  | "contracargos.resolver";
 
 const TODOS: Role[] = [Role.SUPER_ADMIN, Role.OPS, Role.FINANZAS];
 const OPS: Role[] = [Role.SUPER_ADMIN, Role.OPS];
@@ -53,7 +56,10 @@ export const PERMISOS: Record<Accion, Role[]> = {
   "retenciones.liberar_reserva": FINANZAS,
   "retenciones.liberar_riesgo": TODOS,
   "riesgo.reglas": SOLO_SUPER,
-  "riesgo.listas": OPS
+  "riesgo.listas": OPS,
+  "reembolsos.registrar": FINANZAS,
+  "contracargos.gestionar": TODOS,
+  "contracargos.resolver": FINANZAS
 };
 
 export function puede(role: string, accion: Accion): boolean {

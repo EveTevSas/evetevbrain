@@ -45,7 +45,8 @@ describe("ProvidersService — estado de la adquirencia (CA-11)", () => {
       monedas: ["COP"],
       custodia: true,
       dispersion: false,
-      metodos: ["pse", "tarjeta", "efectivo"]
+      metodos: ["pse", "tarjeta", "efectivo"],
+      reembolsos: false
     });
     // Akua no tiene modelo de fondos conocido: no custodia, así el ledger
     // falla explícito si alguien lo activa sin revisar la spec.

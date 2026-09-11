@@ -93,7 +93,8 @@ export class ProvidersService {
         monedas: ["COP"],
         custodia: true,
         dispersion: false,
-        metodos: ["pse", "tarjeta", "efectivo"]
+        metodos: ["pse", "tarjeta", "efectivo"],
+        reembolsos: false
       },
       configuracion: [
         {
@@ -158,7 +159,8 @@ export class ProvidersService {
         monedas: ["COP", "USD"],
         custodia: false,
         dispersion: false,
-        metodos: ["tarjeta", "pse"]
+        metodos: ["tarjeta", "pse"],
+        reembolsos: false
       },
       configuracion: [
         {
@@ -211,7 +213,8 @@ export class ProvidersService {
         monedas: ["COP", "USD"],
         custodia: true,
         dispersion: false,
-        metodos: ["pse", "tarjeta", "efectivo"]
+        metodos: ["pse", "tarjeta", "efectivo"],
+        reembolsos: true
       },
       configuracion: [],
       webhook: null,

@@ -173,3 +173,83 @@ describe("ReglaRiesgoSchema (CA-8)", () => {
     ).toBe(true);
   });
 });
+
+/* Reglas de tarjeta (Fase 11): solo disparan cuando el proveedor trajo la señal. */
+describe("evaluarRiesgo — reglas de tarjeta (reembolsos-contracargos CA-5)", () => {
+  const geo = regla({
+    id: "geo",
+    tipo: "geo_mismatch",
+    parametros: { montoMinimoMinor: 100_000 },
+    accion: "retener"
+  });
+  const intentos = regla({
+    id: "int",
+    tipo: "intentos_tarjeta",
+    parametros: { maxIntentos: 3 },
+    accion: "retener"
+  });
+  const score = regla({
+    id: "sc",
+    tipo: "score_proveedor",
+    parametros: { scoreMaximo: 80 },
+    accion: "retener"
+  });
+
+  it("sin señales de tarjeta ninguna dispara", () => {
+    expect(evaluarRiesgo(5_000_000, CON_HISTORIAL, [geo, intentos, score]).disparadas).toEqual([]);
+  });
+
+  it("geo: tarjeta de un país pagando desde otro, por encima del mínimo → retener", () => {
+    const s = { ...CON_HISTORIAL, tarjeta: { paisTarjeta: "VE", paisIp: "CO" } };
+    expect(evaluarRiesgo(150_000, s, [geo]).decision).toBe("retener");
+    expect(evaluarRiesgo(50_000, s, [geo]).decision).toBe("permitir");
+    expect(
+      evaluarRiesgo(150_000, { ...CON_HISTORIAL, tarjeta: { paisTarjeta: "CO", paisIp: "CO" } }, [
+        geo
+      ]).decision
+    ).toBe("permitir");
+  });
+
+  it("intentos y score del proveedor", () => {
+    expect(
+      evaluarRiesgo(10_000, { ...CON_HISTORIAL, tarjeta: { intentos: 4 } }, [intentos]).decision
+    ).toBe("retener");
+    expect(
+      evaluarRiesgo(10_000, { ...CON_HISTORIAL, tarjeta: { intentos: 3 } }, [intentos]).decision
+    ).toBe("permitir");
+    expect(
+      evaluarRiesgo(10_000, { ...CON_HISTORIAL, tarjeta: { scoreProveedor: 91 } }, [score])
+    ).toMatchObject({
+      decision: "retener",
+      disparadas: [{ detalle: "score del proveedor 91 > 80" }]
+    });
+  });
+
+  it("el esquema exige los parámetros de cada tipo de tarjeta", () => {
+    const base = {
+      nombre: "Geo",
+      tenantId: null,
+      accion: "retener",
+      modo: "shadow",
+      prioridad: 50
+    };
+    expect(
+      ReglaRiesgoSchema.safeParse({
+        ...base,
+        tipo: "geo_mismatch",
+        parametros: { montoMinimoMinor: 0 }
+      }).success
+    ).toBe(true);
+    expect(
+      ReglaRiesgoSchema.safeParse({ ...base, tipo: "geo_mismatch", parametros: { limiteMinor: 1 } })
+        .success
+    ).toBe(false);
+    expect(
+      ReglaRiesgoSchema.safeParse({
+        ...base,
+        tipo: "score_proveedor",
+        parametros: { scoreMaximo: 101 }
+      }).success
+    ).toBe(false);
+  });
+});

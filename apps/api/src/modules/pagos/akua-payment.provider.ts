@@ -32,7 +32,8 @@ export class AkuaPaymentProvider implements PaymentProvider {
     // que el ledger falle explícito en vez de asentar con uno inventado.
     custodia: false,
     dispersion: false,
-    metodos: ["tarjeta", "pse"]
+    metodos: ["tarjeta", "pse"],
+    reembolsos: false
   };
 
   private readonly baseUrl: string;

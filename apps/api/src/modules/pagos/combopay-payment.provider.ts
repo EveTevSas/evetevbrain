@@ -46,7 +46,9 @@ export class ComboPayPaymentProvider implements PaymentProvider {
     monedas: ["COP"],
     custodia: true,
     dispersion: false,
-    metodos: ["pse", "tarjeta", "efectivo"]
+    metodos: ["pse", "tarjeta", "efectivo"],
+    // Su API beta no confirma reembolsos: se pagan desde el banco y se registran.
+    reembolsos: false
   };
 
   private readonly baseUrl: string;

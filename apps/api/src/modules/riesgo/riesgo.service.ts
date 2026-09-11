@@ -1,5 +1,25 @@
 import { ConflictException, Inject, Injectable } from "@nestjs/common";
-import { evaluarRiesgo, type ResultadoRiesgo, type SenalesRiesgo } from "@evetev/shared";
+import {
+  evaluarRiesgo,
+  type ResultadoRiesgo,
+  type SenalesRiesgo,
+  type SenalesTarjeta,
+  type TipoReglaRiesgo
+} from "@evetev/shared";
+
+/** Reglas que leen lo que el proveedor cuenta de la tarjeta al aprobar. */
+const TIPOS_TARJETA: ReadonlySet<TipoReglaRiesgo> = new Set([
+  "geo_mismatch",
+  "intentos_tarjeta",
+  "score_proveedor"
+]);
+/** Las reglas del comercio, que ya corrieron antes de crear el cobro. */
+const TIPOS_COMERCIO: ReadonlySet<TipoReglaRiesgo> = new Set([
+  "limite_transaccion",
+  "limite_diario",
+  "limite_mensual",
+  "monto_atipico"
+]);
 import {
   RIESGO_REPOSITORY,
   type Coincidencia,
@@ -30,7 +50,65 @@ export class RiesgoService {
       this.repo.senales(tenantId),
       this.repo.reglasDe(tenantId)
     ]);
-    return { resultado: evaluarRiesgo(montoMinor, senales, reglas), senales };
+    // Antes de crear el cobro solo hay señales del comercio: las de tarjeta
+    // llegan con la aprobación y se evalúan en `evaluarPostEvento`.
+    return {
+      resultado: evaluarRiesgo(
+        montoMinor,
+        senales,
+        reglas.filter((r) => TIPOS_COMERCIO.has(r.tipo))
+      ),
+      senales
+    };
+  }
+
+  /**
+   * Antifraude de tarjeta (spec reembolsos-contracargos CA-5): corre al
+   * aprobarse el cobro con lo que el proveedor contó de la tarjeta. Con
+   * checkout alojado ya no se puede rechazar; lo que se protege es la salida
+   * del dinero, así que toda regla que actúe retiene. Sin señales, no hay nada
+   * que evaluar y no se guarda nada.
+   */
+  async evaluarPostEvento(
+    tenantId: string,
+    paymentId: string,
+    montoMinor: number,
+    tarjeta: SenalesTarjeta | undefined,
+    actor: string
+  ): Promise<ResultadoRiesgo | null> {
+    if (!tarjeta || Object.keys(tarjeta).length === 0) return null;
+    const [base, reglas] = await Promise.all([
+      this.repo.senales(tenantId),
+      this.repo.reglasDe(tenantId)
+    ]);
+    const reglasTarjeta = reglas.filter((r) => TIPOS_TARJETA.has(r.tipo));
+    if (reglasTarjeta.length === 0) return null;
+    const senales = { ...base, tarjeta };
+    const bruto = evaluarRiesgo(montoMinor, senales, reglasTarjeta);
+    const resultado: ResultadoRiesgo = {
+      decision: bruto.disparadas.some((d) => d.actuo) ? "retener" : "permitir",
+      disparadas: bruto.disparadas
+    };
+    const evaluacionId = await this.repo.registrarEvaluacion({
+      tenantId,
+      paymentId,
+      montoMinor,
+      resultado,
+      senales
+    });
+    if (resultado.decision === "retener") {
+      const motivo = resultado.disparadas
+        .filter((d) => d.actuo)
+        .map((d) => `${d.nombre}: ${d.detalle}`)
+        .join("; ");
+      await this.repo.retenerPorRiesgo({
+        paymentId,
+        evaluacionId,
+        motivo,
+        actor: `riesgo:${actor}`
+      });
+    }
+    return resultado;
   }
 
   /** Guarda la evaluación de un cobro rechazado (sin cobro) y arma el 409. */

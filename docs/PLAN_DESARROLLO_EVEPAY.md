@@ -310,22 +310,23 @@ Corre en paralelo al desarrollo. Bloquea la Fase 8 (producción), no las 6 y 7:
 
 ## 5. Lista maestra de specs
 
-| Spec                         | Fase | Cimiento tocado        | Estado                                                             |
-| ---------------------------- | ---- | ---------------------- | ------------------------------------------------------------------ |
-| `multi-tenancy-rls`          | 0    | multi-tenant           | implementada (solo `spec.md`)                                      |
-| `identidad-rbac`             | 0    | RBAC                   | implementada (solo `spec.md`)                                      |
-| `create-payment-idempotency` | 1    | idempotencia/auditoría | implementada; faltan T8 (dogfooding) y el cobro en sandbox de Akua |
-| `provider-webhooks`          | 2    | auditoría              | implementada; su `tasks.md` quedó sin marcar                       |
-| `ledger-posting`             | 3    | ledger                 | implementada; `tasks.md` sin marcar. La revisa la Fase 6           |
-| `reconciliation`             | 4    | conciliación           | implementada; `tasks.md` sin marcar. La revisa la Fase 6           |
-| `merchant-onboarding`        | 5    | —                      | implementada; `tasks.md` sin marcar                                |
-| `provider-combopay`          | 1–2  | idempotencia/auditoría | implementada; falta T6 (sandbox)                                   |
-| `admin-console`              | 5+   | RBAC/auditoría         | implementada; faltan R3–R6 (refactor)                              |
-| `ledger-custodia`            | 6    | ledger                 | por escribir                                                       |
-| `comisiones`                 | 6    | ledger                 | por escribir                                                       |
-| `dispersion`                 | 7    | ledger/idempotencia    | por escribir                                                       |
-| `rbac-operativo`             | 7    | RBAC                   | por escribir                                                       |
-| `riesgo-comercio`            | 9    | auditoría              | por escribir                                                       |
+| Spec                         | Fase | Cimiento tocado        | Estado                                                                                         |
+| ---------------------------- | ---- | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| `multi-tenancy-rls`          | 0    | multi-tenant           | implementada (solo `spec.md`)                                                                  |
+| `identidad-rbac`             | 0    | RBAC                   | implementada (solo `spec.md`)                                                                  |
+| `create-payment-idempotency` | 1    | idempotencia/auditoría | implementada; faltan T8 (dogfooding) y el cobro en sandbox de Akua                             |
+| `provider-webhooks`          | 2    | auditoría              | implementada; su `tasks.md` quedó sin marcar                                                   |
+| `ledger-posting`             | 3    | ledger                 | implementada; `tasks.md` sin marcar. La revisa la Fase 6                                       |
+| `reconciliation`             | 4    | conciliación           | implementada; `tasks.md` sin marcar. La revisa la Fase 6                                       |
+| `merchant-onboarding`        | 5    | —                      | implementada; `tasks.md` sin marcar                                                            |
+| `provider-combopay`          | 1–2  | idempotencia/auditoría | implementada; falta T6 (sandbox)                                                               |
+| `admin-console`              | 5+   | RBAC/auditoría         | implementada; faltan R3–R6 (refactor)                                                          |
+| `ledger-custodia`            | 6    | ledger                 | implementada (11-sep-2026): asiento dividido, consignación asistida, cuadre de custodia        |
+| `comisiones`                 | 6    | ledger                 | implementada (11-sep-2026): tarifas versionadas, IVA 0 %/19 %, desglose compartido             |
+| `dispersion`                 | 7    | ledger/idempotencia    | implementada (11-sep-2026): lotes asistidos, cuatro ojos, retenciones, deuda                   |
+| `rbac-operativo`             | 7    | RBAC                   | implementada (11-sep-2026): roles ops y finanzas, permisos por acción                          |
+| `riesgo-comercio`            | 9    | auditoría              | implementada (11-sep-2026): reglas con shadow, retención de riesgo, lista restrictiva          |
+| `reembolsos-contracargos`    | 11   | ledger/pagos           | implementada (11-sep-2026) en lo construible sin Akua: asistido, reglas de tarjeta post-evento |
 
 ---
 

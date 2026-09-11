@@ -15,7 +15,8 @@ function proveedorAgregador(): PaymentProvider {
       monedas: ["COP"],
       custodia: true,
       dispersion: false,
-      metodos: ["pse"]
+      metodos: ["pse"],
+      reembolsos: false
     },
     crearCobro: async () => {
       throw new Error("no se usa aquí");

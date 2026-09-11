@@ -225,6 +225,7 @@ export default async function DispersionPage() {
                     <th style={{ ...encabezado, textAlign: "right" }}>Pendiente</th>
                     <th style={{ ...encabezado, textAlign: "right" }}>Retenido</th>
                     <th style={{ ...encabezado, textAlign: "right" }}>En lote</th>
+                    <th style={{ ...encabezado, textAlign: "right" }}>Deuda</th>
                     <th style={encabezado}>Cuenta</th>
                     <th style={{ ...encabezado, textAlign: "right" }}></th>
                   </tr>

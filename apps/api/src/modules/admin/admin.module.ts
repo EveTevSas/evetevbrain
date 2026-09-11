@@ -20,6 +20,7 @@ import { CustodiaAdminService } from "./custodia-admin.service";
 import { DispersionAdminService } from "./dispersion-admin.service";
 import { RiesgoAdminService } from "./riesgo-admin.service";
 import { ReportesAdminService } from "./reportes-admin.service";
+import { ReembolsosAdminService } from "./reembolsos-admin.service";
 
 @Module({
   imports: [MerchantsModule, LedgerModule, ConciliacionModule, RiesgoModule],
@@ -49,7 +50,8 @@ import { ReportesAdminService } from "./reportes-admin.service";
     CustodiaAdminService,
     DispersionAdminService,
     RiesgoAdminService,
-    ReportesAdminService
+    ReportesAdminService,
+    ReembolsosAdminService
   ]
 })
 export class AdminModule {}
