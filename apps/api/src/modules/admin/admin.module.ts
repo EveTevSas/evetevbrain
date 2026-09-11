@@ -14,6 +14,7 @@ import { PerfilComercioService } from "./perfil-comercio.service";
 import { ProvidersService } from "./providers.service";
 import { PagosAdminService } from "./pagos-admin.service";
 import { ConciliacionAdminService } from "./conciliacion-admin.service";
+import { TarifasAdminService } from "./tarifas-admin.service";
 
 @Module({
   imports: [MerchantsModule, LedgerModule, ConciliacionModule],
@@ -38,7 +39,8 @@ import { ConciliacionAdminService } from "./conciliacion-admin.service";
     ProvidersService,
     PagosAdminService,
     ConciliacionAdminService,
-    PerfilComercioService
+    PerfilComercioService,
+    TarifasAdminService
   ]
 })
 export class AdminModule {}

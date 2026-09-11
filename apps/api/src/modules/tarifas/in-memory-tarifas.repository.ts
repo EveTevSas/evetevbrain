@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { TarifaComercio, TarifaProveedor } from "@evetev/shared";
 import type {
+  TarifaVigenteDeComercio,
   TarifasRepository,
   VersionTarifaComercio,
   VersionTarifaProveedor
@@ -17,7 +18,7 @@ import type {
  */
 export class InMemoryTarifasRepository implements TarifasRepository {
   readonly tenants = new Set<string>();
-  readonly comercio: (VersionTarifaComercio & { tenantId: string })[] = [];
+  readonly comercio: TarifaVigenteDeComercio[] = [];
   readonly proveedor: VersionTarifaProveedor[] = [];
   readonly rastros: { actor: string; accion: string; objetoId: string }[] = [];
 
@@ -87,5 +88,11 @@ export class InMemoryTarifasRepository implements TarifasRepository {
       .filter((v) => v.provider === provider)
       .slice()
       .reverse();
+  }
+
+  async tarifasVigentes(): Promise<TarifaVigenteDeComercio[]> {
+    const porTenant = new Map<string, TarifaVigenteDeComercio>();
+    for (const v of this.comercio) porTenant.set(v.tenantId, v);
+    return [...porTenant.values()];
   }
 }

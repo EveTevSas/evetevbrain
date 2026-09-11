@@ -272,7 +272,34 @@ as $$
   order by t.vigente_desde desc, t.secuencia desc;
 $$;
 
+-- La tarifa vigente de TODOS los comercios, para el listado de la consola
+-- (quién está sin tarifa no puede cobrar) y para avisar, al cambiar la del
+-- proveedor, a cuántos comercios les quedaría margen negativo.
+create or replace function evepay.admin_tarifas_vigentes()
+returns table (
+  tenant_id     uuid,
+  id            uuid,
+  bps           int,
+  fijo_minor    bigint,
+  iva_bps       int,
+  vigente_desde timestamptz,
+  creada_por    text,
+  creada_en     timestamptz
+)
+language sql
+security definer
+set search_path = evepay, pg_temp
+stable
+as $$
+  select distinct on (t.tenant_id)
+         t.tenant_id, t.id, t.bps, t.fijo_minor, t.iva_bps, t.vigente_desde, t.creada_por, t.creada_en
+  from evepay.tarifas_comercio t
+  where t.vigente_desde <= now()
+  order by t.tenant_id, t.vigente_desde desc, t.secuencia desc;
+$$;
+
 grant execute on function evepay.tarifa_vigente(uuid) to evepay_api;
+grant execute on function evepay.admin_tarifas_vigentes() to evepay_api;
 grant execute on function evepay.tarifa_proveedor_vigente(text) to evepay_api;
 grant execute on function evepay.admin_asignar_tarifa(uuid, int, bigint, int, text) to evepay_api;
 grant execute on function evepay.admin_asignar_tarifa_proveedor(text, int, bigint, boolean, text) to evepay_api;

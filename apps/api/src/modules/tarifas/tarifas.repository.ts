@@ -47,6 +47,12 @@ export interface TarifasRepository {
   historialTarifas(tenantId: string): Promise<VersionTarifaComercio[]>;
   /** Todas las versiones del proveedor, la vigente primero. */
   historialTarifasProveedor(provider: string): Promise<VersionTarifaProveedor[]>;
+  /** La vigente de cada comercio que tiene tarifa (los que no, no aparecen). */
+  tarifasVigentes(): Promise<TarifaVigenteDeComercio[]>;
+}
+
+export interface TarifaVigenteDeComercio extends VersionTarifaComercio {
+  tenantId: string;
 }
 
 export const TARIFAS_REPOSITORY = Symbol("TARIFAS_REPOSITORY");

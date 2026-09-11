@@ -8,11 +8,25 @@ import type { ProvidersService } from "./providers.service";
 import type { PagosAdminService } from "./pagos-admin.service";
 import type { ConciliacionAdminService } from "./conciliacion-admin.service";
 import type { PerfilComercioService } from "./perfil-comercio.service";
+import type { TarifasAdminService } from "./tarifas-admin.service";
 
 const LISTADO: ComercioListado[] = [];
 
+/** Lo que el controller le pasó al servicio de tarifas, para afirmar sobre ello. */
+const llamadasTarifas: unknown[][] = [];
+
 function controllerConMock(): AdminController {
   const service = { listarComercios: async () => LISTADO } as unknown as AdminService;
+  const tarifas = {
+    asignarTarifaComercio: async (...args: unknown[]) => {
+      llamadasTarifas.push(args);
+      return { id: "v-nueva" };
+    },
+    asignarTarifaProveedor: async (...args: unknown[]) => {
+      llamadasTarifas.push(args);
+      return { id: "v-nueva" };
+    }
+  } as unknown as TarifasAdminService;
   const auditoria = { listar: async () => [] } as unknown as AdminAuditService;
   const providers = {
     estado: () => ({ activo: "fake", proveedores: [] })
@@ -20,7 +34,7 @@ function controllerConMock(): AdminController {
   const pagos = {} as unknown as PagosAdminService;
   const conciliacion = {} as unknown as ConciliacionAdminService;
   const perfiles = {} as unknown as PerfilComercioService;
-  return new AdminController(service, auditoria, providers, pagos, conciliacion, perfiles);
+  return new AdminController(service, auditoria, providers, pagos, conciliacion, perfiles, tarifas);
 }
 
 function conContexto<T>(ctx: RequestContext, fn: () => Promise<T>): Promise<T> {
@@ -116,6 +130,79 @@ describe("AdminController — corregir el nombre (H4)", () => {
     const controller = controllerConMock();
     await expect(
       conContexto(SUPER_ADMIN, () => controller.renombrarComercio("no-es-uuid", NOMBRES))
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+});
+
+describe("AdminController — tarifas (comisiones CA-8, CA-11)", () => {
+  const TENANT = "11111111-1111-4111-8111-111111111111";
+  const TARIFA = { bps: 290, fijoMinor: 30_000, ivaBps: 1900 };
+
+  it("sin el rol no se lee ni se cambia ninguna tarifa", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SIN_ROL, () => controller.asignarTarifaComercio(TENANT, TARIFA))
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      conContexto(SIN_ROL, () => controller.tarifaProveedor("combopay"))
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it("CA-8: porcentaje fuera de 0–10 000 bps o fijo negativo → 400", async () => {
+    const controller = controllerConMock();
+    for (const mala of [
+      { ...TARIFA, bps: -1 },
+      { ...TARIFA, bps: 10_001 },
+      { ...TARIFA, bps: 2.5 },
+      { ...TARIFA, fijoMinor: -1 }
+    ]) {
+      await expect(
+        conContexto(SUPER_ADMIN, () => controller.asignarTarifaComercio(TENANT, mala))
+      ).rejects.toBeInstanceOf(BadRequestException);
+    }
+  });
+
+  it("CA-11: un IVA que no sea 0 % ni 19 % → 400, y la respuesta dice cuáles valen", async () => {
+    const controller = controllerConMock();
+    for (const iva of [500, 1600, 19, "1900"]) {
+      const error = await conContexto(SUPER_ADMIN, () =>
+        controller.asignarTarifaComercio(TENANT, { ...TARIFA, ivaBps: iva })
+      ).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(BadRequestException);
+      expect(JSON.stringify((error as BadRequestException).getResponse())).toMatch(/0 % o 19 %/);
+    }
+  });
+
+  it("una tarifa válida llega al servicio tal cual, con el actor del JWT", async () => {
+    llamadasTarifas.length = 0;
+    const controller = controllerConMock();
+    await conContexto(SUPER_ADMIN, () => controller.asignarTarifaComercio(TENANT, TARIFA));
+    expect(llamadasTarifas[0]).toEqual([TENANT, TARIFA, "ops@evetev.com"]);
+  });
+
+  it("la del proveedor exige declarar si descuenta en la consignación", async () => {
+    llamadasTarifas.length = 0;
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SUPER_ADMIN, () =>
+        controller.asignarTarifaProveedor("combopay", { bps: 0, fijoMinor: 80_000 })
+      )
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    await conContexto(SUPER_ADMIN, () =>
+      controller.asignarTarifaProveedor("combopay", {
+        bps: 0,
+        fijoMinor: 80_000,
+        descuentaEnConsignacion: true
+      })
+    );
+    expect(llamadasTarifas[0]?.[0]).toBe("combopay");
+  });
+
+  it("un tenantId que no es UUID → 400 antes de tocar nada", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SUPER_ADMIN, () => controller.tarifaComercio("no-es-uuid"))
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

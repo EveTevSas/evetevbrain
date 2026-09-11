@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import type { IvaBps, TarifaComercio, TarifaProveedor } from "@evetev/shared";
 import type { Db } from "../../database/drizzle";
 import type {
+  TarifaVigenteDeComercio,
   TarifasRepository,
   VersionTarifaComercio,
   VersionTarifaProveedor
@@ -135,5 +136,12 @@ export class DrizzleTarifasRepository implements TarifasRepository {
       sql`SELECT * FROM evepay.admin_historial_tarifas_proveedor(${provider})`
     );
     return filas.map((f) => this.aProveedor(f));
+  }
+
+  async tarifasVigentes(): Promise<TarifaVigenteDeComercio[]> {
+    const filas = await this.db.execute<FilaTarifaComercio & { tenant_id: string }>(
+      sql`SELECT * FROM evepay.admin_tarifas_vigentes()`
+    );
+    return filas.map((f) => ({ ...this.aComercio(f), tenantId: f.tenant_id }));
   }
 }

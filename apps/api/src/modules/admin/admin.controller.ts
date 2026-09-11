@@ -11,7 +11,12 @@ import {
   Put,
   Query
 } from "@nestjs/common";
-import { RangoFechasSchema, type SaludProvider } from "@evetev/shared";
+import {
+  RangoFechasSchema,
+  TarifaComercioSchema,
+  TarifaProveedorSchema,
+  type SaludProvider
+} from "@evetev/shared";
 import { z } from "zod";
 import { currentContextOrNull } from "../../common/request-context";
 import { Role } from "../identidad/roles";
@@ -25,6 +30,16 @@ import { AdminAuditService, type AccionAdmin } from "./admin-audit.service";
 import { CrearComercioSchema, PerfilComercioSchema } from "./perfil-comercio.schema";
 import { PerfilComercioService, type PerfilGuardado } from "./perfil-comercio.service";
 import { ProvidersService, type EstadoProveedores } from "./providers.service";
+import {
+  TarifasAdminService,
+  type TarifaComercioAdmin,
+  type TarifaProveedorAdmin
+} from "./tarifas-admin.service";
+import type {
+  TarifaVigenteDeComercio,
+  VersionTarifaComercio,
+  VersionTarifaProveedor
+} from "../tarifas/tarifas.repository";
 import {
   ConciliacionAdminService,
   type CorridaConciliacion,
@@ -80,7 +95,8 @@ export class AdminController {
     private readonly providers: ProvidersService,
     private readonly pagos: PagosAdminService,
     private readonly conciliacion: ConciliacionAdminService,
-    private readonly perfiles: PerfilComercioService
+    private readonly perfiles: PerfilComercioService,
+    private readonly tarifas: TarifasAdminService
   ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
@@ -239,6 +255,45 @@ export class AdminController {
     return this.admin.cambiarEstadoKyc(tenantId, parsed.data.estado, this.actor());
   }
 
+  /**
+   * GET /v1/admin/merchants/:tenantId/tarifa — la vigente y el historial de lo
+   * que EvePay le cobra al comercio (spec `comisiones`).
+   */
+  @Get("merchants/:tenantId/tarifa")
+  async tarifaComercio(@Param("tenantId") tenantId: string): Promise<TarifaComercioAdmin> {
+    this.verificarAdmin();
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+    return this.tarifas.tarifaComercio(tenantId);
+  }
+
+  /**
+   * PUT /v1/admin/merchants/:tenantId/tarifa — agrega una versión (CA-1). Los
+   * rangos y el IVA (solo 0 % o 19 %) se validan aquí (CA-8, CA-11) y otra vez
+   * en la base, que es la que manda.
+   */
+  @Put("merchants/:tenantId/tarifa")
+  @HttpCode(200)
+  async asignarTarifaComercio(
+    @Param("tenantId") tenantId: string,
+    @Body() body: unknown
+  ): Promise<VersionTarifaComercio> {
+    this.verificarAdmin();
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+
+    const parsed = TarifaComercioSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.tarifas.asignarTarifaComercio(tenantId, parsed.data, this.actor());
+  }
+
+  /** GET /v1/admin/tarifas — la tarifa vigente de cada comercio que tiene una. */
+  @Get("tarifas")
+  async tarifasVigentes(): Promise<TarifaVigenteDeComercio[]> {
+    this.verificarAdmin();
+    return this.tarifas.tarifasVigentes();
+  }
+
   /** GET /v1/admin/providers — estado de la adquirencia (CA-11, CA-13). */
   @Get("providers")
   async listarProveedores(): Promise<EstadoProveedores> {
@@ -268,6 +323,35 @@ export class AdminController {
     });
 
     return salud;
+  }
+
+  /**
+   * GET /v1/admin/providers/:provider/tarifa — lo que el proveedor le cobra a
+   * EvePay, con su historial y si lo descuenta de la consignación.
+   */
+  @Get("providers/:provider/tarifa")
+  async tarifaProveedor(@Param("provider") provider: string): Promise<TarifaProveedorAdmin> {
+    this.verificarAdmin();
+    return this.tarifas.tarifaProveedor(provider);
+  }
+
+  /**
+   * PUT /v1/admin/providers/:provider/tarifa — agrega una versión. Afecta a
+   * todos los comercios a la vez desde el siguiente cobro.
+   */
+  @Put("providers/:provider/tarifa")
+  @HttpCode(200)
+  async asignarTarifaProveedor(
+    @Param("provider") provider: string,
+    @Body() body: unknown
+  ): Promise<VersionTarifaProveedor> {
+    this.verificarAdmin();
+
+    const parsed = TarifaProveedorSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.tarifas.asignarTarifaProveedor(provider, parsed.data, this.actor());
   }
 
   /** GET /v1/admin/pagos — listado cross-tenant con filtros (CA-15). */
