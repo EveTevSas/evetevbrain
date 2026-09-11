@@ -247,6 +247,37 @@ export class AdminService {
   }
 
   /** Lista todos los comercios (cross-tenant via SECURITY DEFINER). */
+  /**
+   * Corrige la razón social y el nombre visible. Son del tenant, no del
+   * perfil: por eso tienen su propia acción y no exigen que el perfil esté
+   * completo (los comercios creados antes de que se pidiera no lo tienen).
+   */
+  async renombrarComercio(
+    tenantId: string,
+    legalName: string,
+    displayName: string,
+    actor: string
+  ): Promise<{ tenantId: string; legalName: string; displayName: string }> {
+    const nombres = await this.repo.renombrarTenant({
+      tenantId,
+      legalName,
+      displayName,
+      rastro: {
+        actor,
+        accion: "comercio.renombrar",
+        objetoTipo: "tenant",
+        objetoId: tenantId,
+        detalle: { legalName, displayName }
+      }
+    });
+
+    if (nombres === null) {
+      throw new NotFoundException("Comercio no encontrado.");
+    }
+
+    return { tenantId, ...nombres };
+  }
+
   async listarComercios(): Promise<ComercioListado[]> {
     return this.armar(await this.repo.listarComercios());
   }

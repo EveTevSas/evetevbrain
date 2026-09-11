@@ -182,3 +182,34 @@ export async function cambiarKyc(
     return comoResultado(error);
   }
 }
+
+/**
+ * Corrige la razón social y el nombre visible. Va aparte del perfil porque son
+ * del comercio, no de su perfil: un comercio antiguo sin perfil también tiene
+ * que poder corregirse.
+ */
+export async function renombrarComercio(
+  tenantId: string,
+  formulario: FormData
+): Promise<Resultado<{ tenantId: string; legalName: string; displayName: string }>> {
+  const legalName = String(formulario.get("legalName") ?? "").trim();
+  const displayName = String(formulario.get("displayName") ?? "").trim();
+
+  if (legalName.length < 3) {
+    return { ok: false, error: "La razón social debe tener al menos 3 caracteres." };
+  }
+  if (displayName.length < 2) {
+    return { ok: false, error: "El nombre visible debe tener al menos 2 caracteres." };
+  }
+
+  try {
+    const datos = await apiPut<{ tenantId: string; legalName: string; displayName: string }>(
+      `/admin/merchants/${tenantId}/nombre`,
+      { legalName, displayName }
+    );
+    revalidatePath("/comercios");
+    return { ok: true, datos };
+  } catch (error) {
+    return comoResultado(error);
+  }
+}

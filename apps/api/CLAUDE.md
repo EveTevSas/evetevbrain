@@ -20,7 +20,12 @@ Prueba rápida: `GET http://localhost:3001/v1/health` → `{"status":"ok","servi
   "residente". Si un cambio necesita ese concepto aquí, el diseño está mal.
 - Todo pago pasa por la interfaz `PaymentProvider` (contrato en
   `@evetev/shared`). Local/CI usan `FakePaymentProvider`
-  (`PAYMENT_PROVIDER=fake`); Akua es la implementación real.
+  (`PAYMENT_PROVIDER=fake`); ComboPay es la implementación real y Akua queda
+  en reserva.
+- **EvePay custodia el dinero de los comercios.** ComboPay consigna todo a la
+  cuenta de recaudo de EvePay y EvePay dispersa a cada comercio (modelo de
+  fondos en `docs/PLAN_DESARROLLO_EVEPAY.md`). Un cambio que mueva fondos no
+  está listo si no mantiene el cuadre de custodia.
 - Cambios en pagos, ledger, conciliación, multi-tenancy o RBAC exigen **spec
   previa** en `specs/evepay/<feature>/` (EARS) y sus tests.
 - La base usa el rol `evepay_api` con RLS: nunca owner, nunca BYPASSRLS.

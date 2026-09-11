@@ -88,6 +88,22 @@ export class InMemoryComerciosRepository implements ComerciosRepository {
     return args.estado;
   }
 
+  async renombrarTenant(args: {
+    tenantId: string;
+    legalName: string;
+    displayName: string;
+    rastro: RastroAdmin;
+  }): Promise<{ legalName: string; displayName: string } | null> {
+    const t = this.tenants.get(args.tenantId);
+    if (!t) return null;
+    const antes = { legalName: t.legalName, displayName: t.displayName };
+    t.legalName = args.legalName;
+    t.displayName = args.displayName;
+    // Igual que el adaptador real: el rastro lleva los nombres de antes.
+    this.rastros.push({ ...args.rastro, detalle: { ...args.rastro.detalle, antes } });
+    return { legalName: args.legalName, displayName: args.displayName };
+  }
+
   async listarComercios(): Promise<FilaComercio[]> {
     const filas: FilaComercio[] = [];
     for (const [tenantId, t] of this.tenants) {

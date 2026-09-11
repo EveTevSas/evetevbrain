@@ -144,6 +144,13 @@ cobrar. La respuesta fue **no**, y de ahí salieron tres cambios:
   `null` por la base eran rechazados al volver a guardarlos, de modo que leer
   un perfil y guardarlo sin tocar nada fallaba (CA-24).
 
+- [x] H4 — Corregir la razón social y el nombre visible (11-sep-2026). Faltaba:
+      la edición del perfil los excluía por ser del tenant y no quedaba ningún
+      otro camino. Va con acción propia (`PUT /v1/admin/merchants/:tenantId/nombre`)
+      y no dentro del perfil, porque los comercios anteriores al perfil no lo
+      tienen y no deberían llenarlo entero para arreglar un nombre. El rastro
+      guarda los nombres de antes.
+
 ## Refactor del módulo admin (premisa 6)
 
 Va servicio por servicio, no de una vez: cada uno se puede verificar contra la

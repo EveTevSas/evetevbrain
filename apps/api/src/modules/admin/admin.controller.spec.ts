@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ForbiddenException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { requestStorage, type RequestContext } from "../../common/request-context";
 import { AdminController } from "./admin.controller";
 import type { AdminService, ComercioListado } from "./admin.service";
@@ -84,5 +84,38 @@ describe("AdminController — acceso (CA-3 de admin-console)", () => {
   it("los endpoints ya no reciben ningún parámetro de credencial", () => {
     // Si alguien reintroduce un header de acceso, la aridad cambia y esto falla.
     expect(controllerConMock().listarComercios.length).toBe(0);
+  });
+});
+
+describe("AdminController — corregir el nombre (H4)", () => {
+  const TENANT = "11111111-1111-4111-8111-111111111111";
+  const NOMBRES = { legalName: "Comercio Nuevo SAS", displayName: "Nuevo" };
+
+  it("sin el rol no se puede renombrar", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SIN_ROL, () => controller.renombrarComercio(TENANT, NOMBRES))
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it("aplica las mismas reglas del alta: nombres demasiado cortos → 400", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SUPER_ADMIN, () =>
+        controller.renombrarComercio(TENANT, { ...NOMBRES, legalName: "AB" })
+      )
+    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(
+      conContexto(SUPER_ADMIN, () =>
+        controller.renombrarComercio(TENANT, { ...NOMBRES, displayName: "N" })
+      )
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it("un tenantId que no es UUID → 400 antes de tocar nada", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SUPER_ADMIN, () => controller.renombrarComercio("no-es-uuid", NOMBRES))
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

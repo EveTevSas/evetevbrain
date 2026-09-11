@@ -291,3 +291,47 @@ describe("AdminService — listado y ficha", () => {
     expect(await m.service.obtenerComercio("99999999-9999-4999-8999-999999999999")).toBeNull();
   });
 });
+
+describe("AdminService — corregir el nombre", () => {
+  it("cambia razón social y nombre visible, y la ficha los muestra", async () => {
+    const m = montar();
+    const creado = await m.service.crearComercio(ENTRADA, "ops@evetev.com");
+
+    await m.service.renombrarComercio(creado.tenantId, "Comercio Nuevo SAS", "Nuevo", "ops");
+
+    const ficha = await m.service.obtenerComercio(creado.tenantId);
+    expect(ficha?.legalName).toBe("Comercio Nuevo SAS");
+    expect(ficha?.displayName).toBe("Nuevo");
+  });
+
+  it("el rastro guarda cómo se llamaba antes", async () => {
+    const m = montar();
+    const creado = await m.service.crearComercio(ENTRADA, "ops@evetev.com");
+
+    await m.service.renombrarComercio(creado.tenantId, "Comercio Nuevo SAS", "Nuevo", "ops");
+
+    const rastro = m.repo.rastros.find((x) => x.accion === "comercio.renombrar");
+    expect(rastro?.actor).toBe("ops");
+    expect(rastro?.detalle).toMatchObject({
+      legalName: "Comercio Nuevo SAS",
+      displayName: "Nuevo",
+      antes: { legalName: "Comercio Demo SAS", displayName: "Demo" }
+    });
+  });
+
+  it("no exige perfil: los comercios antiguos también se pueden corregir", async () => {
+    const m = montar();
+    const tenantId = await m.repo.crearTenant("Viejo SAS", "Viejo");
+
+    const r = await m.service.renombrarComercio(tenantId, "Viejo y Corregido SAS", "Viejo", "ops");
+    expect(r.legalName).toBe("Viejo y Corregido SAS");
+  });
+
+  it("renombrar un comercio inexistente da 404 y no deja rastro", async () => {
+    const m = montar();
+    await expect(
+      m.service.renombrarComercio("99999999-9999-4999-8999-999999999999", "Nada SAS", "Nada", "ops")
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(m.repo.rastros.some((x) => x.accion === "comercio.renombrar")).toBe(false);
+  });
+});

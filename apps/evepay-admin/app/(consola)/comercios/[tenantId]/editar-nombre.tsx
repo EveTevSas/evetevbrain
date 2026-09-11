@@ -1,69 +1,50 @@
 "use client";
 
-import { CamposPaso, PASOS, validarPaso } from "../campos-perfil";
-import { guardarPerfil } from "../acciones";
+import { Campo, entrada } from "@/components/campos";
 import { Pencil, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent } from "react";
+import { renombrarComercio } from "../acciones";
 
 const boton: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: "0.4rem",
   borderRadius: 9,
-  padding: "0.6rem 1.1rem",
-  fontSize: "0.83rem",
+  padding: "0.45rem 0.85rem",
+  fontSize: "0.78rem",
   fontWeight: 700,
   cursor: "pointer"
 };
 
 /**
- * Edición del perfil de un comercio existente.
- *
- * A diferencia del alta, aquí NO va por pasos: editando se viene a cambiar un
- * campo concreto, y obligar a recorrer cinco pantallas para corregir un
- * teléfono sería peor que el formulario largo. Se muestran todas las secciones
- * seguidas, que ya vienen agrupadas.
+ * Corrección de la razón social y el nombre visible. Va aparte de "Editar
+ * datos" porque son del comercio, no de su perfil: los comercios creados antes
+ * de que se pidiera el perfil no lo tienen, y no deberían tener que llenarlo
+ * entero para arreglar un nombre mal escrito.
  */
-export function EditarPerfil({
+export function EditarNombre({
   tenantId,
-  perfil,
-  beneficiarios
+  legalName,
+  displayName
 }: {
   tenantId: string;
-  perfil: Record<string, unknown> | null;
-  beneficiarios: Record<string, unknown>[];
+  legalName: string;
+  displayName: string;
 }) {
   const router = useRouter();
   const [abierto, setAbierto] = useState(false);
   const [pendiente, iniciar] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-
-  const [tipoPersona, setTipoPersona] = useState<string>(
-    (perfil?.tipo_persona as string) ?? "juridica"
-  );
-
-  const inicial = perfil ? { ...perfil, beneficiarios } : undefined;
 
   function enviar(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.currentTarget;
-
-    // Las mismas comprobaciones del alta: editando también se puede dejar un
-    // NIT sin dígito o una cuenta a medias.
-    for (let i = 0; i < PASOS.length; i++) {
-      const problema = validarPaso(i, form);
-      if (problema) {
-        setError(problema);
-        return;
-      }
-    }
+    const datos = new FormData(e.currentTarget);
     setError(null);
 
     iniciar(async () => {
-      const r = await guardarPerfil(tenantId, new FormData(form));
+      const r = await renombrarComercio(tenantId, datos);
       if (r.ok) {
         setGuardado(true);
         setAbierto(false);
@@ -76,26 +57,22 @@ export function EditarPerfil({
 
   if (!abierto) {
     return (
-      <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
+      <div style={{ display: "flex", gap: "0.6rem", alignItems: "center", marginBottom: "1.2rem" }}>
         <button
           type="button"
           onClick={() => {
             setAbierto(true);
             setGuardado(false);
+            setError(null);
           }}
-          style={{
-            ...boton,
-            background: "#fff",
-            border: "1px solid #E2E8F0",
-            color: "#4b3075"
-          }}
+          style={{ ...boton, background: "#fff", border: "1px solid #E2E8F0", color: "#4b3075" }}
         >
-          <Pencil size={14} />
-          {perfil ? "Editar datos" : "Completar datos"}
+          <Pencil size={13} />
+          Editar nombre
         </button>
         {guardado && (
           <span role="status" style={{ fontSize: "0.8rem", color: "#15803D", fontWeight: 600 }}>
-            Guardado.
+            Nombre actualizado.
           </span>
         )}
       </div>
@@ -104,22 +81,52 @@ export function EditarPerfil({
 
   return (
     <form
-      ref={formRef}
       onSubmit={enviar}
-      style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}
+      style={{
+        background: "#fff",
+        border: "1px solid #E2E8F0",
+        borderRadius: 12,
+        padding: "1rem 1.1rem",
+        marginBottom: "1.2rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.9rem",
+        maxWidth: 620
+      }}
     >
-      {/* La razón social y el nombre visible son del tenant, no del perfil:
-          se corrigen con "Editar nombre", arriba en la ficha. */}
-      {PASOS.map((_, i) => (
-        <CamposPaso
-          key={i}
-          paso={i}
-          inicial={inicial}
-          tipoPersona={tipoPersona}
-          onTipoPersona={setTipoPersona}
-          conIdentidadDelTenant={false}
-        />
-      ))}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: "0.9rem"
+        }}
+      >
+        <Campo etiqueta="Razón social" requerido ayuda="Como figura en el RUT">
+          <input
+            name="legalName"
+            defaultValue={legalName}
+            required
+            minLength={3}
+            maxLength={200}
+            autoFocus
+            style={entrada}
+          />
+        </Campo>
+        <Campo etiqueta="Nombre visible" requerido ayuda="Como se verá en la consola">
+          <input
+            name="displayName"
+            defaultValue={displayName}
+            required
+            minLength={2}
+            maxLength={100}
+            style={entrada}
+          />
+        </Campo>
+      </div>
+
+      <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748B" }}>
+        El cambio queda en la auditoría junto con el nombre anterior.
+      </p>
 
       {error && (
         <p
@@ -152,8 +159,8 @@ export function EditarPerfil({
             cursor: pendiente ? "not-allowed" : "pointer"
           }}
         >
-          <Save size={14} />
-          {pendiente ? "Guardando…" : "Guardar cambios"}
+          <Save size={13} />
+          {pendiente ? "Guardando…" : "Guardar nombre"}
         </button>
         <button
           type="button"
