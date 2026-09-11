@@ -45,6 +45,9 @@ export const payments = evepay.table("payments", {
   provider: text("provider").notNull().default("akua"),
   providerPaymentId: text("provider_payment_id"),
   checkoutUrl: text("checkout_url"),
+  /** Versiones de tarifa con las que se creó el cobro; null antes de 0015. */
+  tarifaId: uuid("tarifa_id"),
+  tarifaProveedorId: uuid("tarifa_proveedor_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
 });
@@ -124,6 +127,30 @@ export const merchantWebhooks = evepay.table("merchant_webhooks", {
   creadaEn: timestamp("creada_en", { withTimezone: true }).notNull().defaultNow()
 });
 
+export const tarifasComercio = evepay.table("tarifas_comercio", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id").notNull(),
+  bps: integer("bps").notNull(),
+  fijoMinor: bigint("fijo_minor", { mode: "number" }).notNull(),
+  ivaBps: integer("iva_bps").notNull(),
+  vigenteDesde: timestamp("vigente_desde", { withTimezone: true }).notNull().defaultNow(),
+  secuencia: bigint("secuencia", { mode: "number" }).notNull(),
+  creadaPor: text("creada_por").notNull(),
+  creadaEn: timestamp("creada_en", { withTimezone: true }).notNull().defaultNow()
+});
+
+export const tarifasProveedor = evepay.table("tarifas_proveedor", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  provider: text("provider").notNull(),
+  bps: integer("bps").notNull(),
+  fijoMinor: bigint("fijo_minor", { mode: "number" }).notNull(),
+  descuentaEnConsignacion: boolean("descuenta_en_consignacion").notNull(),
+  vigenteDesde: timestamp("vigente_desde", { withTimezone: true }).notNull().defaultNow(),
+  secuencia: bigint("secuencia", { mode: "number" }).notNull(),
+  creadaPor: text("creada_por").notNull(),
+  creadaEn: timestamp("creada_en", { withTimezone: true }).notNull().defaultNow()
+});
+
 export const schema = {
   tenants,
   merchantApiKeys,
@@ -134,5 +161,7 @@ export const schema = {
   webhookEvents,
   ledgerEntries,
   ledgerLines,
-  merchantWebhooks
+  merchantWebhooks,
+  tarifasComercio,
+  tarifasProveedor
 };
