@@ -14,6 +14,9 @@ import type { CrearMerchantInput, ProviderMerchant } from "./merchants";
 
 export const MonedaSchema = z.enum(["COP", "USD"]);
 
+/** Cómo paga el pagador dentro del checkout del proveedor. */
+export const MetodoPagoSchema = z.enum(["pse", "tarjeta", "efectivo", "billetera", "bre_b"]);
+
 export const CrearCobroInputSchema = z.object({
   /** Comercio (tenant de EvePay) que cobra. */
   merchantId: z.string().uuid(),
@@ -65,6 +68,7 @@ export const ReporteConciliacionSchema = z.object({
 // --- Tipos derivados de los esquemas (fuente de verdad = el schema) ---
 
 export type Moneda = z.infer<typeof MonedaSchema>;
+export type MetodoPago = z.infer<typeof MetodoPagoSchema>;
 export type CrearCobroInput = z.infer<typeof CrearCobroInputSchema>;
 export type EstadoCobro = z.infer<typeof EstadoCobroSchema>;
 export type Cobro = z.infer<typeof CobroSchema>;
@@ -104,6 +108,17 @@ export interface CapacidadesProvider {
   liquidaciones: boolean;
   /** Monedas que acepta. */
   monedas: Moneda[];
+  /**
+   * Consigna TODO el recaudo a la cuenta de EvePay, que dispersa a cada
+   * comercio (modelo de fondos de la Fase 6). Con `false` el proveedor
+   * liquidaría directo al comercio: ese modelo no tiene spec todavía y el
+   * ledger se niega a asentar con él en vez de hacerlo a ciegas.
+   */
+  custodia: boolean;
+  /** Dispersa a los comercios por API (si no, la dispersión es asistida). */
+  dispersion: boolean;
+  /** Métodos que el pagador puede elegir en su checkout. */
+  metodos: MetodoPago[];
 }
 
 /** Resultado de comprobar que el proveedor responde y acepta las credenciales. */

@@ -2,10 +2,10 @@
 
 Requiere [`comisiones`](../comisiones/) (C1–C4) antes de L3.
 
-- [ ] L1 — Capacidades ampliadas en `@evetev/shared` y en los tres proveedores.
-- [ ] L2 — Plan de cuentas en un solo archivo; `banco` → `recaudo` en los asientos nuevos.
-- [ ] L3 — `registrarCobroAprobado` con comisión, IVA y costo del proveedor (CA-1, CA-2) y fallo sin custodia (CA-3).
-- [ ] L4 — Migración 0016: trigger diferido de balance (CA-10), consignaciones, saldos de recaudo y funciones admin.
+- [x] L1 — Capacidades ampliadas en `@evetev/shared` y en los tres proveedores.
+- [x] L2 — Plan de cuentas en un solo archivo; `banco` → `recaudo` en los asientos nuevos.
+- [x] L3 — `registrarCobroAprobado` con comisión, IVA y costo del proveedor (CA-1, CA-2) y fallo sin custodia (CA-3).
+- [x] L4 — Migración 0016: trigger diferido de balance (CA-10), consignaciones, saldos de recaudo y funciones admin.
 - [ ] L5 — `admin_registrar_consignacion` con los CA-4 a CA-7, probada contra la base local, incluido que P en SQL = P en TypeScript.
 - [ ] L6 — Saldo del banco y cuadre de custodia (CA-8).
 - [ ] L7 — Balance por comercio con margen y el signo de cada naturaleza (CA-9); unificar el signo entre servicio y consola.

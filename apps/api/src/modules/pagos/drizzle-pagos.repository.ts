@@ -5,6 +5,7 @@ import { paymentAudit, paymentIdempotency, payments, webhookEvents } from "../..
 import {
   type AplicarTransicionArgs,
   type CobroAprobadoResumen,
+  type CobroConTarifas,
   type CrearConIdempotenciaArgs,
   type CrearResultado,
   type FiltrosCobros,
@@ -76,6 +77,30 @@ export class DrizzlePagosRepository implements PagosRepository {
         .limit(1);
       const fila = rows[0];
       return fila ? this.aCobro(fila) : null;
+    });
+  }
+
+  async buscarCobroConTarifas(tenantId: string, cobroId: string): Promise<CobroConTarifas | null> {
+    return this.db.transaction(async (tx): Promise<CobroConTarifas | null> => {
+      await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
+      const rows = await tx
+        .select()
+        .from(payments)
+        .where(and(eq(payments.id, cobroId), eq(payments.tenantId, tenantId)))
+        .limit(1);
+      const fila = rows[0];
+      if (!fila) return null;
+      return {
+        id: fila.id,
+        tenantId: fila.tenantId,
+        merchantId: fila.merchantId,
+        montoMinor: fila.amountMinor,
+        referencia: fila.reference,
+        estado: fila.status as EstadoCobro,
+        provider: fila.provider,
+        tarifaId: fila.tarifaId,
+        tarifaProveedorId: fila.tarifaProveedorId
+      };
     });
   }
 

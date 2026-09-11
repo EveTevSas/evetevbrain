@@ -43,7 +43,10 @@ export class ComboPayPaymentProvider implements PaymentProvider {
   readonly capacidades: CapacidadesProvider = {
     altaDeComercios: false,
     liquidaciones: false,
-    monedas: ["COP"]
+    monedas: ["COP"],
+    custodia: true,
+    dispersion: false,
+    metodos: ["pse", "tarjeta", "efectivo"]
   };
 
   private readonly baseUrl: string;

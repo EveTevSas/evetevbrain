@@ -155,7 +155,14 @@ export interface ProveedorInfo {
   nombre: string;
   activo: boolean;
   descripcion: string;
-  capacidades: { altaDeComercios: boolean; liquidaciones: boolean; monedas: string[] };
+  capacidades: {
+    altaDeComercios: boolean;
+    liquidaciones: boolean;
+    monedas: string[];
+    custodia: boolean;
+    dispersion: boolean;
+    metodos: string[];
+  };
   configuracion: VariableConfig[];
   webhook: string | null;
   checklist: PasoHabilitacion[];

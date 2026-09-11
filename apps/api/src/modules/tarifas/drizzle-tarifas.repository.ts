@@ -144,4 +144,18 @@ export class DrizzleTarifasRepository implements TarifasRepository {
     );
     return filas.map((f) => ({ ...this.aComercio(f), tenantId: f.tenant_id }));
   }
+
+  async tarifaPorId(id: string): Promise<VersionTarifaComercio | null> {
+    const filas = await this.db.execute<FilaTarifaComercio>(
+      sql`SELECT * FROM evepay.tarifa_por_id(${id}::uuid)`
+    );
+    return filas[0] ? this.aComercio(filas[0]) : null;
+  }
+
+  async tarifaProveedorPorId(id: string): Promise<VersionTarifaProveedor | null> {
+    const filas = await this.db.execute<FilaTarifaProveedor>(
+      sql`SELECT * FROM evepay.tarifa_proveedor_por_id(${id}::uuid)`
+    );
+    return filas[0] ? this.aProveedor(filas[0]) : null;
+  }
 }

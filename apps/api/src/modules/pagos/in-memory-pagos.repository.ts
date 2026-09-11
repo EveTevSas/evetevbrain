@@ -3,6 +3,7 @@ import type { Cobro, RangoFechas } from "@evetev/shared";
 import {
   type AplicarTransicionArgs,
   type CobroAprobadoResumen,
+  type CobroConTarifas,
   type CrearConIdempotenciaArgs,
   type CrearResultado,
   type FiltrosCobros,
@@ -71,6 +72,24 @@ export class InMemoryPagosRepository implements PagosRepository {
       return null;
     }
     return this.aCobro(fila);
+  }
+
+  async buscarCobroConTarifas(tenantId: string, cobroId: string): Promise<CobroConTarifas | null> {
+    const fila = this.pagos.get(cobroId);
+    if (!fila || fila.tenantId !== tenantId) {
+      return null;
+    }
+    return {
+      id: fila.id,
+      tenantId: fila.tenantId,
+      merchantId: fila.merchantId,
+      montoMinor: fila.amountMinor,
+      referencia: fila.reference,
+      estado: fila.estado,
+      provider: fila.provider,
+      tarifaId: fila.tarifaId ?? null,
+      tarifaProveedorId: fila.tarifaProveedorId ?? null
+    };
   }
 
   async crearConIdempotencia(args: CrearConIdempotenciaArgs): Promise<CrearResultado> {

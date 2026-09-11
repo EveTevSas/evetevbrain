@@ -150,8 +150,11 @@ function TarjetaProveedor({
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
         <Capacidad etiqueta="Alta de comercios por API" tiene={p.capacidades.altaDeComercios} />
         <Capacidad etiqueta="Liquidaciones por API" tiene={p.capacidades.liquidaciones} />
+        <Capacidad etiqueta="Custodia del recaudo" tiene={p.capacidades.custodia} />
+        <Capacidad etiqueta="Dispersión por API" tiene={p.capacidades.dispersion} />
         <span style={{ fontSize: "0.76rem", color: "#64748B" }}>
-          Monedas: {p.capacidades.monedas.join(", ")}
+          Monedas: {p.capacidades.monedas.join(", ")} · Métodos:{" "}
+          {p.capacidades.metodos.length ? p.capacidades.metodos.join(", ") : "—"}
         </span>
       </div>
 

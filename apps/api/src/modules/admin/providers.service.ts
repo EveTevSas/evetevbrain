@@ -87,7 +87,14 @@ export class ProvidersService {
       activo: activo === "combopay",
       descripcion:
         "Adquirencia negociada (API Recaudos beta). EvePay opera como agregador con la cuenta de Evetev.",
-      capacidades: { altaDeComercios: false, liquidaciones: false, monedas: ["COP"] },
+      capacidades: {
+        altaDeComercios: false,
+        liquidaciones: false,
+        monedas: ["COP"],
+        custodia: true,
+        dispersion: false,
+        metodos: ["pse", "tarjeta", "efectivo"]
+      },
       configuracion: [
         {
           nombre: "COMBOPAY_API_TOKEN",
@@ -145,7 +152,14 @@ export class ProvidersService {
       activo: activo === "akua",
       descripcion:
         "Integración anterior, completa pero sin negociación vigente. Queda lista por si se retoma.",
-      capacidades: { altaDeComercios: true, liquidaciones: true, monedas: ["COP", "USD"] },
+      capacidades: {
+        altaDeComercios: true,
+        liquidaciones: true,
+        monedas: ["COP", "USD"],
+        custodia: false,
+        dispersion: false,
+        metodos: ["tarjeta", "pse"]
+      },
       configuracion: [
         {
           nombre: "AKUA_CLIENT_ID",
@@ -191,7 +205,14 @@ export class ProvidersService {
       activo: activo === "fake",
       descripcion:
         "Proveedor simulado para desarrollo y CI. Aprueba todo sin salir a la red; nunca en producción.",
-      capacidades: { altaDeComercios: true, liquidaciones: true, monedas: ["COP", "USD"] },
+      capacidades: {
+        altaDeComercios: true,
+        liquidaciones: true,
+        monedas: ["COP", "USD"],
+        custodia: true,
+        dispersion: false,
+        metodos: ["pse", "tarjeta", "efectivo"]
+      },
       configuracion: [],
       webhook: null,
       checklist: [

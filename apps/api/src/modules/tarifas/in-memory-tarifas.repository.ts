@@ -95,4 +95,15 @@ export class InMemoryTarifasRepository implements TarifasRepository {
     for (const v of this.comercio) porTenant.set(v.tenantId, v);
     return [...porTenant.values()];
   }
+
+  async tarifaPorId(id: string): Promise<VersionTarifaComercio | null> {
+    const v = this.comercio.find((t) => t.id === id);
+    if (!v) return null;
+    const { tenantId: _omitido, ...version } = v;
+    return version;
+  }
+
+  async tarifaProveedorPorId(id: string): Promise<VersionTarifaProveedor | null> {
+    return this.proveedor.find((t) => t.id === id) ?? null;
+  }
 }

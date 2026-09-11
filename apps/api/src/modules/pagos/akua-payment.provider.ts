@@ -27,7 +27,12 @@ export class AkuaPaymentProvider implements PaymentProvider {
   readonly capacidades: CapacidadesProvider = {
     altaDeComercios: true,
     liquidaciones: true,
-    monedas: ["COP", "USD"]
+    monedas: ["COP", "USD"],
+    // Sin negociación vigente no se conoce su modelo de fondos: `false` hace
+    // que el ledger falle explícito en vez de asentar con uno inventado.
+    custodia: false,
+    dispersion: false,
+    metodos: ["tarjeta", "pse"]
   };
 
   private readonly baseUrl: string;

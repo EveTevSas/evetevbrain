@@ -23,7 +23,12 @@ export class FakePaymentProvider implements PaymentProvider {
   readonly capacidades: CapacidadesProvider = {
     altaDeComercios: true,
     liquidaciones: true,
-    monedas: ["COP", "USD"]
+    monedas: ["COP", "USD"],
+    // Mismo modelo de fondos que ComboPay, para que local se comporte como
+    // producción.
+    custodia: true,
+    dispersion: false,
+    metodos: ["pse", "tarjeta", "efectivo"]
   };
 
   /** No hay nada externo que comprobar: el fake siempre está sano. */

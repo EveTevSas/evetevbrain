@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryPagosRepository } from "../pagos/in-memory-pagos.repository";
 import { InMemoryLedgerRepository } from "../ledger/in-memory-ledger.repository";
 import { LedgerService } from "../ledger/ledger.service";
+import { InMemoryTarifasRepository } from "../tarifas/in-memory-tarifas.repository";
 import { InMemoryMerchantsRepository } from "../merchants/in-memory-merchants.repository";
 import { MerchantsService } from "../merchants/merchants.service";
 import { FakePaymentProvider } from "../pagos/fake-payment.provider";
@@ -61,7 +62,12 @@ describe("WebhooksService — normalización de eventos", () => {
     merchants = new MerchantsService(merchantsRepo, new FakePaymentProvider());
     service = new WebhooksService(
       repo,
-      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
+      new LedgerService(
+        ledgerRepo,
+        repo,
+        new FakePaymentProvider(),
+        new InMemoryTarifasRepository()
+      ),
       merchants,
       noopDelivery,
       noopWebhookRepo
@@ -180,7 +186,12 @@ describe("WebhooksService — eventos de ComboPay", () => {
     const merchantsRepo = new InMemoryMerchantsRepository();
     service = new WebhooksService(
       repo,
-      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
+      new LedgerService(
+        ledgerRepo,
+        repo,
+        new FakePaymentProvider(),
+        new InMemoryTarifasRepository()
+      ),
       new MerchantsService(merchantsRepo, new FakePaymentProvider()),
       noopDelivery,
       noopWebhookRepo
@@ -246,7 +257,12 @@ describe("WebhooksService — un webhook no cruza de proveedor", () => {
     const ledgerRepo = new InMemoryLedgerRepository();
     const service = new WebhooksService(
       repo,
-      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
+      new LedgerService(
+        ledgerRepo,
+        repo,
+        new FakePaymentProvider(),
+        new InMemoryTarifasRepository()
+      ),
       new MerchantsService(new InMemoryMerchantsRepository(), new FakePaymentProvider()),
       noopDelivery,
       noopWebhookRepo

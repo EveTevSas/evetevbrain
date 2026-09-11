@@ -42,8 +42,14 @@ describe("ProvidersService — estado de la adquirencia (CA-11)", () => {
     expect(combopay.capacidades).toEqual({
       altaDeComercios: false,
       liquidaciones: false,
-      monedas: ["COP"]
+      monedas: ["COP"],
+      custodia: true,
+      dispersion: false,
+      metodos: ["pse", "tarjeta", "efectivo"]
     });
+    // Akua no tiene modelo de fondos conocido: no custodia, así el ledger
+    // falla explícito si alguien lo activa sin revisar la spec.
+    expect(proveedores.find((p) => p.nombre === "akua")?.capacidades.custodia).toBe(false);
   });
 
   /* §4: la consola necesita saber si falta un secreto, no cuál es. Un descuido

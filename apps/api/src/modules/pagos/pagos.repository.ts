@@ -21,6 +21,23 @@ export interface NuevoCobro {
   tarifaProveedorId?: string;
 }
 
+/**
+ * Un cobro con lo que el ledger necesita para repartirlo: su proveedor y las
+ * versiones de tarifa fijadas al crearlo (null en los anteriores a la Fase 6).
+ * No es el `Cobro` del contrato: eso es lo que ve el comercio.
+ */
+export interface CobroConTarifas {
+  id: string;
+  tenantId: string;
+  merchantId: string;
+  montoMinor: number;
+  referencia: string;
+  estado: EstadoCobro;
+  provider: string;
+  tarifaId: string | null;
+  tarifaProveedorId: string | null;
+}
+
 export interface IdempotencyHit {
   paymentId: string;
   requestHash: string;
@@ -98,6 +115,8 @@ export interface StatsCobros {
 export interface PagosRepository {
   buscarIdempotencia(tenantId: string, idempotencyKey: string): Promise<IdempotencyHit | null>;
   buscarCobro(tenantId: string, cobroId: string): Promise<Cobro | null>;
+  /** El cobro con su proveedor y sus tarifas fijadas, para el ledger. */
+  buscarCobroConTarifas(tenantId: string, cobroId: string): Promise<CobroConTarifas | null>;
   /**
    * Inserta cobro + registro de idempotencia + auditoría de forma atómica.
    * La unicidad (tenant_id, idempotency_key) la garantiza el almacenamiento:
