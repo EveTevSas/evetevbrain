@@ -16,6 +16,9 @@ import { InMemoryMerchantsRepository } from "../modules/merchants/in-memory-merc
 import { TARIFAS_REPOSITORY } from "../modules/tarifas/tarifas.repository";
 import { DrizzleTarifasRepository } from "../modules/tarifas/drizzle-tarifas.repository";
 import { InMemoryTarifasRepository } from "../modules/tarifas/in-memory-tarifas.repository";
+import { RIESGO_REPOSITORY } from "../modules/riesgo/riesgo.repository";
+import { DrizzleRiesgoRepository } from "../modules/riesgo/drizzle-riesgo.repository";
+import { InMemoryRiesgoRepository } from "../modules/riesgo/in-memory-riesgo.repository";
 
 /**
  * Provee los repositorios como singletons globales, para que los módulos compartan
@@ -49,6 +52,12 @@ import { InMemoryTarifasRepository } from "../modules/tarifas/in-memory-tarifas.
         db ? new DrizzleTarifasRepository(db) : new InMemoryTarifasRepository()
     },
     {
+      provide: RIESGO_REPOSITORY,
+      inject: [DB],
+      useFactory: (db: Db | null) =>
+        db ? new DrizzleRiesgoRepository(db) : new InMemoryRiesgoRepository()
+    },
+    {
       // El proveedor de adquirencia se elige por configuración (§4): el resto
       // del núcleo solo conoce la interfaz. fake | akua | combopay.
       provide: PAYMENT_PROVIDER,
@@ -76,6 +85,7 @@ import { InMemoryTarifasRepository } from "../modules/tarifas/in-memory-tarifas.
     LEDGER_REPOSITORY,
     MERCHANTS_REPOSITORY,
     TARIFAS_REPOSITORY,
+    RIESGO_REPOSITORY,
     PAYMENT_PROVIDER
   ]
 })

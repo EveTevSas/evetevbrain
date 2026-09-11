@@ -8,6 +8,7 @@ import {
 } from "@evetev/shared";
 import { MERCHANTS_REPOSITORY, type MerchantsRepository } from "../merchants/merchants.repository";
 import { TARIFAS_REPOSITORY, type TarifasRepository } from "../tarifas/tarifas.repository";
+import { RiesgoService } from "../riesgo/riesgo.service";
 import { PAYMENT_PROVIDER } from "./payment-provider.token";
 import {
   PAGOS_REPOSITORY,
@@ -33,7 +34,8 @@ export class PagosService {
     @Inject(PAYMENT_PROVIDER) private readonly provider: PaymentProvider,
     @Inject(PAGOS_REPOSITORY) private readonly repo: PagosRepository,
     @Inject(MERCHANTS_REPOSITORY) private readonly merchants: MerchantsRepository,
-    @Inject(TARIFAS_REPOSITORY) private readonly tarifas: TarifasRepository
+    @Inject(TARIFAS_REPOSITORY) private readonly tarifas: TarifasRepository,
+    private readonly riesgo: RiesgoService
   ) {}
 
   /**
@@ -124,6 +126,15 @@ export class PagosService {
       );
     }
 
+    // Riesgo del comercio (spec riesgo-comercio): después del reintento
+    // idempotente (un cobro ya creado no se re-evalúa) y ANTES del proveedor.
+    // Rechazar = el cobro no existe. Retener = se crea, pero su dinero no se
+    // dispersa hasta que alguien lo revise.
+    const evaluacion = await this.riesgo.evaluar(ctx.tenantId, input.montoMinor);
+    if (evaluacion.resultado.decision === "rechazar") {
+      await this.riesgo.rechazar(ctx.tenantId, input.montoMinor, evaluacion);
+    }
+
     // Primera vez: crear en el proveedor (una sola llamada) y persistir.
     const prov = await this.provider.crearCobro(input, idempotencyKey);
     const resultado = await this.repo.crearConIdempotencia({
@@ -150,6 +161,13 @@ export class PagosService {
     });
 
     if (resultado.creado) {
+      await this.riesgo.registrar(
+        ctx.tenantId,
+        resultado.cobro.id,
+        input.montoMinor,
+        evaluacion,
+        ctx.actor
+      );
       return resultado.cobro;
     }
 

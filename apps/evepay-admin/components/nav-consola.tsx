@@ -8,7 +8,9 @@ import {
   LayoutDashboard,
   LogOut,
   Plug,
-  Scale
+  Scale,
+  ScrollText,
+  ShieldAlert
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -20,7 +22,9 @@ const SECCIONES = [
   { href: "/proveedores", etiqueta: "Proveedores", Icono: Plug },
   { href: "/pagos", etiqueta: "Pagos", Icono: ArrowLeftRight },
   { href: "/conciliacion", etiqueta: "Conciliación", Icono: Scale },
-  { href: "/dispersion", etiqueta: "Dispersión", Icono: ArrowUpRight }
+  { href: "/dispersion", etiqueta: "Dispersión", Icono: ArrowUpRight },
+  { href: "/riesgo", etiqueta: "Riesgo", Icono: ShieldAlert },
+  { href: "/auditoria", etiqueta: "Auditoría", Icono: ScrollText }
 ] as const;
 
 export function NavConsola() {

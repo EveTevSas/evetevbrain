@@ -2,6 +2,7 @@ import { ConflictException, Inject, Injectable, NotFoundException } from "@nestj
 import { generateApiKey, type ApiKeyEnv } from "../../common/api-key.util";
 import type { EstadoMerchant } from "@evetev/shared";
 import { MerchantsService } from "../merchants/merchants.service";
+import { RiesgoService } from "../riesgo/riesgo.service";
 import { COMERCIOS_REPOSITORY, type ComerciosRepository } from "./comercios.repository";
 import { PerfilComercioService } from "./perfil-comercio.service";
 import type { FilaComercio } from "./comercios.repository";
@@ -66,10 +67,41 @@ export class AdminService {
   constructor(
     @Inject(COMERCIOS_REPOSITORY) private readonly repo: ComerciosRepository,
     private readonly merchants: MerchantsService,
-    private readonly perfiles: PerfilComercioService
+    private readonly perfiles: PerfilComercioService,
+    private readonly riesgo: RiesgoService
   ) {}
 
   async crearComercio(input: CrearComercioInput, actor: string): Promise<ComercioCreado> {
+    /* SARLAFT (riesgo-comercio CA-9): el comercio, su representante y sus
+       beneficiarios se cruzan con la lista restrictiva ANTES de crear nada.
+       Una coincidencia no es un aviso: es un alta que no puede ocurrir. */
+    const coincidencias = await this.riesgo.coincidencias([
+      {
+        tipo: input.perfil.tipoDocumento,
+        numero: input.perfil.numeroDocumento,
+        quien: "el comercio"
+      },
+      {
+        tipo: input.perfil.repTipoDocumento,
+        numero: input.perfil.repNumeroDocumento,
+        quien: "el representante legal"
+      },
+      ...input.perfil.beneficiarios.map((b) => ({
+        tipo: b.tipoDocumento,
+        numero: b.numeroDocumento,
+        quien: `el beneficiario ${b.nombre}`
+      }))
+    ]);
+    if (coincidencias.length > 0) {
+      const detalle = coincidencias
+        .map(
+          (c) =>
+            `${c.quien} (${c.tipoDocumento} ${c.numeroDocumento}) figura en la lista ${c.fuente} como "${c.nombre}"`
+        )
+        .join("; ");
+      throw new ConflictException(`El alta no puede continuar: ${detalle}.`);
+    }
+
     /* Antes de crear nada: si el documento ya está, el alta es un duplicado.
        El índice único lo impediría igual, pero saltando a mitad del proceso y
        dejando un tenant sin perfil ni claves. */

@@ -14,6 +14,7 @@ import {
 import {
   EstadoLoteSchema,
   PoliticaDispersionSchema,
+  ReglaRiesgoSchema,
   RangoFechasSchema,
   TarifaComercioSchema,
   TarifaProveedorSchema,
@@ -24,6 +25,14 @@ import { z } from "zod";
 import { currentContextOrNull } from "../../common/request-context";
 import { ROLES_INTERNOS, type Role } from "../identidad/roles";
 import { puede, rolesPara, type Accion } from "./permisos";
+import { RiesgoAdminService } from "./riesgo-admin.service";
+import type {
+  CasoRiesgo,
+  Coincidencia,
+  EntradaLista,
+  Evaluacion,
+  ReglaGuardada
+} from "../riesgo/riesgo.repository";
 import {
   DispersionAdminService,
   type BalanceDispersion,
@@ -137,7 +146,8 @@ export class AdminController {
     private readonly perfiles: PerfilComercioService,
     private readonly tarifas: TarifasAdminService,
     private readonly custodia: CustodiaAdminService,
-    private readonly dispersion: DispersionAdminService
+    private readonly dispersion: DispersionAdminService,
+    private readonly riesgo: RiesgoAdminService
   ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
@@ -675,6 +685,113 @@ export class AdminController {
     const parsed = z.object({ motivo: z.string().trim().min(3).max(500) }).safeParse(body);
     if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
     return this.dispersion.liberarRetencion(id, parsed.data.motivo, this.quien());
+  }
+
+  // --- Riesgo del comercio (spec riesgo-comercio) ---
+
+  /** GET /v1/admin/riesgo/reglas — todas las reglas, globales primero, con sus disparos de 30 días. */
+  @Get("riesgo/reglas")
+  async listarReglasRiesgo(): Promise<ReglaGuardada[]> {
+    this.exigir("leer");
+    return this.riesgo.listarReglas();
+  }
+
+  /** PUT /v1/admin/riesgo/reglas — crea (sin id) o cambia (con id) una regla; solo super_admin (CA-8, CA-11). */
+  @Put("riesgo/reglas")
+  @HttpCode(200)
+  async guardarReglaRiesgo(@Body() body: unknown): Promise<ReglaGuardada> {
+    this.exigir("riesgo.reglas");
+    const parsed = z
+      .object({ id: z.string().uuid().nullable().optional() })
+      .and(ReglaRiesgoSchema)
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    const { id, ...regla } = parsed.data;
+    return this.riesgo.guardarRegla(id ?? null, regla, this.actor());
+  }
+
+  /** GET /v1/admin/riesgo/evaluaciones?tenantId=&limite= — qué decidió el motor y por qué. */
+  @Get("riesgo/evaluaciones")
+  async listarEvaluacionesRiesgo(
+    @Query("tenantId") tenantId?: string,
+    @Query("limite") limite?: string
+  ): Promise<Evaluacion[]> {
+    this.exigir("leer");
+    if (tenantId && !UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+    const n = Number(limite);
+    return this.riesgo.listarEvaluaciones(
+      tenantId || undefined,
+      Number.isFinite(n) && n > 0 ? n : 100
+    );
+  }
+
+  /** GET /v1/admin/riesgo/cola — cobros retenidos por riesgo, con su evaluación (CA-10). */
+  @Get("riesgo/cola")
+  async colaRiesgo(): Promise<CasoRiesgo[]> {
+    this.exigir("leer");
+    return this.riesgo.colaRiesgo();
+  }
+
+  /** GET /v1/admin/riesgo/listas — la lista restrictiva, activas primero. */
+  @Get("riesgo/listas")
+  async listaRestrictiva(): Promise<EntradaLista[]> {
+    this.exigir("leer");
+    return this.riesgo.listarLista();
+  }
+
+  /** POST /v1/admin/riesgo/listas — agrega una entrada (ops). */
+  @Post("riesgo/listas")
+  @HttpCode(201)
+  async agregarALista(@Body() body: unknown): Promise<{ id: string }> {
+    this.exigir("riesgo.listas");
+    const parsed = z
+      .object({
+        tipoDocumento: z.enum(["NIT", "CC", "CE", "PA"]),
+        numeroDocumento: z.string().trim().min(3).max(30),
+        nombre: z.string().trim().min(2).max(200),
+        fuente: z.enum(["OFAC", "ONU", "PEP", "interna"]),
+        motivo: z.string().trim().max(500).nullable().optional()
+      })
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    const id = await this.riesgo.agregarALista(
+      { ...parsed.data, motivo: parsed.data.motivo ?? null },
+      this.actor()
+    );
+    return { id };
+  }
+
+  /** POST /v1/admin/riesgo/listas/:id/desactivar — no se borra: se desactiva. */
+  @Post("riesgo/listas/:id/desactivar")
+  @HttpCode(200)
+  async desactivarDeLista(@Param("id") id: string): Promise<{ ok: true }> {
+    this.exigir("riesgo.listas");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    await this.riesgo.desactivarDeLista(id, this.actor());
+    return { ok: true };
+  }
+
+  /** POST /v1/admin/riesgo/listas/verificar — cruza documentos con la lista, sin efectos. */
+  @Post("riesgo/listas/verificar")
+  @HttpCode(200)
+  async verificarLista(@Body() body: unknown): Promise<Coincidencia[]> {
+    this.exigir("leer");
+    const parsed = z
+      .object({
+        documentos: z
+          .array(
+            z.object({
+              tipo: z.enum(["NIT", "CC", "CE", "PA"]),
+              numero: z.string().trim().min(3).max(30),
+              quien: z.string().trim().max(120).default("consulta")
+            })
+          )
+          .min(1)
+          .max(50)
+      })
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    return this.riesgo.coincidencias(parsed.data.documentos);
   }
 
   /** GET /v1/admin/auditoria — últimas acciones administrativas (CA-4). */

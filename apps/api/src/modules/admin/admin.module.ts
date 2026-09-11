@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConciliacionModule } from "../conciliacion/conciliacion.module";
+import { RiesgoModule } from "../riesgo/riesgo.module";
 import { LedgerModule } from "../ledger/ledger.module";
 import { MerchantsModule } from "../merchants/merchants.module";
 import { AdminController } from "./admin.controller";
@@ -17,9 +18,10 @@ import { ConciliacionAdminService } from "./conciliacion-admin.service";
 import { TarifasAdminService } from "./tarifas-admin.service";
 import { CustodiaAdminService } from "./custodia-admin.service";
 import { DispersionAdminService } from "./dispersion-admin.service";
+import { RiesgoAdminService } from "./riesgo-admin.service";
 
 @Module({
-  imports: [MerchantsModule, LedgerModule, ConciliacionModule],
+  imports: [MerchantsModule, LedgerModule, ConciliacionModule, RiesgoModule],
   controllers: [AdminController],
   providers: [
     {
@@ -44,7 +46,8 @@ import { DispersionAdminService } from "./dispersion-admin.service";
     PerfilComercioService,
     TarifasAdminService,
     CustodiaAdminService,
-    DispersionAdminService
+    DispersionAdminService,
+    RiesgoAdminService
   ]
 })
 export class AdminModule {}

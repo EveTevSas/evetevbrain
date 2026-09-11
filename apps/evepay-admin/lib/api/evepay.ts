@@ -568,7 +568,7 @@ export interface Retencion {
   id: string;
   tenantId: string;
   tenantNombre: string;
-  tipo: "primer_cobro" | "reserva";
+  tipo: "primer_cobro" | "reserva" | "riesgo";
   paymentId: string | null;
   referencia: string | null;
   loteId: string | null;
@@ -606,4 +606,117 @@ export function listarRetenciones(tenantId?: string): Promise<Retencion[]> {
   return apiGet<Retencion[]>(
     `/admin/dispersion/retenciones${tenantId ? `?tenantId=${tenantId}` : ""}`
   );
+}
+
+// --- Riesgo del comercio (Fase 9, spec riesgo-comercio) ---
+
+export type TipoReglaRiesgo =
+  "limite_transaccion" | "limite_diario" | "limite_mensual" | "monto_atipico";
+export type ModoRegla = "activa" | "shadow" | "inactiva";
+
+export interface ReglaRiesgo {
+  id: string;
+  nombre: string;
+  tipo: TipoReglaRiesgo;
+  tenantId: string | null;
+  tenantNombre: string | null;
+  parametros: { limiteMinor: number } | { factor: number; minimoCobros: number };
+  accion: "rechazar" | "retener";
+  modo: ModoRegla;
+  prioridad: number;
+  creadaPor: string;
+  creadaEn: string;
+  actualizadaPor: string;
+  actualizadaEn: string;
+  disparos30d: number;
+}
+
+export interface ReglaDisparada {
+  id: string;
+  nombre: string;
+  tipo: TipoReglaRiesgo;
+  modo: ModoRegla;
+  accion: "rechazar" | "retener";
+  actuo: boolean;
+  detalle: string;
+}
+
+export interface EvaluacionRiesgo {
+  id: string;
+  tenantId: string;
+  tenantNombre: string;
+  paymentId: string | null;
+  referencia: string | null;
+  montoMinor: number;
+  decision: "permitir" | "retener" | "rechazar";
+  reglasDisparadas: ReglaDisparada[];
+  senales: {
+    hoyMinor: number;
+    mesMinor: number;
+    ticketPromedioMinor: number;
+    cobrosHistoricos: number;
+  };
+  creadaEn: string;
+}
+
+export interface CasoRiesgo {
+  retencionId: string;
+  tenantId: string;
+  tenantNombre: string;
+  paymentId: string;
+  referencia: string;
+  estadoCobro: string;
+  montoCobroMinor: number;
+  montoRetenidoMinor: number;
+  motivo: string;
+  creadaEn: string;
+  evaluacionId: string | null;
+  reglasDisparadas: ReglaDisparada[];
+}
+
+export interface EntradaListaRestrictiva {
+  id: string;
+  tipoDocumento: string;
+  numeroDocumento: string;
+  nombre: string;
+  fuente: "OFAC" | "ONU" | "PEP" | "interna";
+  motivo: string | null;
+  activa: boolean;
+  agregadaPor: string;
+  agregadaEn: string;
+}
+
+export interface CoincidenciaRestrictiva {
+  quien: string;
+  tipoDocumento: string;
+  numeroDocumento: string;
+  nombre: string;
+  fuente: string;
+  motivo: string | null;
+}
+
+export interface AccionAdmin {
+  id: string;
+  actor: string;
+  accion: string;
+  objetoTipo: string | null;
+  objetoId: string | null;
+  detalle: Record<string, unknown>;
+  creadoEn: string;
+}
+
+export function listarReglasRiesgo(): Promise<ReglaRiesgo[]> {
+  return apiGet<ReglaRiesgo[]>("/admin/riesgo/reglas");
+}
+export function listarEvaluacionesRiesgo(limite = 100): Promise<EvaluacionRiesgo[]> {
+  return apiGet<EvaluacionRiesgo[]>(`/admin/riesgo/evaluaciones?limite=${limite}`);
+}
+export function colaRiesgo(): Promise<CasoRiesgo[]> {
+  return apiGet<CasoRiesgo[]>("/admin/riesgo/cola");
+}
+export function listaRestrictiva(): Promise<EntradaListaRestrictiva[]> {
+  return apiGet<EntradaListaRestrictiva[]>("/admin/riesgo/listas");
+}
+export function listarAuditoria(limite = 200): Promise<AccionAdmin[]> {
+  return apiGet<AccionAdmin[]>(`/admin/auditoria?limite=${limite}`);
 }

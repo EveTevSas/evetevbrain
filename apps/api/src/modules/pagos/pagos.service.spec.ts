@@ -6,6 +6,9 @@ import { FakePaymentProvider } from "./fake-payment.provider";
 import { InMemoryPagosRepository } from "./in-memory-pagos.repository";
 import { InMemoryMerchantsRepository } from "../merchants/in-memory-merchants.repository";
 import { InMemoryTarifasRepository } from "../tarifas/in-memory-tarifas.repository";
+import { InMemoryRiesgoRepository } from "../riesgo/in-memory-riesgo.repository";
+import { RiesgoService } from "../riesgo/riesgo.service";
+import type { ReglaRiesgo, SenalesRiesgo } from "@evetev/shared";
 
 const TENANT_A = "11111111-1111-4111-8111-111111111111";
 const TENANT_B = "22222222-2222-4222-8222-222222222222";
@@ -96,6 +99,27 @@ function tarifasCon(
   return repo;
 }
 
+/** Sin reglas: el riesgo no interviene. Los tests de riesgo siembran las suyas. */
+function riesgoCon(
+  reglas: (ReglaRiesgo & { id: string })[] = [],
+  senales?: SenalesRiesgo
+): RiesgoService {
+  const repo = new InMemoryRiesgoRepository();
+  for (const r of reglas) {
+    repo.reglas.push({
+      ...r,
+      tenantNombre: null,
+      creadaPor: "seed",
+      creadaEn: "",
+      actualizadaPor: "seed",
+      actualizadaEn: "",
+      disparos30d: 0
+    });
+  }
+  if (senales) repo.senalesDe.set(TENANT_A, senales);
+  return new RiesgoService(repo);
+}
+
 describe("PagosService — crear cobro idempotente", () => {
   let repo: InMemoryPagosRepository;
   let provider: FakePaymentProvider;
@@ -104,7 +128,7 @@ describe("PagosService — crear cobro idempotente", () => {
   beforeEach(() => {
     repo = new InMemoryPagosRepository();
     provider = new FakePaymentProvider();
-    service = new PagosService(provider, repo, merchantsCon(), tarifasCon());
+    service = new PagosService(provider, repo, merchantsCon(), tarifasCon(), riesgoCon());
   });
 
   it("EARS 1: crea cobro pendiente y llama al proveedor una sola vez", async () => {
@@ -181,7 +205,8 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
       provider,
       new InMemoryPagosRepository(),
       merchantsCon(),
-      tarifasCon()
+      tarifasCon(),
+      riesgoCon()
     );
     await expect(service.crearCobro(ctxA, input(), "k-ok")).resolves.toMatchObject({
       estado: "pendiente"
@@ -192,7 +217,13 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
     "un comercio en estado %s NO puede cobrar",
     async (estado) => {
       const repo = new InMemoryPagosRepository();
-      const service = new PagosService(provider, repo, merchantsCon(estado), tarifasCon());
+      const service = new PagosService(
+        provider,
+        repo,
+        merchantsCon(estado),
+        tarifasCon(),
+        riesgoCon()
+      );
       const spy = vi.spyOn(provider, "crearCobro");
       spy.mockClear();
 
@@ -210,7 +241,8 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
       provider,
       new InMemoryPagosRepository(),
       merchantsCon("en_revision"),
-      tarifasCon()
+      tarifasCon(),
+      riesgoCon()
     );
     await expect(service.crearCobro(ctxA, input(), "k-2")).rejects.toThrow(/en_revision/);
     await expect(service.crearCobro(ctxA, input(), "k-3")).rejects.toThrow(/consola de EvePay/);
@@ -224,7 +256,8 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
       provider,
       new InMemoryPagosRepository(),
       merchantsCon(),
-      tarifasCon()
+      tarifasCon(),
+      riesgoCon()
     );
     // MERCHANT_B está aprobado, pero es de TENANT_B y quien llama es TENANT_A.
     await expect(
@@ -237,7 +270,8 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
       provider,
       new InMemoryPagosRepository(),
       merchantsCon(),
-      tarifasCon()
+      tarifasCon(),
+      riesgoCon()
     );
     await expect(
       service.crearCobro(ctxA, input({ merchantId: "44444444-4444-4444-8444-444444444444" }), "k-5")
@@ -253,7 +287,7 @@ describe("PagosService — solo cobra un comercio aprobado", () => {
     const combopay = new FakePaymentProvider();
     Object.defineProperty(combopay, "nombre", { value: "combopay" });
     const espia = vi.spyOn(repo, "crearConIdempotencia");
-    const service = new PagosService(combopay, repo, merchantsCon(), tarifasCon());
+    const service = new PagosService(combopay, repo, merchantsCon(), tarifasCon(), riesgoCon());
 
     await service.crearCobro(ctxA, input(), "k-6");
 
@@ -272,7 +306,7 @@ describe("PagosService — las tarifas viajan con el cobro", () => {
     const repo = new InMemoryPagosRepository();
     const tarifas = tarifasCon();
     const espia = vi.spyOn(repo, "crearConIdempotencia");
-    const service = new PagosService(provider, repo, merchantsCon(), tarifas);
+    const service = new PagosService(provider, repo, merchantsCon(), tarifas, riesgoCon());
 
     await service.crearCobro(ctxA, input(), "k-t1");
 
@@ -285,7 +319,7 @@ describe("PagosService — las tarifas viajan con el cobro", () => {
     const repo = new InMemoryPagosRepository();
     const tarifas = tarifasCon();
     const espia = vi.spyOn(repo, "crearConIdempotencia");
-    const service = new PagosService(provider, repo, merchantsCon(), tarifas);
+    const service = new PagosService(provider, repo, merchantsCon(), tarifas, riesgoCon());
 
     await service.crearCobro(ctxA, input(), "k-t2");
     const versionVieja = espia.mock.calls[0]?.[0].nuevo.tarifaId;
@@ -310,7 +344,8 @@ describe("PagosService — las tarifas viajan con el cobro", () => {
       provider,
       repo,
       merchantsCon(),
-      tarifasCon({ comercio: false })
+      tarifasCon({ comercio: false }),
+      riesgoCon()
     );
 
     await expect(service.crearCobro(ctxA, input(), "k-t4")).rejects.toBeInstanceOf(
@@ -329,7 +364,8 @@ describe("PagosService — las tarifas viajan con el cobro", () => {
       provider,
       repo,
       merchantsCon(),
-      tarifasCon({ proveedor: false })
+      tarifasCon({ proveedor: false }),
+      riesgoCon()
     );
 
     await expect(service.crearCobro(ctxA, input(), "k-t5")).rejects.toBeInstanceOf(
@@ -353,7 +389,13 @@ describe("PagosService — las tarifas viajan con el cobro", () => {
     const repo = new InMemoryPagosRepository();
     const spy = vi.spyOn(provider, "crearCobro");
     spy.mockClear();
-    const service = new PagosService(provider, repo, merchantsCon(), tarifasCon({ tarifa }));
+    const service = new PagosService(
+      provider,
+      repo,
+      merchantsCon(),
+      tarifasCon({ tarifa }),
+      riesgoCon()
+    );
 
     await expect(
       service.crearCobro(ctxA, input({ montoMinor: 150_000 }), "k-t6")
@@ -367,10 +409,150 @@ describe("PagosService — las tarifas viajan con el cobro", () => {
       provider,
       new InMemoryPagosRepository(),
       merchantsCon(),
-      tarifasCon({ tarifa: { bps: 0, fijoMinor: 149_999, ivaBps: 0 } })
+      tarifasCon({ tarifa: { bps: 0, fijoMinor: 149_999, ivaBps: 0 } }),
+      riesgoCon()
     );
     await expect(
       service.crearCobro(ctxA, input({ montoMinor: 150_000 }), "k-t7")
     ).resolves.toMatchObject({ estado: "pendiente" });
+  });
+});
+
+/* El riesgo del comercio corre antes del proveedor (spec riesgo-comercio):
+   rechazar = el cobro no existe; retener = se crea pero queda retenido para
+   la dispersión; shadow = solo se anota. */
+describe("PagosService — riesgo del comercio (riesgo-comercio CA-1 a CA-3)", () => {
+  const provider = new FakePaymentProvider();
+  const LIMITE: ReglaRiesgo & { id: string } = {
+    id: "lim",
+    nombre: "Límite por transacción",
+    tipo: "limite_transaccion",
+    tenantId: null,
+    parametros: { limiteMinor: 100_000 },
+    accion: "rechazar",
+    modo: "activa",
+    prioridad: 10
+  };
+
+  it("CA-1: una regla activa de rechazar → 409 sin llamar al proveedor, y la evaluación queda", async () => {
+    const repo = new InMemoryPagosRepository();
+    const riesgoRepo = new InMemoryRiesgoRepository();
+    riesgoRepo.reglas.push({
+      ...LIMITE,
+      tenantNombre: null,
+      creadaPor: "s",
+      creadaEn: "",
+      actualizadaPor: "s",
+      actualizadaEn: "",
+      disparos30d: 0
+    });
+    const spy = vi.spyOn(provider, "crearCobro");
+    spy.mockClear();
+    const service = new PagosService(
+      provider,
+      repo,
+      merchantsCon(),
+      tarifasCon(),
+      new RiesgoService(riesgoRepo)
+    );
+
+    const error = await service.crearCobro(ctxA, input(), "k-r1").catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ConflictException);
+    expect((error as Error).message).toMatch(/rechazado por riesgo: Límite por transacción/);
+    expect(spy).not.toHaveBeenCalled();
+    expect(await repo.contarPorTenant(TENANT_A)).toBe(0);
+    expect(riesgoRepo.evaluaciones).toEqual([
+      expect.objectContaining({ decision: "rechazar", paymentId: null })
+    ]);
+  });
+
+  it("CA-2: la misma regla en shadow deja crear el cobro y anota qué habría hecho", async () => {
+    const repo = new InMemoryPagosRepository();
+    const riesgoRepo = new InMemoryRiesgoRepository();
+    riesgoRepo.reglas.push({
+      ...LIMITE,
+      modo: "shadow",
+      tenantNombre: null,
+      creadaPor: "s",
+      creadaEn: "",
+      actualizadaPor: "s",
+      actualizadaEn: "",
+      disparos30d: 0
+    });
+    const service = new PagosService(
+      provider,
+      repo,
+      merchantsCon(),
+      tarifasCon(),
+      new RiesgoService(riesgoRepo)
+    );
+
+    const cobro = await service.crearCobro(ctxA, input(), "k-r2");
+    expect(cobro.estado).toBe("pendiente");
+    expect(riesgoRepo.evaluaciones[0]).toMatchObject({
+      decision: "permitir",
+      paymentId: cobro.id,
+      reglasDisparadas: [expect.objectContaining({ id: "lim", actuo: false, modo: "shadow" })]
+    });
+    expect(riesgoRepo.retenciones).toHaveLength(0);
+  });
+
+  it("CA-3: monto atípico activo → el cobro se crea y queda retenido por riesgo", async () => {
+    const repo = new InMemoryPagosRepository();
+    const riesgoRepo = new InMemoryRiesgoRepository();
+    riesgoRepo.reglas.push({
+      id: "atip",
+      nombre: "Monto atípico",
+      tipo: "monto_atipico",
+      tenantId: null,
+      parametros: { factor: 5, minimoCobros: 10 },
+      accion: "retener",
+      modo: "activa",
+      prioridad: 40,
+      tenantNombre: null,
+      creadaPor: "s",
+      creadaEn: "",
+      actualizadaPor: "s",
+      actualizadaEn: "",
+      disparos30d: 0
+    });
+    riesgoRepo.senalesDe.set(TENANT_A, {
+      hoyMinor: 0,
+      mesMinor: 0,
+      ticketPromedioMinor: 10_000,
+      cobrosHistoricos: 20
+    });
+    const service = new PagosService(
+      provider,
+      repo,
+      merchantsCon(),
+      tarifasCon(),
+      new RiesgoService(riesgoRepo)
+    );
+
+    const cobro = await service.crearCobro(ctxA, input({ montoMinor: 150_000 }), "k-r3");
+    expect(cobro.estado).toBe("pendiente");
+    expect(riesgoRepo.retenciones).toEqual([
+      expect.objectContaining({
+        paymentId: cobro.id,
+        motivo: expect.stringMatching(/Monto atípico/)
+      })
+    ]);
+    expect(riesgoRepo.evaluaciones[0]?.decision).toBe("retener");
+  });
+
+  it("un reintento idempotente no se vuelve a evaluar", async () => {
+    const repo = new InMemoryPagosRepository();
+    const riesgoRepo = new InMemoryRiesgoRepository();
+    const service = new PagosService(
+      provider,
+      repo,
+      merchantsCon(),
+      tarifasCon(),
+      new RiesgoService(riesgoRepo)
+    );
+    await service.crearCobro(ctxA, input(), "k-r4");
+    await service.crearCobro(ctxA, input(), "k-r4");
+    expect(riesgoRepo.evaluaciones).toHaveLength(1);
   });
 });

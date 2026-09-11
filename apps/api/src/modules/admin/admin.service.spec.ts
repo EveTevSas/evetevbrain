@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictException, NotFoundException } from "@nestjs/common";
 import { AdminService, type CrearComercioInput } from "./admin.service";
 import { InMemoryComerciosRepository } from "./in-memory-comercios.repository";
+import { InMemoryRiesgoRepository } from "../riesgo/in-memory-riesgo.repository";
+import { RiesgoService } from "../riesgo/riesgo.service";
 import type { MerchantsService } from "../merchants/merchants.service";
 import type { PerfilComercioService } from "./perfil-comercio.service";
 import type { PerfilComercio } from "./perfil-comercio.schema";
@@ -13,6 +15,8 @@ import type { PerfilComercio } from "./perfil-comercio.schema";
  */
 
 const MERCHANT_ID = "33333333-3333-4333-8333-333333333333";
+/** El repositorio de riesgo del último montaje, para sembrar la lista restrictiva. */
+let riesgoRepoActual: InMemoryRiesgoRepository;
 
 function perfilValido(): PerfilComercio {
   return {
@@ -70,6 +74,8 @@ interface Montaje {
 function montar(
   opciones: { documentoRepetido?: string; pasoManual?: string | null } = {}
 ): Montaje {
+  const riesgoRepo = new InMemoryRiesgoRepository();
+  riesgoRepoActual = riesgoRepo;
   const repo = new InMemoryComerciosRepository();
   const perfilesGuardados: { tenantId: string; actor: string }[] = [];
 
@@ -110,7 +116,7 @@ function montar(
   } as unknown as MerchantsService;
 
   return {
-    service: new AdminService(repo, merchants, perfiles),
+    service: new AdminService(repo, merchants, perfiles, new RiesgoService(riesgoRepo)),
     repo,
     perfilesGuardados,
     registrar
@@ -333,5 +339,61 @@ describe("AdminService — corregir el nombre", () => {
       m.service.renombrarComercio("99999999-9999-4999-8999-999999999999", "Nada SAS", "Nada", "ops")
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(m.repo.rastros.some((x) => x.accion === "comercio.renombrar")).toBe(false);
+  });
+});
+
+/* SARLAFT (riesgo-comercio CA-9): un documento en la lista restrictiva bloquea
+   el alta antes de crear nada — ni tenant, ni perfil, ni claves. */
+describe("AdminService — cruce con la lista restrictiva (CA-9)", () => {
+  it("el documento del comercio en OFAC → 409 nombrando la fuente, sin crear nada", async () => {
+    const { service, repo } = montar();
+    await riesgoRepoActual.agregarALista(
+      {
+        tipoDocumento: "NIT",
+        numeroDocumento: "830.053.105",
+        nombre: "Empresa Vetada SAS",
+        fuente: "OFAC",
+        motivo: "prueba"
+      },
+      "ops"
+    );
+    const error = await service.crearComercio(ENTRADA, "ops@evetev.com").catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ConflictException);
+    expect((error as Error).message).toMatch(/el comercio .*OFAC.*Empresa Vetada SAS/);
+    expect(repo.tenants.size).toBe(0);
+  });
+
+  it("el representante legal en la lista PEP también bloquea", async () => {
+    const { service, repo } = montar();
+    await riesgoRepoActual.agregarALista(
+      {
+        tipoDocumento: "CC",
+        numeroDocumento: "1020304050",
+        nombre: "Persona Expuesta",
+        fuente: "PEP",
+        motivo: null
+      },
+      "ops"
+    );
+    await expect(service.crearComercio(ENTRADA, "ops@evetev.com")).rejects.toThrow(
+      /representante legal.*PEP/
+    );
+    expect(repo.tenants.size).toBe(0);
+  });
+
+  it("una entrada desactivada no bloquea", async () => {
+    const { service } = montar();
+    const id = await riesgoRepoActual.agregarALista(
+      {
+        tipoDocumento: "NIT",
+        numeroDocumento: "830053105",
+        nombre: "Ya no",
+        fuente: "interna",
+        motivo: null
+      },
+      "ops"
+    );
+    await riesgoRepoActual.desactivarDeLista(id, "ops");
+    await expect(service.crearComercio(ENTRADA, "ops@evetev.com")).resolves.toBeTruthy();
   });
 });

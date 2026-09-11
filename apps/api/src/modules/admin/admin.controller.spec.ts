@@ -11,6 +11,7 @@ import type { PerfilComercioService } from "./perfil-comercio.service";
 import type { TarifasAdminService } from "./tarifas-admin.service";
 import type { CustodiaAdminService } from "./custodia-admin.service";
 import type { DispersionAdminService } from "./dispersion-admin.service";
+import type { RiesgoAdminService } from "./riesgo-admin.service";
 
 const LISTADO: ComercioListado[] = [];
 
@@ -50,6 +51,12 @@ function controllerConMock(): AdminController {
       return { id: "l-1" };
     }
   } as unknown as DispersionAdminService;
+  const riesgo = {
+    guardarRegla: async (...args: unknown[]) => {
+      llamadasCustodia.push(["regla", ...args]);
+      return { id: "r-1" };
+    }
+  } as unknown as RiesgoAdminService;
   const auditoria = { listar: async () => [] } as unknown as AdminAuditService;
   const providers = {
     estado: () => ({ activo: "fake", proveedores: [] })
@@ -66,7 +73,8 @@ function controllerConMock(): AdminController {
     perfiles,
     tarifas,
     custodia,
-    dispersion
+    dispersion,
+    riesgo
   );
 }
 
@@ -377,5 +385,48 @@ describe("AdminController — roles internos (rbac-operativo CA-2, CA-3)", () =>
         controller.registrarSaldoRecaudo({ fecha: "2026-09-11", saldoMinor: 1 })
       )
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+});
+
+describe("AdminController — reglas de riesgo (riesgo-comercio CA-8, CA-11)", () => {
+  const REGLA = {
+    nombre: "Límite por transacción",
+    tipo: "limite_transaccion",
+    tenantId: null,
+    parametros: { limiteMinor: 20_000_000 },
+    accion: "rechazar",
+    modo: "shadow",
+    prioridad: 10
+  };
+
+  it("CA-11: ops no crea ni cambia reglas", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto({ tenantId: "", actor: "ops@evetev.com", role: "ops" }, () =>
+        controller.guardarReglaRiesgo(REGLA)
+      )
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it("CA-8: parámetros que no son del tipo → 400; bien formada → llega al servicio", async () => {
+    llamadasCustodia.length = 0;
+    const controller = controllerConMock();
+    await expect(
+      conContexto(SUPER_ADMIN, () =>
+        controller.guardarReglaRiesgo({ ...REGLA, parametros: { factor: 5, minimoCobros: 10 } })
+      )
+    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(
+      conContexto(SUPER_ADMIN, () => controller.guardarReglaRiesgo({ ...REGLA, modo: "encendida" }))
+    ).rejects.toBeInstanceOf(BadRequestException);
+    await conContexto(SUPER_ADMIN, () =>
+      controller.guardarReglaRiesgo({ ...REGLA, id: "11111111-1111-4111-8111-111111111111" })
+    );
+    expect(llamadasCustodia[0]).toEqual([
+      "regla",
+      "11111111-1111-4111-8111-111111111111",
+      REGLA,
+      "ops@evetev.com"
+    ]);
   });
 });

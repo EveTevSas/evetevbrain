@@ -86,7 +86,7 @@ export interface Retencion {
   id: string;
   tenantId: string;
   tenantNombre: string;
-  tipo: "primer_cobro" | "reserva";
+  tipo: "primer_cobro" | "reserva" | "riesgo";
   paymentId: string | null;
   referencia: string | null;
   loteId: string | null;
