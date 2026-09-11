@@ -1,6 +1,6 @@
 # Tareas — Comisiones
 
-- [ ] C1 — `calcularTarifa`, `desglosarCobro` y `validarTarifa` en `@evetev/shared`, con tests de los CA-6, CA-8 y CA-12 (redondeo mitad arriba, montos grandes, IVA de 0 % y 19 %, y el ejemplo de $50.000).
+- [x] C1 — `calcularTarifa`, `desglosarCobro` y `validarTarifa` en `@evetev/shared`, con tests de los CA-6, CA-8 y CA-12 (redondeo mitad arriba, montos grandes, IVA de 0 % y 19 %, y el ejemplo de $50.000).
 - [ ] C2 — Migración 0015: `tarifas_comercio` (con `iva_bps` limitado a 0 o 1 900 en la base) y `tarifas_proveedor` inmutables, las dos referencias en `payments` y las funciones admin.
 - [ ] C3 — Repositorio de tarifas (puerto + Drizzle + in-memory).
 - [ ] C4 — `PagosService`: exigir las dos tarifas (CA-3, CA-4), rechazar comisión + IVA ≥ monto (CA-7) y fijarlas en el cobro (CA-5).
