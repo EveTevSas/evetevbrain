@@ -30,11 +30,14 @@ const boton: React.CSSProperties = {
  */
 export function TarifaProveedor({
   tarifa,
-  tarifasComercios
+  tarifasComercios,
+  puedeEditar
 }: {
   tarifa: TarifaProveedorAdmin;
   /** La tarifa vigente de cada comercio, para medir el efecto del cambio. */
   tarifasComercios: TarifaVigenteDeComercio[];
+  /** Solo super_admin cambia tarifas (rbac-operativo). */
+  puedeEditar: boolean;
 }) {
   const router = useRouter();
   const vigente = tarifa.vigente;
@@ -94,7 +97,7 @@ export function TarifaProveedor({
         }}
       >
         <h3 style={{ margin: 0, fontSize: "0.72rem", color: "#334155" }}>TARIFA QUE NOS COBRA</h3>
-        {!editando && (
+        {!editando && puedeEditar && (
           <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
             {guardado && (
               <span

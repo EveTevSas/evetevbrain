@@ -12,6 +12,8 @@ import {
   type VariableConfig
 } from "@/lib/api/evepay";
 import { Check, CircleDot, Hand, Minus } from "lucide-react";
+import { puede } from "@/lib/auth/permissions";
+import { sesionActual } from "@/lib/auth/rol";
 import { PruebaSalud } from "./prueba-salud";
 import { TarifaProveedor } from "./tarifa-proveedor";
 
@@ -104,11 +106,13 @@ function Variable({ v }: { v: VariableConfig }) {
 function TarjetaProveedor({
   p,
   tarifa,
-  tarifasComercios
+  tarifasComercios,
+  puedeEditarTarifa
 }: {
   p: ProveedorInfo;
   tarifa: TarifaProveedorAdmin;
   tarifasComercios: TarifaVigenteDeComercio[];
+  puedeEditarTarifa: boolean;
 }) {
   return (
     <div
@@ -158,7 +162,11 @@ function TarjetaProveedor({
         </span>
       </div>
 
-      <TarifaProveedor tarifa={tarifa} tarifasComercios={tarifasComercios} />
+      <TarifaProveedor
+        tarifa={tarifa}
+        tarifasComercios={tarifasComercios}
+        puedeEditar={puedeEditarTarifa}
+      />
 
       {p.configuracion.length > 0 && (
         <div>
@@ -233,6 +241,7 @@ export default async function ProveedoresPage() {
   const tarifas = new Map<string, TarifaProveedorAdmin>();
   let tarifasComercios: TarifaVigenteDeComercio[] = [];
   let error: string | null = null;
+  const { rol } = await sesionActual();
 
   try {
     [estado, tarifasComercios] = await Promise.all([estadoProveedores(), tarifasVigentes()]);
@@ -269,6 +278,7 @@ export default async function ProveedoresPage() {
                   tarifas.get(p.nombre) ?? { provider: p.nombre, vigente: null, historial: [] }
                 }
                 tarifasComercios={tarifasComercios}
+                puedeEditarTarifa={puede(rol, "tarifas.escribir")}
               />
             ))}
           </div>

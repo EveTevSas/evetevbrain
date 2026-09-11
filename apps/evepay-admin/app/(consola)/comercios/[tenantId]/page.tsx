@@ -1,6 +1,7 @@
 import { Tarjeta, TituloSeccion } from "@/components/seccion";
 import {
   balanceDeComercio,
+  dispersionDeComercio,
   ErrorApi,
   estadoProveedores,
   obtenerComercio,
@@ -9,15 +10,20 @@ import {
   tarifaDeProveedor,
   type Comercio,
   type BalanceComercio,
+  type BalanceDispersion,
   type PerfilGuardado,
+  type PoliticaDispersion,
   type TarifaComercioAdmin,
   type VersionTarifaProveedor
 } from "@/lib/api/evepay";
 import { ArrowLeft, CircleAlert } from "lucide-react";
 import Link from "next/link";
 import { AccionesComercio } from "../acciones-comercio";
+import { puede } from "@/lib/auth/permissions";
+import { sesionActual } from "@/lib/auth/rol";
 import { Balance } from "./balance";
 import { Comision } from "./comision";
+import { PoliticaDispersionBloque } from "./politica-dispersion";
 import { EditarNombre } from "./editar-nombre";
 import { EditarPerfil } from "./editar-perfil";
 
@@ -86,6 +92,8 @@ export default async function FichaComercioPage({
   let datos: PerfilGuardado | null = null;
   let tarifa: TarifaComercioAdmin = { vigente: null, historial: [] };
   let balance: BalanceComercio | null = null;
+  let dispersion: { politica: PoliticaDispersion; balance: BalanceDispersion } | null = null;
+  const { rol } = await sesionActual();
   let proveedor: { nombre: string; tarifa: VersionTarifaProveedor | null } = {
     nombre: "",
     tarifa: null
@@ -94,12 +102,13 @@ export default async function FichaComercioPage({
 
   try {
     let proveedores;
-    [comercio, datos, tarifa, proveedores, balance] = await Promise.all([
+    [comercio, datos, tarifa, proveedores, balance, dispersion] = await Promise.all([
       obtenerComercio(tenantId),
       obtenerPerfil(tenantId),
       tarifaDeComercio(tenantId),
       estadoProveedores(),
-      balanceDeComercio(tenantId)
+      balanceDeComercio(tenantId),
+      dispersionDeComercio(tenantId)
     ]);
     // La vista previa necesita lo que nos cobra el proveedor que atiende.
     const tarifaProveedor = await tarifaDeProveedor(proveedores.activo);
@@ -248,8 +257,24 @@ export default async function FichaComercioPage({
           </Tarjeta>
         )}
 
+        {dispersion && (
+          <Tarjeta>
+            <PoliticaDispersionBloque
+              tenantId={comercio.tenantId}
+              politica={dispersion.politica}
+              balance={dispersion.balance}
+              puedeEditar={puede(rol, "dispersion.politica")}
+            />
+          </Tarjeta>
+        )}
+
         <Tarjeta>
-          <Comision tenantId={comercio.tenantId} tarifa={tarifa} proveedor={proveedor} />
+          <Comision
+            tenantId={comercio.tenantId}
+            tarifa={tarifa}
+            proveedor={proveedor}
+            puedeEditar={puede(rol, "tarifas.escribir")}
+          />
         </Tarjeta>
 
         <Tarjeta>

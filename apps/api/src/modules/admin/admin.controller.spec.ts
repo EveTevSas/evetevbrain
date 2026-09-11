@@ -10,6 +10,7 @@ import type { ConciliacionAdminService } from "./conciliacion-admin.service";
 import type { PerfilComercioService } from "./perfil-comercio.service";
 import type { TarifasAdminService } from "./tarifas-admin.service";
 import type { CustodiaAdminService } from "./custodia-admin.service";
+import type { DispersionAdminService } from "./dispersion-admin.service";
 
 const LISTADO: ComercioListado[] = [];
 
@@ -39,6 +40,16 @@ function controllerConMock(): AdminController {
       return { id: "s-1" };
     }
   } as unknown as CustodiaAdminService;
+  const dispersion = {
+    prepararLote: async (...args: unknown[]) => {
+      llamadasCustodia.push(["preparar", ...args]);
+      return { id: "l-1" };
+    },
+    aprobarLote: async (...args: unknown[]) => {
+      llamadasCustodia.push(["aprobar", ...args]);
+      return { id: "l-1" };
+    }
+  } as unknown as DispersionAdminService;
   const auditoria = { listar: async () => [] } as unknown as AdminAuditService;
   const providers = {
     estado: () => ({ activo: "fake", proveedores: [] })
@@ -54,7 +65,8 @@ function controllerConMock(): AdminController {
     conciliacion,
     perfiles,
     tarifas,
-    custodia
+    custodia,
+    dispersion
   );
 }
 
@@ -298,5 +310,72 @@ describe("AdminController — consignaciones y saldo del banco (ledger-custodia)
     await expect(
       conContexto(SUPER_ADMIN, () => controller.cuadreCustodia("2026-9-1"))
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+});
+
+/* rbac-operativo: quien prepara no aprueba ni paga; solo super_admin toca
+   tarifas; el mensaje dice qué rol hace falta. */
+describe("AdminController — roles internos (rbac-operativo CA-2, CA-3)", () => {
+  const OPS: RequestContext = { tenantId: "", actor: "ops@evetev.com", role: "ops" };
+  const FINANZAS: RequestContext = { tenantId: "", actor: "fin@evetev.com", role: "finanzas" };
+  const TENANT = "11111111-1111-4111-8111-111111111111";
+
+  it("ops y finanzas leen", async () => {
+    const controller = controllerConMock();
+    await expect(conContexto(OPS, () => controller.listarComercios())).resolves.toEqual(LISTADO);
+    await expect(conContexto(FINANZAS, () => controller.listarComercios())).resolves.toEqual(
+      LISTADO
+    );
+  });
+
+  it("ops no cambia tarifas, y el 403 dice qué rol hace falta", async () => {
+    const controller = controllerConMock();
+    const error = await conContexto(OPS, () =>
+      controller.asignarTarifaComercio(TENANT, { bps: 0, fijoMinor: 0, ivaBps: 0 })
+    ).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ForbiddenException);
+    expect((error as Error).message).toMatch(/super_admin/);
+    expect((error as Error).message).toMatch(/tu rol es ops/);
+  });
+
+  it("ops prepara lotes pero no los aprueba; finanzas al revés", async () => {
+    llamadasCustodia.length = 0;
+    const controller = controllerConMock();
+    await conContexto(OPS, () => controller.prepararLote({ tenantId: TENANT }));
+    await expect(conContexto(OPS, () => controller.aprobarLote(TENANT))).rejects.toBeInstanceOf(
+      ForbiddenException
+    );
+    await expect(
+      conContexto(FINANZAS, () => controller.prepararLote({ tenantId: TENANT }))
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await conContexto(FINANZAS, () => controller.aprobarLote(TENANT));
+    // El servicio recibe quién actúa y con qué rol: la base hace el cuatro ojos.
+    expect(llamadasCustodia[0]).toEqual([
+      "preparar",
+      TENANT,
+      { actor: "ops@evetev.com", rol: "ops" }
+    ]);
+    expect(llamadasCustodia[1]).toEqual([
+      "aprobar",
+      TENANT,
+      { actor: "fin@evetev.com", rol: "finanzas" }
+    ]);
+  });
+
+  it("finanzas no edita comercios; ops no registra el saldo del banco", async () => {
+    const controller = controllerConMock();
+    await expect(
+      conContexto(FINANZAS, () =>
+        controller.renombrarComercio(TENANT, {
+          legalName: "Comercio Nuevo SAS",
+          displayName: "Nuevo"
+        })
+      )
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      conContexto(OPS, () =>
+        controller.registrarSaldoRecaudo({ fecha: "2026-09-11", saldoMinor: 1 })
+      )
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 });

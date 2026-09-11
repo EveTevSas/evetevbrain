@@ -51,12 +51,15 @@ const rejilla: React.CSSProperties = {
 export function Comision({
   tenantId,
   tarifa,
-  proveedor
+  proveedor,
+  puedeEditar
 }: {
   tenantId: string;
   tarifa: TarifaComercioAdmin;
   /** El que atiende los cobros y lo que nos cobra; null si aún no tiene tarifa. */
   proveedor: { nombre: string; tarifa: VersionTarifaProveedor | null };
+  /** Solo super_admin cambia tarifas (rbac-operativo). */
+  puedeEditar: boolean;
 }) {
   const router = useRouter();
   const vigente = tarifa.vigente;
@@ -123,7 +126,7 @@ export function Comision({
         }}
       >
         <h2 style={{ margin: 0, fontSize: "0.98rem", color: "#0A2540" }}>Comisión</h2>
-        {!editando && (
+        {!editando && puedeEditar && (
           <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
             {guardado && (
               <span role="status" style={{ fontSize: "0.8rem", color: "#15803D", fontWeight: 600 }}>

@@ -1,7 +1,15 @@
 "use client";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { ArrowLeftRight, Building2, LayoutDashboard, LogOut, Plug, Scale } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ArrowUpRight,
+  Building2,
+  LayoutDashboard,
+  LogOut,
+  Plug,
+  Scale
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -11,7 +19,8 @@ const SECCIONES = [
   { href: "/comercios", etiqueta: "Comercios", Icono: Building2 },
   { href: "/proveedores", etiqueta: "Proveedores", Icono: Plug },
   { href: "/pagos", etiqueta: "Pagos", Icono: ArrowLeftRight },
-  { href: "/conciliacion", etiqueta: "Conciliación", Icono: Scale }
+  { href: "/conciliacion", etiqueta: "Conciliación", Icono: Scale },
+  { href: "/dispersion", etiqueta: "Dispersión", Icono: ArrowUpRight }
 ] as const;
 
 export function NavConsola() {

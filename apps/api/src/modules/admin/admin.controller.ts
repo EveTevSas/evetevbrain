@@ -12,14 +12,26 @@ import {
   Query
 } from "@nestjs/common";
 import {
+  EstadoLoteSchema,
+  PoliticaDispersionSchema,
   RangoFechasSchema,
   TarifaComercioSchema,
   TarifaProveedorSchema,
+  type PoliticaDispersion,
   type SaludProvider
 } from "@evetev/shared";
 import { z } from "zod";
 import { currentContextOrNull } from "../../common/request-context";
-import { Role } from "../identidad/roles";
+import { ROLES_INTERNOS, type Role } from "../identidad/roles";
+import { puede, rolesPara, type Accion } from "./permisos";
+import {
+  DispersionAdminService,
+  type BalanceDispersion,
+  type BalanceDispersionComercio,
+  type ItemLote,
+  type Lote,
+  type Retencion
+} from "./dispersion-admin.service";
 import {
   AdminService,
   type ApiKeyRotada,
@@ -124,13 +136,14 @@ export class AdminController {
     private readonly conciliacion: ConciliacionAdminService,
     private readonly perfiles: PerfilComercioService,
     private readonly tarifas: TarifasAdminService,
-    private readonly custodia: CustodiaAdminService
+    private readonly custodia: CustodiaAdminService,
+    private readonly dispersion: DispersionAdminService
   ) {}
 
   /** GET /v1/admin/merchants — lista todos los comercios (para el panel y verificar auth). */
   @Get("merchants")
   async listarComercios(): Promise<ComercioListado[]> {
-    this.verificarAdmin();
+    this.exigir("leer");
     return this.admin.listarComercios();
   }
 
@@ -138,7 +151,7 @@ export class AdminController {
   @Post("merchants")
   @HttpCode(201)
   async crearComercio(@Body() body: unknown): Promise<ComercioCreado> {
-    this.verificarAdmin();
+    this.exigir("comercios.escribir");
 
     const parsed = CrearComercioSchema.safeParse(body);
     if (!parsed.success) {
@@ -157,7 +170,7 @@ export class AdminController {
     @Param("tenantId") tenantId: string,
     @Body() body: unknown
   ): Promise<ApiKeyRotada> {
-    this.verificarAdmin();
+    this.exigir("comercios.escribir");
     if (!UUID_RE.test(tenantId)) {
       throw new BadRequestException("tenantId inválido.");
     }
@@ -179,7 +192,7 @@ export class AdminController {
     @Param("tenantId") tenantId: string,
     @Body() body: unknown
   ): Promise<{ tenantId: string; estado: string }> {
-    this.verificarAdmin();
+    this.exigir("comercios.escribir");
     if (!UUID_RE.test(tenantId)) {
       throw new BadRequestException("tenantId inválido.");
     }
@@ -202,7 +215,7 @@ export class AdminController {
     @Param("tenantId") tenantId: string,
     @Body() body: unknown
   ): Promise<{ tenantId: string; legalName: string; displayName: string }> {
-    this.verificarAdmin();
+    this.exigir("comercios.escribir");
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
 
     const parsed = RenombrarComercioSchema.safeParse(body);
@@ -220,7 +233,7 @@ export class AdminController {
   /** GET /v1/admin/merchants/:tenantId — ficha del comercio. */
   @Get("merchants/:tenantId")
   async obtenerComercio(@Param("tenantId") tenantId: string): Promise<ComercioListado> {
-    this.verificarAdmin();
+    this.exigir("leer");
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
 
     const comercio = await this.admin.obtenerComercio(tenantId);
@@ -234,7 +247,7 @@ export class AdminController {
    */
   @Get("merchants/:tenantId/perfil")
   async obtenerPerfil(@Param("tenantId") tenantId: string): Promise<PerfilGuardado | null> {
-    this.verificarAdmin();
+    this.exigir("leer");
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
     return this.perfiles.obtener(tenantId);
   }
@@ -250,7 +263,7 @@ export class AdminController {
     @Param("tenantId") tenantId: string,
     @Body() body: unknown
   ): Promise<{ ok: true }> {
-    this.verificarAdmin();
+    this.exigir("comercios.escribir");
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
 
     const parsed = PerfilComercioSchema.safeParse(body);
@@ -273,7 +286,7 @@ export class AdminController {
     @Param("tenantId") tenantId: string,
     @Body() body: unknown
   ): Promise<{ tenantId: string; merchantId: string; estado: string }> {
-    this.verificarAdmin();
+    this.exigir("comercios.escribir");
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
 
     const parsed = CambiarKycSchema.safeParse(body);
@@ -289,7 +302,7 @@ export class AdminController {
    */
   @Get("merchants/:tenantId/tarifa")
   async tarifaComercio(@Param("tenantId") tenantId: string): Promise<TarifaComercioAdmin> {
-    this.verificarAdmin();
+    this.exigir("leer");
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
     return this.tarifas.tarifaComercio(tenantId);
   }
@@ -305,7 +318,7 @@ export class AdminController {
     @Param("tenantId") tenantId: string,
     @Body() body: unknown
   ): Promise<VersionTarifaComercio> {
-    this.verificarAdmin();
+    this.exigir("tarifas.escribir");
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
 
     const parsed = TarifaComercioSchema.safeParse(body);
@@ -321,7 +334,7 @@ export class AdminController {
    */
   @Get("merchants/:tenantId/balance")
   async balanceComercio(@Param("tenantId") tenantId: string): Promise<BalanceComercio> {
-    this.verificarAdmin();
+    this.exigir("leer");
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
     return this.custodia.balanceComercio(tenantId);
   }
@@ -329,14 +342,14 @@ export class AdminController {
   /** GET /v1/admin/tarifas — la tarifa vigente de cada comercio que tiene una. */
   @Get("tarifas")
   async tarifasVigentes(): Promise<TarifaVigenteDeComercio[]> {
-    this.verificarAdmin();
+    this.exigir("leer");
     return this.tarifas.tarifasVigentes();
   }
 
   /** GET /v1/admin/providers — estado de la adquirencia (CA-11, CA-13). */
   @Get("providers")
   async listarProveedores(): Promise<EstadoProveedores> {
-    this.verificarAdmin();
+    this.exigir("leer");
     return this.providers.estado();
   }
 
@@ -348,7 +361,7 @@ export class AdminController {
   @Post("providers/health")
   @HttpCode(200)
   async saludProveedor(): Promise<SaludProvider & { proveedor: string }> {
-    this.verificarAdmin();
+    this.exigir("proveedores.salud");
     const salud = await this.providers.salud();
 
     // Comprobar la adquirencia es una acción de operación: queda registrada,
@@ -370,7 +383,7 @@ export class AdminController {
    */
   @Get("providers/:provider/tarifa")
   async tarifaProveedor(@Param("provider") provider: string): Promise<TarifaProveedorAdmin> {
-    this.verificarAdmin();
+    this.exigir("leer");
     return this.tarifas.tarifaProveedor(provider);
   }
 
@@ -384,7 +397,7 @@ export class AdminController {
     @Param("provider") provider: string,
     @Body() body: unknown
   ): Promise<VersionTarifaProveedor> {
-    this.verificarAdmin();
+    this.exigir("tarifas.escribir");
 
     const parsed = TarifaProveedorSchema.safeParse(body);
     if (!parsed.success) {
@@ -396,7 +409,7 @@ export class AdminController {
   /** GET /v1/admin/pagos — listado cross-tenant con filtros (CA-15). */
   @Get("pagos")
   async listarPagos(@Query() query: Record<string, string | undefined>): Promise<PaginaPagos> {
-    this.verificarAdmin();
+    this.exigir("leer");
 
     const parsed = FiltrosPagosSchema.safeParse(query);
     if (!parsed.success) {
@@ -408,7 +421,7 @@ export class AdminController {
   /** GET /v1/admin/pagos/:id — un cobro concreto. */
   @Get("pagos/:id")
   async obtenerPago(@Param("id") id: string): Promise<PagoAdmin> {
-    this.verificarAdmin();
+    this.exigir("leer");
     if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
     return this.pagos.obtener(id);
   }
@@ -419,7 +432,7 @@ export class AdminController {
    */
   @Get("pagos/:id/timeline")
   async timelinePago(@Param("id") id: string): Promise<EventoTimeline[]> {
-    this.verificarAdmin();
+    this.exigir("leer");
     if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
     return this.pagos.timeline(id);
   }
@@ -431,7 +444,7 @@ export class AdminController {
   @Post("pagos/:id/reverify")
   @HttpCode(200)
   async reverificarPago(@Param("id") id: string): Promise<ResultadoReverificacion> {
-    this.verificarAdmin();
+    this.exigir("pagos.reverificar");
     if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
     return this.pagos.reverificar(id, this.actor());
   }
@@ -447,7 +460,7 @@ export class AdminController {
     @Param("tenantId") tenantId: string,
     @Body() body: unknown
   ): Promise<CorridaConciliacion> {
-    this.verificarAdmin();
+    this.exigir("conciliacion.correr");
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
 
     const parsed = RangoFechasSchema.safeParse(body);
@@ -463,7 +476,7 @@ export class AdminController {
     @Query("tenantId") tenantId?: string,
     @Query("limite") limite?: string
   ): Promise<CorridaConciliacion[]> {
-    this.verificarAdmin();
+    this.exigir("leer");
     if (tenantId && !UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
     const n = Number(limite);
     return this.conciliacion.historico(tenantId, Number.isFinite(n) && n > 0 ? n : 50);
@@ -472,7 +485,7 @@ export class AdminController {
   /** GET /v1/admin/ledger/:tenantId — saldos reconstruidos y asientos (CA-21). */
   @Get("ledger/:tenantId")
   async ledger(@Param("tenantId") tenantId: string): Promise<LedgerTenant> {
-    this.verificarAdmin();
+    this.exigir("leer");
     if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
     return this.conciliacion.ledger(tenantId);
   }
@@ -480,7 +493,7 @@ export class AdminController {
   /** GET /v1/admin/consignaciones — las registradas, la más reciente primero. */
   @Get("consignaciones")
   async listarConsignaciones(@Query("limite") limite?: string): Promise<Consignacion[]> {
-    this.verificarAdmin();
+    this.exigir("leer");
     const n = Number(limite);
     return this.custodia.listarConsignaciones(Number.isFinite(n) && n > 0 ? n : 50);
   }
@@ -492,7 +505,7 @@ export class AdminController {
    */
   @Get("consignaciones/pendientes")
   async cobrosPorConsignar(@Query("provider") provider?: string): Promise<CobroPorConsignar[]> {
-    this.verificarAdmin();
+    this.exigir("leer");
     return this.custodia.cobrosPorConsignar(provider?.trim() || this.providers.nombreActivo());
   }
 
@@ -505,7 +518,7 @@ export class AdminController {
   async registrarConsignacion(
     @Body() body: unknown
   ): Promise<{ id: string } & RegistrarConsignacionInput> {
-    this.verificarAdmin();
+    this.exigir("consignaciones.registrar");
 
     const parsed = RegistrarConsignacionSchema.safeParse(body);
     if (!parsed.success) {
@@ -517,7 +530,7 @@ export class AdminController {
   /** GET /v1/admin/recaudo/cuadre?fecha= — libro vs banco al cierre de la fecha (CA-8). */
   @Get("recaudo/cuadre")
   async cuadreCustodia(@Query("fecha") fecha?: string): Promise<CuadreCustodia> {
-    this.verificarAdmin();
+    this.exigir("leer");
     if (fecha !== undefined && !FechaSchema.safeParse(fecha).success) {
       throw new BadRequestException("La fecha va como AAAA-MM-DD.");
     }
@@ -530,7 +543,7 @@ export class AdminController {
   async registrarSaldoRecaudo(
     @Body() body: unknown
   ): Promise<{ id: string; cuadre: CuadreCustodia }> {
-    this.verificarAdmin();
+    this.exigir("recaudo.saldo");
 
     const parsed = RegistrarSaldoSchema.safeParse(body);
     if (!parsed.success) {
@@ -539,10 +552,135 @@ export class AdminController {
     return this.custodia.registrarSaldoRecaudo(parsed.data, this.actor());
   }
 
+  // --- Dispersión (spec dispersion) ---
+
+  /** GET /v1/admin/dispersion/balances — disponible, pendiente, retenido y en lote de cada comercio (CA-1). */
+  @Get("dispersion/balances")
+  async balancesDispersion(): Promise<BalanceDispersionComercio[]> {
+    this.exigir("leer");
+    return this.dispersion.balances();
+  }
+
+  /** GET /v1/admin/merchants/:tenantId/dispersion — política y balance de dispersión del comercio. */
+  @Get("merchants/:tenantId/dispersion")
+  async dispersionComercio(@Param("tenantId") tenantId: string): Promise<{
+    politica: PoliticaDispersion & { actualizadaPor: string | null };
+    balance: BalanceDispersion;
+  }> {
+    this.exigir("leer");
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+    const [politica, balance] = await Promise.all([
+      this.dispersion.politica(tenantId),
+      this.dispersion.balance(tenantId)
+    ]);
+    return { politica, balance };
+  }
+
+  /** PUT /v1/admin/merchants/:tenantId/dispersion — T+N, reserva y retención del primer cobro (CA-11). */
+  @Put("merchants/:tenantId/dispersion")
+  @HttpCode(200)
+  async guardarPoliticaDispersion(
+    @Param("tenantId") tenantId: string,
+    @Body() body: unknown
+  ): Promise<PoliticaDispersion & { actualizadaPor: string | null }> {
+    this.exigir("dispersion.politica");
+    if (!UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+    const parsed = PoliticaDispersionSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    await this.dispersion.guardarPolitica(tenantId, parsed.data, this.quien());
+    return this.dispersion.politica(tenantId);
+  }
+
+  /** GET /v1/admin/dispersion/lotes?estado= — lotes, los abiertos primero. */
+  @Get("dispersion/lotes")
+  async listarLotes(@Query("estado") estado?: string): Promise<Lote[]> {
+    this.exigir("leer");
+    if (estado !== undefined && estado !== "") {
+      const parsed = EstadoLoteSchema.safeParse(estado);
+      if (!parsed.success) throw new BadRequestException("Estado de lote inválido.");
+      return this.dispersion.listarLotes(parsed.data);
+    }
+    return this.dispersion.listarLotes();
+  }
+
+  /** GET /v1/admin/dispersion/lotes/:id — el lote con sus items. */
+  @Get("dispersion/lotes/:id")
+  async obtenerLote(@Param("id") id: string): Promise<Lote & { items: ItemLote[] }> {
+    this.exigir("leer");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    return this.dispersion.lote(id);
+  }
+
+  /** POST /v1/admin/dispersion/lotes — ops prepara el lote de un comercio (CA-2, CA-3). */
+  @Post("dispersion/lotes")
+  @HttpCode(201)
+  async prepararLote(@Body() body: unknown): Promise<Lote> {
+    this.exigir("lotes.preparar");
+    const parsed = z.object({ tenantId: z.string().uuid() }).safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    return this.dispersion.prepararLote(parsed.data.tenantId, this.quien());
+  }
+
+  /** POST /v1/admin/dispersion/lotes/:id/aprobar — finanzas, otra persona que quien preparó (CA-4). */
+  @Post("dispersion/lotes/:id/aprobar")
+  @HttpCode(200)
+  async aprobarLote(@Param("id") id: string): Promise<Lote> {
+    this.exigir("lotes.aprobar");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    return this.dispersion.aprobarLote(id, this.quien());
+  }
+
+  /** POST /v1/admin/dispersion/lotes/:id/pagar — registra el pago hecho desde el banco (CA-5, CA-6). */
+  @Post("dispersion/lotes/:id/pagar")
+  @HttpCode(200)
+  async pagarLote(@Param("id") id: string, @Body() body: unknown): Promise<Lote> {
+    this.exigir("lotes.pagar");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    const parsed = z
+      .object({
+        fecha: FechaSchema,
+        referenciaPago: z.string().trim().min(1).max(120),
+        comprobante: z.string().trim().max(500).optional()
+      })
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    return this.dispersion.registrarPago(id, parsed.data, this.quien());
+  }
+
+  /** POST /v1/admin/dispersion/lotes/:id/fallar — el banco no pagó; los cobros vuelven a disponible (CA-7). */
+  @Post("dispersion/lotes/:id/fallar")
+  @HttpCode(200)
+  async fallarLote(@Param("id") id: string, @Body() body: unknown): Promise<Lote> {
+    this.exigir("lotes.pagar");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    const parsed = z.object({ motivo: z.string().trim().min(3).max(500) }).safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    return this.dispersion.marcarFallido(id, parsed.data.motivo, this.quien());
+  }
+
+  /** GET /v1/admin/dispersion/retenciones?tenantId= — retenciones, las activas primero. */
+  @Get("dispersion/retenciones")
+  async listarRetenciones(@Query("tenantId") tenantId?: string): Promise<Retencion[]> {
+    this.exigir("leer");
+    if (tenantId && !UUID_RE.test(tenantId)) throw new BadRequestException("tenantId inválido.");
+    return this.dispersion.listarRetenciones(tenantId || undefined);
+  }
+
+  /** POST /v1/admin/dispersion/retenciones/:id/liberar — con motivo; el rol depende del tipo (CA-10). */
+  @Post("dispersion/retenciones/:id/liberar")
+  @HttpCode(200)
+  async liberarRetencion(@Param("id") id: string, @Body() body: unknown): Promise<Retencion> {
+    this.exigir("leer");
+    if (!UUID_RE.test(id)) throw new BadRequestException("id inválido.");
+    const parsed = z.object({ motivo: z.string().trim().min(3).max(500) }).safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.flatten());
+    return this.dispersion.liberarRetencion(id, parsed.data.motivo, this.quien());
+  }
+
   /** GET /v1/admin/auditoria — últimas acciones administrativas (CA-4). */
   @Get("auditoria")
   async listarAuditoria(@Query("limite") limite?: string): Promise<AccionAdmin[]> {
-    this.verificarAdmin();
+    this.exigir("leer");
     const n = Number(limite);
     return this.auditoria.listar(Number.isFinite(n) && n > 0 ? n : 100);
   }
@@ -552,9 +690,15 @@ export class AdminController {
     return currentContextOrNull()?.actor || "desconocido";
   }
 
+  /** Quién actúa y con qué rol, para el cuatro ojos y la auditoría de dispersión. */
+  private quien(): { actor: string; rol: string } {
+    return { actor: this.actor(), rol: currentContextOrNull()?.role ?? "" };
+  }
+
   /**
-   * Acceso admin (CA-3 de admin-console): rol super_admin en el JWT de
-   * Supabase, que TenantMiddleware deja en el contexto. Sin contexto no hay
+   * Acceso por acción (spec `rbac-operativo`): el rol viene del JWT de
+   * Supabase que TenantMiddleware deja en el contexto, y la tabla de permisos
+   * dice qué roles internos pueden hacer cada cosa. Sin contexto no hay
    * identidad, y eso se lee como no autorizado (403), nunca como un 500 que
    * además delate que el endpoint existe.
    *
@@ -563,9 +707,14 @@ export class AdminController {
    * auditoría no podía nombrar a nadie, y revocarlo obligaba a rotarlo para
    * todos a la vez.
    */
-  private verificarAdmin(): void {
-    if (currentContextOrNull()?.role !== Role.SUPER_ADMIN) {
-      throw new ForbiddenException("Acceso de administrador requerido.");
+  private exigir(accion: Accion): void {
+    const role = currentContextOrNull()?.role ?? "";
+    if (puede(role, accion)) return;
+    if (ROLES_INTERNOS.includes(role as Role)) {
+      throw new ForbiddenException(
+        `Esta acción requiere el rol ${rolesPara(accion).join(" o ")}; tu rol es ${role}.`
+      );
     }
+    throw new ForbiddenException("Acceso de administrador requerido.");
   }
 }

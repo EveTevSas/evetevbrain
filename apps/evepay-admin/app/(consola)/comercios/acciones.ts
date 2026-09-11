@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { validarTarifaComercio } from "@evetev/shared";
+import { PoliticaDispersionSchema, validarTarifaComercio } from "@evetev/shared";
 import {
   apiPost,
   apiPut,
@@ -9,9 +9,10 @@ import {
   type ApiKeyRotada,
   type ComercioCreado,
   type PerfilComercio,
+  type PoliticaDispersion,
   type VersionTarifaComercio
 } from "@/lib/api/evepay";
-import { describirErrores, leerTarifaComercio } from "@/lib/tarifas";
+import { describirErrores, leerTarifaComercio, porcentajeABps } from "@/lib/tarifas";
 
 /**
  * Server Actions de la sección de comercios. Cada una devuelve un resultado
@@ -237,6 +238,37 @@ export async function asignarTarifaComercio(
       validacion.tarifa
     );
     revalidatePath("/comercios");
+    return { ok: true, datos };
+  } catch (error) {
+    return comoResultado(error);
+  }
+}
+
+/** Política de dispersión del comercio (T+N, reserva, primer cobro). Solo super_admin. */
+export async function guardarPoliticaDispersion(
+  tenantId: string,
+  formulario: FormData
+): Promise<Resultado<PoliticaDispersion>> {
+  const parsed = PoliticaDispersionSchema.safeParse({
+    diasLiquidacion: Number(formulario.get("diasLiquidacion")),
+    reservaBps: porcentajeABps(String(formulario.get("reservaPorcentaje") ?? "")),
+    diasReserva: Number(formulario.get("diasReserva")),
+    retenerPrimerCobro: formulario.get("retenerPrimerCobro") === "on"
+  });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error:
+        "Revisa los rangos: T+N de 0 a 30 días, reserva de 0 a 50 %, liberación de 0 a 365 días."
+    };
+  }
+  try {
+    const datos = await apiPut<PoliticaDispersion>(
+      `/admin/merchants/${tenantId}/dispersion`,
+      parsed.data
+    );
+    revalidatePath("/comercios");
+    revalidatePath("/dispersion");
     return { ok: true, datos };
   } catch (error) {
     return comoResultado(error);

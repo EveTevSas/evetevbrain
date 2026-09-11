@@ -13,7 +13,14 @@ import { registrarSaldoRecaudo } from "./acciones";
  * recaudo contra lo que dice el banco. El saldo del banco se registra a mano
  * del extracto; si no coincide con el libro, aquí se ve como descuadre.
  */
-export function CuadreDeCustodia({ cuadre }: { cuadre: CuadreCustodia }) {
+export function CuadreDeCustodia({
+  cuadre,
+  puedeRegistrar
+}: {
+  cuadre: CuadreCustodia;
+  /** El saldo del banco lo registra finanzas (rbac-operativo). */
+  puedeRegistrar: boolean;
+}) {
   const router = useRouter();
   const [abierto, setAbierto] = useState(false);
   const [pendiente, iniciar] = useTransition();
@@ -84,7 +91,7 @@ export function CuadreDeCustodia({ cuadre }: { cuadre: CuadreCustodia }) {
               : `El banco dice ${formatoMonto(cuadre.saldoBanco ?? 0, "COP")} (registrado por ${cuadre.registradoPor}).`}
           </p>
         </div>
-        {!abierto && (
+        {!abierto && puedeRegistrar && (
           <button
             type="button"
             onClick={() => setAbierto(true)}

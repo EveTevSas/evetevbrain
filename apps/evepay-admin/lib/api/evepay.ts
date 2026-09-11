@@ -470,6 +470,8 @@ export interface BalanceComercio {
   enTransito: number;
   enRecaudo: number;
   porPagarProveedor: number;
+  retenido: number;
+  dispersado: number;
 }
 
 export function listarConsignaciones(): Promise<Consignacion[]> {
@@ -488,4 +490,120 @@ export function cuadreCustodia(fecha?: string): Promise<CuadreCustodia> {
 
 export function balanceDeComercio(tenantId: string): Promise<BalanceComercio> {
   return apiGet<BalanceComercio>(`/admin/merchants/${tenantId}/balance`);
+}
+
+// --- Dispersión (Fase 7, spec dispersion) ---
+
+export type EstadoLote = "programado" | "aprobado" | "pagado" | "fallido";
+
+export interface PoliticaDispersion {
+  diasLiquidacion: number;
+  reservaBps: number;
+  diasReserva: number;
+  retenerPrimerCobro: boolean;
+  actualizadaPor: string | null;
+}
+
+export interface BalanceDispersion {
+  disponibleMinor: number;
+  pendienteMinor: number;
+  retenidoMinor: number;
+  enLoteMinor: number;
+  cuentaCertificada: boolean;
+  cuentaDetalle: string | null;
+  cobrosDisponibles: number;
+  diasLiquidacion: number;
+  reservaBps: number;
+  primerCobroRetenido: boolean;
+}
+
+export interface BalanceDispersionComercio extends BalanceDispersion {
+  tenantId: string;
+  tenantNombre: string;
+  tenantEstado: string;
+  loteAbierto: { id: string; estado: EstadoLote } | null;
+}
+
+export interface Lote {
+  id: string;
+  tenantId: string;
+  tenantNombre: string;
+  estado: EstadoLote;
+  montoMinor: number;
+  reservaMinor: number;
+  cuenta: {
+    banco: string;
+    tipoCuenta: string;
+    numeroCuenta: string;
+    titularCuenta: string;
+    titularDocumento: string;
+  };
+  preparadoPor: string;
+  preparadoEn: string;
+  aprobadoPor: string | null;
+  aprobadoEn: string | null;
+  fechaPago: string | null;
+  referenciaPago: string | null;
+  comprobante: string | null;
+  pagadoPor: string | null;
+  pagadoEn: string | null;
+  falloMotivo: string | null;
+  fallidoPor: string | null;
+  fallidoEn: string | null;
+  cobros: number;
+}
+
+export interface ItemLote {
+  id: string;
+  tipo: "cobro" | "reserva_liberada";
+  paymentId: string | null;
+  referencia: string | null;
+  montoCobroMinor: number | null;
+  retencionId: string | null;
+  montoMinor: number;
+  reservaMinor: number;
+}
+
+export interface Retencion {
+  id: string;
+  tenantId: string;
+  tenantNombre: string;
+  tipo: "primer_cobro" | "reserva";
+  paymentId: string | null;
+  referencia: string | null;
+  loteId: string | null;
+  montoMinor: number;
+  liberarDesde: string | null;
+  motivo: string;
+  creadaPor: string;
+  creadaEn: string;
+  liberadaPor: string | null;
+  liberadaEn: string | null;
+  liberacionMotivo: string | null;
+  pagadaEnLote: string | null;
+  estado: "activa" | "pendiente" | "liberada" | "pagada" | "anulada";
+}
+
+export function balancesDispersion(): Promise<BalanceDispersionComercio[]> {
+  return apiGet<BalanceDispersionComercio[]>("/admin/dispersion/balances");
+}
+
+export function dispersionDeComercio(
+  tenantId: string
+): Promise<{ politica: PoliticaDispersion; balance: BalanceDispersion }> {
+  return apiGet(`/admin/merchants/${tenantId}/dispersion`);
+}
+
+export function listarLotes(): Promise<Lote[]> {
+  return apiGet<Lote[]>("/admin/dispersion/lotes");
+}
+
+export function obtenerLote(id: string): Promise<Lote & { items: ItemLote[] }> {
+  return apiGet(`/admin/dispersion/lotes/${id}`);
+}
+
+export function listarRetenciones(tenantId?: string): Promise<Retencion[]> {
+  return apiGet<Retencion[]>(
+    `/admin/dispersion/retenciones${tenantId ? `?tenantId=${tenantId}` : ""}`
+  );
 }

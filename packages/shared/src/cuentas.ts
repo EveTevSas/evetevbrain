@@ -25,6 +25,8 @@ export const CUENTAS = {
   costoProveedor: (provider: string) => `costo_proveedor:${provider}`,
   /** Pasivo: tarifa del proveedor facturada aparte y aún sin pagar. */
   porPagar: (provider: string) => `por_pagar:${provider}`,
+  /** Pasivo: lo que se le debe al comercio pero está retenido (reserva). */
+  retenido: (merchantId: string) => `retenido:${merchantId}`,
   /**
    * Solo en asientos anteriores a la Fase 6, cuando el banco era una cuenta
    * genérica. No se reescribe nada: el cuadre de custodia la suma a `recaudo`.

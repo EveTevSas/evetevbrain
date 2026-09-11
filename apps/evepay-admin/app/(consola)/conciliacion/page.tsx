@@ -19,6 +19,8 @@ import { formatoMonto } from "@/lib/formato";
 import { naturalezaDeCuenta, saldoNatural } from "@evetev/shared";
 import { CircleAlert, CircleCheck, Hand } from "lucide-react";
 import Link from "next/link";
+import { puede } from "@/lib/auth/permissions";
+import { sesionActual } from "@/lib/auth/rol";
 import { CorrerConciliacion } from "./correr";
 import { CuadreDeCustodia } from "./cuadre-custodia";
 import { RegistrarConsignacion } from "./registrar-consignacion";
@@ -297,6 +299,7 @@ export default async function ConciliacionPage() {
   let pendientes: CobroPorConsignar[] = [];
   let proveedorActivo = "";
   let error: string | null = null;
+  const { rol } = await sesionActual();
 
   try {
     let proveedores;
@@ -339,7 +342,9 @@ export default async function ConciliacionPage() {
         </Tarjeta>
       ) : (
         <>
-          {cuadre && <CuadreDeCustodia cuadre={cuadre} />}
+          {cuadre && (
+            <CuadreDeCustodia cuadre={cuadre} puedeRegistrar={puede(rol, "recaudo.saldo")} />
+          )}
 
           {conDescuadre.length > 0 && (
             <div

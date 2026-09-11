@@ -1,10 +1,13 @@
 /**
- * Aprovisiona un usuario super_admin de la consola de EvePay (A5 de
- * specs/evepay/admin-console/). Se corre desde un entorno administrativo
- * seguro con la clave secreta del proyecto Supabase de EVEPAY:
+ * Aprovisiona un usuario interno de la consola de EvePay (A5 de
+ * specs/evepay/admin-console/ y CA-5 de specs/evepay/rbac-operativo/). Se
+ * corre desde un entorno administrativo seguro con la clave secreta del
+ * proyecto Supabase de EVEPAY:
  *
  *   SUPABASE_URL=... SUPABASE_SECRET_KEY=... SUPABASE_INVITE_REDIRECT_URL=... \
- *     pnpm auth:provision-admin --email persona@evetev.com --name "Nombre"
+ *     pnpm auth:provision-admin --email persona@evetev.com --name "Nombre" --role ops
+ *
+ * `--role` es uno de super_admin | ops | finanzas (por defecto super_admin).
  *
  * El rol va en app_metadata (solo escribible con la clave secreta; el usuario
  * no puede editarlo). Si el usuario ya existe, solo se asegura el rol.
@@ -59,6 +62,11 @@ async function main() {
   const email = required(args.get("email"), "--email").toLowerCase();
   const name = required(args.get("name"), "--name");
   const password = args.get("password")?.trim();
+  const role = (args.get("role") ?? "super_admin").trim();
+  const ROLES = ["super_admin", "ops", "finanzas"];
+  if (!ROLES.includes(role)) {
+    throw new Error(`--role debe ser uno de: ${ROLES.join(", ")}.`);
+  }
 
   if (password && !esLocal(url)) {
     throw new Error(
@@ -78,11 +86,11 @@ async function main() {
 
   if (existing) {
     const { error } = await supabase.auth.admin.updateUserById(existing.id, {
-      app_metadata: { ...existing.app_metadata, role: "super_admin" },
+      app_metadata: { ...existing.app_metadata, role },
       ...(password ? { password } : {})
     });
     if (error) throw error;
-    console.log(`Listo: ${email} ya existía; rol super_admin asegurado.`);
+    console.log(`Listo: ${email} ya existía; rol ${role} asegurado.`);
     return;
   }
 
@@ -92,10 +100,10 @@ async function main() {
       password,
       email_confirm: true,
       user_metadata: { name },
-      app_metadata: { role: "super_admin" }
+      app_metadata: { role }
     });
     if (error) throw error;
-    console.log(`Listo: ${email} creado en el Supabase local con rol super_admin.`);
+    console.log(`Listo: ${email} creado en el Supabase local con rol ${role}.`);
     return;
   }
 
@@ -109,11 +117,11 @@ async function main() {
   if (!created) throw new Error("El usuario invitado no aparece en el listado.");
 
   const { error: roleError } = await supabase.auth.admin.updateUserById(created.id, {
-    app_metadata: { ...created.app_metadata, role: "super_admin" }
+    app_metadata: { ...created.app_metadata, role }
   });
   if (roleError) throw roleError;
 
-  console.log(`Listo: invitación enviada a ${email} con rol super_admin.`);
+  console.log(`Listo: invitación enviada a ${email} con rol ${role}.`);
 }
 
 main().catch((error) => {

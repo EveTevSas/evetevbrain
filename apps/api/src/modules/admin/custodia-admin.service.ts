@@ -1,13 +1,7 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException
-} from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { sql } from "drizzle-orm";
 import { DB, type Db } from "../../database/drizzle";
-import { errorDeBase } from "../../database/errores";
+import { traducirErrorDeBase } from "../../database/errores";
 import { ProvidersService } from "./providers.service";
 
 /**
@@ -75,26 +69,10 @@ export interface BalanceComercio {
   enTransito: number;
   enRecaudo: number;
   porPagarProveedor: number;
-}
-
-/**
- * Las funciones de 0016 levantan errores con código y mensaje pensados para
- * la persona que opera: check_violation cuando la consignación no cuadra o
- * trae un cobro que no corresponde, unique_violation cuando la referencia ya
- * existe, no_data_found cuando un cobro no existe. Se devuelven tal cual.
- */
-function traducir(error: unknown): never {
-  const { code, message } = errorDeBase(error);
-  switch (code) {
-    case "23514":
-      throw new BadRequestException(message);
-    case "23505":
-      throw new ConflictException(message);
-    case "P0002":
-      throw new NotFoundException(message);
-    default:
-      throw error;
-  }
+  /** Lo que se le debe al comercio pero está retenido (reserva). */
+  retenido: number;
+  /** Lo que ya se le pagó al comercio. */
+  dispersado: number;
 }
 
 @Injectable()
@@ -149,7 +127,7 @@ export class CustodiaAdminService {
       }
       return { id, ...input };
     } catch (error) {
-      traducir(error);
+      traducirErrorDeBase(error);
     }
   }
 
@@ -223,7 +201,9 @@ export class CustodiaAdminService {
       margen: Number(f.margen ?? 0),
       enTransito: Number(f.en_transito ?? 0),
       enRecaudo: Number(f.en_recaudo ?? 0),
-      porPagarProveedor: Number(f.por_pagar_proveedor ?? 0)
+      porPagarProveedor: Number(f.por_pagar_proveedor ?? 0),
+      retenido: Number(f.retenido ?? 0),
+      dispersado: Number(f.dispersado ?? 0)
     };
   }
 

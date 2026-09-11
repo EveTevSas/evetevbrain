@@ -5,3 +5,4 @@ export * from "./merchants";
 export * from "./nit";
 export * from "./tarifa";
 export * from "./cuentas";
+export * from "./dispersion";

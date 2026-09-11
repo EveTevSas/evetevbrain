@@ -158,7 +158,9 @@ describe("CustodiaAdminService — lecturas", () => {
       margen: 40_000,
       enTransito: 4_920_000,
       enRecaudo: 0,
-      porPagarProveedor: 0
+      porPagarProveedor: 0,
+      retenido: 0,
+      dispersado: 0
     });
     expect(await new CustodiaAdminService(dbQue([]), providers).balanceComercio("x")).toMatchObject(
       {
