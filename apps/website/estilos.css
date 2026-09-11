@@ -374,49 +374,85 @@ nav {
   height: 19px;
   flex: none;
 }
-/* Sin retícula de líneas: separa el aire, no los bordes. Es lo que pide el
-   manual —"la jerarquía se logra con espacio", nunca con adornos— y evita que
-   esta sección contradiga la amplitud del hero que tiene justo encima. */
-/* Tres productos desde ago-2026: la rejilla se adapta en vez de fijar dos
-   columnas, así el tercero no queda solo en una fila. El gap baja un poco
-   porque con tres columnas el aire de antes dejaba las tarjetas muy estrechas. */
+/* Productos (sep-2026): columnas numeradas separadas por líneas finas, sin
+   iconos ni chips. La cabecera va alineada a la izquierda con rótulo pequeño,
+   titular grande y una línea de apoyo; es la estructura, no la decoración, la
+   que ordena la sección. */
+.productos {
+  padding-top: 76px;
+}
+.productos .sec-h {
+  margin-bottom: 44px;
+  max-width: 640px;
+}
+.productos .sec-h h2 {
+  font-size: clamp(1.7rem, 3.6vw, 2.5rem);
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+.productos .sec-h p {
+  font-size: 0.95rem;
+}
+.rotulo {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--eve-electrico);
+  margin-bottom: 10px;
+}
 .prod {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: clamp(30px, 4.5vw, 56px);
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--eve-linea);
 }
 .prod > article {
-  padding: 0;
+  padding: 28px clamp(20px, 3vw, 36px) 8px;
+  border-left: 1px solid var(--eve-linea);
+  display: flex;
+  flex-direction: column;
+}
+.prod > article:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.prod > article:last-child {
+  padding-right: 0;
+}
+.prod .num {
+  font-family: "Baloo 2", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--p-texto, var(--p));
+  margin-bottom: 18px;
 }
 .prod h3 {
-  font-size: 1.12rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  margin: 16px 0 6px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  margin: 0 0 4px;
 }
 /* El rótulo hereda el color de la línea, pero admite un tono aparte para
    texto: el violeta base sobre blanco no llega al contraste AA (regla C7),
    así que Eve Intelligence pasa su --p-texto. Los demás no declaran nada y
    siguen usando --p, que en azul sí contrasta. */
 .prod .sub {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.4px;
   text-transform: uppercase;
   color: var(--p-texto, var(--p));
+  margin-bottom: 12px;
 }
 .prod p {
   font-size: 0.85rem;
   color: var(--eve-pizarra);
   margin-bottom: 14px;
-  max-width: 44ch;
 }
 .prod ul {
   list-style: none;
-  margin: 0 0 16px;
+  margin: 0 0 22px;
 }
 .prod li {
   font-size: 0.8rem;
@@ -435,21 +471,15 @@ nav {
   flex: none;
   margin-top: 8px;
 }
-/* Dos salidas por card: la landing del producto primero, y debajo la acción
-   que ya estaba y sigue siendo útil (integración o piloto). El destacado toma
-   el color de la línea (--p), no el coral, que está reservado (C2). */
-.prod .enlaces {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  align-items: center;
-}
-.link.destacado {
-  color: var(--p);
+/* Un solo enlace por producto, al pie de la columna. Toma el color de la
+   línea (--p), no el coral, que está reservado (C2). */
+.prod .link.destacado {
+  margin-top: auto;
+  color: var(--p-texto, var(--p));
   font-weight: 600;
 }
 
-/* Estado del producto: ícono + texto, nunca solo color (C5) */
+/* Estado (nosotros.html): ícono + texto, nunca solo color (C5) */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -467,11 +497,6 @@ nav {
   width: 11px;
   height: 11px;
   flex: none;
-}
-.chip.build {
-  background: #eaf2fb;
-  border-color: #cfe0f5;
-  color: var(--eve-mezclado);
 }
 
 /* OJO con el espaciado vertical de las secciones: `.wrap` es un selector de
@@ -1377,13 +1402,19 @@ footer {
   }
 }
 
-/* Los dos productos a una columna antes de llegar al móvil: son tarjetas con
-   lista de viñetas, y a dos columnas por debajo de ~860px las líneas quedan de
-   tres o cuatro palabras y la sección se vuelve larguísima. */
+/* Los productos a una columna antes de llegar al móvil: a tres columnas por
+   debajo de ~860px las líneas quedan de tres o cuatro palabras. En vertical el
+   separador pasa de línea izquierda a línea superior. */
 @media (max-width: 860px) {
   .prod {
     grid-template-columns: 1fr;
-    gap: clamp(38px, 7vw, 52px);
+    border-top: 0;
+  }
+  .prod > article,
+  .prod > article:first-child {
+    padding: 28px 0 24px;
+    border-left: 0;
+    border-top: 1px solid var(--eve-linea);
   }
 }
 

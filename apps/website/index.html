@@ -259,122 +259,65 @@
 
     <!-- Sin <hr> aquí a propósito: el borde oscuro del video ya separa con fuerza,
      y una línea encima de tanto aire sobraba. -->
-    <section id="servicios" class="wrap" style="padding-top: 76px">
+    <!-- Sección de productos (sep-2026): sin isotipos, sin chips de estado y con
+     un solo enlace por producto. La identidad de cada línea la lleva el número
+     (01/02/03) en su color (§12); el estado real lo cuenta cada landing. -->
+    <section id="servicios" class="wrap productos">
       <div class="sec-h">
-        <h2>¿Qué construye Evetev?</h2>
-        <p>
-          Tres líneas: EvePay, una pasarela de pagos de arquitectura gateway puro; EveConecta,
-          gestión y recaudo para conjuntos residenciales; y Eve Intelligence, asistentes que
-          responden con la documentación de tu empresa. EvePay y EveConecta están en construcción.
-          Esto es lo que hay hoy, sin adornos.
-        </p>
+        <span class="rotulo">Nuestros productos</span>
+        <h2>Pagos, recaudo e inteligencia sobre tus documentos</h2>
+        <p>Tres productos sobre una misma infraestructura, construidos para operar dinero real.</p>
       </div>
 
-      <!-- Cada producto lleva el color de su línea (§12). El ícono NO se redibuja:
-       es la unidad oficial del CDN usada como máscara y teñida con --p (T1). -->
       <div class="prod">
-        <article
-          style="--p: var(--eve-electrico); --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;)"
-        >
-          <span class="p-ico" role="img" aria-label="Ícono de EvePay"></span>
-          <h3>
-            EvePay
-            <span class="chip build"
-              ><svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.4"
-                stroke-linecap="round"
-                aria-hidden="true"
-              >
-                <path d="M12 6v6l4 2"></path>
-                <circle cx="12" cy="12" r="9"></circle></svg
-              >En construcción</span
-            >
-          </h3>
+        <article style="--p: var(--eve-electrico)">
+          <span class="num" aria-hidden="true">01</span>
+          <h3>EvePay</h3>
           <span class="sub">Plataforma de pagos</span>
           <p>
-            Nuestra pasarela de pagos. Arquitectura de gateway puro: el dinero va directo del
-            cliente al banco del comercio, sin pasar por nuestra tesorería.
+            Pasarela de pagos de arquitectura gateway puro: el dinero va del cliente al banco del
+            comercio sin pasar por nuestra tesorería.
           </p>
           <ul>
             <li>Cobros idempotentes: reintentar nunca cobra dos veces.</li>
             <li>Libro de movimientos inmutable, en doble partida.</li>
             <li>Conciliación de lo cobrado contra lo liquidado.</li>
-            <li>Nunca tocamos el número de tarjeta: checkout embebido del proveedor.</li>
           </ul>
-          <div class="enlaces">
-            <a class="link destacado" href="/evepay">Conocer EvePay →</a>
-            <a class="link" href="#desarrolladores">Ver cómo se integra →</a>
-          </div>
+          <a class="link destacado" href="/evepay">Conocer EvePay →</a>
         </article>
 
-        <article
-          style="--p: var(--eve-mezclado); --u: url(&quot;/marca/unidad-derecha-negro.svg&quot;)"
-        >
-          <span class="p-ico" role="img" aria-label="Ícono de EveConecta"></span>
-          <h3>
-            EveConecta
-            <span class="chip build"
-              ><svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.4"
-                stroke-linecap="round"
-                aria-hidden="true"
-              >
-                <path d="M12 6v6l4 2"></path>
-                <circle cx="12" cy="12" r="9"></circle></svg
-              >En construcción</span
-            >
-          </h3>
+        <article style="--p: var(--eve-mezclado)">
+          <span class="num" aria-hidden="true">02</span>
+          <h3>EveConecta</h3>
           <span class="sub">Gestión y recaudo para conjuntos</span>
           <p>
             Administración y recaudo para propiedad horizontal. Es además nuestro primer cliente: la
-            prueba, cobrando dinero real, de que EvePay funciona.
+            prueba, con dinero real, de que EvePay funciona.
           </p>
           <ul>
             <li>Cuotas por coeficiente, estado de cuenta y paz y salvo.</li>
-            <li>Pago en línea del residente y panel de cartera del administrador.</li>
-            <li>Recordatorios con tope de frecuencia y horario respetuoso.</li>
+            <li>Pago en línea del residente y cartera del administrador.</li>
             <li>Cada movimiento queda auditado: quién, cuándo y por qué.</li>
           </ul>
-          <div class="enlaces">
-            <a class="link destacado" href="/conecta">Conocer EveConecta →</a>
-            <a class="link" href="#contacto">Hablar de un piloto →</a>
-          </div>
+          <a class="link destacado" href="/conecta">Conocer EveConecta →</a>
         </article>
 
-        <!-- Eve Intelligence vuelve a la vitrina. Se había retirado en #78 porque
-         no había producto que enseñar; ahora lo hay, y responde en la esquina
-         de esta misma página. El violeta identifica la línea (C3): va en el
-         icono, nunca en un botón. -->
-        <article
-          style="
-            --p: var(--eve-violeta);
-            --p-texto: var(--eve-violeta-texto);
-            --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
-          "
-        >
-          <span class="p-ico" role="img" aria-label="Ícono de Eve Intelligence"></span>
+        <!-- El violeta identifica la línea (C3): va en el número y el rótulo,
+         nunca en un botón. --p-texto da el tono que sí contrasta sobre blanco. -->
+        <article style="--p: var(--eve-violeta); --p-texto: var(--eve-violeta-texto)">
+          <span class="num" aria-hidden="true">03</span>
           <h3>Eve Intelligence</h3>
           <span class="sub">Asistentes con tus documentos</span>
           <p>
-            Le montamos a tu empresa un asistente que responde con tu propia documentación y solo
-            con ella. El de la esquina de esta página es exactamente eso.
+            Un asistente para tu empresa que responde con tu propia documentación y solo con ella.
+            El de la esquina de esta página es exactamente eso.
           </p>
           <ul>
             <li>Cita de qué documento salió cada respuesta.</li>
             <li>Cuando no lo sabe, lo dice y pasa a una persona.</li>
-            <li>Te entregamos el informe de que no inventa, sobre tus preguntas.</li>
-            <li>Tu base documental es tuya, escrita y con manual para mantenerla.</li>
+            <li>Tu base documental es tuya, escrita y con manual.</li>
           </ul>
-          <div class="enlaces">
-            <a class="link destacado" href="/intelligence">Conocer Eve Intelligence →</a>
-            <a class="link" href="#contacto">Hablar de un caso →</a>
-          </div>
+          <a class="link destacado" href="/intelligence">Conocer Eve Intelligence →</a>
         </article>
       </div>
     </section>
