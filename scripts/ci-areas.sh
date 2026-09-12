@@ -17,7 +17,7 @@ marcar() { echo "$1=$2" >> "$GITHUB_OUTPUT"; echo "  $1=$2"; }
 
 todo() {
   echo "$1 → se ejecuta todo el CI."
-  for a in global shared api eveconecta eveledger evepayadmin hub evestudio landings; do marcar "$a" true; done
+  for a in global shared api eveconecta eveledger evepayadmin hub evestudio evestore landings; do marcar "$a" true; done
   exit 0
 }
 
@@ -74,6 +74,11 @@ marcar hub "$HUB"
 # Eve Studio corre solo en local, así que no tiene despliegue que vigilar; lo
 # que sí tiene son las pruebas del arnés de escritura, que es lo único que
 # impide que el agente escriba fuera de las tres landings.
+# La tienda no consume packages/shared: es cerrada sobre su propia base.
+EVESTORE=false
+toca '^apps/eve-store/' && EVESTORE=true
+marcar evestore "$EVESTORE"
+
 EVESTUDIO=false
 toca '^apps/eve-studio/' && EVESTUDIO=true
 marcar evestudio "$EVESTUDIO"
