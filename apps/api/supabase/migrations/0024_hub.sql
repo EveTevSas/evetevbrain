@@ -138,7 +138,7 @@ insert into hub.portales (nombre, url, descripcion, color, estado, rol_acceso, o
   ('EveConecta',              'https://conecta.evetev.com',       'Propiedad horizontal: cuotas y cobros vía EvePay.',   '#1D4ED8', 'operando', 'admin', 20),
   ('EveLedger',               'https://eveledger.vercel.app',     'Estaciones de servicio (MVP con cliente).',           '#15803D', 'operando', 'admin', 30),
   ('evetev.com',              'https://evetev.com',               'Sitio corporativo y landings.',                       '#0A2540', 'operando', 'editor', 40),
-  ('GitHub · Evetev',         'https://github.com/EveTev',        'Monorepo, CI, specs y documentación.',                '#1b1b24', 'operando', 'owner', 50),
+  ('GitHub · Evetev',         'https://github.com/EveTevSas/evetevbrain', 'Monorepo, CI, specs y documentación.',                '#1b1b24', 'operando', 'owner', 50),
   ('Supabase · EvePay',       'https://supabase.com/dashboard',   'Base y Auth de EvePay y del Hub.',                    '#3ECF8E', 'operando', 'owner', 60),
   ('Vercel',                  'https://vercel.com',               'Despliegues de las apps Next.',                       '#000000', 'operando', 'owner', 70)
 on conflict (nombre) do nothing;
