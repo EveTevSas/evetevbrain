@@ -82,7 +82,7 @@ const GRUPOS: { titulo: string; entradas: Entrada[] }[] = [
     titulo: "Plataforma",
     entradas: [
       { href: "/tarifas", etiqueta: "Comisiones & Pricing", Icono: Percent },
-      { href: "/proveedores", etiqueta: "Proveedores", Icono: Plug },
+      { href: "/proveedores", etiqueta: "Configuración", Icono: Plug },
       { href: "/reportes", etiqueta: "Reportes", Icono: FileSpreadsheet },
       { href: "/auditoria", etiqueta: "Auditoría", Icono: ScrollText },
       { href: "/usuarios", etiqueta: "Usuarios & RBAC", Icono: UsersRound }
