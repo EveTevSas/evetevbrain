@@ -2383,6 +2383,10 @@ export function AssembliesPage() {
     uploadAssemblySupport,
     updateAssemblySupportStatus,
     downloadAssemblySupport,
+    accreditAssemblyAttendee,
+    revokeAssemblyAttendee,
+    fetchAssemblyAttendees,
+    downloadAssemblyProxy,
     busy
   } = useData();
   const { user } = useAuthUser();
@@ -2433,7 +2437,11 @@ export function AssembliesPage() {
         busy={busy}
         canManage={canScheduleAssembly}
         canManageSupports={canScheduleAssembly}
+        onAccreditAttendee={accreditAssemblyAttendee}
+        onDownloadProxy={downloadAssemblyProxy}
         onDownloadSupport={downloadAssemblySupport}
+        onFetchAttendees={fetchAssemblyAttendees}
+        onRevokeAttendee={revokeAssemblyAttendee}
         onSendEmailConvocation={sendAssemblyEmailConvocation}
         onSupportStatusChange={updateAssemblySupportStatus}
         onToggleChecklist={updateAssemblyChecklist}

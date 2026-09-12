@@ -3,7 +3,9 @@ import "server-only";
 import { cookies } from "next/headers";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type {
+  AccreditAssemblyAttendee,
   AnnouncementItem,
+  AssemblyAttendee,
   AssemblyItem,
   CaseItem,
   CreateAnnouncement,
@@ -520,6 +522,80 @@ export async function scheduleAssembly(input: ScheduleAssembly): Promise<Assembl
     }
   }
   return result;
+}
+
+export async function accreditAssemblyAttendee(
+  assemblyId: string,
+  input: AccreditAssemblyAttendee
+): Promise<AssemblyAttendee> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("acreditar_asistente_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_calidad: input.calidad,
+      p_persona_id: input.personaId,
+      p_unidad_codigo: input.unidadCodigo,
+      p_representa_persona_id: input.representaPersonaId,
+      p_canal: input.canal,
+      p_soporte_path: input.soportePath
+    });
+
+  if (error) {
+    if (error.code === "42501") throw new DemoApiError(error.message, 403);
+    if (error.code === "22023") throw new DemoApiError(error.message, 400);
+    if (error.code === "23505") throw new DemoApiError(error.message, 409);
+    if (error.code === "P0002") throw new DemoApiError(error.message, 404);
+    throw new DemoApiError("No fue posible acreditar al asistente.", 500);
+  }
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió la acreditación registrada.", 500);
+  }
+  return data as AssemblyAttendee;
+}
+
+export async function revokeAssemblyAccreditation(
+  assemblyId: string,
+  attendeeId: string
+): Promise<{ id: string }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("revocar_acreditacion_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_acreditacion_id: attendeeId
+    });
+
+  if (error) {
+    if (error.code === "42501") throw new DemoApiError(error.message, 403);
+    if (error.code === "P0002") throw new DemoApiError(error.message, 404);
+    throw new DemoApiError("No fue posible revocar la acreditación.", 500);
+  }
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió la revocación.", 500);
+  }
+  return data as { id: string };
+}
+
+export async function listAssemblyAttendees(assemblyId: string): Promise<AssemblyAttendee[]> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("listar_asistentes_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId
+    });
+
+  if (error) {
+    if (error.code === "42501") throw new DemoApiError(error.message, 403);
+    throw new DemoApiError("No fue posible consultar los asistentes.", 500);
+  }
+  return (data as AssemblyAttendee[] | null) ?? [];
 }
 
 export async function updateResidentPetPhoto(

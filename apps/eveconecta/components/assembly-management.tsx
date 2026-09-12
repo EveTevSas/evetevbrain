@@ -10,6 +10,8 @@ import {
   stageProgressPercent
 } from "@/lib/assemblies";
 import type {
+  AccreditAssemblyAttendee,
+  AssemblyAttendee,
   AssemblyCapabilities,
   AssemblyItem,
   AssemblySettings,
@@ -25,7 +27,6 @@ import type {
 import { Badge, Button, Card, EmptyState, Progress, cn } from "@/lib/ui";
 import {
   ArrowRight,
-  BadgeCheck,
   BellRing,
   BookOpenCheck,
   CalendarDays,
@@ -49,9 +50,10 @@ import {
   UsersRound,
   Vote
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "./modal";
 import { StatusBadge } from "./status-badge";
+import { AssemblyAccreditationPanel } from "./assembly-accreditation";
 import { AssemblySupportPanel } from "./assembly-supports";
 import { AssemblyConvocationPanel } from "./assembly-convocation";
 
@@ -402,11 +404,31 @@ function ConvocationStage({
 
 function RegistrationStage({
   assembly,
-  capabilities
+  capabilities,
+  people,
+  attendees,
+  attendeesLoading,
+  canManage,
+  busy,
+  onAccredit,
+  onRevoke,
+  onDownloadProxy
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   capabilities: AssemblyCapabilities;
+  people: CommunityPerson[];
+  attendees: AssemblyAttendee[];
+  attendeesLoading: boolean;
+  canManage: boolean;
+  busy: string | null;
+  onAccredit: (
+    input: Omit<AccreditAssemblyAttendee, "soportePath">,
+    evidenceFile?: File
+  ) => Promise<AssemblyAttendee | null>;
+  onRevoke: (attendeeId: string) => Promise<{ id: string } | null>;
+  onDownloadProxy: (attendee: AssemblyAttendee) => Promise<void>;
 }) {
+  const hasRegistration = capabilities.proxy_management || capabilities.identity_accreditation;
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -418,12 +440,12 @@ function RegistrationStage({
         <Stat
           label="Coeficientes"
           value={`${assembly.dossier.representedCoefficientPercent.toFixed(2)}%`}
-          detail="Del total de la copropiedad"
+          detail="Base deliberatoria"
         />
         <Stat
           label="Poderes"
           value={String(assembly.dossier.validatedProxies)}
-          detail="Validados y vigentes"
+          detail="Vigentes en esta asamblea"
         />
         <Stat
           label="Con voz"
@@ -431,41 +453,21 @@ function RegistrationStage({
           detail="Residentes sin poder"
         />
       </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        {capabilities.proxy_management ? (
-          <Card className="p-5 hover:translate-y-0">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <FileCheck2 size={19} className="text-[var(--accent)]" />
-                <h3 className="font-extrabold">Poderes</h3>
-              </div>
-              <Badge tone="success">Sin duplicados</Badge>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-              Se conserva propietario, apoderado, unidad, alcance, vigencia y evidencia de cada
-              poder.
-            </p>
-          </Card>
-        ) : (
-          <CapabilityNotice label="La gestión de poderes" />
-        )}
-        {capabilities.identity_accreditation ? (
-          <Card className="p-5 hover:translate-y-0">
-            <div className="flex items-center gap-2">
-              <BadgeCheck size={19} className="text-[var(--accent)]" />
-              <h3 className="font-extrabold">Calidad de participación</h3>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Badge tone="info">Propietario</Badge>
-              <Badge tone="info">Apoderado</Badge>
-              <Badge tone="neutral">Residente con voz</Badge>
-              <Badge tone="neutral">Invitado</Badge>
-            </div>
-          </Card>
-        ) : (
-          <CapabilityNotice label="La acreditación de identidad" />
-        )}
-      </div>
+      {hasRegistration ? (
+        <AssemblyAccreditationPanel
+          assembly={assembly}
+          attendees={attendees}
+          attendeesLoading={attendeesLoading}
+          busy={busy}
+          canManage={canManage}
+          onAccredit={onAccredit}
+          onDownloadProxy={onDownloadProxy}
+          onRevoke={onRevoke}
+          people={people}
+        />
+      ) : (
+        <CapabilityNotice label="La acreditación de asistentes y la gestión de poderes" />
+      )}
     </div>
   );
 }
@@ -717,11 +719,16 @@ function StageContent({
   canManage,
   canManageSupports,
   busy,
+  attendees,
+  attendeesLoading,
   onToggleChecklist,
   onUploadSupport,
   onSupportStatusChange,
   onDownloadSupport,
-  onSendEmailConvocation
+  onSendEmailConvocation,
+  onAccreditAttendee,
+  onRevokeAttendee,
+  onDownloadProxy
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   people: CommunityPerson[];
@@ -730,6 +737,8 @@ function StageContent({
   canManage: boolean;
   canManageSupports: boolean;
   busy: string | null;
+  attendees: AssemblyAttendee[];
+  attendeesLoading: boolean;
   onToggleChecklist: (
     assemblyId: string,
     input: UpdateAssemblyChecklist
@@ -749,6 +758,12 @@ function StageContent({
     assemblyId: string,
     input: SendAssemblyEmailConvocation
   ) => Promise<AssemblyItem | null>;
+  onAccreditAttendee: (
+    input: Omit<AccreditAssemblyAttendee, "soportePath">,
+    evidenceFile?: File
+  ) => Promise<AssemblyAttendee | null>;
+  onRevokeAttendee: (attendeeId: string) => Promise<{ id: string } | null>;
+  onDownloadProxy: (attendee: AssemblyAttendee) => Promise<void>;
 }) {
   return (
     <div className="space-y-4">
@@ -774,7 +789,18 @@ function StageContent({
         />
       ) : null}
       {stage === "registration" ? (
-        <RegistrationStage assembly={assembly} capabilities={capabilities} />
+        <RegistrationStage
+          assembly={assembly}
+          attendees={attendees}
+          attendeesLoading={attendeesLoading}
+          busy={busy}
+          canManage={canManage}
+          capabilities={capabilities}
+          onAccredit={onAccreditAttendee}
+          onDownloadProxy={onDownloadProxy}
+          onRevoke={onRevokeAttendee}
+          people={people}
+        />
       ) : null}
       {stage === "live" ? <LiveStage assembly={assembly} capabilities={capabilities} /> : null}
       {stage === "minutes" ? (
@@ -808,7 +834,11 @@ function AssemblyWorkspace({
   onUploadSupport,
   onSupportStatusChange,
   onDownloadSupport,
-  onSendEmailConvocation
+  onSendEmailConvocation,
+  onAccreditAttendee,
+  onRevokeAttendee,
+  onFetchAttendees,
+  onDownloadProxy
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   people: CommunityPerson[];
@@ -837,9 +867,56 @@ function AssemblyWorkspace({
     assemblyId: string,
     input: SendAssemblyEmailConvocation
   ) => Promise<AssemblyItem | null>;
+  onAccreditAttendee: (
+    assemblyId: string,
+    input: Omit<AccreditAssemblyAttendee, "soportePath">,
+    evidenceFile?: File
+  ) => Promise<AssemblyAttendee | null>;
+  onRevokeAttendee: (assemblyId: string, attendeeId: string) => Promise<{ id: string } | null>;
+  onFetchAttendees: (assemblyId: string) => Promise<AssemblyAttendee[]>;
+  onDownloadProxy: (attendee: AssemblyAttendee) => Promise<void>;
 }) {
   const [activeStage, setActiveStage] = useState<AssemblyStage>(assembly.dossier.currentStage);
+  const [attendees, setAttendees] = useState<AssemblyAttendee[]>([]);
+  const [attendeesLoading, setAttendeesLoading] = useState(false);
   const readiness = assemblyReadinessPercent(assembly.dossier, settings.capabilities);
+
+  // onFetchAttendees viene de un objeto de contexto que se recrea con cada
+  // mutación global (paga una cuota, aprueba un gasto, etc.); leerlo por ref
+  // evita que ESE churn, en vez de un cambio real de asamblea/etapa, dispare
+  // el efecto de abajo. requestIdRef descarta la respuesta de una llamada que
+  // ya no es la más reciente (por ejemplo la que dispara "busy" al iniciar una
+  // acreditación, si resuelve después que el refetch posterior a esa acción).
+  const onFetchAttendeesRef = useRef(onFetchAttendees);
+  onFetchAttendeesRef.current = onFetchAttendees;
+  const requestIdRef = useRef(0);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    // React StrictMode simula montar/desmontar/remontar una vez en
+    // desarrollo; sin este reinicio, el "desmontaje" simulado deja
+    // mountedRef en false para siempre y refreshAttendees nunca vuelve a
+    // aplicar su resultado, aunque el componente siga realmente montado.
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const refreshAttendees = useCallback(async () => {
+    if (!canManage) return;
+    const requestId = ++requestIdRef.current;
+    setAttendeesLoading(true);
+    try {
+      const result = await onFetchAttendeesRef.current(assembly.id);
+      if (mountedRef.current && requestIdRef.current === requestId) setAttendees(result);
+    } finally {
+      if (mountedRef.current && requestIdRef.current === requestId) setAttendeesLoading(false);
+    }
+  }, [assembly.id, canManage]);
+
+  useEffect(() => {
+    if (open && activeStage === "registration") void refreshAttendees();
+  }, [activeStage, open, refreshAttendees]);
   return (
     <Modal
       description="Expediente único de preparación, decisión, acta y cumplimiento."
@@ -932,11 +1009,24 @@ function AssemblyWorkspace({
 
         <StageContent
           assembly={assembly}
+          attendees={attendees}
+          attendeesLoading={attendeesLoading}
           busy={busy}
           canManage={canManage}
           canManageSupports={canManageSupports}
           capabilities={settings.capabilities}
+          onAccreditAttendee={async (input, evidenceFile) => {
+            const result = await onAccreditAttendee(assembly.id, input, evidenceFile);
+            if (result) await refreshAttendees();
+            return result;
+          }}
+          onDownloadProxy={onDownloadProxy}
           onDownloadSupport={onDownloadSupport}
+          onRevokeAttendee={async (attendeeId) => {
+            const result = await onRevokeAttendee(assembly.id, attendeeId);
+            if (result) await refreshAttendees();
+            return result;
+          }}
           onSendEmailConvocation={onSendEmailConvocation}
           onSupportStatusChange={onSupportStatusChange}
           onToggleChecklist={onToggleChecklist}
@@ -1065,7 +1155,11 @@ export function AssemblyManagement({
   onUploadSupport,
   onSupportStatusChange,
   onDownloadSupport,
-  onSendEmailConvocation
+  onSendEmailConvocation,
+  onAccreditAttendee,
+  onRevokeAttendee,
+  onFetchAttendees,
+  onDownloadProxy
 }: {
   assemblies: AssemblyItem[];
   people: CommunityPerson[];
@@ -1093,6 +1187,14 @@ export function AssemblyManagement({
     assemblyId: string,
     input: SendAssemblyEmailConvocation
   ) => Promise<AssemblyItem | null>;
+  onAccreditAttendee: (
+    assemblyId: string,
+    input: Omit<AccreditAssemblyAttendee, "soportePath">,
+    evidenceFile?: File
+  ) => Promise<AssemblyAttendee | null>;
+  onRevokeAttendee: (assemblyId: string, attendeeId: string) => Promise<{ id: string } | null>;
+  onFetchAttendees: (assemblyId: string) => Promise<AssemblyAttendee[]>;
+  onDownloadProxy: (attendee: AssemblyAttendee) => Promise<void>;
 }) {
   const settings = normalizeAssemblySettings(rawSettings);
   const normalizedAssemblies = useMemo(
@@ -1289,7 +1391,11 @@ export function AssemblyManagement({
           busy={busy}
           canManage={canManage}
           canManageSupports={canManageSupports}
+          onAccreditAttendee={onAccreditAttendee}
+          onDownloadProxy={onDownloadProxy}
           onDownloadSupport={onDownloadSupport}
+          onFetchAttendees={onFetchAttendees}
+          onRevokeAttendee={onRevokeAttendee}
           onSendEmailConvocation={onSendEmailConvocation}
           onOpenChange={(open) => {
             if (!open) setSelectedAssemblyId(null);

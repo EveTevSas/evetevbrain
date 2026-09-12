@@ -4,7 +4,9 @@ import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import {
   DEMO_TENANT_ID,
   DEMO_USER_ID,
+  type AccreditAssemblyAttendee,
   type AnnouncementItem,
+  type AssemblyAttendee,
   type AssemblySettings,
   type AssemblyItem,
   type AssemblySupportDocument,
@@ -42,6 +44,11 @@ import {
   type WorkOrderItem
 } from "@/lib/contracts";
 import { DEFAULT_ASSEMBLY_CAPABILITIES } from "@/lib/assemblies";
+import {
+  ASSEMBLY_PROXY_BUCKET,
+  assemblyProxyPath,
+  validateAssemblyProxy
+} from "@/lib/assembly-proxies";
 import {
   ASSEMBLY_SUPPORT_BUCKET,
   assemblySupportPath,
@@ -102,6 +109,17 @@ interface DataContextValue {
     input: UpdateAssemblySupportStatus
   ) => Promise<AssemblySupportDocument | null>;
   downloadAssemblySupport: (document: AssemblySupportDocument) => Promise<void>;
+  accreditAssemblyAttendee: (
+    assemblyId: string,
+    input: Omit<AccreditAssemblyAttendee, "soportePath">,
+    evidenceFile?: File
+  ) => Promise<AssemblyAttendee | null>;
+  revokeAssemblyAttendee: (
+    assemblyId: string,
+    attendeeId: string
+  ) => Promise<{ id: string } | null>;
+  fetchAssemblyAttendees: (assemblyId: string) => Promise<AssemblyAttendee[]>;
+  downloadAssemblyProxy: (attendee: AssemblyAttendee) => Promise<void>;
   createReservation: (input: CreateReservation) => Promise<ReservationItem | null>;
   createVisitor: (input: CreateVisitor) => Promise<VisitorItem | null>;
   createParkingSpot: (input: CreateParkingSpot) => Promise<ParkingSpotItem | null>;
@@ -337,6 +355,65 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [snapshot.tenant.id]
   );
 
+  const uploadAssemblyProxyFile = useCallback(
+    async (assemblyId: string, file: File): Promise<string> => {
+      const validationError = validateAssemblyProxy(file);
+      if (validationError) throw new Error(validationError);
+
+      const supabase = getSupabaseBrowserClient();
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error("Debes iniciar sesión para subir la evidencia.");
+
+      const path = assemblyProxyPath(
+        snapshot.tenant.id,
+        assemblyId,
+        crypto.randomUUID(),
+        file.type
+      );
+      const { error: uploadError } = await supabase.storage
+        .from(ASSEMBLY_PROXY_BUCKET)
+        .upload(path, file, {
+          cacheControl: "3600",
+          contentType: file.type,
+          upsert: false
+        });
+      if (uploadError) throw new Error("No fue posible almacenar la evidencia del poder.");
+      return path;
+    },
+    [snapshot.tenant.id]
+  );
+
+  const accreditAssemblyAttendeeWithEvidence = useCallback(
+    async (
+      assemblyId: string,
+      input: Omit<AccreditAssemblyAttendee, "soportePath">,
+      evidenceFile?: File
+    ): Promise<AssemblyAttendee> => {
+      const soportePath = evidenceFile
+        ? await uploadAssemblyProxyFile(assemblyId, evidenceFile)
+        : null;
+      try {
+        return await apiRequest<AssemblyAttendee>(
+          `/v1/habitat/assemblies/${assemblyId}/attendees`,
+          {
+            method: "POST",
+            body: JSON.stringify({ ...input, soportePath })
+          }
+        );
+      } catch (error) {
+        if (soportePath) {
+          await getSupabaseBrowserClient()
+            .storage.from(ASSEMBLY_PROXY_BUCKET)
+            .remove([soportePath]);
+        }
+        throw error;
+      }
+    },
+    [uploadAssemblyProxyFile]
+  );
+
   useEffect(() => {
     void refresh();
     const onOnline = () => void refresh();
@@ -487,6 +564,47 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const link = window.document.createElement("a");
         link.href = data.signedUrl;
         link.download = document.name;
+        link.rel = "noopener noreferrer";
+        link.click();
+      },
+      accreditAssemblyAttendee: (assemblyId, input, evidenceFile) =>
+        mutate(
+          `assembly-attendee-${assemblyId}`,
+          () => accreditAssemblyAttendeeWithEvidence(assemblyId, input, evidenceFile),
+          "Asistente acreditado"
+        ),
+      revokeAssemblyAttendee: (assemblyId, attendeeId) =>
+        mutate(
+          `assembly-attendee-revoke-${attendeeId}`,
+          () =>
+            apiRequest<{ id: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/attendees/${attendeeId}/revoke`,
+              { method: "PATCH", body: JSON.stringify({}) }
+            ),
+          "Acreditación revocada"
+        ),
+      fetchAssemblyAttendees: (assemblyId) =>
+        apiRequest<AssemblyAttendee[]>(`/v1/habitat/assemblies/${assemblyId}/attendees`),
+      downloadAssemblyProxy: async (attendee) => {
+        if (!attendee.soportePath) {
+          notify(
+            "Sin evidencia",
+            "Esta acreditación no tiene un documento de poder adjunto.",
+            "info"
+          );
+          return;
+        }
+        const { data, error } = await getSupabaseBrowserClient()
+          .storage.from(ASSEMBLY_PROXY_BUCKET)
+          .createSignedUrl(attendee.soportePath, 60, {
+            download: `poder-${attendee.unidadCodigo ?? attendee.id}`
+          });
+        if (error || !data?.signedUrl) {
+          notify("No se pudo descargar", "El enlace privado no pudo generarse.", "error");
+          return;
+        }
+        const link = window.document.createElement("a");
+        link.href = data.signedUrl;
         link.rel = "noopener noreferrer";
         link.click();
       },
@@ -657,6 +775,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         )
     }),
     [
+      accreditAssemblyAttendeeWithEvidence,
       busy,
       connection,
       createCaseWithImages,

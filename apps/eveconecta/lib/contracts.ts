@@ -449,6 +449,94 @@ export interface AssemblyDecisionItem {
   status: "pending" | "in_progress" | "completed";
 }
 
+export const assemblyAttendeeQualitySchema = z.enum([
+  "propietario",
+  "apoderado",
+  "residente_con_voz",
+  "invitado"
+]);
+export type AssemblyAttendeeQuality = z.infer<typeof assemblyAttendeeQualitySchema>;
+
+export interface AssemblyAttendee {
+  id: string;
+  unidadId: string | null;
+  unidadCodigo: string | null;
+  personaId: string;
+  personaNombre: string | null;
+  calidad: AssemblyAttendeeQuality;
+  representaPersonaId: string | null;
+  representaNombre: string | null;
+  coeficienteAplicado: number;
+  canal: "presencial" | "virtual";
+  soportePath: string | null;
+  acreditadoEn: string;
+}
+
+export const assemblyProxyPathSchema = z
+  .string()
+  .regex(
+    /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(pdf|jpg|png)$/,
+    "La ruta de la evidencia no es válida."
+  );
+
+export const accreditAssemblyAttendeeSchema = z
+  .object({
+    calidad: assemblyAttendeeQualitySchema,
+    personaId: z.string().uuid(),
+    unidadCodigo: z.string().trim().min(1).max(20).nullable().default(null),
+    representaPersonaId: z.string().uuid().nullable().default(null),
+    canal: z.enum(["presencial", "virtual"]).default("presencial"),
+    soportePath: assemblyProxyPathSchema.nullable().default(null)
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.calidad === "invitado") {
+      if (value.unidadCodigo !== null) {
+        context.addIssue({
+          code: "custom",
+          path: ["unidadCodigo"],
+          message: "El invitado no referencia una unidad."
+        });
+      }
+      if (value.representaPersonaId !== null) {
+        context.addIssue({
+          code: "custom",
+          path: ["representaPersonaId"],
+          message: "El invitado no admite representación."
+        });
+      }
+      return;
+    }
+    if (value.unidadCodigo === null) {
+      context.addIssue({
+        code: "custom",
+        path: ["unidadCodigo"],
+        message: "Esta calidad exige indicar la unidad."
+      });
+    }
+    if (value.calidad === "apoderado") {
+      if (value.representaPersonaId === null) {
+        context.addIssue({
+          code: "custom",
+          path: ["representaPersonaId"],
+          message: "El apoderado exige indicar a quién representa."
+        });
+      } else if (value.representaPersonaId === value.personaId) {
+        context.addIssue({
+          code: "custom",
+          path: ["representaPersonaId"],
+          message: "Quien asiste no puede autorrepresentarse."
+        });
+      }
+    } else if (value.representaPersonaId !== null) {
+      context.addIssue({
+        code: "custom",
+        path: ["representaPersonaId"],
+        message: "Esta calidad no admite representación."
+      });
+    }
+  });
+
 export interface AssemblySupportDocument {
   id: string;
   name: string;
@@ -823,6 +911,7 @@ export type ScheduleAssembly = z.infer<typeof scheduleAssemblySchema>;
 export type UpdateAssemblyCapabilities = z.infer<typeof updateAssemblyCapabilitiesSchema>;
 export type UpdateAssemblyChecklist = z.infer<typeof updateAssemblyChecklistSchema>;
 export type SendAssemblyEmailConvocation = z.infer<typeof sendAssemblyEmailConvocationSchema>;
+export type AccreditAssemblyAttendee = z.infer<typeof accreditAssemblyAttendeeSchema>;
 export type CreateAssemblySupport = z.infer<typeof createAssemblySupportSchema>;
 export type UpdateAssemblySupportStatus = z.infer<typeof updateAssemblySupportStatusSchema>;
 export type CastVote = z.infer<typeof castVoteSchema>;

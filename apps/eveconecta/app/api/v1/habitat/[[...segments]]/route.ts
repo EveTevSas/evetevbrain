@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { ZodError, z } from "zod";
 import {
+  accreditAssemblyAttendeeSchema,
   createAnnouncementSchema,
   createAssemblySupportSchema,
   createCaseSchema,
@@ -36,6 +37,7 @@ import { ASSEMBLY_SUPPORT_BUCKET, assemblySupportCategoryLabels } from "@/lib/as
 import { ACTIVE_CONJUNTO_COOKIE } from "@/lib/auth/tenant-cookie";
 import { communityContactChannels } from "@/lib/community-contacts";
 import {
+  accreditAssemblyAttendee,
   approveExpense,
   canSelectConjunto,
   createAmenityReservation,
@@ -46,8 +48,10 @@ import {
   createVisitorAuthorization,
   DemoApiError,
   getDemoSnapshot,
+  listAssemblyAttendees,
   mutateDemoSnapshot,
   payDemoFee,
+  revokeAssemblyAccreditation,
   scheduleAssembly,
   updateResidentPetPhoto,
   updateResidentPetStatus
@@ -81,8 +85,16 @@ function normalizeVehicleIdentifier(value: string): string {
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
     const { segments = [] } = await context.params;
-    if (segments.join("/") !== "snapshot") return problem("Ruta no encontrada.", 404);
-    return NextResponse.json(await getDemoSnapshot());
+    const path = segments.join("/");
+    if (path === "snapshot") return NextResponse.json(await getDemoSnapshot());
+
+    const attendeesMatch = path.match(/^assemblies\/([0-9a-f-]+)\/attendees$/i);
+    if (attendeesMatch) {
+      const assemblyId = z.string().uuid().parse(attendeesMatch[1]);
+      return NextResponse.json(await listAssemblyAttendees(assemblyId));
+    }
+
+    return problem("Ruta no encontrada.", 404);
   } catch (error) {
     return handleError(error);
   }
@@ -118,6 +130,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
     if (path === "assemblies") {
       const input = scheduleAssemblySchema.parse(body);
       return NextResponse.json(await scheduleAssembly(input), { status: 201 });
+    }
+
+    const assemblyAttendeeMatch = path.match(/^assemblies\/([0-9a-f-]+)\/attendees$/i);
+    if (assemblyAttendeeMatch) {
+      const assemblyId = z.string().uuid().parse(assemblyAttendeeMatch[1]);
+      const input = accreditAssemblyAttendeeSchema.parse(body);
+      return NextResponse.json(await accreditAssemblyAttendee(assemblyId, input), {
+        status: 201
+      });
     }
 
     const assemblySupportMatch = path.match(/^assemblies\/([0-9a-f-]+)\/supports$/i);
@@ -685,6 +706,15 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
           };
         })
       );
+    }
+
+    const attendeeRevokeMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/attendees\/([0-9a-f-]+)\/revoke$/i
+    );
+    if (attendeeRevokeMatch) {
+      const assemblyId = z.string().uuid().parse(attendeeRevokeMatch[1]);
+      const attendeeId = z.string().uuid().parse(attendeeRevokeMatch[2]);
+      return NextResponse.json(await revokeAssemblyAccreditation(assemblyId, attendeeId));
     }
 
     const petPhotoMatch = path.match(/^pets\/([0-9a-f-]+)\/photo$/i);
