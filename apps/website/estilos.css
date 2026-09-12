@@ -739,42 +739,330 @@ input[type="range"] {
   padding: 3px 0;
 }
 
-/* TARJETAS con ilustración (§6) */
-.icards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
+/* EN LA PRÁCTICA (sep-2026): una escena en video con la conversación encima
+   y tres tarjetas oscuras con la interfaz en miniatura. Todo en HTML/CSS. */
+.practica {
+  padding-top: 84px;
+  padding-bottom: 92px;
 }
-.icard {
-  border: 1px solid var(--eve-linea);
-  border-radius: 14px;
+.practica .sec-h {
+  max-width: 640px;
+}
+.escena {
+  position: relative;
+  border-radius: 22px;
   overflow: hidden;
+  aspect-ratio: 16 / 9;
+  min-height: 420px;
+  background: var(--eve-azul-noche);
+  color: #fff;
+  margin-bottom: 72px;
+}
+.escena video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Velo en los bordes donde va texto; el centro del video queda limpio. */
+.escena::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(10, 37, 64, 0.55), transparent 32%),
+    linear-gradient(270deg, rgba(10, 37, 64, 0.45), transparent 55%);
+  pointer-events: none;
+}
+.escena-cab {
+  position: absolute;
+  z-index: 2;
+  top: clamp(18px, 3vw, 30px);
+  left: clamp(18px, 3vw, 30px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.escena-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--eve-cian);
+}
+.escena-cab b {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.escena-cab .link {
+  color: #d6e6f7;
+  font-size: 0.82rem;
+  margin-top: 4px;
+}
+.escena-cab .link:hover {
+  color: #fff;
+}
+.chat {
+  position: absolute;
+  z-index: 2;
+  right: clamp(18px, 3vw, 30px);
+  bottom: clamp(18px, 3vw, 30px);
+  width: min(380px, 48%);
+  list-style: none;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat li {
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.chat .de-residente {
+  align-self: flex-end;
+  background: rgba(10, 37, 64, 0.72);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+  backdrop-filter: blur(6px);
+}
+.chat .de-eve {
+  align-self: flex-start;
   background: #fff;
-  transition: 0.2s;
+  color: var(--eve-azul-noche);
+  border-bottom-left-radius: 5px;
+}
+/* Los mensajes entran uno tras otro cuando la escena se ve (clase .visto la
+   pone el JS). Sin JS o con movimiento reducido se ven todos de una vez. */
+@media (prefers-reduced-motion: no-preference) {
+  .escena.espera .chat li {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .escena.visto .chat li {
+    animation: chat-entra 0.45s ease-out both;
+  }
+  .escena.visto .chat li:nth-child(2) {
+    animation-delay: 0.9s;
+  }
+  .escena.visto .chat li:nth-child(3) {
+    animation-delay: 1.8s;
+  }
+  .escena.visto .chat li:nth-child(4) {
+    animation-delay: 2.7s;
+  }
+  .escena.visto .chat li:nth-child(5) {
+    animation-delay: 3.6s;
+  }
+  .escena.visto .chat li:nth-child(6) {
+    animation-delay: 4.5s;
+  }
+  @keyframes chat-entra {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+.mocks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(20px, 3vw, 32px);
+}
+/* Las tres tarjetas miden lo mismo para que los títulos de abajo alineen. */
+.mock {
   display: flex;
   flex-direction: column;
 }
-.icard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(10, 37, 64, 0.09);
+.mock-card {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 22px 22px 26px;
+  min-height: 300px;
+  color: #fff;
+  background:
+    radial-gradient(120% 90% at 100% 100%, rgba(30, 111, 235, 0.35), transparent 60%),
+    linear-gradient(160deg, #0e2f52, var(--eve-azul-noche-profundo));
+  margin-bottom: 20px;
 }
-.icard .cover {
-  display: block;
-  width: 100%;
-  height: auto;
+/* Retícula tenue detrás de la interfaz, como en un panel. */
+.mock-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
 }
-.icard .cuerpo {
-  padding: 18px 22px 22px;
-}
-.icard h3 {
-  font-size: 0.95rem;
+.mock-card h3 {
+  position: relative;
+  font-size: 1.05rem;
   font-weight: 600;
-  margin-bottom: 5px;
+  margin-bottom: 18px;
 }
-.icard p {
-  font-size: 0.82rem;
+.mock h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+.mock p {
+  font-size: 0.85rem;
   color: var(--eve-pizarra);
-  margin-bottom: 12px;
+}
+/* Interfaz en miniatura: tarjeta translúcida sobre el fondo oscuro. */
+.ui {
+  position: relative;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 0.74rem;
+  color: #dce8f6;
+  backdrop-filter: blur(4px);
+}
+.ui b {
+  color: #fff;
+  font-weight: 600;
+}
+.ui-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.ui-cab {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.ui-pie {
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--eve-muted);
+}
+.ui-chip {
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  white-space: nowrap;
+}
+.ui-chip.ok {
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(34, 211, 238, 0.14);
+  color: var(--eve-cian);
+}
+.ui-monto {
+  font-family: "Baloo 2", sans-serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #fff;
+  padding: 12px 0 4px;
+}
+.ui-monto small {
+  font-family: "Inter", sans-serif;
+  font-size: 0.7rem;
+  color: var(--eve-muted);
+  margin-left: 4px;
+}
+.ui-pasos {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0 14px;
+  position: relative;
+  font-size: 0.66rem;
+  color: var(--eve-muted);
+}
+.ui-pasos::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 7px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+.ui-pasos li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  position: relative;
+}
+.ui-pasos li::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: var(--eve-azul-noche-profundo);
+  box-sizing: border-box;
+}
+.ui-pasos li.hecho {
+  color: #fff;
+}
+.ui-pasos li.hecho::before {
+  border-color: var(--eve-cian);
+  background: var(--eve-cian);
+  box-shadow: inset 0 0 0 3px var(--eve-azul-noche-profundo);
+}
+.ui-lista {
+  list-style: none;
+  margin: 6px 0 10px;
+}
+.ui-lista li {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ui-lista li.total {
+  border-bottom: 0;
+  color: #fff;
+}
+.ui-lista li.total b {
+  color: var(--eve-cian);
+}
+.ui-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 10px;
+  font-size: 0.7rem;
+}
+.ui-tabla th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--eve-muted);
+  padding: 4px 0 6px;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ui-tabla td {
+  padding: 6px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-variant-numeric: tabular-nums;
+}
+.ui-tabla th:not(:first-child),
+.ui-tabla td:not(:first-child) {
+  text-align: right;
+  white-space: nowrap;
 }
 
 /* BANDA portada (§6): object-fit cover + velo + contenido en blanco */
@@ -1270,6 +1558,36 @@ footer {
     background: var(--eve-tinte);
     border-radius: 0;
     padding: 4px 12px;
+  }
+  /* La escena deja de superponer: video arriba y conversación debajo, sobre
+     azul noche. Las tarjetas de interfaz pasan a una columna. */
+  .escena {
+    aspect-ratio: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .escena video {
+    position: static;
+    aspect-ratio: 16 / 9;
+    height: auto;
+  }
+  .escena::after {
+    display: none;
+  }
+  .escena-cab {
+    position: static;
+    padding: 18px 20px 0;
+    order: 2;
+  }
+  .chat {
+    position: static;
+    width: auto;
+    order: 3;
+    padding: 16px 20px 22px;
+  }
+  .mocks {
+    grid-template-columns: 1fr;
   }
   /* En móvil el menú ancho se vuelve lista: sin tarjeta destacada ni título. */
   .drop.open .drop-panel.mega {
