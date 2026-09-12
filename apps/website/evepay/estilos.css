@@ -244,16 +244,13 @@
 }
 
 /* ── Link de pago por WhatsApp ───────────────────────────────────────────
-   Dos columnas en escritorio (texto / pasos), una en móvil. Los pasos usan
-   el mismo círculo numerado, en tamaño pequeño, alineado al texto. */
+   Dos columnas en escritorio (texto / lado derecho), una en móvil. Los
+   pasos usan el mismo círculo numerado, en tamaño pequeño, alineado al
+   texto. */
 .wa {
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
   gap: 56px;
-  /* `start`, no `center`: la columna de texto es más alta que los 4 pasos
-     porque lleva la ilustración debajo. Centrada, los pasos quedaban
-     flotando a media altura; alineados arriba arrancan en la misma línea
-     que el titular y el dibujo cuelga por debajo del texto. */
   align-items: start;
   max-width: 980px;
   margin: 0 auto;
@@ -265,6 +262,12 @@
   margin-top: 16px;
   color: var(--eve-pizarra);
   font-size: clamp(0.9rem, 1.6vw, 0.98rem);
+}
+/* Pasos + ilustración: los dos viven en la columna derecha, no la
+   izquierda de texto — la tingua es apoyo de los pasos, no del párrafo. */
+.wa-lado {
+  display: grid;
+  gap: 28px;
 }
 .wa-pasos {
   list-style: none;
@@ -283,12 +286,15 @@
   padding-top: 3px;
 }
 /* Ilustración de la tingua: línea sobre blanco, se apoya limpia sobre
-   --eve-tinte, sin tarjeta ni sombra (ya trae su propia base dibujada). */
+   --eve-tinte, sin tarjeta ni sombra (ya trae su propia base dibujada).
+   `figure` trae un margen de fábrica del navegador (1em 40px): sin este
+   reset, la imagen aparecía desplazada 40px en vez de ir a ras del borde
+   de `.wa-lado`. */
 .wa-figura {
-  margin: 28px 0 0;
+  margin: 0;
 }
 .wa-figura img {
-  width: min(500px, 100%);
+  width: min(320px, 100%);
   height: auto;
   display: block;
   /* El WebP es línea sobre blanco puro (#fff en las esquinas). `multiply`
@@ -301,11 +307,6 @@
      blanco ya se funde por el `multiply`, así que la opacidad solo aligera
      las líneas sobre el tinte. */
   opacity: 0.85;
-}
-.wa-figura figcaption {
-  margin-top: 12px;
-  font-size: 0.84rem;
-  color: var(--eve-pizarra);
 }
 
 /* ── Demo (formulario sobre azul noche) ──────────────────────────────────
@@ -385,15 +386,8 @@
   .wa-texto h2 {
     text-align: center;
   }
-  .wa-figura {
-    max-width: 420px;
-    margin-inline: auto;
-  }
-  .wa-figura img {
-    margin-inline: auto;
-  }
-  .wa-figura figcaption {
-    text-align: center;
+  .wa-lado {
+    justify-items: center;
   }
   .wa-pasos {
     max-width: 420px;
