@@ -889,3 +889,17 @@ export function listarReembolsos(paymentId: string): Promise<Reembolso[]> {
 export function listarContracargos(paymentId?: string): Promise<Contracargo[]> {
   return apiGet<Contracargo[]>(`/admin/contracargos${paymentId ? `?paymentId=${paymentId}` : ""}`);
 }
+
+export interface ResumenComercio {
+  tenantId: string;
+  ciudad: string | null;
+  volumenMesMinor: number;
+  cobrosMes: number;
+  porPagarMinor: number;
+  tieneTarifa: boolean;
+  retencionesActivas: number;
+  retenidasRiesgo30d: number;
+}
+export function resumenComercios(): Promise<ResumenComercio[]> {
+  return apiGet<ResumenComercio[]>("/admin/merchants-resumen");
+}

@@ -42,7 +42,8 @@ import {
   ReportesAdminService,
   type EstadoCuenta,
   type FilaFiscal,
-  type Resumen
+  type Resumen,
+  type ResumenComercio
 } from "./reportes-admin.service";
 import type {
   CasoRiesgo,
@@ -909,6 +910,13 @@ export class AdminController {
   }
 
   // --- Command Center y reportes (Fase 10) ---
+
+  /** GET /v1/admin/merchants-resumen — volumen del mes, por pagar, tarifa y riesgo de cada comercio. */
+  @Get("merchants-resumen")
+  async resumenComercios(): Promise<ResumenComercio[]> {
+    this.exigir("leer");
+    return this.reportes.comercios();
+  }
 
   /** GET /v1/admin/resumen — la portada: cifras reales de hoy, del mes y de la custodia. */
   @Get("resumen")

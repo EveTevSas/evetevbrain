@@ -74,6 +74,17 @@ export interface FilaFiscal {
   margenMinor: number;
 }
 
+export interface ResumenComercio {
+  tenantId: string;
+  ciudad: string | null;
+  volumenMesMinor: number;
+  cobrosMes: number;
+  porPagarMinor: number;
+  tieneTarifa: boolean;
+  retencionesActivas: number;
+  retenidasRiesgo30d: number;
+}
+
 type Fila = Record<string, unknown>;
 const n = (v: unknown) => Number(v ?? 0);
 
@@ -106,6 +117,21 @@ export class ReportesAdminService {
       comerciosSinKyc: n(f.comercios_sin_kyc),
       asientosDescuadrados: n(f.asientos_descuadrados)
     };
+  }
+
+  /** Una fila por comercio para el listado: volumen del mes, por pagar, tarifa y riesgo. */
+  async comercios(): Promise<ResumenComercio[]> {
+    const filas = await this.db.execute<Fila>(sql`SELECT * FROM evepay.admin_comercios_resumen()`);
+    return filas.map((f) => ({
+      tenantId: String(f.tenant_id),
+      ciudad: f.ciudad ? String(f.ciudad) : null,
+      volumenMesMinor: n(f.volumen_mes_minor),
+      cobrosMes: n(f.cobros_mes),
+      porPagarMinor: n(f.por_pagar_minor),
+      tieneTarifa: Boolean(f.tiene_tarifa),
+      retencionesActivas: n(f.retenciones_activas),
+      retenidasRiesgo30d: n(f.retenidas_riesgo_30d)
+    }));
   }
 
   async estadoCuenta(tenantId: string, desde: string, hasta: string): Promise<EstadoCuenta> {
