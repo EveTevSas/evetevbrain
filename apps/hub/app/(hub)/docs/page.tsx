@@ -3,7 +3,7 @@ import { ultimosRastros } from "@/lib/hub/auditoria";
 
 export const dynamic = "force-dynamic";
 
-const REPO = "https://github.com/EveTev/EveTevBrain/blob/main/MonoRepo";
+const REPO = "https://github.com/EveTevSas/evetevbrain/blob/main/MonoRepo";
 const DOCS = [
   [
     "Constitución de ingeniería",
