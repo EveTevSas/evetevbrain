@@ -13,6 +13,12 @@ import { ComboPayPaymentProvider } from "../modules/pagos/combopay-payment.provi
 import { MERCHANTS_REPOSITORY } from "../modules/merchants/merchants.repository";
 import { DrizzleMerchantsRepository } from "../modules/merchants/drizzle-merchants.repository";
 import { InMemoryMerchantsRepository } from "../modules/merchants/in-memory-merchants.repository";
+import { TARIFAS_REPOSITORY } from "../modules/tarifas/tarifas.repository";
+import { DrizzleTarifasRepository } from "../modules/tarifas/drizzle-tarifas.repository";
+import { InMemoryTarifasRepository } from "../modules/tarifas/in-memory-tarifas.repository";
+import { RIESGO_REPOSITORY } from "../modules/riesgo/riesgo.repository";
+import { DrizzleRiesgoRepository } from "../modules/riesgo/drizzle-riesgo.repository";
+import { InMemoryRiesgoRepository } from "../modules/riesgo/in-memory-riesgo.repository";
 
 /**
  * Provee los repositorios como singletons globales, para que los módulos compartan
@@ -40,6 +46,18 @@ import { InMemoryMerchantsRepository } from "../modules/merchants/in-memory-merc
         db ? new DrizzleMerchantsRepository(db) : new InMemoryMerchantsRepository()
     },
     {
+      provide: TARIFAS_REPOSITORY,
+      inject: [DB],
+      useFactory: (db: Db | null) =>
+        db ? new DrizzleTarifasRepository(db) : new InMemoryTarifasRepository()
+    },
+    {
+      provide: RIESGO_REPOSITORY,
+      inject: [DB],
+      useFactory: (db: Db | null) =>
+        db ? new DrizzleRiesgoRepository(db) : new InMemoryRiesgoRepository()
+    },
+    {
       // El proveedor de adquirencia se elige por configuración (§4): el resto
       // del núcleo solo conoce la interfaz. fake | akua | combopay.
       provide: PAYMENT_PROVIDER,
@@ -62,6 +80,13 @@ import { InMemoryMerchantsRepository } from "../modules/merchants/in-memory-merc
       }
     }
   ],
-  exports: [PAGOS_REPOSITORY, LEDGER_REPOSITORY, MERCHANTS_REPOSITORY, PAYMENT_PROVIDER]
+  exports: [
+    PAGOS_REPOSITORY,
+    LEDGER_REPOSITORY,
+    MERCHANTS_REPOSITORY,
+    TARIFAS_REPOSITORY,
+    RIESGO_REPOSITORY,
+    PAYMENT_PROVIDER
+  ]
 })
 export class RepositoriesModule {}

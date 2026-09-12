@@ -1,7 +1,14 @@
 import { createHash } from "node:crypto";
-import { ConflictException, Inject, Injectable } from "@nestjs/common";
-import type { Cobro, CrearCobroInput, PaymentProvider } from "@evetev/shared";
+import { BadRequestException, ConflictException, Inject, Injectable } from "@nestjs/common";
+import {
+  desglosarCobro,
+  type Cobro,
+  type CrearCobroInput,
+  type PaymentProvider
+} from "@evetev/shared";
 import { MERCHANTS_REPOSITORY, type MerchantsRepository } from "../merchants/merchants.repository";
+import { TARIFAS_REPOSITORY, type TarifasRepository } from "../tarifas/tarifas.repository";
+import { RiesgoService } from "../riesgo/riesgo.service";
 import { PAYMENT_PROVIDER } from "./payment-provider.token";
 import {
   PAGOS_REPOSITORY,
@@ -26,7 +33,9 @@ export class PagosService {
   constructor(
     @Inject(PAYMENT_PROVIDER) private readonly provider: PaymentProvider,
     @Inject(PAGOS_REPOSITORY) private readonly repo: PagosRepository,
-    @Inject(MERCHANTS_REPOSITORY) private readonly merchants: MerchantsRepository
+    @Inject(MERCHANTS_REPOSITORY) private readonly merchants: MerchantsRepository,
+    @Inject(TARIFAS_REPOSITORY) private readonly tarifas: TarifasRepository,
+    private readonly riesgo: RiesgoService
   ) {}
 
   /**
@@ -54,12 +63,55 @@ export class PagosService {
     }
   }
 
+  /**
+   * Sin las dos tarifas no se cobra (CA-3, CA-4 de `comisiones`).
+   *
+   * Sin la del comercio no se sabe cuánto es de EvePay y cuánto suyo; sin la
+   * del proveedor no se sabe cuánto cuesta ni cuánto va a consignar. Un cobro
+   * así no se puede asentar en el libro ni cuadrar después. Se rechaza ANTES
+   * de llamar al proveedor: si llegara a crearse allá, habría plata en camino
+   * que nadie sabe repartir.
+   *
+   * Las versiones vigentes se fijan en el cobro (CA-5): cambiar una tarifa
+   * después no altera lo que ya se cobró.
+   */
+  private async resolverTarifas(
+    tenantId: string,
+    montoMinor: number
+  ): Promise<{ tarifaId: string; tarifaProveedorId: string }> {
+    const tarifa = await this.tarifas.tarifaVigente(tenantId);
+    if (!tarifa) {
+      throw new ConflictException(
+        "El comercio no tiene tarifa asignada y no puede cobrar. Asígnale una en la consola de EvePay."
+      );
+    }
+
+    const tarifaProveedor = await this.tarifas.tarifaProveedorVigente(this.provider.nombre);
+    if (!tarifaProveedor) {
+      throw new ConflictException(
+        `El proveedor "${this.provider.nombre}" no tiene tarifa configurada y no se puede cobrar con él. Configúrala en la consola de EvePay.`
+      );
+    }
+
+    // CA-7: si la comisión con su IVA se come el monto, el comercio recibiría
+    // cero o menos. Es una tarifa mal puesta, no un cobro válido.
+    const desglose = desglosarCobro(montoMinor, tarifa, tarifaProveedor);
+    if (desglose.alComercio <= 0) {
+      throw new BadRequestException(
+        `La comisión (${desglose.comision}) más su IVA (${desglose.iva}) iguala o supera el monto del cobro (${montoMinor}), en centavos: el comercio no recibiría nada. Revisa la tarifa del comercio.`
+      );
+    }
+
+    return { tarifaId: tarifa.id, tarifaProveedorId: tarifaProveedor.id };
+  }
+
   async crearCobro(
     ctx: CobroContext,
     input: CrearCobroInput,
     idempotencyKey: string
   ): Promise<Cobro> {
     await this.exigirComercioAprobado(ctx.tenantId, input.merchantId);
+    const tarifas = await this.resolverTarifas(ctx.tenantId, input.montoMinor);
 
     const requestHash = hashRequest(ctx.tenantId, input);
 
@@ -72,6 +124,15 @@ export class PagosService {
         previo.requestHash,
         requestHash
       );
+    }
+
+    // Riesgo del comercio (spec riesgo-comercio): después del reintento
+    // idempotente (un cobro ya creado no se re-evalúa) y ANTES del proveedor.
+    // Rechazar = el cobro no existe. Retener = se crea, pero su dinero no se
+    // dispersa hasta que alguien lo revise.
+    const evaluacion = await this.riesgo.evaluar(ctx.tenantId, input.montoMinor);
+    if (evaluacion.resultado.decision === "rechazar") {
+      await this.riesgo.rechazar(ctx.tenantId, input.montoMinor, evaluacion);
     }
 
     // Primera vez: crear en el proveedor (una sola llamada) y persistir.
@@ -90,7 +151,9 @@ export class PagosService {
         // cambie de adquirencia (CA-14 de admin-console).
         provider: this.provider.nombre,
         providerPaymentId: prov.providerPaymentId,
-        checkoutUrl: prov.checkoutUrl
+        checkoutUrl: prov.checkoutUrl,
+        tarifaId: tarifas.tarifaId,
+        tarifaProveedorId: tarifas.tarifaProveedorId
       },
       idempotencyKey,
       requestHash,
@@ -98,6 +161,13 @@ export class PagosService {
     });
 
     if (resultado.creado) {
+      await this.riesgo.registrar(
+        ctx.tenantId,
+        resultado.cobro.id,
+        input.montoMinor,
+        evaluacion,
+        ctx.actor
+      );
       return resultado.cobro;
     }
 

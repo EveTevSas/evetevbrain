@@ -2,6 +2,15 @@
 
 > Fase 4 del [plan de EvePay](../../../docs/PLAN_DESARROLLO_EVEPAY.md). Cimiento
 > no-reescribible (§1): lo cobrado cuadra con lo registrado.
+>
+> **Actualizada por [`ledger-custodia`](../ledger-custodia/) (Fase 6):** esta
+> conciliación automática aplica solo a proveedores que exponen liquidaciones
+> por API (Akua). Con ComboPay, que no las expone, la conciliación es
+> **asistida**: operación registra cada consignación del extracto y marca los
+> cobros que cubre (`admin_registrar_consignacion`). En ambos casos el asiento
+> `cobro_conciliado` es débito `recaudo` / crédito `clearing:<proveedor>` por
+> lo que el proveedor debía del cobro (monto − su tarifa si la descuenta al
+> consignar), ya no débito `banco` por el monto entero.
 
 ## Problema
 
@@ -29,6 +38,8 @@ proveedor (liquidación sin cobro local) y no-conciliados (cobro sin liquidació
 - Cruce por `provider_payment_id`:
   - cuadra (mismo monto) → transición `aprobado → conciliado` (auditada) + asiento
     `cobro_conciliado` (débito `banco`, crédito `akua_clearing`).
+    **Vigente (Fase 6):** débito `recaudo`, crédito `clearing:<proveedor>`, por
+    lo que el proveedor debía del cobro según la tarifa fijada en él.
   - monto distinto → **diferencia** (no se concilia).
   - liquidación sin cobro local → **huérfano del proveedor**.
   - cobro `aprobado` sin liquidación → **no conciliado** (sigue pendiente).
@@ -59,3 +70,6 @@ proveedor (liquidación sin cobro local) y no-conciliados (cobro sin liquidació
 - §1: lo cobrado cuadra con lo registrado (conciliación desde el MVP).
 - §2/§4: asientos en el ledger inmutable; aislamiento por tenant; montos en centavos.
 - §7: las liquidaciones se obtienen solo por la interfaz `PaymentProvider` (Akua detrás).
+- Con un proveedor sin liquidaciones por API (`capacidades.liquidaciones = false`),
+  la corrida se registra como `no_soportada` y la conciliación real ocurre por
+  consignaciones (`ledger-custodia`).

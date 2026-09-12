@@ -9,7 +9,15 @@ const TENANT = "11111111-1111-4111-8111-111111111111";
 function proveedorAgregador(): PaymentProvider {
   return {
     nombre: "combopay",
-    capacidades: { altaDeComercios: false, liquidaciones: false, monedas: ["COP"] },
+    capacidades: {
+      altaDeComercios: false,
+      liquidaciones: false,
+      monedas: ["COP"],
+      custodia: true,
+      dispersion: false,
+      metodos: ["pse"],
+      reembolsos: false
+    },
     crearCobro: async () => {
       throw new Error("no se usa aquí");
     },

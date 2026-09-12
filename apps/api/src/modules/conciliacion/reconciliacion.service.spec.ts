@@ -4,6 +4,7 @@ import { InMemoryPagosRepository } from "../pagos/in-memory-pagos.repository";
 import { InMemoryLedgerRepository } from "../ledger/in-memory-ledger.repository";
 import { FakePaymentProvider } from "../pagos/fake-payment.provider";
 import { LedgerService } from "../ledger/ledger.service";
+import { InMemoryTarifasRepository } from "../tarifas/in-memory-tarifas.repository";
 import { ReconciliacionService } from "./reconciliacion.service";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
@@ -51,7 +52,12 @@ describe("ReconciliacionService — settlement", () => {
     service = new ReconciliacionService(
       pagos,
       provider,
-      new LedgerService(ledgerRepo, pagos, new FakePaymentProvider())
+      new LedgerService(
+        ledgerRepo,
+        pagos,
+        new FakePaymentProvider(),
+        new InMemoryTarifasRepository()
+      )
     );
   });
 

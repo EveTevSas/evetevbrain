@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryPagosRepository } from "../pagos/in-memory-pagos.repository";
 import { InMemoryLedgerRepository } from "../ledger/in-memory-ledger.repository";
 import { LedgerService } from "../ledger/ledger.service";
+import { InMemoryTarifasRepository } from "../tarifas/in-memory-tarifas.repository";
+import { InMemoryRiesgoRepository } from "../riesgo/in-memory-riesgo.repository";
+import { RiesgoService } from "../riesgo/riesgo.service";
 import { InMemoryMerchantsRepository } from "../merchants/in-memory-merchants.repository";
 import { MerchantsService } from "../merchants/merchants.service";
 import { FakePaymentProvider } from "../pagos/fake-payment.provider";
@@ -61,10 +64,16 @@ describe("WebhooksService — normalización de eventos", () => {
     merchants = new MerchantsService(merchantsRepo, new FakePaymentProvider());
     service = new WebhooksService(
       repo,
-      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
+      new LedgerService(
+        ledgerRepo,
+        repo,
+        new FakePaymentProvider(),
+        new InMemoryTarifasRepository()
+      ),
       merchants,
       noopDelivery,
-      noopWebhookRepo
+      noopWebhookRepo,
+      new RiesgoService(new InMemoryRiesgoRepository())
     );
   });
 
@@ -180,10 +189,16 @@ describe("WebhooksService — eventos de ComboPay", () => {
     const merchantsRepo = new InMemoryMerchantsRepository();
     service = new WebhooksService(
       repo,
-      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
+      new LedgerService(
+        ledgerRepo,
+        repo,
+        new FakePaymentProvider(),
+        new InMemoryTarifasRepository()
+      ),
       new MerchantsService(merchantsRepo, new FakePaymentProvider()),
       noopDelivery,
-      noopWebhookRepo
+      noopWebhookRepo,
+      new RiesgoService(new InMemoryRiesgoRepository())
     );
   });
 
@@ -246,10 +261,16 @@ describe("WebhooksService — un webhook no cruza de proveedor", () => {
     const ledgerRepo = new InMemoryLedgerRepository();
     const service = new WebhooksService(
       repo,
-      new LedgerService(ledgerRepo, repo, new FakePaymentProvider()),
+      new LedgerService(
+        ledgerRepo,
+        repo,
+        new FakePaymentProvider(),
+        new InMemoryTarifasRepository()
+      ),
       new MerchantsService(new InMemoryMerchantsRepository(), new FakePaymentProvider()),
       noopDelivery,
-      noopWebhookRepo
+      noopWebhookRepo,
+      new RiesgoService(new InMemoryRiesgoRepository())
     );
 
     // Dos cobros distintos que, por casualidad, comparten identificador.
@@ -329,5 +350,93 @@ describe("WebhooksService — un webhook no cruza de proveedor", () => {
 
     expect((await repo.buscarCobro(TENANT, idAkua))?.estado).toBe("pendiente");
     expect((await repo.buscarCobro(TENANT, idCombopay))?.estado).toBe("pendiente");
+  });
+});
+
+/* Antifraude de tarjeta (reembolsos-contracargos CA-5): al aprobarse el cobro,
+   las señales que trae el proveedor se evalúan; si una regla activa dispara,
+   el cobro queda retenido; sin señales, nada. */
+describe("WebhooksService — riesgo de tarjeta al aprobar (CA-5)", () => {
+  function montar(reglaActiva: boolean) {
+    const repo = new InMemoryPagosRepository();
+    const ledgerRepo = new InMemoryLedgerRepository();
+    const riesgoRepo = new InMemoryRiesgoRepository();
+    riesgoRepo.reglas.push({
+      id: "geo",
+      nombre: "País de la tarjeta distinto al de la IP",
+      tipo: "geo_mismatch",
+      tenantId: null,
+      parametros: { montoMinimoMinor: 100_000 },
+      accion: "retener",
+      modo: reglaActiva ? "activa" : "shadow",
+      prioridad: 50,
+      tenantNombre: null,
+      creadaPor: "s",
+      creadaEn: "",
+      actualizadaPor: "s",
+      actualizadaEn: "",
+      disparos30d: 0,
+      disparosHoy: 0,
+      retenciones30d: 0,
+      liberadas30d: 0
+    });
+    const merchantsRepo = new InMemoryMerchantsRepository();
+    const service = new WebhooksService(
+      repo,
+      new LedgerService(
+        ledgerRepo,
+        repo,
+        new FakePaymentProvider(),
+        new InMemoryTarifasRepository()
+      ),
+      new MerchantsService(merchantsRepo, new FakePaymentProvider()),
+      noopDelivery,
+      noopWebhookRepo,
+      new RiesgoService(riesgoRepo)
+    );
+    return { repo, riesgoRepo, service };
+  }
+
+  it("una tarjeta de otro país pagando desde Colombia, con la regla activa → el cobro queda retenido", async () => {
+    const { repo, riesgoRepo, service } = montar(true);
+    const id = await seedCobro(repo, "combopay");
+    await service.procesar({
+      id: "evt-geo-1",
+      type: "payment_approved",
+      provider: "combopay",
+      providerPaymentId: PROV,
+      senalesTarjeta: { paisTarjeta: "VE", paisIp: "CO" }
+    });
+    expect((await repo.buscarCobro(TENANT, id))?.estado).toBe("aprobado");
+    expect(riesgoRepo.retenciones).toEqual([
+      expect.objectContaining({ paymentId: id, motivo: expect.stringMatching(/VE/) })
+    ]);
+    expect(riesgoRepo.evaluaciones[0]).toMatchObject({ decision: "retener", paymentId: id });
+  });
+
+  it("en shadow se anota pero no se retiene; sin señales no se evalúa nada", async () => {
+    const { repo, riesgoRepo, service } = montar(false);
+    const id = await seedCobro(repo, "combopay");
+    await service.procesar({
+      id: "evt-geo-2",
+      type: "payment_approved",
+      provider: "combopay",
+      providerPaymentId: PROV,
+      senalesTarjeta: { paisTarjeta: "VE", paisIp: "CO" }
+    });
+    expect(riesgoRepo.retenciones).toHaveLength(0);
+    expect(riesgoRepo.evaluaciones[0]?.reglasDisparadas[0]).toMatchObject({ actuo: false });
+    void id;
+
+    const sin = montar(true);
+    const id2 = await seedCobro(sin.repo, "combopay");
+    await sin.service.procesar({
+      id: "evt-geo-3",
+      type: "payment_approved",
+      provider: "combopay",
+      providerPaymentId: PROV
+    });
+    expect(sin.riesgoRepo.evaluaciones).toHaveLength(0);
+    void id2;
   });
 });

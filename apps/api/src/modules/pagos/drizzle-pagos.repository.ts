@@ -1,10 +1,12 @@
 import { and, count, eq, gte, lte, sql, sum, desc } from "drizzle-orm";
 import type { Cobro, EstadoCobro, RangoFechas } from "@evetev/shared";
 import type { Db } from "../../database/drizzle";
+import { errorDeBase } from "../../database/errores";
 import { paymentAudit, paymentIdempotency, payments, webhookEvents } from "../../database/schema";
 import {
   type AplicarTransicionArgs,
   type CobroAprobadoResumen,
+  type CobroConTarifas,
   type CrearConIdempotenciaArgs,
   type CrearResultado,
   type FiltrosCobros,
@@ -79,6 +81,30 @@ export class DrizzlePagosRepository implements PagosRepository {
     });
   }
 
+  async buscarCobroConTarifas(tenantId: string, cobroId: string): Promise<CobroConTarifas | null> {
+    return this.db.transaction(async (tx): Promise<CobroConTarifas | null> => {
+      await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
+      const rows = await tx
+        .select()
+        .from(payments)
+        .where(and(eq(payments.id, cobroId), eq(payments.tenantId, tenantId)))
+        .limit(1);
+      const fila = rows[0];
+      if (!fila) return null;
+      return {
+        id: fila.id,
+        tenantId: fila.tenantId,
+        merchantId: fila.merchantId,
+        montoMinor: fila.amountMinor,
+        referencia: fila.reference,
+        estado: fila.status as EstadoCobro,
+        provider: fila.provider,
+        tarifaId: fila.tarifaId,
+        tarifaProveedorId: fila.tarifaProveedorId
+      };
+    });
+  }
+
   async crearConIdempotencia(args: CrearConIdempotenciaArgs): Promise<CrearResultado> {
     const { nuevo } = args;
     try {
@@ -97,7 +123,9 @@ export class DrizzlePagosRepository implements PagosRepository {
             status: nuevo.estado,
             provider: nuevo.provider,
             providerPaymentId: nuevo.providerPaymentId,
-            checkoutUrl: nuevo.checkoutUrl ?? null
+            checkoutUrl: nuevo.checkoutUrl ?? null,
+            tarifaId: nuevo.tarifaId ?? null,
+            tarifaProveedorId: nuevo.tarifaProveedorId ?? null
           })
           .returning();
         const fila = inserted[0]!;
@@ -122,11 +150,7 @@ export class DrizzlePagosRepository implements PagosRepository {
       });
     } catch (error) {
       // 23505 = unique_violation → otra transacción ganó la carrera.
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        (error as { code?: string }).code === "23505"
-      ) {
+      if (errorDeBase(error).code === "23505") {
         return { creado: false };
       }
       throw error;

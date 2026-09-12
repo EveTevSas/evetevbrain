@@ -5,14 +5,17 @@ export const ESTADO_INICIAL: EstadoCobro = "creado";
 
 /**
  * Máquina de estados del cobro (§2):
- *   creado → pendiente → aprobado | fallido → conciliado
+ *   creado → pendiente → aprobado | fallido → conciliado → reembolsado
+ * `reembolsado` (Fase 11) es terminal y solo lo pone la base al completar
+ * un reembolso o perder un contracargo; ningún webhook lo produce.
  */
 const TRANSICIONES: Record<EstadoCobro, readonly EstadoCobro[]> = {
   creado: ["pendiente", "fallido"],
   pendiente: ["aprobado", "fallido"],
-  aprobado: ["conciliado"],
+  aprobado: ["conciliado", "reembolsado"],
   fallido: [],
-  conciliado: []
+  conciliado: ["reembolsado"],
+  reembolsado: []
 };
 
 export function puedeTransicionar(desde: EstadoCobro, hacia: EstadoCobro): boolean {

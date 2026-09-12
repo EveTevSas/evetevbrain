@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { IdentidadModule } from "../identidad/identidad.module";
+import { RiesgoModule } from "../riesgo/riesgo.module";
 import { PagosController } from "./pagos.controller";
 import { PagosService } from "./pagos.service";
 
@@ -8,7 +9,7 @@ import { PagosService } from "./pagos.service";
  * global (RepositoriesModule), compartidos con `webhooks` y `conciliacion`.
  */
 @Module({
-  imports: [IdentidadModule],
+  imports: [IdentidadModule, RiesgoModule],
   controllers: [PagosController],
   providers: [PagosService],
   exports: [PagosService]

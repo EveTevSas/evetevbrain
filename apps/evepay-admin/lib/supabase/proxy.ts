@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-import { esSuperAdmin, isSafeInternalPath } from "@/lib/auth/permissions";
+import { isSafeInternalPath, rolInterno } from "@/lib/auth/permissions";
 import { getSupabasePublicConfig } from "./config";
 
 function responseWithAuthCookies(source: NextResponse, target: NextResponse): NextResponse {
@@ -59,8 +59,9 @@ export async function refreshSessionAndAuthorize(request: NextRequest): Promise<
     return responseWithAuthCookies(response, redirectTo(request, "/login", next));
   }
 
-  // CA-2: autenticado pero sin el rol → fuera de toda la consola.
-  if (!esSuperAdmin(user)) {
+  // CA-2 de admin-console / CA-1 de rbac-operativo: autenticado pero sin un
+  // rol interno (super_admin, ops, finanzas) → fuera de toda la consola.
+  if (!rolInterno(user)) {
     if (pathname === "/sin-acceso" || pathname === "/login") {
       response.headers.set("Cache-Control", "private, no-store");
       return response;

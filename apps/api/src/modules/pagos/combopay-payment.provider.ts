@@ -43,7 +43,12 @@ export class ComboPayPaymentProvider implements PaymentProvider {
   readonly capacidades: CapacidadesProvider = {
     altaDeComercios: false,
     liquidaciones: false,
-    monedas: ["COP"]
+    monedas: ["COP"],
+    custodia: true,
+    dispersion: false,
+    metodos: ["pse", "tarjeta", "efectivo"],
+    // Su API beta no confirma reembolsos: se pagan desde el banco y se registran.
+    reembolsos: false
   };
 
   private readonly baseUrl: string;

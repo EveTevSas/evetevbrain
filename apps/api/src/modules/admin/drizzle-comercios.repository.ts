@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import type { Db } from "../../database/drizzle";
-import { merchantApiKeys, merchants, tenants } from "../../database/schema";
+import { merchantApiKeys, merchants } from "../../database/schema";
 import { AdminAuditService } from "./admin-audit.service";
 import type {
   ClaveParaGuardar,
@@ -14,7 +14,10 @@ import type {
  * comercios; el servicio decide y este guarda.
  *
  * Cada escritura abre su transacción, fija `app.tenant_id` para que RLS deje
- * ver las filas del comercio, y guarda el rastro dentro de la misma.
+ * ver las filas del comercio, y guarda el rastro dentro de la misma. Lo que
+ * toca identity.tenants va por las funciones SECURITY DEFINER de 0018: desde
+ * la Fase 8 la tabla tiene RLS y la consola, que cruza comercios, no la ve
+ * directo.
  */
 export class DrizzleComerciosRepository implements ComerciosRepository {
   constructor(
@@ -23,19 +26,19 @@ export class DrizzleComerciosRepository implements ComerciosRepository {
   ) {}
 
   async crearTenant(legalName: string, displayName: string): Promise<string> {
-    const filas = await this.db
-      .insert(tenants)
-      .values({ legalName, displayName })
-      .returning({ id: tenants.id });
-    return filas[0]!.id;
+    const filas = await this.db.execute<{ admin_crear_tenant: string }>(
+      sql`SELECT identity.admin_crear_tenant(${legalName}, ${displayName})`
+    );
+    const id = filas[0]?.admin_crear_tenant;
+    if (!id) throw new Error("La base no devolvió el id del comercio creado.");
+    return id;
   }
 
   async existeTenant(tenantId: string): Promise<boolean> {
-    const filas = await this.db
-      .select({ id: tenants.id })
-      .from(tenants)
-      .where(eq(tenants.id, tenantId));
-    return filas.length > 0;
+    const filas = await this.db.execute<{ admin_tenant_existe: boolean }>(
+      sql`SELECT identity.admin_tenant_existe(${tenantId}::uuid)`
+    );
+    return Boolean(filas[0]?.admin_tenant_existe);
   }
 
   async emitirClaves(args: {
@@ -123,18 +126,15 @@ export class DrizzleComerciosRepository implements ComerciosRepository {
     rastro: RastroAdmin;
   }): Promise<string | null> {
     return this.db.transaction(async (tx) => {
-      const actualizado = await tx
-        .update(tenants)
-        .set({ status: args.estado, updatedAt: new Date() })
-        .where(eq(tenants.id, args.tenantId))
-        .returning({ status: tenants.status });
-
-      if (actualizado.length === 0) {
+      const filas = await tx.execute<{ admin_cambiar_estado_tenant: string | null }>(
+        sql`SELECT identity.admin_cambiar_estado_tenant(${args.tenantId}::uuid, ${args.estado})`
+      );
+      const estado = filas[0]?.admin_cambiar_estado_tenant ?? null;
+      if (estado === null) {
         return null;
       }
-
       await this.auditoria.registrarEn(tx, args.rastro);
-      return actualizado[0]!.status;
+      return estado;
     });
   }
 
@@ -145,27 +145,23 @@ export class DrizzleComerciosRepository implements ComerciosRepository {
     rastro: RastroAdmin;
   }): Promise<{ legalName: string; displayName: string } | null> {
     return this.db.transaction(async (tx) => {
-      /* Los nombres de antes se leen en la misma transacción y con bloqueo,
-         para que el rastro diga exactamente qué se reemplazó aunque dos
-         personas editen el mismo comercio a la vez. */
-      const antes = await tx
-        .select({ legalName: tenants.legalName, displayName: tenants.displayName })
-        .from(tenants)
-        .where(eq(tenants.id, args.tenantId))
-        .for("update");
-
-      if (antes.length === 0) {
+      /* La función devuelve los nombres de antes, leídos con bloqueo en la
+         misma transacción, para que el rastro diga exactamente qué se
+         reemplazó aunque dos personas editen el mismo comercio a la vez. */
+      const antes = await tx.execute<{ legal_name: string; display_name: string }>(
+        sql`SELECT * FROM identity.admin_renombrar_tenant(${args.tenantId}::uuid, ${args.legalName}, ${args.displayName})`
+      );
+      const previo = antes[0];
+      if (!previo) {
         return null;
       }
 
-      await tx
-        .update(tenants)
-        .set({ legalName: args.legalName, displayName: args.displayName, updatedAt: new Date() })
-        .where(eq(tenants.id, args.tenantId));
-
       await this.auditoria.registrarEn(tx, {
         ...args.rastro,
-        detalle: { ...args.rastro.detalle, antes: antes[0] }
+        detalle: {
+          ...args.rastro.detalle,
+          antes: { legalName: previo.legal_name, displayName: previo.display_name }
+        }
       });
 
       return { legalName: args.legalName, displayName: args.displayName };

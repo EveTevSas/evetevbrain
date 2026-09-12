@@ -23,7 +23,13 @@ export class FakePaymentProvider implements PaymentProvider {
   readonly capacidades: CapacidadesProvider = {
     altaDeComercios: true,
     liquidaciones: true,
-    monedas: ["COP", "USD"]
+    monedas: ["COP", "USD"],
+    // Mismo modelo de fondos que ComboPay, para que local se comporte como
+    // producción.
+    custodia: true,
+    dispersion: false,
+    metodos: ["pse", "tarjeta", "efectivo"],
+    reembolsos: true
   };
 
   /** No hay nada externo que comprobar: el fake siempre está sano. */
@@ -55,5 +61,13 @@ export class FakePaymentProvider implements PaymentProvider {
 
   async crearMerchant(_input: CrearMerchantInput): Promise<ProviderMerchant> {
     return { providerMerchantId: randomUUID(), estado: "en_revision" };
+  }
+
+  /** El fake devuelve por API al instante; en producción esto lo hace el banco. */
+  async reembolsar(
+    _providerPaymentId: string,
+    _montoMinor: number
+  ): Promise<{ providerRefundId: string }> {
+    return { providerRefundId: randomUUID() };
   }
 }
