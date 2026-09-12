@@ -71,11 +71,18 @@ MARCA_SERVIDA = RAIZ / "apps/website/marca"
 # ── El arnés de escritura ──────────────────────────────────────────────────
 # Todo esto vive en código y no en el prompt a propósito: a un modelo se le
 # puede convencer de saltarse una instrucción; a un `if` no.
-CARPETAS_ESCRIBIBLES = (
-    "apps/website/evepay/",
-    "apps/website/conecta/",
-    "apps/website/intelligence/",
-)
+# Las landings sobre las que puede trabajar, y su nombre de cara a la persona.
+# Es la ÚNICA lista: de aquí salen las carpetas escribibles, el desplegable de
+# la interfaz y la validación de lo que llega por la API. Añadir una landing es
+# añadir una línea aquí; duplicar la lista en el JavaScript sería garantizar que
+# un día se queden distintas y que la nueva no aparezca sin que falle nada.
+LANDINGS = {
+    "evepay": {"etiqueta": "EvePay", "carpeta": "apps/website/evepay/"},
+    "conecta": {"etiqueta": "EveConecta", "carpeta": "apps/website/conecta/"},
+    "intelligence": {"etiqueta": "Eve Intelligence", "carpeta": "apps/website/intelligence/"},
+}
+
+CARPETAS_ESCRIBIBLES = tuple(v["carpeta"] for v in LANDINGS.values())
 EXTENSIONES_ESCRIBIBLES = (".html", ".css")
 # base.css y formularios.js son copias GENERADAS desde packages/brand: editarlas
 # aquí las revierte el siguiente `pnpm landings:sync` y además rompe el job de CI
@@ -364,16 +371,22 @@ def _rechazo(ruta: str, motivo: str) -> str:
     return f"'{ruta}': {motivo}"
 
 
-def validar_ruta(ruta: str) -> str | None:
-    """Devuelve el motivo del rechazo, o None si la ruta es aceptable."""
+def validar_ruta(ruta: str, carpetas: tuple = CARPETAS_ESCRIBIBLES) -> str | None:
+    """Devuelve el motivo del rechazo, o None si la ruta es aceptable.
+
+    `carpetas` es el ámbito de esta petición: todas las landings, o solo la que
+    la persona eligió en el desplegable. Se pasa como argumento y no se lee de
+    una global porque el ámbito cambia en cada petición y el módulo se reutiliza
+    entre ellas — una global sería un ámbito compartido entre conversaciones.
+    """
     if ruta != ruta.strip() or not ruta:
         return _rechazo(ruta, "ruta vacía o con espacios alrededor")
     if ruta.startswith("/") or ":" in ruta or "\\" in ruta:
         return _rechazo(ruta, "debe ser relativa a la raíz del repositorio")
     if ".." in ruta.split("/"):
         return _rechazo(ruta, "no se permite '..' en la ruta")
-    if not ruta.startswith(CARPETAS_ESCRIBIBLES):
-        return _rechazo(ruta, f"solo se puede escribir en {', '.join(CARPETAS_ESCRIBIBLES)}")
+    if not ruta.startswith(tuple(carpetas)):
+        return _rechazo(ruta, f"solo se puede escribir en {', '.join(carpetas)}")
     if not ruta.endswith(EXTENSIONES_ESCRIBIBLES):
         return _rechazo(ruta, f"solo archivos {', '.join(EXTENSIONES_ESCRIBIBLES)}")
     if ruta.rsplit("/", 1)[-1] in ARCHIVOS_PROHIBIDOS:
@@ -381,7 +394,7 @@ def validar_ruta(ruta: str) -> str | None:
     return None
 
 
-def crear_herramientas_de_escritura(registro: dict):
+def crear_herramientas_de_escritura(registro: dict, carpetas: tuple = CARPETAS_ESCRIBIBLES):
     """Se crean por petición para que el tope de escrituras sea por petición.
 
     `registro` lo aporta quien llama y recoge lo que se escribió de verdad, para
@@ -419,7 +432,7 @@ def crear_herramientas_de_escritura(registro: dict):
 
     def _guardar(ruta: str, contenido: str, resumen: str) -> str:
         """El tramo común: valida, escribe al disco y apunta qué quedó."""
-        motivo = validar_ruta(ruta)
+        motivo = validar_ruta(ruta, carpetas)
         if motivo:
             return _falla("No se escribió nada. " + motivo)
         if len(contenido.encode("utf-8")) > MAX_BYTES_ARCHIVO:
@@ -491,7 +504,7 @@ def crear_herramientas_de_escritura(registro: dict):
         agotado = _cobrar_intento()
         if agotado:
             return agotado
-        motivo = validar_ruta(ruta)
+        motivo = validar_ruta(ruta, carpetas)
         if motivo:
             return _falla("No se escribió nada. " + motivo)
         if not buscar:
@@ -644,7 +657,7 @@ DEJAR EL CAMBIO:
     persona se va a enterar en cuanto mire el `git diff`."""
 
 
-def construir_agente(registro: dict):
+def construir_agente(registro: dict, carpetas: tuple = CARPETAS_ESCRIBIBLES):
     """Se construye por invocación, no al importar el módulo: si faltara la API
     key, un fallo en el import deja el servidor muerto y sin diagnóstico."""
     llm = ChatOpenAI(
@@ -654,7 +667,7 @@ def construir_agente(registro: dict):
         temperature=TEMPERATURA_MODELO,
         timeout=TIMEOUT_MODELO,
     )
-    escribir_archivo, editar_bloque = crear_herramientas_de_escritura(registro)
+    escribir_archivo, editar_bloque = crear_herramientas_de_escritura(registro, carpetas)
     return create_react_agent(
         llm,
         tools=[
@@ -681,6 +694,10 @@ class PeticionChat(BaseModel):
     # del prompt del sistema, así que no pueden desactivar las reglas de arriba
     # ni el arnés, que vive en código.
     instrucciones: str | None = Field(default=None, max_length=4000)
+    # Sobre qué landing trabaja este turno. "todas" deja las tres escribibles,
+    # que es como funcionaba antes y sigue siendo el valor por defecto: un
+    # cliente viejo que no mande el campo se comporta igual que siempre.
+    landing: str = Field(default="todas")
 
 
 def limpiar_markdown(texto: str) -> str:
@@ -705,6 +722,22 @@ def parece_html(texto: str) -> bool:
     return "<!doctype" in cabeza or "<html" in cabeza
 
 
+@app.get("/api/landings")
+async def landings_disponibles():
+    """De aquí saca el desplegable sus opciones.
+
+    Existe por lo mismo que /api/imagen/apps: si la lista se escribiera a mano en
+    el JavaScript, el día que se añada una landing no aparecería, y no fallaría
+    nada — simplemente no estaría. El servidor es quien sabe dónde puede escribir.
+    """
+    return {
+        "landings": [
+            {"id": k, "etiqueta": v["etiqueta"], "carpeta": v["carpeta"]}
+            for k, v in LANDINGS.items()
+        ]
+    }
+
+
 @app.get("/api/health")
 async def health():
     """Comprobación de que el servidor local está en pie y sabe dónde mira."""
@@ -714,6 +747,7 @@ async def health():
         "raiz": str(RAIZ),
         "moonshot_configurado": bool(os.getenv("MOONSHOT_API_KEY")),
         "marca_servida": len(_servidos()),
+        "landings": {k: v["etiqueta"] for k, v in LANDINGS.items()},
         "carpetas_escribibles": list(CARPETAS_ESCRIBIBLES),
     }
 
@@ -736,14 +770,34 @@ FRASES_DE_CAMBIO = (
 )
 
 
+# Y las frases con las que NIEGA haberlo dejado. Van aparte y se miran PRIMERO
+# porque contienen a las de arriba: «No toqué ningún archivo» —que es
+# literalmente lo que la regla 12 le manda decir cuando no escribe— contiene
+# «toqué». Sin esta comprobación el arnés saltaba contra una negación, gastaba
+# una vuelta entera del modelo y le enseñaba a la persona un aviso que
+# contradecía la respuesta que tenía justo debajo. Se vio en cuanto el
+# desplegable de landing empezó a hacer que el agente rechazara peticiones.
+FRASES_DE_NEGACION = (
+    "no toqué", "no toque", "no escribí", "no escribi",
+    "no propuse", "no dejé", "no deje", "no he tocado", "no modifiqué",
+)
+
+
 def dice_que_cambio(texto: str) -> bool:
     """¿El agente afirma haber dejado el cambio escrito?
 
     Se mira su TEXTO, no su intención: decir «toqué index.html» es una
     afirmación verificable, y el registro de la herramienta dice si es cierta.
     Describir lo que haría no cuenta y no debe disparar nada: una respuesta que
-    explica una opción es una respuesta legítima."""
+    explica una opción es una respuesta legítima.
+
+    Ante la duda, NO dispara. Equivocarse hacia disparar cuesta una vuelta del
+    modelo y un aviso falso que contradice lo que la persona está leyendo;
+    equivocarse hacia no disparar solo pierde una segunda oportunidad que el
+    aviso de `fallos` sigue cubriendo."""
     bajo = texto.lower()
+    if any(n in bajo for n in FRASES_DE_NEGACION):
+        return False
     return any(f in bajo for f in FRASES_DE_CAMBIO)
 
 
@@ -852,6 +906,32 @@ async def generar_interfaz(peticion: PeticionChat):
             + peticion.instrucciones.strip()
         )
 
+    # El ámbito de esta petición. Se valida contra LANDINGS y no se confía en lo
+    # que llegue: un id desconocido es un error del cliente, no una excusa para
+    # abrir las tres carpetas.
+    if peticion.landing == "todas":
+        carpetas = CARPETAS_ESCRIBIBLES
+    elif peticion.landing in LANDINGS:
+        carpetas = (LANDINGS[peticion.landing]["carpeta"],)
+    else:
+        raise HTTPException(status_code=400, detail=f"landing_desconocida:{peticion.landing}")
+
+    if peticion.landing != "todas":
+        etiqueta = LANDINGS[peticion.landing]["etiqueta"]
+        sistema += (
+            f"\n\nÁMBITO DE ESTA PETICIÓN: solo {etiqueta} ({carpetas[0]}).\n"
+            "La persona lo eligió en el desplegable, así que trabaja únicamente "
+            "ahí. Las otras landings no son escribibles en este turno y la "
+            "herramienta rechazará cualquier ruta fuera de esa carpeta — no es "
+            "algo que puedas sortear, ni hace falta que lo intentes."
+        )
+    else:
+        sistema += (
+            "\n\nÁMBITO DE ESTA PETICIÓN: las tres landings. Si el cambio es "
+            "general —la cabecera, el pie, una regla compartida—, aplícalo en las "
+            "tres y dilo en tu respuesta. Si solo afecta a una, toca solo esa."
+        )
+
     mensajes = [SystemMessage(content=sistema)]
     for m in peticion.historial:
         mensajes.append(
@@ -862,7 +942,7 @@ async def generar_interfaz(peticion: PeticionChat):
     mensajes.append(HumanMessage(content=peticion.mensaje_nuevo))
 
     registro: dict = {}
-    agente = construir_agente(registro)
+    agente = construir_agente(registro, carpetas)
     # Sin presupuesto de TIEMPO: en local no hay reloj externo que corte, así que
     # una petición puede tardar lo que necesite. Pero sí con tope de PASOS, que
     # es otra cosa: acota el bucle, no el trabajo.
