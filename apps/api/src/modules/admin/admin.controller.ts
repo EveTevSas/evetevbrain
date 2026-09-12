@@ -50,7 +50,8 @@ import type {
   Coincidencia,
   EntradaLista,
   Evaluacion,
-  ReglaGuardada
+  ReglaGuardada,
+  ResumenRiesgo
 } from "../riesgo/riesgo.repository";
 import {
   DispersionAdminService,
@@ -746,6 +747,13 @@ export class AdminController {
       tenantId || undefined,
       Number.isFinite(n) && n > 0 ? n : 100
     );
+  }
+
+  /** GET /v1/admin/riesgo/resumen — evaluadas, rechazadas y retenidas hoy (Bogotá) y cuántas esperan revisión. */
+  @Get("riesgo/resumen")
+  async resumenRiesgo(): Promise<ResumenRiesgo> {
+    this.exigir("leer");
+    return this.riesgo.resumen();
   }
 
   /** GET /v1/admin/riesgo/cola — cobros retenidos por riesgo, con su evaluación (CA-10). */

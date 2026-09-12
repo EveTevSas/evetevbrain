@@ -113,7 +113,10 @@ function riesgoCon(
       creadaEn: "",
       actualizadaPor: "seed",
       actualizadaEn: "",
-      disparos30d: 0
+      disparos30d: 0,
+      disparosHoy: 0,
+      retenciones30d: 0,
+      liberadas30d: 0
     });
   }
   if (senales) repo.senalesDe.set(TENANT_A, senales);
@@ -444,7 +447,10 @@ describe("PagosService — riesgo del comercio (riesgo-comercio CA-1 a CA-3)", (
       creadaEn: "",
       actualizadaPor: "s",
       actualizadaEn: "",
-      disparos30d: 0
+      disparos30d: 0,
+      disparosHoy: 0,
+      retenciones30d: 0,
+      liberadas30d: 0
     });
     const spy = vi.spyOn(provider, "crearCobro");
     spy.mockClear();
@@ -477,7 +483,10 @@ describe("PagosService — riesgo del comercio (riesgo-comercio CA-1 a CA-3)", (
       creadaEn: "",
       actualizadaPor: "s",
       actualizadaEn: "",
-      disparos30d: 0
+      disparos30d: 0,
+      disparosHoy: 0,
+      retenciones30d: 0,
+      liberadas30d: 0
     });
     const service = new PagosService(
       provider,
@@ -514,7 +523,10 @@ describe("PagosService — riesgo del comercio (riesgo-comercio CA-1 a CA-3)", (
       creadaEn: "",
       actualizadaPor: "s",
       actualizadaEn: "",
-      disparos30d: 0
+      disparos30d: 0,
+      disparosHoy: 0,
+      retenciones30d: 0,
+      liberadas30d: 0
     });
     riesgoRepo.senalesDe.set(TENANT_A, {
       hoyMinor: 0,

@@ -9,6 +9,7 @@ import type {
   EntradaLista,
   Evaluacion,
   ReglaGuardada,
+  ResumenRiesgo,
   RiesgoRepository
 } from "./riesgo.repository";
 
@@ -31,7 +32,10 @@ function aRegla(f: Fila): ReglaGuardada {
     creadaEn: fecha(f.creada_en),
     actualizadaPor: String(f.actualizada_por),
     actualizadaEn: fecha(f.actualizada_en),
-    disparos30d: Number(f.disparos_30d ?? 0)
+    disparos30d: Number(f.disparos_30d ?? 0),
+    disparosHoy: Number(f.disparos_hoy ?? 0),
+    retenciones30d: Number(f.retenciones_30d ?? 0),
+    liberadas30d: Number(f.liberadas_30d ?? 0)
   };
 }
 
@@ -146,6 +150,18 @@ export class DrizzleRiesgoRepository implements RiesgoRepository {
       senales: aSenales(f.senales),
       creadaEn: fecha(f.creada_en)
     }));
+  }
+
+  async resumenRiesgo(): Promise<ResumenRiesgo> {
+    const f =
+      (await this.db.execute<Fila>(sql`SELECT * FROM evepay.admin_resumen_riesgo()`))[0] ?? {};
+    return {
+      evaluadasHoy: Number(f.evaluadas_hoy ?? 0),
+      rechazadasHoy: Number(f.rechazadas_hoy ?? 0),
+      retenidasHoy: Number(f.retenidas_hoy ?? 0),
+      enCola: Number(f.en_cola ?? 0),
+      shadowHoy: Number(f.shadow_hoy ?? 0)
+    };
   }
 
   async colaRiesgo(): Promise<CasoRiesgo[]> {

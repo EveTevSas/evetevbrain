@@ -18,44 +18,82 @@ const NOMBRES: Record<ReglaRiesgo["tipo"], string> = {
   score_proveedor: "Tarjeta: score del proveedor"
 };
 
-function describir(r: ReglaRiesgo): string {
+const TIPO_CORTO: Record<ReglaRiesgo["tipo"], string> = {
+  limite_transaccion: "umbral",
+  limite_diario: "umbral diario",
+  limite_mensual: "umbral mensual",
+  monto_atipico: "atípico",
+  geo_mismatch: "geo",
+  intentos_tarjeta: "velocity",
+  score_proveedor: "score"
+};
+
+/** La condición como la lee el motor, en una línea: es lo que se compara con el cobro. */
+function condicion(r: ReglaRiesgo): string {
   const p = r.parametros;
   if ("factor" in p)
-    return `más de ${p.factor}× el ticket promedio (mínimo ${p.minimoCobros} cobros)`;
-  if ("limiteMinor" in p) return `más de ${formatoMonto(p.limiteMinor, "COP")}`;
+    return `monto > ${p.factor}× ticket_promedio · mínimo ${p.minimoCobros} cobros`;
+  if ("limiteMinor" in p) {
+    const limite = formatoMonto(p.limiteMinor, "COP");
+    if (r.tipo === "limite_diario") return `acumulado_hoy + monto > ${limite}`;
+    if (r.tipo === "limite_mensual") return `acumulado_mes + monto > ${limite}`;
+    return `monto > ${limite}`;
+  }
   if ("montoMinimoMinor" in p)
-    return `países distintos en cobros desde ${formatoMonto(p.montoMinimoMinor, "COP")} (al aprobar, si el proveedor manda la señal)`;
-  if ("maxIntentos" in p)
-    return `más de ${p.maxIntentos} intentos (al aprobar, si el proveedor lo cuenta)`;
-  return `score del proveedor mayor que ${p.scoreMaximo} (al aprobar, si lo manda)`;
+    return `país_tarjeta ≠ país_ip · monto ≥ ${formatoMonto(p.montoMinimoMinor, "COP")}`;
+  if ("maxIntentos" in p) return `intentos_misma_tarjeta > ${p.maxIntentos}`;
+  return `score_proveedor > ${p.scoreMaximo}`;
 }
 
-/** Selector activa / shadow / inactiva. Shadow: evalúa y anota, no actúa. */
+/** Las tres de tarjeta corren al aprobar (con la señal del proveedor); las demás, antes de crear el cobro. */
+const ES_DE_TARJETA = new Set<ReglaRiesgo["tipo"]>([
+  "geo_mismatch",
+  "intentos_tarjeta",
+  "score_proveedor"
+]);
+
+/** Selector Activa / Shadow / Off. Shadow: evalúa y anota, no actúa. */
 function Modo({ regla, puedeEditar }: { regla: ReglaRiesgo; puedeEditar: boolean }) {
   const router = useRouter();
   const [pendiente, iniciar] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const colores = { activa: "#15803D", shadow: "#1D4ED8", inactiva: "#94A3B8" } as const;
+  const opciones = [
+    ["activa", "Activa", "#15803D"],
+    ["shadow", "Shadow", "#1D4ED8"],
+    ["inactiva", "Off", "#64748B"]
+  ] as const;
 
   return (
     <div
       style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}
     >
       <div
+        role="radiogroup"
+        aria-label={`Modo de ${regla.nombre}`}
         style={{
           display: "inline-flex",
           border: "1px solid #E2E8F0",
-          borderRadius: 8,
-          overflow: "hidden"
+          borderRadius: 9,
+          overflow: "hidden",
+          background: "#fff"
         }}
       >
-        {(["activa", "shadow", "inactiva"] as const).map((m) => {
+        {opciones.map(([m, texto, color]) => {
           const on = regla.modo === m;
           return (
             <button
               key={m}
               type="button"
+              role="radio"
+              aria-checked={on}
               disabled={!puedeEditar || pendiente || on}
+              title={
+                m === "shadow"
+                  ? "Evalúa y anota qué habría hecho, sin actuar"
+                  : m === "activa"
+                    ? "Actúa sobre el cobro"
+                    : "No se evalúa"
+              }
               onClick={() =>
                 iniciar(async () => {
                   const r = await cambiarModoRegla(regla.id, m);
@@ -65,15 +103,16 @@ function Modo({ regla, puedeEditar }: { regla: ReglaRiesgo; puedeEditar: boolean
               }
               style={{
                 border: "none",
-                padding: "0.3rem 0.6rem",
-                fontSize: "0.72rem",
+                padding: "0.4rem 0.8rem",
+                fontSize: "0.76rem",
                 fontWeight: 600,
                 cursor: puedeEditar && !on ? "pointer" : "default",
-                background: on ? colores[m] : "#fff",
-                color: on ? "#fff" : "#64748B"
+                background: on ? color : "transparent",
+                color: on ? "#fff" : puedeEditar ? "#475569" : "#94A3B8",
+                opacity: pendiente ? 0.6 : 1
               }}
             >
-              {m}
+              {texto}
             </button>
           );
         })}
@@ -85,6 +124,18 @@ function Modo({ regla, puedeEditar }: { regla: ReglaRiesgo; puedeEditar: boolean
       )}
     </div>
   );
+}
+
+function etiqueta(bg: string, fg: string): React.CSSProperties {
+  return {
+    background: bg,
+    color: fg,
+    borderRadius: 999,
+    padding: "0.15rem 0.55rem",
+    fontSize: "0.7rem",
+    fontWeight: 700,
+    whiteSpace: "nowrap"
+  };
 }
 
 export function Reglas({
@@ -115,13 +166,6 @@ export function Reglas({
     });
   }
 
-  const celda: React.CSSProperties = {
-    padding: "0.6rem 0.7rem",
-    fontSize: "0.82rem",
-    borderBottom: "1px solid #F1F5F9",
-    verticalAlign: "top"
-  };
-
   return (
     <div>
       <div
@@ -134,7 +178,14 @@ export function Reglas({
           flexWrap: "wrap"
         }}
       >
-        <h2 style={{ margin: 0, fontSize: "0.98rem", color: "#0A2540" }}>Reglas del motor</h2>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "0.7rem", flexWrap: "wrap" }}>
+          <h2 style={{ margin: 0, fontSize: "0.98rem", color: "#0A2540" }}>Reglas del motor</h2>
+          <span style={{ fontSize: "0.76rem", color: "#94A3B8" }}>
+            {reglas.length} reglas · {reglas.filter((r) => r.modo === "activa").length} activas ·{" "}
+            {reglas.filter((r) => r.modo === "shadow").length} shadow ·{" "}
+            {reglas.filter((r) => r.modo === "inactiva").length} off
+          </span>
+        </div>
         {puedeEditar && !nueva && (
           <button
             type="button"
@@ -357,29 +408,104 @@ export function Reglas({
         </form>
       )}
 
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 760 }}>
-          <tbody>
-            {reglas.map((r) => (
-              <tr key={r.id}>
-                <td style={celda}>
-                  <div style={{ fontWeight: 700, color: "#0A2540" }}>{r.nombre}</div>
-                  <div style={{ fontSize: "0.74rem", color: "#64748B" }}>
-                    {NOMBRES[r.tipo]} · {describir(r)} → <strong>{r.accion}</strong>
-                  </div>
-                  <div style={{ fontSize: "0.7rem", color: "#94A3B8" }}>
-                    {r.tenantNombre ? `Solo ${r.tenantNombre}` : "Global"} · prioridad {r.prioridad}{" "}
-                    · disparó {r.disparos30d} vez/veces en 30 días
-                  </div>
-                </td>
-                <td style={{ ...celda, textAlign: "right" }}>
-                  <Modo regla={r} puedeEditar={puedeEditar} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {reglas.length === 0 ? (
+        <p style={{ margin: 0, fontSize: "0.84rem", color: "#64748B" }}>
+          No hay reglas. La primera nace en shadow.
+        </p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
+          {reglas.map((r) => (
+            <article
+              key={r.id}
+              style={{
+                background: "#fff",
+                border: "1px solid #E2E8F0",
+                borderRadius: 14,
+                padding: "1rem 1.1rem",
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1fr) auto",
+                gap: "0.6rem 1rem",
+                alignItems: "start",
+                opacity: r.modo === "inactiva" ? 0.7 : 1
+              }}
+            >
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    flexWrap: "wrap",
+                    marginBottom: "0.5rem"
+                  }}
+                >
+                  <strong style={{ fontSize: "0.95rem", color: "#0A2540" }}>{r.nombre}</strong>
+                  <span style={etiqueta("#FEF3C7", "#92400E")}>{TIPO_CORTO[r.tipo]}</span>
+                  {ES_DE_TARJETA.has(r.tipo) && (
+                    <span style={etiqueta("#EFF6FF", "#1D4ED8")}>
+                      al aprobar · señal del proveedor
+                    </span>
+                  )}
+                  {r.tenantNombre && (
+                    <span style={etiqueta("#F3E8FF", "#4b3075")}>solo {r.tenantNombre}</span>
+                  )}
+                </div>
+                <code
+                  style={{
+                    display: "inline-block",
+                    maxWidth: "100%",
+                    background: "#F8FAFC",
+                    border: "1px solid #E2E8F0",
+                    borderRadius: 8,
+                    padding: "0.4rem 0.7rem",
+                    fontSize: "0.8rem",
+                    color: "#0A2540",
+                    overflowWrap: "anywhere"
+                  }}
+                >
+                  {condicion(r)} → {r.accion}
+                </code>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "1rem",
+                    flexWrap: "wrap",
+                    marginTop: "0.6rem",
+                    fontSize: "0.76rem",
+                    color: "#64748B"
+                  }}
+                >
+                  <span>
+                    acción:{" "}
+                    <span
+                      style={etiqueta(
+                        r.accion === "rechazar" ? "#FEE2E2" : "#FEF3C7",
+                        r.accion === "rechazar" ? "#B91C1C" : "#92400E"
+                      )}
+                    >
+                      {r.accion}
+                    </span>
+                  </span>
+                  <span>
+                    disparos: <strong style={{ color: "#0A2540" }}>{r.disparosHoy}</strong> hoy ·{" "}
+                    {r.disparos30d} en 30 días
+                  </span>
+                  {r.retenciones30d > 0 && (
+                    <span title="Retenciones que causó esta regla y que alguien liberó al revisarlas: la medida real de falsos positivos">
+                      liberadas al revisar:{" "}
+                      <strong style={{ color: r.liberadas30d > 0 ? "#B45309" : "#0A2540" }}>
+                        {r.liberadas30d}/{r.retenciones30d}
+                      </strong>
+                    </span>
+                  )}
+                  <span>prioridad {r.prioridad}</span>
+                </div>
+              </div>
+              <Modo regla={r} puedeEditar={puedeEditar} />
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

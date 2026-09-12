@@ -8,6 +8,7 @@ import {
   type EntradaLista,
   type Evaluacion,
   type ReglaGuardada,
+  type ResumenRiesgo,
   type RiesgoRepository
 } from "../riesgo/riesgo.repository";
 
@@ -34,6 +35,10 @@ export class RiesgoAdminService {
 
   colaRiesgo(): Promise<CasoRiesgo[]> {
     return this.repo.colaRiesgo();
+  }
+
+  resumen(): Promise<ResumenRiesgo> {
+    return this.repo.resumenRiesgo();
   }
 
   listarLista(): Promise<EntradaLista[]> {

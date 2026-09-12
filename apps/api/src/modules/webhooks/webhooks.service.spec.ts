@@ -375,7 +375,10 @@ describe("WebhooksService — riesgo de tarjeta al aprobar (CA-5)", () => {
       creadaEn: "",
       actualizadaPor: "s",
       actualizadaEn: "",
-      disparos30d: 0
+      disparos30d: 0,
+      disparosHoy: 0,
+      retenciones30d: 0,
+      liberadas30d: 0
     });
     const merchantsRepo = new InMemoryMerchantsRepository();
     const service = new WebhooksService(

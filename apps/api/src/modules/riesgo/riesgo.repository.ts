@@ -14,7 +14,20 @@ export type ReglaGuardada = ReglaRiesgo & {
   actualizadaPor: string;
   actualizadaEn: string;
   disparos30d: number;
+  disparosHoy: number;
+  /** Retenciones de riesgo que esta regla causó en 30 días y cuántas se liberaron al revisarlas. */
+  retenciones30d: number;
+  liberadas30d: number;
 };
+
+/** Cifras del día (Bogotá) para la cabecera de Riesgo. */
+export interface ResumenRiesgo {
+  evaluadasHoy: number;
+  rechazadasHoy: number;
+  retenidasHoy: number;
+  enCola: number;
+  shadowHoy: number;
+}
 
 export interface Evaluacion {
   id: string;
@@ -97,6 +110,7 @@ export interface RiesgoRepository {
   guardarRegla(id: string | null, regla: ReglaRiesgo, actor: string): Promise<string>;
   listarEvaluaciones(tenantId?: string, limite?: number): Promise<Evaluacion[]>;
   colaRiesgo(): Promise<CasoRiesgo[]>;
+  resumenRiesgo(): Promise<ResumenRiesgo>;
   listarLista(limite?: number): Promise<EntradaLista[]>;
   agregarALista(
     entrada: Omit<EntradaLista, "id" | "activa" | "agregadaPor" | "agregadaEn">,

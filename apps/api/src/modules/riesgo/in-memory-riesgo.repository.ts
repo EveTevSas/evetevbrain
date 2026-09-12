@@ -7,6 +7,7 @@ import type {
   EntradaLista,
   Evaluacion,
   ReglaGuardada,
+  ResumenRiesgo,
   RiesgoRepository
 } from "./riesgo.repository";
 
@@ -105,7 +106,10 @@ export class InMemoryRiesgoRepository implements RiesgoRepository {
       creadaEn: ahora,
       actualizadaPor: actor,
       actualizadaEn: ahora,
-      disparos30d: 0
+      disparos30d: 0,
+      disparosHoy: 0,
+      retenciones30d: 0,
+      liberadas30d: 0
     };
     this.reglas.push(nueva);
     return nueva.id;
@@ -116,6 +120,18 @@ export class InMemoryRiesgoRepository implements RiesgoRepository {
       .filter((e) => !tenantId || e.tenantId === tenantId)
       .slice(-limite)
       .reverse();
+  }
+
+  async resumenRiesgo(): Promise<ResumenRiesgo> {
+    const hoy = new Date().toISOString().slice(0, 10);
+    const deHoy = this.evaluaciones.filter((e) => e.creadaEn.startsWith(hoy));
+    return {
+      evaluadasHoy: deHoy.length,
+      rechazadasHoy: deHoy.filter((e) => e.decision === "rechazar").length,
+      retenidasHoy: deHoy.filter((e) => e.decision === "retener").length,
+      enCola: (await this.colaRiesgo()).length,
+      shadowHoy: deHoy.filter((e) => e.reglasDisparadas.some((d) => !d.actuo)).length
+    };
   }
 
   async colaRiesgo(): Promise<CasoRiesgo[]> {

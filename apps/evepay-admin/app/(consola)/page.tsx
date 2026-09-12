@@ -1,3 +1,4 @@
+import { Kpi } from "@/components/kpi";
 import { Tarjeta, TituloSeccion } from "@/components/seccion";
 import {
   cuadreCustodia,
@@ -14,39 +15,6 @@ import { CircleAlert, CircleCheck } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-
-function Kpi({ etiqueta, valor, detalle }: { etiqueta: string; valor: string; detalle?: string }) {
-  return (
-    <div
-      style={{
-        background: "#fff",
-        border: "1px solid #E2E8F0",
-        borderRadius: 14,
-        padding: "1rem 1.1rem"
-      }}
-    >
-      <div
-        style={{ fontSize: "0.7rem", fontWeight: 700, color: "#64748B", letterSpacing: "0.04em" }}
-      >
-        {etiqueta.toUpperCase()}
-      </div>
-      <div
-        style={{
-          fontSize: "1.35rem",
-          fontWeight: 700,
-          color: "#0A2540",
-          marginTop: "0.35rem",
-          fontVariantNumeric: "tabular-nums"
-        }}
-      >
-        {valor}
-      </div>
-      {detalle && (
-        <div style={{ fontSize: "0.74rem", color: "#94A3B8", marginTop: "0.2rem" }}>{detalle}</div>
-      )}
-    </div>
-  );
-}
 
 function Alerta({
   href,

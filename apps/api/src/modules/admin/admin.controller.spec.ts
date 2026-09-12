@@ -57,7 +57,14 @@ function controllerConMock(): AdminController {
     guardarRegla: async (...args: unknown[]) => {
       llamadasCustodia.push(["regla", ...args]);
       return { id: "r-1" };
-    }
+    },
+    resumen: async () => ({
+      evaluadasHoy: 4,
+      rechazadasHoy: 1,
+      retenidasHoy: 1,
+      enCola: 0,
+      shadowHoy: 1
+    })
   } as unknown as RiesgoAdminService;
   const reportes = {
     resumen: async () => ({ cobrosHoy: 0 }),
@@ -428,6 +435,25 @@ describe("AdminController — reglas de riesgo (riesgo-comercio CA-8, CA-11)", (
     modo: "shadow",
     prioridad: 10
   };
+
+  it("resumen del día: cualquier rol interno lo lee, un comercio no", async () => {
+    const controller = controllerConMock();
+    const r = await conContexto({ tenantId: "", actor: "ops@evetev.com", role: "ops" }, () =>
+      controller.resumenRiesgo()
+    );
+    expect(r).toEqual({
+      evaluadasHoy: 4,
+      rechazadasHoy: 1,
+      retenidasHoy: 1,
+      enCola: 0,
+      shadowHoy: 1
+    });
+    await expect(
+      conContexto({ tenantId: "t-1", actor: "x", role: "admin_comercio" }, () =>
+        controller.resumenRiesgo()
+      )
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
 
   it("CA-11: ops no crea ni cambia reglas", async () => {
     const controller = controllerConMock();

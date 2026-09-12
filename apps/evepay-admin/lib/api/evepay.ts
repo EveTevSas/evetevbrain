@@ -644,6 +644,10 @@ export interface ReglaRiesgo {
   actualizadaPor: string;
   actualizadaEn: string;
   disparos30d: number;
+  disparosHoy: number;
+  /** Retenciones que causó en 30 días y cuántas se liberaron al revisarlas (≈ falsos positivos). */
+  retenciones30d: number;
+  liberadas30d: number;
 }
 
 export interface ReglaDisparada {
@@ -728,6 +732,18 @@ export function listarEvaluacionesRiesgo(limite = 100): Promise<EvaluacionRiesgo
 }
 export function colaRiesgo(): Promise<CasoRiesgo[]> {
   return apiGet<CasoRiesgo[]>("/admin/riesgo/cola");
+}
+
+/** Cifras del día (Bogotá) para la cabecera de Riesgo. */
+export interface ResumenRiesgo {
+  evaluadasHoy: number;
+  rechazadasHoy: number;
+  retenidasHoy: number;
+  enCola: number;
+  shadowHoy: number;
+}
+export function resumenRiesgo(): Promise<ResumenRiesgo> {
+  return apiGet<ResumenRiesgo>("/admin/riesgo/resumen");
 }
 export function listaRestrictiva(): Promise<EntradaListaRestrictiva[]> {
   return apiGet<EntradaListaRestrictiva[]>("/admin/riesgo/listas");
