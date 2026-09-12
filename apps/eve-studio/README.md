@@ -3,6 +3,12 @@
 Agente que edita las landings de `apps/website` a partir del manual de marca.
 Python + LangGraph, con **Kimi (Moonshot)** como motor.
 
+> [!IMPORTANT]
+> **Proyecto congelado desde el 12 de septiembre de 2026.** Funciona y se puede
+> usar; lo que no se hace es invertir más en él. Antes de añadirle nada, lee
+> [«Por qué está congelado»](#por-qué-está-congelado) — el motivo es de números,
+> no de que esté roto.
+
 **Corre en local y solo en local.** Lee y escribe el repositorio que tienes en el
 disco; deja los archivos tocados en tu árbol de trabajo y para. No despliega, no
 commitea y no abre Pull Requests: eso lo haces tú cuando el cambio te guste.
@@ -247,3 +253,65 @@ en agosto de 2026, así que cualquier imagen que produjera venía rota.
 Es justo el fallo que la duplicación invitaba a cometer, y el motivo por el que
 ahora hay una sola implementación. Si algún día hace falta un REPL, que llame a
 `/api/chat` en vez de reimplementar las herramientas.
+
+## Por qué está congelado
+
+**La decisión, en una línea:** se puede usar para retoques de copy y CSS en las
+tres landings; cualquier otra cosa sale más a cuenta hacerla directamente con un
+agente de propósito general en el editor.
+
+No está congelado por estar roto. Está congelado porque **la cuenta no daba**.
+
+### Los números
+
+Del 17 de agosto al 12 de septiembre de 2026:
+
+|                                                |                                                    |
+| ---------------------------------------------- | -------------------------------------------------- |
+| PR abiertos por el agente                      | **18** — 9 mezclados, 9 descartados                |
+| De los mezclados, publicaciones de imagen      | **4** (el botón, que envuelve `pnpm marca:imagen`) |
+| Cambios de landing reales                      | **5**, ~720 líneas                                 |
+| PR de construcción y arreglo del propio agente | **31**                                             |
+
+Seis PR de mantenimiento por cada cambio útil, y la mitad de lo que produjo se
+tiró sin mezclar. Los dos aciertos grandes —#33 y #39, las landings de EvePay y
+EveConecta enteras— fueron al principio, cuando esas páginas no existían.
+
+### Por qué la cuenta no da
+
+El coste por edición es bajo: Kimi es barato. El problema es **el impuesto de
+mantenimiento**, que se paga en tokens caros y no para, porque la herramienta es
+estrecha: solo `.html` y `.css`, solo tres carpetas, sin poder correr las
+pruebas, comprobar el build ni mirar el resultado en un navegador. Cada hueco
+que se le encuentra pide otro PR, y detrás viene el siguiente.
+
+Súmale que sus fallos son silenciosos y caros de encontrar. `temperature=0.2`
+—que kimi-k3 rechaza con un 400— lo dejó sin atender una sola petición durante
+días, y el error ni se veía porque una llamada síncrona dentro de un `async def`
+bloqueaba el bucle de eventos. Ver [#184](https://github.com/EveTevSas/evetevbrain/pull/184).
+
+Y el argumento que decide: **el único usuario tiene ya un agente mejor a mano.**
+Mientras eso siga siendo verdad, esto es una versión más débil de algo que ya
+existe.
+
+### Qué haría falta para descongelarlo
+
+Una de estas dos, no una corazonada:
+
+1. **Que lo use alguien sin terminal** — diseño, marketing, alguien que no va a
+   abrir un editor con un agente dentro. Ese es el caso que justifica una
+   interfaz web propia, y es el que nunca llegó a darse.
+2. **Que el volumen de retoques de landing crezca de verdad.** El coste por
+   edición sí es menor; solo hace falta que haya suficientes ediciones para
+   amortizar el mantenimiento. Cinco en dos meses no bastan.
+
+### Qué NO se toca
+
+Lo que se congela es **este agente**, no lo que hay debajo:
+
+- **`pnpm marca:imagen`** es anterior y sigue siendo la vía para publicar una
+  imagen de marca. La pestaña «Imagen» de aquí solo lo invoca.
+- **El arnés y sus 48 pruebas** se quedan: si algún día se descongela, es lo que
+  impide que el agente escriba donde no debe.
+- **El job de CI** sigue corriendo. Cuesta segundos y evita que el módulo se
+  pudra sin que nadie se entere.
