@@ -175,6 +175,64 @@ nav {
   height: 19px;
   flex: none;
 }
+/* Menú ancho de Soluciones: dos columnas, tarjeta destacada + lista con
+   descripción. Se ancla al botón, no al ancho de la ventana, para que en
+   escritorio caiga bajo "Soluciones" y no ocupe todo el nav. */
+.drop-panel.mega {
+  display: none;
+  grid-template-columns: 240px 1fr;
+  gap: 18px;
+  width: 620px;
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(10, 37, 64, 0.1);
+}
+.drop.open .drop-panel.mega {
+  display: grid;
+}
+.drop-panel.mega a {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+}
+.drop-panel.mega a b {
+  font-weight: 600;
+  color: var(--eve-azul-noche);
+  font-size: 0.9rem;
+}
+.drop-panel.mega a span {
+  color: var(--eve-pizarra);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.mega-destacado {
+  background: var(--eve-tinte);
+  border-radius: 10px;
+}
+.mega-destacado img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: block;
+}
+.mega-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mega-titulo {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--eve-muted);
+  padding: 4px 12px 6px;
+}
 
 /* BOTONES (§6) — jerarquía: coral (1 por vista) → mezclado → ghost → enlace */
 .btn {
@@ -1212,6 +1270,17 @@ footer {
     background: var(--eve-tinte);
     border-radius: 0;
     padding: 4px 12px;
+  }
+  /* En móvil el menú ancho se vuelve lista: sin tarjeta destacada ni título. */
+  .drop.open .drop-panel.mega {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    gap: 0;
+  }
+  .drop-panel.mega .mega-destacado,
+  .drop-panel.mega .mega-titulo {
+    display: none;
   }
   .checks {
     grid-template-columns: 1fr;

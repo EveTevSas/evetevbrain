@@ -142,42 +142,32 @@
         <div class="menu" id="menu">
           <div class="drop" id="drop1">
             <button aria-haspopup="true" aria-expanded="false">
-              Productos <span style="font-size: 9px" aria-hidden="true">▾</span>
+              Soluciones <span style="font-size: 9px" aria-hidden="true">▾</span>
             </button>
-            <div class="drop-panel">
-              <a href="/evepay"
-                ><span
-                  class="p-ico sm"
-                  style="
-                    --p: var(--eve-electrico);
-                    --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
-                  "
-                  aria-hidden="true"
-                ></span>
-                EvePay</a
-              >
-              <a href="/conecta"
-                ><span
-                  class="p-ico sm"
-                  style="
-                    --p: var(--eve-mezclado);
-                    --u: url(&quot;/marca/unidad-derecha-negro.svg&quot;);
-                  "
-                  aria-hidden="true"
-                ></span>
-                EveConecta</a
-              >
-              <a href="/intelligence"
-                ><span
-                  class="p-ico sm"
-                  style="
-                    --p: var(--eve-violeta);
-                    --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
-                  "
-                  aria-hidden="true"
-                ></span>
-                Eve Intelligence</a
-              >
+            <!-- Menú ancho (sep-2026): tarjeta destacada a la izquierda y las tres
+             soluciones con una línea de qué hacen. Sin iconos: el nombre y la
+             descripción bastan. La ilustración es activo de marca (T1). -->
+            <div class="drop-panel mega">
+              <a class="mega-destacado" href="#servicios">
+                <img src="/marca/pasarela-de-pago.webp" alt="" loading="lazy" />
+                <b>Tres soluciones, una infraestructura</b>
+                <span>Pagos, recaudo e inteligencia sobre tus documentos.</span>
+              </a>
+              <div class="mega-lista">
+                <span class="mega-titulo">Soluciones</span>
+                <a href="/evepay">
+                  <b>EvePay</b>
+                  <span>Pasarela de pagos para cobrar en línea</span>
+                </a>
+                <a href="/conecta">
+                  <b>EveConecta</b>
+                  <span>Gestión y recaudo para conjuntos residenciales</span>
+                </a>
+                <a href="/intelligence">
+                  <b>Eve Intelligence</b>
+                  <span>Asistentes que responden con tus documentos</span>
+                </a>
+              </div>
             </div>
           </div>
           <a href="#desarrolladores">Desarrolladores</a>
@@ -795,7 +785,7 @@
             </p>
           </div>
           <div class="foot-col">
-            <h4>Productos</h4>
+            <h4>Soluciones</h4>
             <a href="/evepay">EvePay</a>
             <a href="/conecta">EveConecta</a>
             <a href="/intelligence">Eve Intelligence</a>
