@@ -707,6 +707,15 @@
           Proyecto
           <select id="proyectos" title="Cada proyecto guarda su propia conversación"></select>
         </label>
+        <label class="proy">
+          Landing
+          <select
+            id="landing"
+            title="Sobre qué landing puede escribir. No es una sugerencia: fuera de lo elegido, la herramienta rechaza la escritura"
+          >
+            <option value="todas">Todas</option>
+          </select>
+        </label>
         <button class="btn btn-ghost" id="btnNuevo" title="Crea un proyecto con su propia memoria">
           Nuevo
         </button>
@@ -1027,6 +1036,7 @@
       }
 
       function pintarConversacion() {
+        pintarLanding();
         $("#mensajes").innerHTML = "";
         const p = proyecto();
         if (!p.completo.length) {
@@ -1039,6 +1049,52 @@
         }
         $("#mensajes").scrollTop = $("#mensajes").scrollHeight;
       }
+
+      /* ── Landing: sobre cuál puede escribir ─────────────────────────────────
+         Las opciones las da el servidor (/api/landings) y no una lista escrita
+         aquí: el día que se añada una landing aparece sola. Y la elección se
+         guarda en el proyecto, igual que las instrucciones, porque una
+         conversación sobre EvePay sigue siéndolo al recargar. */
+      let landingsCargadas = false;
+
+      async function cargarLandings() {
+        try {
+          const r = await fetch("/api/landings");
+          if (!r.ok) return;
+          const { landings } = await r.json();
+          const sel = $("#landing");
+          for (const l of landings) {
+            const o = document.createElement("option");
+            o.value = l.id;
+            o.textContent = l.etiqueta;
+            o.title = l.carpeta;
+            sel.appendChild(o);
+          }
+          landingsCargadas = true;
+        } catch {
+          /* sin respuesta: se queda «Todas», que es el comportamiento de siempre */
+        }
+        pintarLanding();
+      }
+
+      function pintarLanding() {
+        const sel = $("#landing");
+        const v = proyecto().landing || "todas";
+        // El descarte de una landing desconocida SOLO puede hacerse una vez que
+        // las opciones llegaron del servidor. Sin esta guarda, la primera
+        // pintada —que ocurre antes del fetch, cuando el desplegable solo tiene
+        // «Todas»— borraría la landing que el proyecto tenía guardada.
+        if (landingsCargadas && ![...sel.options].some((o) => o.value === v)) {
+          proyecto().landing = "todas";
+          guardar();
+        }
+        sel.value = proyecto().landing || "todas";
+      }
+
+      $("#landing").addEventListener("change", (e) => {
+        proyecto().landing = e.target.value;
+        guardar();
+      });
 
       // ── Utilidades ───────────────────────────────────────────────────────────
       function avisar(texto) {
@@ -1185,7 +1241,8 @@
             body: JSON.stringify({
               historial: proyecto().historial,
               mensaje_nuevo: adjuntarRegistro ? texto + "\n\n" + registroComoTexto() : texto,
-              instrucciones: proyecto().instrucciones || null
+              instrucciones: proyecto().instrucciones || null,
+              landing: proyecto().landing || "todas"
             })
           });
           let cuerpo = {};
@@ -1546,6 +1603,7 @@
       // ── Arranque ─────────────────────────────────────────────────────────────
       pintarSelector();
       pintarConversacion();
+      cargarLandings();
     </script>
   </body>
 </html>
