@@ -103,6 +103,11 @@ embebido** de Akua; EvePay solo maneja tokens e IDs.
 
 ---
 
+> **Estado al 11-sep-2026:** Fases 0–11 implementadas en código (la 8 solo en
+> su parte de solidez; lo externo —despliegue, Supabase alojado, ComboPay—
+> sigue pendiente). El detalle de cada sesión está en
+> [`BITACORA_EVEPAY.md`](BITACORA_EVEPAY.md).
+
 ## 1. Metodología (cómo se construye cada pieza)
 
 Seguimos el loop de SDD (§9): **Constitución → Especificar → Clarificar → Plan →
