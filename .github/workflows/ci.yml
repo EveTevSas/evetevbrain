@@ -22,6 +22,7 @@ jobs:
       eveconecta: ${{ steps.areas.outputs.eveconecta }}
       eveledger: ${{ steps.areas.outputs.eveledger }}
       evepayadmin: ${{ steps.areas.outputs.evepayadmin }}
+      hub: ${{ steps.areas.outputs.hub }}
       evestudio: ${{ steps.areas.outputs.evestudio }}
       landings: ${{ steps.areas.outputs.landings }}
     steps:
@@ -269,6 +270,46 @@ jobs:
 
       - name: Build
         run: pnpm --filter @evetev/evepay-admin build
+
+  # ── Hub de Evetev: torre de control de la compañía ─────────────────────────
+  # Comparte identidad con la consola y lee EvePay por HTTP; su base es el
+  # schema `hub` con el rol hub_app. Consume packages/shared (Cuenta canónica).
+  hub:
+    name: Hub de Evetev
+    runs-on: ubuntu-latest
+    needs: [cambios, shared]
+    if: ${{ !failure() && !cancelled() && needs.cambios.outputs.hub == 'true' }}
+    env:
+      # NEXT_PUBLIC_* se hornean en build time; placeholders válidos para CI.
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      HUB_DATABASE_URL: postgresql://hub_app:x@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build shared
+        run: pnpm --filter @evetev/shared build
+
+      - name: Lint
+        run: pnpm --filter @evetev/hub lint
+
+      - name: Typecheck
+        run: pnpm --filter @evetev/hub typecheck
+
+      - name: Test
+        run: pnpm --filter @evetev/hub test
+
+      - name: Build
+        run: pnpm --filter @evetev/hub build
 
   # ── Eve Studio: el arnés de escritura ──────────────────────────────────────
   # La única app en Python del repo, y la única que no se despliega: corre en el
