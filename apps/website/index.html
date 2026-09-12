@@ -142,46 +142,35 @@
         <div class="menu" id="menu">
           <div class="drop" id="drop1">
             <button aria-haspopup="true" aria-expanded="false">
-              Productos <span style="font-size: 9px" aria-hidden="true">▾</span>
+              Soluciones <span style="font-size: 9px" aria-hidden="true">▾</span>
             </button>
-            <div class="drop-panel">
-              <a href="/evepay"
-                ><span
-                  class="p-ico sm"
-                  style="
-                    --p: var(--eve-electrico);
-                    --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
-                  "
-                  aria-hidden="true"
-                ></span>
-                EvePay</a
-              >
-              <a href="/conecta"
-                ><span
-                  class="p-ico sm"
-                  style="
-                    --p: var(--eve-mezclado);
-                    --u: url(&quot;/marca/unidad-derecha-negro.svg&quot;);
-                  "
-                  aria-hidden="true"
-                ></span>
-                EveConecta</a
-              >
-              <a href="/intelligence"
-                ><span
-                  class="p-ico sm"
-                  style="
-                    --p: var(--eve-violeta);
-                    --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
-                  "
-                  aria-hidden="true"
-                ></span>
-                Eve Intelligence</a
-              >
+            <!-- Menú ancho (sep-2026): tarjeta destacada a la izquierda y las tres
+             soluciones con una línea de qué hacen. Sin iconos: el nombre y la
+             descripción bastan. La ilustración es activo de marca (T1). -->
+            <div class="drop-panel mega">
+              <a class="mega-destacado" href="#servicios">
+                <img src="/marca/pasarela-de-pago.webp" alt="" loading="lazy" />
+                <b>Tres soluciones, una infraestructura</b>
+                <span>Pagos, recaudo e inteligencia sobre tus documentos.</span>
+              </a>
+              <div class="mega-lista">
+                <span class="mega-titulo">Soluciones</span>
+                <a href="/evepay">
+                  <b>EvePay</b>
+                  <span>Pasarela de pagos para cobrar en línea</span>
+                </a>
+                <a href="/conecta">
+                  <b>EveConecta</b>
+                  <span>Gestión y recaudo para conjuntos residenciales</span>
+                </a>
+                <a href="/intelligence">
+                  <b>Eve Intelligence</b>
+                  <span>Asistentes que responden con tus documentos</span>
+                </a>
+              </div>
             </div>
           </div>
-          <a href="#desarrolladores">Desarrolladores</a>
-          <a href="nosotros.html">Nosotros</a>
+          <a href="/nosotros">Nosotros</a>
           <a href="#contacto">Contacto</a>
           <button class="link" onclick="mostrarToast('Inicio de sesión: demo visual')">
             Entrar
@@ -259,126 +248,74 @@
 
     <!-- Sin <hr> aquí a propósito: el borde oscuro del video ya separa con fuerza,
      y una línea encima de tanto aire sobraba. -->
-    <section id="servicios" class="wrap" style="padding-top: 76px">
+    <!-- Sección de productos (sep-2026): sin isotipos, sin chips de estado y con
+     un solo enlace por producto. La identidad de cada línea la lleva el número
+     (01/02/03) en su color (§12); el estado real lo cuenta cada landing. -->
+    <section id="servicios" class="wrap productos">
       <div class="sec-h">
-        <h2>¿Qué construye Evetev?</h2>
-        <p>
-          Tres líneas: EvePay, una pasarela de pagos de arquitectura gateway puro; EveConecta,
-          gestión y recaudo para conjuntos residenciales; y Eve Intelligence, asistentes que
-          responden con la documentación de tu empresa. EvePay y EveConecta están en construcción.
-          Esto es lo que hay hoy, sin adornos.
-        </p>
+        <span class="rotulo">Nuestros productos</span>
+        <h2>Pagos, recaudo e inteligencia sobre tus documentos</h2>
+        <p>Tres productos sobre una misma infraestructura, construidos para operar dinero real.</p>
       </div>
 
-      <!-- Cada producto lleva el color de su línea (§12). El ícono NO se redibuja:
-       es la unidad oficial del CDN usada como máscara y teñida con --p (T1). -->
       <div class="prod">
-        <article
-          style="--p: var(--eve-electrico); --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;)"
-        >
-          <span class="p-ico" role="img" aria-label="Ícono de EvePay"></span>
-          <h3>
-            EvePay
-            <span class="chip build"
-              ><svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.4"
-                stroke-linecap="round"
-                aria-hidden="true"
-              >
-                <path d="M12 6v6l4 2"></path>
-                <circle cx="12" cy="12" r="9"></circle></svg
-              >En construcción</span
-            >
-          </h3>
+        <article style="--p: var(--eve-electrico)">
+          <span class="num" aria-hidden="true">01</span>
+          <h3>EvePay</h3>
           <span class="sub">Plataforma de pagos</span>
           <p>
-            Nuestra pasarela de pagos. Arquitectura de gateway puro: el dinero va directo del
-            cliente al banco del comercio, sin pasar por nuestra tesorería.
+            Pasarela de pagos de arquitectura gateway puro: el dinero va del cliente al banco del
+            comercio sin pasar por nuestra tesorería.
           </p>
           <ul>
             <li>Cobros idempotentes: reintentar nunca cobra dos veces.</li>
             <li>Libro de movimientos inmutable, en doble partida.</li>
             <li>Conciliación de lo cobrado contra lo liquidado.</li>
-            <li>Nunca tocamos el número de tarjeta: checkout embebido del proveedor.</li>
           </ul>
-          <div class="enlaces">
-            <a class="link destacado" href="/evepay">Conocer EvePay →</a>
-            <a class="link" href="#desarrolladores">Ver cómo se integra →</a>
-          </div>
+          <a class="link destacado" href="/evepay">Conocer EvePay →</a>
         </article>
 
-        <article
-          style="--p: var(--eve-mezclado); --u: url(&quot;/marca/unidad-derecha-negro.svg&quot;)"
-        >
-          <span class="p-ico" role="img" aria-label="Ícono de EveConecta"></span>
-          <h3>
-            EveConecta
-            <span class="chip build"
-              ><svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.4"
-                stroke-linecap="round"
-                aria-hidden="true"
-              >
-                <path d="M12 6v6l4 2"></path>
-                <circle cx="12" cy="12" r="9"></circle></svg
-              >En construcción</span
-            >
-          </h3>
+        <article style="--p: var(--eve-mezclado)">
+          <span class="num" aria-hidden="true">02</span>
+          <h3>EveConecta</h3>
           <span class="sub">Gestión y recaudo para conjuntos</span>
           <p>
             Administración y recaudo para propiedad horizontal. Es además nuestro primer cliente: la
-            prueba, cobrando dinero real, de que EvePay funciona.
+            prueba, con dinero real, de que EvePay funciona.
           </p>
           <ul>
             <li>Cuotas por coeficiente, estado de cuenta y paz y salvo.</li>
-            <li>Pago en línea del residente y panel de cartera del administrador.</li>
-            <li>Recordatorios con tope de frecuencia y horario respetuoso.</li>
+            <li>Pago en línea del residente y cartera del administrador.</li>
             <li>Cada movimiento queda auditado: quién, cuándo y por qué.</li>
           </ul>
-          <div class="enlaces">
-            <a class="link destacado" href="/conecta">Conocer EveConecta →</a>
-            <a class="link" href="#contacto">Hablar de un piloto →</a>
-          </div>
+          <a class="link destacado" href="/conecta">Conocer EveConecta →</a>
         </article>
 
-        <!-- Eve Intelligence vuelve a la vitrina. Se había retirado en #78 porque
-         no había producto que enseñar; ahora lo hay, y responde en la esquina
-         de esta misma página. El violeta identifica la línea (C3): va en el
-         icono, nunca en un botón. -->
-        <article
-          style="
-            --p: var(--eve-violeta);
-            --p-texto: var(--eve-violeta-texto);
-            --u: url(&quot;/marca/unidad-izquierda-negro.svg&quot;);
-          "
-        >
-          <span class="p-ico" role="img" aria-label="Ícono de Eve Intelligence"></span>
+        <!-- El violeta identifica la línea (C3): va en el número y el rótulo,
+         nunca en un botón. --p-texto da el tono que sí contrasta sobre blanco. -->
+        <article style="--p: var(--eve-violeta); --p-texto: var(--eve-violeta-texto)">
+          <span class="num" aria-hidden="true">03</span>
           <h3>Eve Intelligence</h3>
           <span class="sub">Asistentes con tus documentos</span>
           <p>
-            Le montamos a tu empresa un asistente que responde con tu propia documentación y solo
-            con ella. El de la esquina de esta página es exactamente eso.
+            Un asistente para tu empresa que responde con tu propia documentación y solo con ella.
+            El de la esquina de esta página es exactamente eso.
           </p>
           <ul>
             <li>Cita de qué documento salió cada respuesta.</li>
             <li>Cuando no lo sabe, lo dice y pasa a una persona.</li>
-            <li>Te entregamos el informe de que no inventa, sobre tus preguntas.</li>
-            <li>Tu base documental es tuya, escrita y con manual para mantenerla.</li>
+            <li>Tu base documental es tuya, escrita y con manual.</li>
           </ul>
-          <div class="enlaces">
-            <a class="link destacado" href="/intelligence">Conocer Eve Intelligence →</a>
-            <a class="link" href="#contacto">Hablar de un caso →</a>
-          </div>
+          <a class="link destacado" href="/intelligence">Conocer Eve Intelligence →</a>
         </article>
       </div>
     </section>
 
+    <!-- «¿PARA QUIÉN ES EVETEV?» OCULTA POR AHORA (sep-2026): la portada ya
+     cuenta las tres soluciones y "En la práctica"; esta sección repetía el
+     discurso de EvePay con pestañas. Para reactivarla: descomentar este bloque
+     y restaurar el enlace "Desarrolladores" del nav (portada y Nosotros) y
+     "Documentación API" del pie. El JS de las pestañas sigue en la página.
     <section id="desarrolladores" class="wrap">
       <div class="sec-h">
         <h2>¿Para quién es Evetev?</h2>
@@ -439,105 +376,110 @@
         </p>
       </div>
     </section>
+    -->
 
-    <section class="wrap" id="soluciones" style="padding-top: 84px; padding-bottom: 92px">
-      <div class="sec-h">
-        <h2>¿Cómo se ve en la práctica?</h2>
-        <p>
-          Todavía no tenemos casos de clientes que mostrar: estamos en fundación. Esto es lo que la
-          ingeniería ya resuelve.
-        </p>
+    <!-- En la práctica (sep-2026): dos escenas con datos de ejemplo, no casos de
+     clientes. Arriba EveConecta: video de marca de una residente reservando el
+     salón social, con la conversación encima. Abajo EvePay: tres tarjetas
+     oscuras con la interfaz en miniatura (cobro, conciliación, libro mayor),
+     hechas en HTML, no en SVG a mano. Los montos y nombres son ficticios. -->
+    <section class="practica" id="soluciones">
+      <div class="wrap">
+        <div class="sec-h">
+          <span class="rotulo">En la práctica</span>
+          <h2>¿Cómo se ve en la práctica?</h2>
+          <p>
+            Un recorrido de cada solución con datos de ejemplo: lo que la ingeniería ya resuelve,
+            sin adornos.
+          </p>
+        </div>
+
+        <article class="escena" aria-label="EveConecta: reserva del salón social">
+          <video
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            poster="/files/conectahome-poster.jpg"
+            aria-hidden="true"
+          >
+            <source src="/files/conectahome.mp4" type="video/mp4" />
+          </video>
+          <div class="escena-cab">
+            <span class="escena-tag">EveConecta</span>
+            <b>Reserva del salón social</b>
+            <a class="link" href="/conecta">Conocer EveConecta ↗</a>
+          </div>
+          <ol class="chat" aria-label="Conversación de ejemplo">
+            <li class="de-residente">Hola, quiero reservar el salón social para el sábado 20.</li>
+            <li class="de-eve">
+              Claro. El sábado 20 está libre de 3:00 a 9:00 p.&nbsp;m. ¿Qué horario te sirve?
+            </li>
+            <li class="de-residente">De 4 a 8, por favor.</li>
+            <li class="de-eve">
+              Listo. La reserva lleva un depósito de $150.000, reembolsable. Puedes pagarlo en línea
+              desde aquí.
+            </li>
+            <li class="de-residente">Pagado ✓</li>
+            <li class="de-eve">
+              Recibido. Reserva confirmada: salón social, sábado 20, 4 a 8 p.&nbsp;m. Ya te llegó el
+              comprobante.
+            </li>
+          </ol>
+        </article>
       </div>
-      <div class="icards">
-        <article class="icard">
-          <svg
-            class="cover"
-            viewBox="0 0 400 220"
-            role="img"
-            aria-label="Ilustración del checkout de EvePay"
-          >
-            <defs>
-              <linearGradient id="cv1" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#0A2540"></stop>
-                <stop offset="1" stop-color="#1E6FEB"></stop>
-              </linearGradient>
-            </defs>
-            <rect width="400" height="220" fill="url(#cv1)"></rect>
-            <rect x="52" y="34" width="150" height="152" rx="14" fill="#FFFFFF"></rect>
-            <rect x="68" y="52" width="70" height="8" rx="4" fill="#CBD5E1"></rect>
-            <rect x="68" y="70" width="118" height="14" rx="4" fill="#0A2540"></rect>
-            <rect x="68" y="98" width="118" height="22" rx="6" fill="#EAF2FB"></rect>
-            <rect x="68" y="128" width="118" height="22" rx="6" fill="#EAF2FB"></rect>
-            <rect x="68" y="158" width="118" height="18" rx="9" fill="#144A96"></rect>
-            <rect x="103" y="164" width="48" height="6" rx="3" fill="#FFFFFF"></rect>
-            <circle cx="290" cy="165" r="26" fill="#22D3EE"></circle>
-            <path
-              d="M279 165 l8 8 l15 -16"
-              stroke="#0A2540"
-              stroke-width="5"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-          </svg>
-          <div class="cuerpo">
-            <h3>Un cobro que no se cobra dos veces</h3>
+
+      <!-- Bloque de EvePay (sep-2026): banda oscura a todo el ancho con las
+       cuatro garantías de la plataforma en columnas numeradas. Sustituyó a
+       tres tarjetas con la interfaz en miniatura; el fondo es gradiente y
+       retícula, sin video, para no repetir el de la banda de arriba. -->
+      <div class="banda-evepay">
+        <div class="wrap">
+          <div class="banda-evepay-cab">
+            <span class="rotulo">EvePay · Plataforma de pagos</span>
+            <h3>Cobros que cuadran, de punta a punta</h3>
             <p>
-              Cada cobro lleva clave de idempotencia y una máquina de estados explícita. El
-              reintento devuelve el cobro que ya existía.
+              Del cobro al libro mayor, sin huecos. Lo que la plataforma ya resuelve para un
+              comercio que cobra en línea.
             </p>
-            <a class="link" href="#desarrolladores">Ver la integración →</a>
+            <a class="link" href="/evepay">Conocer EvePay ↗</a>
           </div>
-        </article>
-        <article class="icard">
-          <svg
-            class="cover"
-            viewBox="0 0 400 220"
-            role="img"
-            aria-label="Ilustración de una compra con descuento"
-          >
-            <defs>
-              <linearGradient id="cv3" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#0E7490"></stop>
-                <stop offset="1" stop-color="#22D3EE"></stop>
-              </linearGradient>
-            </defs>
-            <rect width="400" height="220" fill="url(#cv3)"></rect>
-            <path
-              d="M120 88 L280 88 L262 178 Q260 190 248 190 L152 190 Q140 190 138 178 Z"
-              fill="#FFFFFF"
-            ></path>
-            <path
-              d="M160 88 Q160 54 200 54 Q240 54 240 88"
-              stroke="#0A2540"
-              stroke-width="9"
-              fill="none"
-              stroke-linecap="round"
-            ></path>
-            <rect x="150" y="112" width="100" height="9" rx="4.5" fill="#CBD5E1"></rect>
-            <rect x="150" y="132" width="72" height="9" rx="4.5" fill="#EAF2FB"></rect>
-            <circle cx="258" cy="72" r="24" fill="#144A96"></circle>
-            <text
-              x="258"
-              y="78"
-              text-anchor="middle"
-              font-family="Arial"
-              font-weight="bold"
-              font-size="15"
-              fill="#FFFFFF"
-            >
-              -20%
-            </text>
-          </svg>
-          <div class="cuerpo">
-            <h3>La plata cuadra o se nota</h3>
-            <p>
-              Un libro de movimientos inmutable en doble partida, y una conciliación que cruza lo
-              cobrado contra lo liquidado y reporta cada diferencia.
-            </p>
-            <a class="link" href="#contacto">Conversemos →</a>
-          </div>
-        </article>
+          <ol class="garantias">
+            <li>
+              <span class="num" aria-hidden="true">01</span>
+              <h4>Idempotente</h4>
+              <p>
+                Cada cobro lleva su clave. Reintentar devuelve el cobro que ya existía, nunca uno
+                nuevo.
+              </p>
+            </li>
+            <li>
+              <span class="num" aria-hidden="true">02</span>
+              <h4>Conciliado</h4>
+              <p>
+                Cruzamos lo cobrado contra lo que el banco liquidó y reportamos cada diferencia con
+                su cobro.
+              </p>
+            </li>
+            <li>
+              <span class="num" aria-hidden="true">03</span>
+              <h4>Doble partida</h4>
+              <p>
+                Un libro inmutable donde cada peso tiene origen y destino. El cierre se comprueba,
+                no se confía.
+              </p>
+            </li>
+            <li>
+              <span class="num" aria-hidden="true">04</span>
+              <h4>Sin tocar la tarjeta</h4>
+              <p>
+                Checkout embebido del proveedor: el número de tarjeta nunca pasa por nuestros
+                servidores.
+              </p>
+            </li>
+          </ol>
+        </div>
       </div>
     </section>
 
@@ -836,7 +778,7 @@
             justo.
           </p>
         </div>
-        <a class="btn btn-sec" href="nosotros.html">Sobre Nosotros</a>
+        <a class="btn btn-sec" href="/nosotros">Sobre Nosotros</a>
       </div>
     </section>
 
@@ -852,22 +794,22 @@
             </p>
           </div>
           <div class="foot-col">
-            <h4>Productos</h4>
+            <h4>Soluciones</h4>
             <a href="/evepay">EvePay</a>
             <a href="/conecta">EveConecta</a>
             <a href="/intelligence">Eve Intelligence</a>
           </div>
           <div class="foot-col">
             <h4>Empresa</h4>
-            <a href="nosotros.html">Nosotros</a>
-            <!-- <a href="nosotros.html#equipo">Equipo</a> -->
+            <a href="/nosotros">Nosotros</a>
+            <!-- <a href="/nosotros#equipo">Equipo</a> -->
             <!-- oculto con la sección «El equipo» de nosotros.html (19-ago-2026) -->
             <a href="#contacto">Contacto</a>
-            <a href="nosotros.html#trabaja">Trabaja con nosotros</a>
+            <a href="/nosotros#trabaja">Trabaja con nosotros</a>
           </div>
           <div class="foot-col">
             <h4>Recursos</h4>
-            <a href="#desarrolladores">Documentación API</a>
+            <!-- <a href="#desarrolladores">Documentación API</a> oculto con la sección (sep-2026) -->
             <a href="#faq">Preguntas frecuentes</a>
             <a href="mailto:contacto@evetev.com">contacto@evetev.com</a>
           </div>
@@ -977,6 +919,21 @@
       menu
         .querySelectorAll("a")
         .forEach((a) => a.addEventListener("click", () => menu.classList.remove("open")));
+
+      // La conversación de la escena entra cuando se ve, no al cargar la página.
+      const escena = document.querySelector(".escena");
+      if (escena && "IntersectionObserver" in window) {
+        escena.classList.add("espera");
+        new IntersectionObserver(
+          (entradas, obs) => {
+            if (entradas.some((e) => e.isIntersecting)) {
+              escena.classList.replace("espera", "visto");
+              obs.disconnect();
+            }
+          },
+          { threshold: 0.35 }
+        ).observe(escena);
+      }
 
       const drop = document.getElementById("drop1");
       const dropBtn = drop.querySelector("button");

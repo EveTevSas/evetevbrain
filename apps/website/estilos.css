@@ -175,6 +175,64 @@ nav {
   height: 19px;
   flex: none;
 }
+/* Menú ancho de Soluciones: dos columnas, tarjeta destacada + lista con
+   descripción. Se ancla al botón, no al ancho de la ventana, para que en
+   escritorio caiga bajo "Soluciones" y no ocupe todo el nav. */
+.drop-panel.mega {
+  display: none;
+  grid-template-columns: 240px 1fr;
+  gap: 18px;
+  width: 620px;
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(10, 37, 64, 0.1);
+}
+.drop.open .drop-panel.mega {
+  display: grid;
+}
+.drop-panel.mega a {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+}
+.drop-panel.mega a b {
+  font-weight: 600;
+  color: var(--eve-azul-noche);
+  font-size: 0.9rem;
+}
+.drop-panel.mega a span {
+  color: var(--eve-pizarra);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.mega-destacado {
+  background: var(--eve-tinte);
+  border-radius: 10px;
+}
+.mega-destacado img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: block;
+}
+.mega-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mega-titulo {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--eve-muted);
+  padding: 4px 12px 6px;
+}
 
 /* BOTONES (§6) — jerarquía: coral (1 por vista) → mezclado → ghost → enlace */
 .btn {
@@ -374,49 +432,85 @@ nav {
   height: 19px;
   flex: none;
 }
-/* Sin retícula de líneas: separa el aire, no los bordes. Es lo que pide el
-   manual —"la jerarquía se logra con espacio", nunca con adornos— y evita que
-   esta sección contradiga la amplitud del hero que tiene justo encima. */
-/* Tres productos desde ago-2026: la rejilla se adapta en vez de fijar dos
-   columnas, así el tercero no queda solo en una fila. El gap baja un poco
-   porque con tres columnas el aire de antes dejaba las tarjetas muy estrechas. */
+/* Productos (sep-2026): columnas numeradas separadas por líneas finas, sin
+   iconos ni chips. La cabecera va alineada a la izquierda con rótulo pequeño,
+   titular grande y una línea de apoyo; es la estructura, no la decoración, la
+   que ordena la sección. */
+.productos {
+  padding-top: 76px;
+}
+.productos .sec-h {
+  margin-bottom: 44px;
+  max-width: 640px;
+}
+.productos .sec-h h2 {
+  font-size: clamp(1.7rem, 3.6vw, 2.5rem);
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+.productos .sec-h p {
+  font-size: 0.95rem;
+}
+.rotulo {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--eve-electrico);
+  margin-bottom: 10px;
+}
 .prod {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: clamp(30px, 4.5vw, 56px);
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--eve-linea);
 }
 .prod > article {
-  padding: 0;
+  padding: 28px clamp(20px, 3vw, 36px) 8px;
+  border-left: 1px solid var(--eve-linea);
+  display: flex;
+  flex-direction: column;
+}
+.prod > article:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.prod > article:last-child {
+  padding-right: 0;
+}
+.prod .num {
+  font-family: "Baloo 2", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--p-texto, var(--p));
+  margin-bottom: 18px;
 }
 .prod h3 {
-  font-size: 1.12rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  margin: 16px 0 6px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  margin: 0 0 4px;
 }
 /* El rótulo hereda el color de la línea, pero admite un tono aparte para
    texto: el violeta base sobre blanco no llega al contraste AA (regla C7),
    así que Eve Intelligence pasa su --p-texto. Los demás no declaran nada y
    siguen usando --p, que en azul sí contrasta. */
 .prod .sub {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.4px;
   text-transform: uppercase;
   color: var(--p-texto, var(--p));
+  margin-bottom: 12px;
 }
 .prod p {
   font-size: 0.85rem;
   color: var(--eve-pizarra);
   margin-bottom: 14px;
-  max-width: 44ch;
 }
 .prod ul {
   list-style: none;
-  margin: 0 0 16px;
+  margin: 0 0 22px;
 }
 .prod li {
   font-size: 0.8rem;
@@ -435,21 +529,15 @@ nav {
   flex: none;
   margin-top: 8px;
 }
-/* Dos salidas por card: la landing del producto primero, y debajo la acción
-   que ya estaba y sigue siendo útil (integración o piloto). El destacado toma
-   el color de la línea (--p), no el coral, que está reservado (C2). */
-.prod .enlaces {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  align-items: center;
-}
-.link.destacado {
-  color: var(--p);
+/* Un solo enlace por producto, al pie de la columna. Toma el color de la
+   línea (--p), no el coral, que está reservado (C2). */
+.prod .link.destacado {
+  margin-top: auto;
+  color: var(--p-texto, var(--p));
   font-weight: 600;
 }
 
-/* Estado del producto: ícono + texto, nunca solo color (C5) */
+/* Estado (nosotros.html): ícono + texto, nunca solo color (C5) */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -467,11 +555,6 @@ nav {
   width: 11px;
   height: 11px;
   flex: none;
-}
-.chip.build {
-  background: #eaf2fb;
-  border-color: #cfe0f5;
-  color: var(--eve-mezclado);
 }
 
 /* OJO con el espaciado vertical de las secciones: `.wrap` es un selector de
@@ -656,42 +739,221 @@ input[type="range"] {
   padding: 3px 0;
 }
 
-/* TARJETAS con ilustración (§6) */
-.icards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
+/* EN LA PRÁCTICA (sep-2026): una escena en video con la conversación encima
+   y tres tarjetas oscuras con la interfaz en miniatura. Todo en HTML/CSS. */
+.practica {
+  padding-top: 84px;
+  padding-bottom: 0;
 }
-.icard {
-  border: 1px solid var(--eve-linea);
-  border-radius: 14px;
+.practica .sec-h {
+  max-width: 640px;
+}
+.escena {
+  position: relative;
+  border-radius: 22px;
   overflow: hidden;
-  background: #fff;
-  transition: 0.2s;
+  aspect-ratio: 16 / 9;
+  min-height: 420px;
+  background: var(--eve-azul-noche);
+  color: #fff;
+  margin-bottom: clamp(64px, 8vw, 96px);
+}
+.escena video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Velo en los bordes donde va texto; el centro del video queda limpio. */
+.escena::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(10, 37, 64, 0.55), transparent 32%),
+    linear-gradient(270deg, rgba(10, 37, 64, 0.45), transparent 55%);
+  pointer-events: none;
+}
+.escena-cab {
+  position: absolute;
+  z-index: 2;
+  top: clamp(18px, 3vw, 30px);
+  left: clamp(18px, 3vw, 30px);
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
-.icard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(10, 37, 64, 0.09);
+.escena-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--eve-cian);
 }
-.icard .cover {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.icard .cuerpo {
-  padding: 18px 22px 22px;
-}
-.icard h3 {
-  font-size: 0.95rem;
+.escena-cab b {
+  font-size: 1.05rem;
   font-weight: 600;
-  margin-bottom: 5px;
 }
-.icard p {
+.escena-cab .link {
+  color: #d6e6f7;
   font-size: 0.82rem;
-  color: var(--eve-pizarra);
+  margin-top: 4px;
+}
+.escena-cab .link:hover {
+  color: #fff;
+}
+.chat {
+  position: absolute;
+  z-index: 2;
+  right: clamp(18px, 3vw, 30px);
+  bottom: clamp(18px, 3vw, 30px);
+  width: min(380px, 48%);
+  list-style: none;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat li {
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.chat .de-residente {
+  align-self: flex-end;
+  background: rgba(10, 37, 64, 0.72);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+  backdrop-filter: blur(6px);
+}
+.chat .de-eve {
+  align-self: flex-start;
+  background: #fff;
+  color: var(--eve-azul-noche);
+  border-bottom-left-radius: 5px;
+}
+/* Los mensajes entran uno tras otro cuando la escena se ve (clase .visto la
+   pone el JS). Sin JS o con movimiento reducido se ven todos de una vez. */
+@media (prefers-reduced-motion: no-preference) {
+  .escena.espera .chat li {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .escena.visto .chat li {
+    animation: chat-entra 0.45s ease-out both;
+  }
+  .escena.visto .chat li:nth-child(2) {
+    animation-delay: 0.9s;
+  }
+  .escena.visto .chat li:nth-child(3) {
+    animation-delay: 1.8s;
+  }
+  .escena.visto .chat li:nth-child(4) {
+    animation-delay: 2.7s;
+  }
+  .escena.visto .chat li:nth-child(5) {
+    animation-delay: 3.6s;
+  }
+  .escena.visto .chat li:nth-child(6) {
+    animation-delay: 4.5s;
+  }
+  @keyframes chat-entra {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* Banda de EvePay: oscura y a todo el ancho, con las garantías en columnas
+   numeradas separadas por líneas finas. La sección padre ya no es .wrap para
+   que la banda pueda salirse del ancho de lectura. */
+.banda-evepay {
+  background:
+    radial-gradient(90% 70% at 85% 20%, rgba(30, 111, 235, 0.32), transparent 60%),
+    linear-gradient(160deg, #0e2f52, var(--eve-azul-noche-profundo));
+  color: #fff;
+  padding: clamp(64px, 8vw, 96px) 0 clamp(56px, 7vw, 84px);
+  position: relative;
+  overflow: hidden;
+}
+.banda-evepay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+.banda-evepay .wrap {
+  position: relative;
+}
+.banda-evepay-cab {
+  max-width: 640px;
+  margin-bottom: clamp(56px, 8vw, 110px);
+}
+.banda-evepay-cab .rotulo {
+  color: var(--eve-cian);
+}
+.banda-evepay-cab h3 {
+  font-family: "Baloo 2", sans-serif;
+  font-size: clamp(1.7rem, 3.6vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.15;
   margin-bottom: 12px;
+}
+.banda-evepay-cab p {
+  font-size: 0.95rem;
+  color: #d6e6f7;
+  margin-bottom: 14px;
+}
+.banda-evepay-cab .link {
+  color: var(--eve-cian);
+  font-weight: 600;
+}
+.garantias {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+.garantias li {
+  padding: 28px clamp(18px, 2.4vw, 30px) 6px;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+}
+.garantias li:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.garantias li:last-child {
+  padding-right: 0;
+}
+.garantias .num {
+  display: block;
+  font-family: "Baloo 2", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--eve-cian);
+  margin-bottom: 22px;
+}
+.garantias h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.garantias p {
+  font-size: 0.85rem;
+  color: #c9d8ea;
 }
 
 /* BANDA portada (§6): object-fit cover + velo + contenido en blanco */
@@ -1188,6 +1450,60 @@ footer {
     border-radius: 0;
     padding: 4px 12px;
   }
+  /* La escena deja de superponer: video arriba y conversación debajo, sobre
+     azul noche. Las tarjetas de interfaz pasan a una columna. */
+  .escena {
+    aspect-ratio: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .escena video {
+    position: static;
+    aspect-ratio: 16 / 9;
+    height: auto;
+  }
+  .escena::after {
+    display: none;
+  }
+  .escena-cab {
+    position: static;
+    padding: 18px 20px 0;
+    order: 2;
+  }
+  .chat {
+    position: static;
+    width: auto;
+    order: 3;
+    padding: 16px 20px 22px;
+  }
+  .garantias {
+    grid-template-columns: 1fr 1fr;
+    border-top: 0;
+  }
+  .garantias li,
+  .garantias li:first-child {
+    padding: 22px 0 18px;
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+  }
+  .garantias li:nth-child(even) {
+    padding-left: 18px;
+  }
+  .garantias li:nth-child(odd) {
+    padding-right: 18px;
+  }
+  /* En móvil el menú ancho se vuelve lista: sin tarjeta destacada ni título. */
+  .drop.open .drop-panel.mega {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    gap: 0;
+  }
+  .drop-panel.mega .mega-destacado,
+  .drop-panel.mega .mega-titulo {
+    display: none;
+  }
   .checks {
     grid-template-columns: 1fr;
   }
@@ -1377,13 +1693,19 @@ footer {
   }
 }
 
-/* Los dos productos a una columna antes de llegar al móvil: son tarjetas con
-   lista de viñetas, y a dos columnas por debajo de ~860px las líneas quedan de
-   tres o cuatro palabras y la sección se vuelve larguísima. */
+/* Los productos a una columna antes de llegar al móvil: a tres columnas por
+   debajo de ~860px las líneas quedan de tres o cuatro palabras. En vertical el
+   separador pasa de línea izquierda a línea superior. */
 @media (max-width: 860px) {
   .prod {
     grid-template-columns: 1fr;
-    gap: clamp(38px, 7vw, 52px);
+    border-top: 0;
+  }
+  .prod > article,
+  .prod > article:first-child {
+    padding: 28px 0 24px;
+    border-left: 0;
+    border-top: 1px solid var(--eve-linea);
   }
 }
 

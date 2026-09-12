@@ -4,7 +4,7 @@
   "private": true,
   "description": "evetev.com — sitio corporativo y las tres landings de producto (/evepay, /conecta, /intelligence). Estático (HTML/CSS), se despliega en Vercel.",
   "scripts": {
-    "dev": "python3 -m http.server 3002",
+    "dev": "python3 dev.py 3002",
     "lint": "echo \"(website) sitio estático, sin lint\" && exit 0",
     "typecheck": "echo \"(website) sitio estático, sin typecheck\" && exit 0",
     "test": "echo \"(website) sitio estático, sin tests\" && exit 0"

@@ -5,9 +5,10 @@ se despliega en **Vercel** (§10).
 
 ```
 index.html        # la portada
-nosotros.html     # Nosotros · Equipo · Trabaja con nosotros
+nosotros.html     # /nosotros · Equipo · Trabaja con nosotros
 estilos.css       # hoja compartida por ambas páginas
 formularios.js    # envío de los dos formularios corporativos
+dev.py            # servidor local con URLs limpias, como Vercel
 api/contacto.js   # función serverless que manda el correo
 files/            # video de fondo e imagen de portada
 
@@ -125,6 +126,14 @@ El sitio sigue `packages/brand/assets/evetev_brand_styles.md` (v1.0):
 
 `files/` solo conserva lo que no es activo de marca: el video
 `evepay-background.mp4` y su poster `portada-red.jpg`.
+
+## URLs limpias
+
+`vercel.json` lleva `cleanUrls: true`: `nosotros.html` se sirve en `/nosotros`
+y cualquier `.html` en la barra redirige a su URL sin extensión. Por eso los
+enlaces internos **nunca** llevan `.html` (`/`, `/nosotros#trabaja`). El
+servidor local imita ese comportamiento; con `python3 -m http.server` a secas
+se verían URLs que en producción no existen.
 
 ## Correr en local
 
