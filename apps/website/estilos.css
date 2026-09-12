@@ -1450,32 +1450,43 @@ footer {
     border-radius: 0;
     padding: 4px 12px;
   }
-  /* La escena deja de superponer: video arriba y conversación debajo, sobre
-     azul noche. Las tarjetas de interfaz pasan a una columna. */
+  /* La escena sigue siendo el video con la conversación encima, pero en
+     vertical: el video rellena la tarjeta (recorta los lados) y el chat se
+     apoya en el borde inferior. El padding superior deja ver el rostro. */
   .escena {
     aspect-ratio: auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
-  }
-  .escena video {
-    position: static;
-    aspect-ratio: 16 / 9;
-    height: auto;
+    justify-content: flex-end;
+    padding: 280px 16px 18px;
+    border-radius: 24px;
   }
   .escena::after {
-    display: none;
+    background:
+      linear-gradient(180deg, rgba(10, 37, 64, 0.55), transparent 30%),
+      linear-gradient(0deg, rgba(10, 37, 64, 0.5), transparent 60%);
+  }
+  /* La residente está a la izquierda del encuadre 16:9; al recortar en
+     vertical se centra sobre ella y no sobre el sofá. */
+  .escena video {
+    object-position: 28% 50%;
   }
   .escena-cab {
-    position: static;
-    padding: 18px 20px 0;
-    order: 2;
+    top: 20px;
+    left: 20px;
   }
   .chat {
-    position: static;
-    width: auto;
-    order: 3;
-    padding: 16px 20px 22px;
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    gap: 8px;
+  }
+  .chat li {
+    max-width: 84%;
+    font-size: 0.86rem;
+    padding: 11px 15px;
   }
   .garantias {
     grid-template-columns: 1fr 1fr;
