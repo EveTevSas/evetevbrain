@@ -378,153 +378,103 @@
      salón social, con la conversación encima. Abajo EvePay: tres tarjetas
      oscuras con la interfaz en miniatura (cobro, conciliación, libro mayor),
      hechas en HTML, no en SVG a mano. Los montos y nombres son ficticios. -->
-    <section class="wrap practica" id="soluciones">
-      <div class="sec-h">
-        <span class="rotulo">En la práctica</span>
-        <h2>¿Cómo se ve en la práctica?</h2>
-        <p>
-          Un recorrido de cada solución con datos de ejemplo: lo que la ingeniería ya resuelve, sin
-          adornos.
-        </p>
-      </div>
-
-      <article class="escena" aria-label="EveConecta: reserva del salón social">
-        <video
-          autoplay
-          muted
-          loop
-          playsinline
-          preload="metadata"
-          poster="/files/conectahome-poster.jpg"
-          aria-hidden="true"
-        >
-          <source src="/files/conectahome.mp4" type="video/mp4" />
-        </video>
-        <div class="escena-cab">
-          <span class="escena-tag">EveConecta</span>
-          <b>Reserva del salón social</b>
-          <a class="link" href="/conecta">Conocer EveConecta ↗</a>
+    <section class="practica" id="soluciones">
+      <div class="wrap">
+        <div class="sec-h">
+          <span class="rotulo">En la práctica</span>
+          <h2>¿Cómo se ve en la práctica?</h2>
+          <p>
+            Un recorrido de cada solución con datos de ejemplo: lo que la ingeniería ya resuelve,
+            sin adornos.
+          </p>
         </div>
-        <ol class="chat" aria-label="Conversación de ejemplo">
-          <li class="de-residente">Hola, quiero reservar el salón social para el sábado 20.</li>
-          <li class="de-eve">
-            Claro. El sábado 20 está libre de 3:00 a 9:00 p.&nbsp;m. ¿Qué horario te sirve?
-          </li>
-          <li class="de-residente">De 4 a 8, por favor.</li>
-          <li class="de-eve">
-            Listo. La reserva lleva un depósito de $150.000, reembolsable. Puedes pagarlo en línea
-            desde aquí.
-          </li>
-          <li class="de-residente">Pagado ✓</li>
-          <li class="de-eve">
-            Recibido. Reserva confirmada: salón social, sábado 20, 4 a 8 p.&nbsp;m. Ya te llegó el
-            comprobante.
-          </li>
-        </ol>
-      </article>
 
-      <!-- Cabecera del bloque de EvePay: sin ella, las tarjetas parecían la
-       continuación del video de EveConecta. -->
-      <div class="bloque-cab">
-        <span class="rotulo">EvePay</span>
-        <h3>Del cobro al libro mayor, sin huecos</h3>
-        <p>Tres pantallas de la plataforma de pagos con datos de ejemplo.</p>
-        <a class="link destacado" href="/evepay">Conocer EvePay ↗</a>
+        <article class="escena" aria-label="EveConecta: reserva del salón social">
+          <video
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            poster="/files/conectahome-poster.jpg"
+            aria-hidden="true"
+          >
+            <source src="/files/conectahome.mp4" type="video/mp4" />
+          </video>
+          <div class="escena-cab">
+            <span class="escena-tag">EveConecta</span>
+            <b>Reserva del salón social</b>
+            <a class="link" href="/conecta">Conocer EveConecta ↗</a>
+          </div>
+          <ol class="chat" aria-label="Conversación de ejemplo">
+            <li class="de-residente">Hola, quiero reservar el salón social para el sábado 20.</li>
+            <li class="de-eve">
+              Claro. El sábado 20 está libre de 3:00 a 9:00 p.&nbsp;m. ¿Qué horario te sirve?
+            </li>
+            <li class="de-residente">De 4 a 8, por favor.</li>
+            <li class="de-eve">
+              Listo. La reserva lleva un depósito de $150.000, reembolsable. Puedes pagarlo en línea
+              desde aquí.
+            </li>
+            <li class="de-residente">Pagado ✓</li>
+            <li class="de-eve">
+              Recibido. Reserva confirmada: salón social, sábado 20, 4 a 8 p.&nbsp;m. Ya te llegó el
+              comprobante.
+            </li>
+          </ol>
+        </article>
       </div>
 
-      <div class="mocks">
-        <article class="mock">
-          <div class="mock-card">
-            <h3>Un cobro</h3>
-            <div class="ui">
-              <div class="ui-fila ui-cab">
-                <span>Cobro <b>ch_8f2a…91</b></span>
-                <span class="ui-chip ok">Aprobado</span>
-              </div>
-              <div class="ui-monto">$186.500 <small>COP</small></div>
-              <ol class="ui-pasos">
-                <li class="hecho">Creado</li>
-                <li class="hecho">Pendiente</li>
-                <li class="hecho">Aprobado</li>
-                <li>Conciliado</li>
-              </ol>
-              <div class="ui-fila ui-pie"><span>Idempotencia</span><b>ord-2048 · 1 intento</b></div>
-            </div>
+      <!-- Bloque de EvePay (sep-2026): banda oscura a todo el ancho con las
+       cuatro garantías de la plataforma en columnas numeradas. Sustituyó a
+       tres tarjetas con la interfaz en miniatura; el fondo es gradiente y
+       retícula, sin video, para no repetir el de la banda de arriba. -->
+      <div class="banda-evepay">
+        <div class="wrap">
+          <div class="banda-evepay-cab">
+            <span class="rotulo">EvePay · Plataforma de pagos</span>
+            <h3>Cobros que cuadran, de punta a punta</h3>
+            <p>
+              Del cobro al libro mayor, sin huecos. Lo que la plataforma ya resuelve para un
+              comercio que cobra en línea.
+            </p>
+            <a class="link" href="/evepay">Conocer EvePay ↗</a>
           </div>
-          <h4>Un cobro que no se cobra dos veces.</h4>
-          <p>
-            Cada cobro lleva clave de idempotencia y una máquina de estados explícita. Reintentar
-            devuelve el cobro que ya existía, nunca uno nuevo.
-          </p>
-        </article>
-
-        <article class="mock">
-          <div class="mock-card">
-            <h3>Conciliación</h3>
-            <div class="ui">
-              <div class="ui-fila ui-cab">
-                <span>Liquidación <b>10 sep</b></span>
-                <span class="ui-chip ok">Cuadra</span>
-              </div>
-              <ul class="ui-lista">
-                <li><span>Cobrado</span><b>$4.212.300</b></li>
-                <li><span>Comisiones</span><b>−$117.944</b></li>
-                <li><span>Liquidado por el banco</span><b>$4.094.356</b></li>
-                <li class="total"><span>Diferencia</span><b>$0</b></li>
-              </ul>
-              <div class="ui-fila ui-pie"><span>38 cobros</span><b>38 cruzados · 0 sin par</b></div>
-            </div>
-          </div>
-          <h4>La plata cuadra o se nota.</h4>
-          <p>
-            Cruzamos lo cobrado contra lo que el banco liquidó y reportamos cada diferencia con su
-            cobro, en vez de un total que “más o menos” da.
-          </p>
-        </article>
-
-        <article class="mock">
-          <div class="mock-card">
-            <h3>Libro mayor</h3>
-            <div class="ui">
-              <div class="ui-fila ui-cab">
-                <span>Asiento <b>#20481</b></span>
-                <span class="ui-chip">Inmutable</span>
-              </div>
-              <table class="ui-tabla">
-                <thead>
-                  <tr>
-                    <th>Cuenta</th>
-                    <th>Débito</th>
-                    <th>Crédito</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Por cobrar · proveedor</td>
-                    <td>$186.500</td>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <td>Ingreso por comisión</td>
-                    <td></td>
-                    <td>$5.222</td>
-                  </tr>
-                  <tr>
-                    <td>Por pagar · comercio</td>
-                    <td></td>
-                    <td>$181.278</td>
-                  </tr>
-                </tbody>
-              </table>
-              <div class="ui-fila ui-pie"><span>Débitos = Créditos</span><b>$186.500 ✓</b></div>
-            </div>
-          </div>
-          <h4>Cada peso tiene origen y destino.</h4>
-          <p>
-            Doble partida sobre un libro que no se edita ni se borra. Cada movimiento dice quién,
-            cuándo y por qué, y el cierre se comprueba, no se confía.
-          </p>
-        </article>
+          <ol class="garantias">
+            <li>
+              <span class="num" aria-hidden="true">01</span>
+              <h4>Idempotente</h4>
+              <p>
+                Cada cobro lleva su clave. Reintentar devuelve el cobro que ya existía, nunca uno
+                nuevo.
+              </p>
+            </li>
+            <li>
+              <span class="num" aria-hidden="true">02</span>
+              <h4>Conciliado</h4>
+              <p>
+                Cruzamos lo cobrado contra lo que el banco liquidó y reportamos cada diferencia con
+                su cobro.
+              </p>
+            </li>
+            <li>
+              <span class="num" aria-hidden="true">03</span>
+              <h4>Doble partida</h4>
+              <p>
+                Un libro inmutable donde cada peso tiene origen y destino. El cierre se comprueba,
+                no se confía.
+              </p>
+            </li>
+            <li>
+              <span class="num" aria-hidden="true">04</span>
+              <h4>Sin tocar la tarjeta</h4>
+              <p>
+                Checkout embebido del proveedor: el número de tarjeta nunca pasa por nuestros
+                servidores.
+              </p>
+            </li>
+          </ol>
+        </div>
       </div>
     </section>
 
