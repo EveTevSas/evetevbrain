@@ -17,7 +17,7 @@ marcar() { echo "$1=$2" >> "$GITHUB_OUTPUT"; echo "  $1=$2"; }
 
 todo() {
   echo "$1 → se ejecuta todo el CI."
-  for a in global shared api eveconecta eveledger evepayadmin evestudio landings; do marcar "$a" true; done
+  for a in global shared api eveconecta eveledger evepayadmin hub evestudio landings; do marcar "$a" true; done
   exit 0
 }
 
@@ -65,6 +65,11 @@ marcar eveledger "$EVELEDGER"
 EVEPAYADMIN=$SHARED
 toca '^apps/evepay-admin/' && EVEPAYADMIN=true
 marcar evepayadmin "$EVEPAYADMIN"
+
+# El Hub consume packages/shared (contrato de la Cuenta canónica).
+HUB=$SHARED
+toca '^apps/hub/' && HUB=true
+marcar hub "$HUB"
 
 # Eve Studio corre solo en local, así que no tiene despliegue que vigilar; lo
 # que sí tiene son las pruebas del arnés de escritura, que es lo único que

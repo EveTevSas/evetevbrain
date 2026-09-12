@@ -12,3 +12,9 @@
 -- conectara como owner, las políticas RLS se ignorarían y el aislamiento entre
 -- comercios dejaría de existir sin que ningún test lo notara.
 create role evepay_api with login password 'postgres' nobypassrls;
+
+-- Rol del Hub de Evetev (apps/hub). Comparte el proyecto Supabase con EvePay
+-- pero solo puede tocar el schema `hub` (spec specs/hub/hub-base, CA-3): la
+-- migración 0024 le da GRANT ahí y a nada más. Misma advertencia: sin
+-- BYPASSRLS, nunca owner.
+create role hub_app with login password 'postgres' nobypassrls;

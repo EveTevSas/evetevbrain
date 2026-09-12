@@ -6,6 +6,47 @@ pendiente. Complementa `PLAN_DESARROLLO_EVEPAY.md` (el plan) y las specs en
 
 ---
 
+## 11-sep-2026 (tarde) — Nace `apps/hub`, la torre de control de la compañía
+
+**Rama:** `feat/hub`, encima de `feat/evepay-comisiones` (el Hub lee
+`/v1/admin/resumen`, que nació allí). **Insumo:** prototipo
+`evetev-hub-prototipo.html` y `ARQUITECTURA_HUB_EVETEV.md` de la fundadora;
+el §8 del documento decía «hoy NO construir el Hub» y ella decidió adelantarlo,
+así que se montó **delgado**.
+
+**Decisiones (confirmadas con la fundadora):**
+
+- **Supabase de EvePay** para identidad (Google), opción (a) del documento:
+  una cuenta por persona; el Hub llama a EvePay con el JWT de quien navega.
+- **Entra cualquier cuenta de Google del dominio `evetev.com`**
+  (`HUB_DOMINIOS_PERMITIDOS`), más quien ya tenga rol interno de EvePay.
+- **Cuenta canónica en el Hub** (`hub.cuentas`, `hub.enlaces_producto`),
+  contrato en `@evetev/shared/cuenta-canonica.ts`. EvePay no la conoce.
+- Datos propios en el schema `hub` con el rol `hub_app`, que **no tiene
+  GRANT** sobre `evepay`/`identity`/`audit` (probado: permission denied). Sin
+  ORM. Migración `0024_hub.sql` en `apps/api/supabase/migrations/` porque es
+  un solo proyecto Supabase y una sola historia de migraciones.
+- Nombres reales del repo en lugar de los del documento: `evepay-admin`,
+  `eveconecta`, `eveledger`; no existe `evepay-sdk`, se usa la API admin.
+
+**Qué quedó:** spec `specs/hub/hub-base` (CA-1…CA-8, todas cubiertas);
+Google en `config.toml` (secretos por `env`, apagado sin ellos; en local se
+entra con correo); `apps/hub` en :3005 con proxy de acceso, login con Google,
+callback OAuth, menú Compañía · Negocio · Interno y las ocho vistas: Global,
+Portales & accesos, Productos, Clientes (unificado), Ingresos & costos, Salud
+financiera, Equipo & metas, Documentos (con auditoría del Hub). Todo lo
+editable va por server actions con Zod + auditoría (CA-7). Lo que no se puede
+calcular con datos reales dice «sin datos» (churn, NRR, CAC…). CI: área y job
+`hub`. Verificado: shared 76 tests, hub 4, lint/typecheck/build en verde; las
+nueve rutas renderizan con una sesión real y el roll-up de EvePay llega.
+
+**Pendiente:** credenciales OAuth de Google (Google Cloud → Supabase),
+proyecto Vercel para `apps/hub`, crear `hub_app` en el Supabase alojado y
+aplicar 0024, registrar costos y cierre del mes reales, MRR de EveConecta y
+EveLedger por API cuando exista.
+
+---
+
 ## 11-sep-2026 — Fases 6 a 11 y rediseño de la consola
 
 **Rama:** `feat/evepay-comisiones` (desde `main`, 20 commits, sin push al
