@@ -21,7 +21,7 @@ const SECCIONES = [
   { href: "/", etiqueta: "Inicio", Icono: LayoutDashboard },
   { href: "/comercios", etiqueta: "Comercios", Icono: Building2 },
   { href: "/proveedores", etiqueta: "Proveedores", Icono: Plug },
-  { href: "/pagos", etiqueta: "Pagos", Icono: ArrowLeftRight },
+  { href: "/pagos", etiqueta: "Transacciones", Icono: ArrowLeftRight },
   { href: "/conciliacion", etiqueta: "Conciliación", Icono: Scale },
   { href: "/dispersion", etiqueta: "Dispersión", Icono: ArrowUpRight },
   { href: "/riesgo", etiqueta: "Riesgo", Icono: ShieldAlert },

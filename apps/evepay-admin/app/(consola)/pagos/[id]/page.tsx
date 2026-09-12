@@ -114,7 +114,7 @@ export default async function DetallePagoPage({ params }: { params: Promise<{ id
   if (error || !pago) {
     return (
       <>
-        <TituloSeccion titulo="Cobro" descripcion="Detalle e historia del cobro." />
+        <TituloSeccion titulo="Transacción" descripcion="Detalle e historia del cobro." />
         <Tarjeta>
           <p style={{ margin: 0, fontSize: "0.87rem", color: "#B91C1C", fontWeight: 600 }}>
             {error}
@@ -145,7 +145,7 @@ export default async function DetallePagoPage({ params }: { params: Promise<{ id
         }}
       >
         <ArrowLeft size={14} />
-        Pagos
+        Transacciones
       </Link>
 
       <TituloSeccion

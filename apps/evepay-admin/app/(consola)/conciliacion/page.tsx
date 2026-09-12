@@ -424,7 +424,7 @@ export default async function ConciliacionPage() {
             &ldquo;saldo&rdquo; guardado que pudiera quedar desactualizado. Las corridas de
             conciliación son inmutables: registran qué se sabía y cuándo. Ver{" "}
             <Link href="/pagos" style={{ color: "#4b3075" }}>
-              los cobros
+              las transacciones
             </Link>{" "}
             para el detalle de cada movimiento.
           </p>

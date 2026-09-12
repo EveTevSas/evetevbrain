@@ -359,7 +359,7 @@ export default async function InicioPage() {
                 {(
                   [
                     ["/comercios", "Comercios"],
-                    ["/pagos", "Pagos"],
+                    ["/pagos", "Transacciones"],
                     ["/conciliacion", "Conciliación"],
                     ["/dispersion", "Dispersión"],
                     ["/riesgo", "Riesgo"],
