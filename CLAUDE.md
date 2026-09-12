@@ -6,17 +6,17 @@ cuando esta guía y la constitución se contradigan, manda la constitución.
 
 ## Qué es cada app (y su estado)
 
-| App                  | Qué es                                                     | Estado                                        | Puerto local |
-| -------------------- | ---------------------------------------------------------- | --------------------------------------------- | ------------ |
-| `apps/api`           | **EvePay** — plataforma de pagos (NestJS). El producto.    | Activa (aún sin desplegar)                    | 3001         |
-| `apps/eveconecta`    | Vertical de propiedad horizontal (Next.js + Supabase)      | **Producción** — conecta.evetev.com           | 3002         |
-| `apps/eveledger`     | Operación de estaciones de servicio (Next.js + Prisma)     | **Producción** — `*.vercel.app` (MVP cliente) | 3007         |
-| `apps/evepay-admin`  | Consola de operación de EvePay (Next.js, rol super_admin)  | Activa (aún sin desplegar)                    | 3004         |
-| `apps/website`       | evetev.com + landings `/evepay` `/conecta` `/intelligence` | **Producción**                                | —            |
-| `apps/rag-assistant` | **Fluxi**, asistente RAG (Kimi + embeddings)               | Producción — `rag-assistant-ochre.vercel.app` | —            |
-| `apps/eve-store`     | Tienda (Postgres schema `tienda`)                          | En desarrollo                                 | —            |
-| `apps/eve-merchants` | Panel de comercios                                         | En desarrollo                                 | —            |
-| `apps/eve-studio`    | Generador con Kimi — **solo local**, escribe en tu árbol   | Experimental — no se despliega                | 3003         |
+| App                  | Qué es                                                     | Estado                                           | Puerto local |
+| -------------------- | ---------------------------------------------------------- | ------------------------------------------------ | ------------ |
+| `apps/api`           | **EvePay** — plataforma de pagos (NestJS). El producto.    | Activa (aún sin desplegar)                       | 3001         |
+| `apps/eveconecta`    | Vertical de propiedad horizontal (Next.js + Supabase)      | **Producción** — conecta.evetev.com              | 3002         |
+| `apps/eveledger`     | Operación de estaciones de servicio (Next.js + Prisma)     | **Producción** — `*.vercel.app` (MVP cliente)    | 3007         |
+| `apps/evepay-admin`  | Consola de operación de EvePay (Next.js, rol super_admin)  | Activa (aún sin desplegar)                       | 3004         |
+| `apps/website`       | evetev.com + landings `/evepay` `/conecta` `/intelligence` | **Producción**                                   | —            |
+| `apps/rag-assistant` | **Fluxi**, asistente RAG (Kimi + embeddings)               | Producción — `rag-assistant-ochre.vercel.app`    | —            |
+| `apps/eve-store`     | Tienda (Postgres schema `tienda`)                          | En desarrollo                                    | —            |
+| `apps/eve-merchants` | Panel de comercios                                         | En desarrollo                                    | —            |
+| `apps/eve-studio`    | Generador con Kimi — **solo local**, escribe en tu árbol   | **Congelado** (sep-2026) — usable, sin inversión | 3003         |
 
 Paquetes: `packages/shared` (contrato de EvePay: tipos + Zod), `packages/config`
 (eslint/prettier/tsconfig base), `packages/brand` (marca: tokens, logos, patrones
