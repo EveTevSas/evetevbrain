@@ -2397,6 +2397,10 @@ export function AssembliesPage() {
     closeVoting,
     castVote,
     revokeVote,
+    fetchMyAssemblyAccreditations,
+    castSelfServiceVote,
+    generateVoteLink,
+    revokeVoteLink,
     startAssembly,
     closeAssembly,
     fetchAssemblyMinutes,
@@ -2473,6 +2477,10 @@ export function AssembliesPage() {
         onCloseVoting={closeVoting}
         onCastVote={castVote}
         onRevokeVote={revokeVote}
+        onFetchMyAccreditations={fetchMyAssemblyAccreditations}
+        onCastSelfServiceVote={castSelfServiceVote}
+        onGenerateVoteLink={generateVoteLink}
+        onRevokeVoteLink={revokeVoteLink}
         onStartAssembly={startAssembly}
         onCloseAssembly={closeAssembly}
         onFetchMinutes={fetchAssemblyMinutes}

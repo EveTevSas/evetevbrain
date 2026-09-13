@@ -12,10 +12,15 @@ import type {
   AssemblyDecisionsOverview,
   AssemblyItem,
   AssemblyMinutesOverview,
+  AssemblyOwnAccreditation,
+  AssemblyTokenVoteState,
+  AssemblyVoteLink,
   AssemblyVoteRecord,
   AssemblyVoteTally,
   AttachDecisionEvidence,
   CaseItem,
+  CastSelfServiceVote,
+  CastTokenVote,
   CastVote,
   CreateAgendaItem,
   CreateAnnouncement,
@@ -50,7 +55,7 @@ import {
 import { canInitiatePayment, initialsFor, roleLabels, type AppRole } from "@/lib/auth/permissions";
 import { fetchActiveMemberships, selectActiveMembership } from "@/lib/auth/resolve-membership";
 import { ACTIVE_CONJUNTO_COOKIE } from "@/lib/auth/tenant-cookie";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseAnonServerClient, getSupabaseServerClient } from "@/lib/supabase/server";
 import { createResidentSnapshot } from "./resident-view";
 
 export class DemoApiError extends Error {
@@ -850,6 +855,126 @@ export async function listAssemblyVoting(assemblyId: string): Promise<AssemblyAg
     throw new DemoApiError("No fue posible consultar las votaciones.", 500);
   }
   return (data as AssemblyAgendaVoting[] | null) ?? [];
+}
+
+export async function listMyAssemblyAccreditations(
+  assemblyId: string
+): Promise<AssemblyOwnAccreditation[]> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("listar_mis_acreditaciones_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId
+    });
+
+  if (error) {
+    if (error.code === "42501") throw new DemoApiError(error.message, 403);
+    throw new DemoApiError("No fue posible consultar tus acreditaciones.", 500);
+  }
+  return (data as AssemblyOwnAccreditation[] | null) ?? [];
+}
+
+export async function castSelfServiceVote(
+  assemblyId: string,
+  agendaItemId: string,
+  input: CastSelfServiceVote
+): Promise<AssemblyVoteRecord> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("votar_autoservicio_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_punto_id: agendaItemId,
+      p_acreditacion_id: input.accreditationId,
+      p_opcion: voteOptionToSql[input.option]
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el voto registrado.", 500);
+  }
+  return data as AssemblyVoteRecord;
+}
+
+// Sin sesión de Supabase: mismo motivo que castTokenVote. Es lo que renderiza
+// la página pública antes de que la persona vote.
+export async function getTokenVoteState(token: string): Promise<AssemblyTokenVoteState> {
+  const supabase = getSupabaseAnonServerClient();
+
+  const { data, error } = await supabase
+    .schema("conjuntos")
+    .rpc("obtener_estado_voto_token_demo", { p_token: token });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el estado del enlace.", 500);
+  }
+  return data as AssemblyTokenVoteState;
+}
+
+// Sin sesión de Supabase: usa el cliente anónimo, no getDemoAccess. La RPC
+// resuelve conjunto/asamblea/acreditación a partir del token mismo, no de
+// auth.uid() ni de una cookie de copropiedad activa.
+export async function castTokenVote(input: CastTokenVote): Promise<AssemblyVoteRecord> {
+  const supabase = getSupabaseAnonServerClient();
+
+  const { data, error } = await supabase.schema("conjuntos").rpc("votar_con_token_asamblea_demo", {
+    p_token: input.token,
+    p_punto_id: input.agendaItemId,
+    p_opcion: voteOptionToSql[input.option]
+  });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el voto registrado.", 500);
+  }
+  return data as AssemblyVoteRecord;
+}
+
+export async function generateVoteLink(
+  assemblyId: string,
+  accreditationId: string
+): Promise<AssemblyVoteLink> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("generar_enlace_voto_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_acreditacion_id: accreditationId
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el enlace generado.", 500);
+  }
+  return data as AssemblyVoteLink;
+}
+
+export async function revokeVoteLink(
+  assemblyId: string,
+  accreditationId: string
+): Promise<{ acreditacionId: string }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("revocar_enlace_voto_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_acreditacion_id: accreditationId
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió la revocación del enlace.", 500);
+  }
+  return data as { acreditacionId: string };
 }
 
 export async function startAssembly(assemblyId: string): Promise<void> {

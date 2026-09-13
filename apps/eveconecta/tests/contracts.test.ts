@@ -1,5 +1,7 @@
 import {
   attachDecisionEvidenceSchema,
+  castSelfServiceVoteSchema,
+  castTokenVoteSchema,
   castVoteSchema,
   createAssemblyDecisionSchema,
   saveAssemblyMinutesSchema,
@@ -12,6 +14,7 @@ import {
   formatCop,
   registerVehicleAccessSchema,
   scheduleAssemblySchema,
+  tokenVoteStateQuerySchema,
   updateAssemblyDecisionSchema,
   updateAssemblyDecisionStatusSchema,
   updateCommunityPersonSchema,
@@ -272,6 +275,43 @@ describe("web contract helpers", () => {
     expect(() =>
       castVoteSchema.parse({ unidadCodigo: "A-101", option: "yes", extra: true })
     ).toThrow();
+  });
+
+  it("validates a self-service vote input", () => {
+    const accreditationId = "11111111-1111-4111-8111-111111111111";
+    expect(
+      castSelfServiceVoteSchema.parse({ accreditationId, option: "no" })
+    ).toMatchObject({ accreditationId, option: "no" });
+  });
+
+  it("rejects a self-service vote with a non-uuid accreditation id", () => {
+    expect(() =>
+      castSelfServiceVoteSchema.parse({ accreditationId: "not-a-uuid", option: "yes" })
+    ).toThrow();
+  });
+
+  it("validates a vote-by-link input", () => {
+    const agendaItemId = "22222222-2222-4222-8222-222222222222";
+    expect(
+      castTokenVoteSchema.parse({ token: "abc123", agendaItemId, option: "abstain" })
+    ).toMatchObject({ token: "abc123", agendaItemId, option: "abstain" });
+  });
+
+  it("rejects a vote-by-link input with an empty token or a non-uuid agenda item", () => {
+    const agendaItemId = "22222222-2222-4222-8222-222222222222";
+    expect(() =>
+      castTokenVoteSchema.parse({ token: "", agendaItemId, option: "yes" })
+    ).toThrow();
+    expect(() =>
+      castTokenVoteSchema.parse({ token: "abc123", agendaItemId: "not-a-uuid", option: "yes" })
+    ).toThrow();
+  });
+
+  it("validates the token-state query and rejects an empty token", () => {
+    expect(tokenVoteStateQuerySchema.parse({ token: "abc123" })).toMatchObject({
+      token: "abc123"
+    });
+    expect(() => tokenVoteStateQuerySchema.parse({ token: "" })).toThrow();
   });
 
   it("validates saving the assembly minutes", () => {

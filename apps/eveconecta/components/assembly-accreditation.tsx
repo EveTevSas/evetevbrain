@@ -6,10 +6,21 @@ import type {
   AssemblyAttendee,
   AssemblyAttendeeQuality,
   AssemblyItem,
+  AssemblyVoteLink,
   CommunityPerson
 } from "@/lib/contracts";
 import { Badge, Button, Card, EmptyState } from "@/lib/ui";
-import { Download, Fingerprint, ShieldOff, UploadCloud, UserPlus, Users } from "lucide-react";
+import {
+  Copy,
+  Download,
+  Fingerprint,
+  Link2,
+  Link2Off,
+  ShieldOff,
+  UploadCloud,
+  UserPlus,
+  Users
+} from "lucide-react";
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { Field, SelectInput } from "./form-field";
 import { Modal } from "./modal";
@@ -260,6 +271,79 @@ function AccreditationForm({
   );
 }
 
+function VoteLinkAction({
+  attendeeId,
+  busy,
+  onGenerate,
+  onRevoke
+}: {
+  attendeeId: string;
+  busy: string | null;
+  onGenerate: (accreditationId: string) => Promise<AssemblyVoteLink | null>;
+  onRevoke: (accreditationId: string) => Promise<{ acreditacionId: string } | null>;
+}) {
+  const [token, setToken] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const generateBusyKey = `assembly-vote-link-generate-${attendeeId}`;
+  const revokeBusyKey = `assembly-vote-link-revoke-${attendeeId}`;
+
+  async function generate() {
+    setCopied(false);
+    const result = await onGenerate(attendeeId);
+    setToken(result?.token ?? null);
+  }
+
+  async function revoke() {
+    const result = await onRevoke(attendeeId);
+    if (result) {
+      setToken(null);
+    }
+  }
+
+  if (token) {
+    const url = `${window.location.origin}/votar/${token}`;
+    return (
+      <div className="flex flex-col items-end gap-1.5 rounded-lg bg-[var(--wash)] p-2.5 text-right">
+        <p className="text-[11px] font-semibold text-[var(--muted)]">
+          Solo se muestra una vez — cópialo ahora.
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => {
+              void navigator.clipboard.writeText(url);
+              setCopied(true);
+            }}
+            size="sm"
+            variant="secondary"
+          >
+            <Copy size={13} /> {copied ? "Copiado" : "Copiar enlace"}
+          </Button>
+          <button
+            className="focus-ring flex items-center gap-1 text-xs font-bold text-[var(--eve-error)] hover:underline"
+            disabled={busy === revokeBusyKey}
+            onClick={() => void revoke()}
+            type="button"
+          >
+            <Link2Off size={13} /> Revocar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Button
+      disabled={busy === generateBusyKey}
+      onClick={() => void generate()}
+      size="sm"
+      variant="secondary"
+    >
+      <Link2 size={14} />
+      {busy === generateBusyKey ? "Generando…" : "Enlace de voto"}
+    </Button>
+  );
+}
+
 export function AssemblyAccreditationPanel({
   assembly,
   people,
@@ -269,7 +353,9 @@ export function AssemblyAccreditationPanel({
   busy,
   onAccredit,
   onRevoke,
-  onDownloadProxy
+  onDownloadProxy,
+  onGenerateVoteLink,
+  onRevokeVoteLink
 }: {
   assembly: AssemblyItem;
   people: CommunityPerson[];
@@ -283,6 +369,8 @@ export function AssemblyAccreditationPanel({
   ) => Promise<AssemblyAttendee | null>;
   onRevoke: (attendeeId: string) => Promise<{ id: string } | null>;
   onDownloadProxy: (attendee: AssemblyAttendee) => Promise<void>;
+  onGenerateVoteLink: (accreditationId: string) => Promise<AssemblyVoteLink | null>;
+  onRevokeVoteLink: (accreditationId: string) => Promise<{ acreditacionId: string } | null>;
 }) {
   const [formOpen, setFormOpen] = useState(false);
 
@@ -356,7 +444,7 @@ export function AssemblyAccreditationPanel({
                     </p>
                   ) : null}
                 </div>
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex flex-wrap items-center justify-end gap-2">
                   {attendee.soportePath ? (
                     <Button
                       onClick={() => void onDownloadProxy(attendee)}
@@ -365,6 +453,14 @@ export function AssemblyAccreditationPanel({
                     >
                       <Download size={14} /> Poder
                     </Button>
+                  ) : null}
+                  {attendee.calidad === "propietario" || attendee.calidad === "apoderado" ? (
+                    <VoteLinkAction
+                      attendeeId={attendee.id}
+                      busy={busy}
+                      onGenerate={onGenerateVoteLink}
+                      onRevoke={onRevokeVoteLink}
+                    />
                   ) : null}
                   <Button
                     disabled={busy === `assembly-attendee-revoke-${attendee.id}`}

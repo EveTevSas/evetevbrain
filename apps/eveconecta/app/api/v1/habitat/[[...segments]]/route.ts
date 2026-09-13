@@ -4,6 +4,7 @@ import { ZodError, z } from "zod";
 import {
   accreditAssemblyAttendeeSchema,
   attachDecisionEvidenceSchema,
+  castSelfServiceVoteSchema,
   castVoteSchema,
   createAgendaItemSchema,
   createAnnouncementSchema,
@@ -50,6 +51,7 @@ import {
   approveExpense,
   attachDecisionEvidence,
   canSelectConjunto,
+  castSelfServiceVote,
   castVote,
   closeAssembly,
   closeVoting,
@@ -65,11 +67,13 @@ import {
   deleteAssemblyDecision,
   DemoApiError,
   fetchAssemblyMinutes,
+  generateVoteLink,
   getDemoSnapshot,
   listAssemblyAgenda,
   listAssemblyAttendees,
   listAssemblyDecisions,
   listAssemblyVoting,
+  listMyAssemblyAccreditations,
   mutateDemoSnapshot,
   openVoting,
   payDemoFee,
@@ -77,6 +81,7 @@ import {
   reorderAgenda,
   revokeAssemblyAccreditation,
   revokeVote,
+  revokeVoteLink,
   saveAssemblyMinutes,
   scheduleAssembly,
   signAssemblyMinutes,
@@ -135,6 +140,14 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     if (votingMatch) {
       const assemblyId = z.string().uuid().parse(votingMatch[1]);
       return NextResponse.json(await listAssemblyVoting(assemblyId));
+    }
+
+    const myAccreditationsMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/my-accreditations$/i
+    );
+    if (myAccreditationsMatch) {
+      const assemblyId = z.string().uuid().parse(myAccreditationsMatch[1]);
+      return NextResponse.json(await listMyAssemblyAccreditations(assemblyId));
     }
 
     const minutesMatch = path.match(/^assemblies\/([0-9a-f-]+)\/minutes$/i);
@@ -228,6 +241,29 @@ export async function POST(request: NextRequest, context: RouteContext) {
       const itemId = z.string().uuid().parse(castVoteMatch[2]);
       const input = castVoteSchema.parse(body);
       return NextResponse.json(await castVote(assemblyId, itemId, input), { status: 201 });
+    }
+
+    const castSelfServiceVoteMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/agenda\/([0-9a-f-]+)\/votes\/self$/i
+    );
+    if (castSelfServiceVoteMatch) {
+      const assemblyId = z.string().uuid().parse(castSelfServiceVoteMatch[1]);
+      const itemId = z.string().uuid().parse(castSelfServiceVoteMatch[2]);
+      const input = castSelfServiceVoteSchema.parse(body);
+      return NextResponse.json(await castSelfServiceVote(assemblyId, itemId, input), {
+        status: 201
+      });
+    }
+
+    const voteLinkGenerateMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/accreditations\/([0-9a-f-]+)\/vote-link$/i
+    );
+    if (voteLinkGenerateMatch) {
+      const assemblyId = z.string().uuid().parse(voteLinkGenerateMatch[1]);
+      const accreditationId = z.string().uuid().parse(voteLinkGenerateMatch[2]);
+      return NextResponse.json(await generateVoteLink(assemblyId, accreditationId), {
+        status: 201
+      });
     }
 
     const assemblyStartMatch = path.match(/^assemblies\/([0-9a-f-]+)\/start$/i);
@@ -1010,6 +1046,15 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
       z.string().uuid().parse(voteRevokeMatch[2]);
       const voteId = z.string().uuid().parse(voteRevokeMatch[3]);
       return NextResponse.json(await revokeVote(assemblyId, voteId));
+    }
+
+    const voteLinkRevokeMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/accreditations\/([0-9a-f-]+)\/vote-link$/i
+    );
+    if (voteLinkRevokeMatch) {
+      const assemblyId = z.string().uuid().parse(voteLinkRevokeMatch[1]);
+      const accreditationId = z.string().uuid().parse(voteLinkRevokeMatch[2]);
+      return NextResponse.json(await revokeVoteLink(assemblyId, accreditationId));
     }
 
     return problem("Ruta no encontrada.", 404);

@@ -556,6 +556,60 @@ export interface AssemblyAgendaVoting {
   roster: AssemblyVoteRecord[] | null;
 }
 
+export const castSelfServiceVoteSchema = z
+  .object({
+    accreditationId: z.string().uuid(),
+    option: voteOptionSchema
+  })
+  .strict();
+
+export const castTokenVoteSchema = z
+  .object({
+    token: z.string().trim().min(1),
+    agendaItemId: z.string().uuid(),
+    option: voteOptionSchema
+  })
+  .strict();
+
+export const tokenVoteStateQuerySchema = z
+  .object({
+    token: z.string().trim().min(1)
+  })
+  .strict();
+
+export interface AssemblyOwnVote {
+  agendaItemId: string;
+  option: VoteOption;
+}
+
+export interface AssemblyOwnAccreditation {
+  id: string;
+  unidadCodigo: string;
+  calidad: AssemblyAttendeeQuality;
+  representaNombre: string | null;
+  votes: AssemblyOwnVote[];
+}
+
+export interface AssemblyVoteLink {
+  token: string;
+}
+
+export interface AssemblyTokenVoteItem {
+  agendaItemId: string;
+  title: string;
+  status: "not_started" | "open" | "closed";
+  myOption: VoteOption | null;
+}
+
+export interface AssemblyTokenVoteState {
+  unidadCodigo: string;
+  calidad: AssemblyAttendeeQuality;
+  representaNombre: string | null;
+  asambleaTitulo: string;
+  asambleaEnCurso: boolean;
+  items: AssemblyTokenVoteItem[];
+}
+
 export const saveAssemblyMinutesSchema = z
   .object({
     presidentePersonaId: z.string().uuid(),
@@ -1096,6 +1150,9 @@ export type ReorderAgenda = z.infer<typeof reorderAgendaSchema>;
 export type CreateAssemblySupport = z.infer<typeof createAssemblySupportSchema>;
 export type UpdateAssemblySupportStatus = z.infer<typeof updateAssemblySupportStatusSchema>;
 export type CastVote = z.infer<typeof castVoteSchema>;
+export type CastSelfServiceVote = z.infer<typeof castSelfServiceVoteSchema>;
+export type CastTokenVote = z.infer<typeof castTokenVoteSchema>;
+export type TokenVoteStateQuery = z.infer<typeof tokenVoteStateQuerySchema>;
 export type SaveAssemblyMinutes = z.infer<typeof saveAssemblyMinutesSchema>;
 export type CreateAssemblyDecision = z.infer<typeof createAssemblyDecisionSchema>;
 export type UpdateAssemblyDecision = z.infer<typeof updateAssemblyDecisionSchema>;

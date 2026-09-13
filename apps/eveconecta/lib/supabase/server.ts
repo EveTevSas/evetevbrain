@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { getSupabasePublicConfig } from "./config";
 
@@ -25,4 +26,13 @@ export async function getSupabaseServerClient() {
       }
     }
   });
+}
+
+// Sin cookies ni sesión: para el único flujo que llega sin cuenta en el
+// portal (el voto por enlace de asamblea) y por eso no puede pasar por
+// getSupabaseServerClient. La RPC que se llama con este cliente hace su
+// propia validación de autorización a partir del token, no de auth.uid().
+export function getSupabaseAnonServerClient() {
+  const { publishableKey, url } = getSupabasePublicConfig();
+  return createClient(url, publishableKey);
 }

@@ -14,11 +14,14 @@ import {
   type AssemblySettings,
   type AssemblyItem,
   type AssemblyMinutesOverview,
+  type AssemblyOwnAccreditation,
   type AssemblySupportDocument,
+  type AssemblyVoteLink,
   type AssemblyVoteRecord,
   type AssemblyVoteTally,
   type AttachDecisionEvidence,
   type CaseItem,
+  type CastSelfServiceVote,
   type CastVote,
   type CommunityPerson,
   type CreateAgendaItem,
@@ -163,6 +166,20 @@ interface DataContextValue {
     itemId: string,
     voteId: string
   ) => Promise<{ id: string } | null>;
+  fetchMyAssemblyAccreditations: (assemblyId: string) => Promise<AssemblyOwnAccreditation[]>;
+  castSelfServiceVote: (
+    assemblyId: string,
+    itemId: string,
+    input: CastSelfServiceVote
+  ) => Promise<AssemblyVoteRecord | null>;
+  generateVoteLink: (
+    assemblyId: string,
+    accreditationId: string
+  ) => Promise<AssemblyVoteLink | null>;
+  revokeVoteLink: (
+    assemblyId: string,
+    accreditationId: string
+  ) => Promise<{ acreditacionId: string } | null>;
   startAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
   closeAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
   fetchAssemblyMinutes: (assemblyId: string) => Promise<AssemblyMinutesOverview>;
@@ -766,6 +783,40 @@ export function DataProvider({ children }: { children: ReactNode }) {
               { method: "DELETE" }
             ),
           "Voto revocado"
+        ),
+      fetchMyAssemblyAccreditations: (assemblyId) =>
+        apiRequest<AssemblyOwnAccreditation[]>(
+          `/v1/habitat/assemblies/${assemblyId}/my-accreditations`
+        ),
+      castSelfServiceVote: (assemblyId, itemId, input) =>
+        mutate(
+          `assembly-voting-cast-self-${itemId}`,
+          () =>
+            apiRequest<AssemblyVoteRecord>(
+              `/v1/habitat/assemblies/${assemblyId}/agenda/${itemId}/votes/self`,
+              { method: "POST", body: JSON.stringify(input) }
+            ),
+          "Voto registrado"
+        ),
+      generateVoteLink: (assemblyId, accreditationId) =>
+        mutate(
+          `assembly-vote-link-generate-${accreditationId}`,
+          () =>
+            apiRequest<AssemblyVoteLink>(
+              `/v1/habitat/assemblies/${assemblyId}/accreditations/${accreditationId}/vote-link`,
+              { method: "POST" }
+            ),
+          "Enlace de voto generado"
+        ),
+      revokeVoteLink: (assemblyId, accreditationId) =>
+        mutate(
+          `assembly-vote-link-revoke-${accreditationId}`,
+          () =>
+            apiRequest<{ acreditacionId: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/accreditations/${accreditationId}/vote-link`,
+              { method: "DELETE" }
+            ),
+          "Enlace de voto revocado"
         ),
       startAssembly: (assemblyId) =>
         mutate(

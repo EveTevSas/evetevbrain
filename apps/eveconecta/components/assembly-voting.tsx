@@ -4,6 +4,8 @@ import type {
   AssemblyAgendaItem,
   AssemblyAgendaVoting,
   AssemblyCapabilities,
+  AssemblyOwnAccreditation,
+  CastSelfServiceVote,
   CastVote,
   VoteOption
 } from "@/lib/contracts";
@@ -107,26 +109,86 @@ function VoteCastForm({
   );
 }
 
+// Aparece solo cuando el usuario autenticado tiene, entre sus propias
+// acreditaciones (la suya y las que representa como apoderado), al menos una
+// sin voto todavía en este punto — independiente del formulario de mesa de
+// arriba, que sigue existiendo tal cual para canManage.
+function SelfServiceVoteBlock({
+  itemId,
+  busy,
+  accreditations,
+  onCastSelfServiceVote
+}: {
+  itemId: string;
+  busy: string | null;
+  accreditations: AssemblyOwnAccreditation[];
+  onCastSelfServiceVote: (itemId: string, input: CastSelfServiceVote) => Promise<unknown>;
+}) {
+  const pending = accreditations.filter(
+    (accreditation) => !accreditation.votes.some((vote) => vote.agendaItemId === itemId)
+  );
+  if (!pending.length) return null;
+  const busyKey = `assembly-voting-cast-self-${itemId}`;
+
+  return (
+    <div className="mt-3 space-y-2 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent-soft)] p-3">
+      <p className="text-xs font-bold text-[var(--accent)]">Vota ahora</p>
+      {pending.map((accreditation) => (
+        <div
+          className="flex flex-wrap items-center justify-between gap-2"
+          key={accreditation.id}
+        >
+          <p className="text-xs text-[var(--muted)]">
+            {accreditation.unidadCodigo}
+            {accreditation.representaNombre
+              ? ` · representas a ${accreditation.representaNombre}`
+              : ""}
+          </p>
+          <div className="flex gap-1.5">
+            {(["yes", "no", "abstain"] as const).map((option) => (
+              <Button
+                disabled={busy === busyKey}
+                key={option}
+                onClick={() =>
+                  void onCastSelfServiceVote(itemId, { accreditationId: accreditation.id, option })
+                }
+                size="sm"
+                variant="secondary"
+              >
+                {voteOptionLabels[option]}
+              </Button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function VotingItemCard({
   item,
   voting,
   canManage,
   secretBallots,
   busy,
+  myAccreditations,
   onOpen,
   onClose,
   onCastVote,
-  onRevokeVote
+  onRevokeVote,
+  onCastSelfServiceVote
 }: {
   item: AssemblyAgendaItem;
   voting: AssemblyAgendaVoting | undefined;
   canManage: boolean;
   secretBallots: boolean;
   busy: string | null;
+  myAccreditations: AssemblyOwnAccreditation[];
   onOpen: (itemId: string) => Promise<unknown>;
   onClose: (itemId: string) => Promise<unknown>;
   onCastVote: (itemId: string, input: CastVote) => Promise<unknown>;
   onRevokeVote: (itemId: string, voteId: string) => Promise<unknown>;
+  onCastSelfServiceVote: (itemId: string, input: CastSelfServiceVote) => Promise<unknown>;
 }) {
   const status = voting?.status ?? "not_started";
   const tally = voting?.tally;
@@ -163,6 +225,15 @@ function VotingItemCard({
             Abst. {isUnitBasis ? tally.abstainUnits : tally.abstainCoefficient.toFixed(2)}
           </span>
         </div>
+      ) : null}
+
+      {status === "open" ? (
+        <SelfServiceVoteBlock
+          accreditations={myAccreditations}
+          busy={busy}
+          itemId={item.id}
+          onCastSelfServiceVote={onCastSelfServiceVote}
+        />
       ) : null}
 
       {status === "closed" ? (
@@ -259,10 +330,12 @@ export function AssemblyVotingPanel({
   canManage,
   capabilities,
   busy,
+  myAccreditations,
   onOpen,
   onClose,
   onCastVote,
-  onRevokeVote
+  onRevokeVote,
+  onCastSelfServiceVote
 }: {
   agendaItems: AssemblyAgendaItem[];
   voting: AssemblyAgendaVoting[] | null;
@@ -270,10 +343,12 @@ export function AssemblyVotingPanel({
   canManage: boolean;
   capabilities: AssemblyCapabilities;
   busy: string | null;
+  myAccreditations: AssemblyOwnAccreditation[];
   onOpen: (itemId: string) => Promise<unknown>;
   onClose: (itemId: string) => Promise<unknown>;
   onCastVote: (itemId: string, input: CastVote) => Promise<unknown>;
   onRevokeVote: (itemId: string, voteId: string) => Promise<unknown>;
+  onCastSelfServiceVote: (itemId: string, input: CastSelfServiceVote) => Promise<unknown>;
 }) {
   const votableItems = agendaItems.filter(
     (item) => item.votingRule !== "none" && capabilityFor(item.votingRule, capabilities)
@@ -301,6 +376,8 @@ export function AssemblyVotingPanel({
               canManage={canManage}
               item={item}
               key={item.id}
+              myAccreditations={myAccreditations}
+              onCastSelfServiceVote={onCastSelfServiceVote}
               onCastVote={onCastVote}
               onClose={onClose}
               onOpen={onOpen}

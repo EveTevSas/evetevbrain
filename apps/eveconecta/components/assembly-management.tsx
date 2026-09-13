@@ -19,12 +19,15 @@ import type {
   AssemblyDecisionsOverview,
   AssemblyItem,
   AssemblyMinutesOverview,
+  AssemblyOwnAccreditation,
   AssemblySettings,
   AssemblyStage,
   AssemblySupportDocument,
+  AssemblyVoteLink,
   AssemblyVoteRecord,
   AssemblyVoteTally,
   AttachDecisionEvidence,
+  CastSelfServiceVote,
   CastVote,
   CommunityPerson,
   CreateAgendaItem,
@@ -387,7 +390,9 @@ function RegistrationStage({
   busy,
   onAccredit,
   onRevoke,
-  onDownloadProxy
+  onDownloadProxy,
+  onGenerateVoteLink,
+  onRevokeVoteLink
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   capabilities: AssemblyCapabilities;
@@ -402,6 +407,8 @@ function RegistrationStage({
   ) => Promise<AssemblyAttendee | null>;
   onRevoke: (attendeeId: string) => Promise<{ id: string } | null>;
   onDownloadProxy: (attendee: AssemblyAttendee) => Promise<void>;
+  onGenerateVoteLink: (accreditationId: string) => Promise<AssemblyVoteLink | null>;
+  onRevokeVoteLink: (accreditationId: string) => Promise<{ acreditacionId: string } | null>;
 }) {
   const hasRegistration = capabilities.proxy_management || capabilities.identity_accreditation;
   return (
@@ -437,7 +444,9 @@ function RegistrationStage({
           canManage={canManage}
           onAccredit={onAccredit}
           onDownloadProxy={onDownloadProxy}
+          onGenerateVoteLink={onGenerateVoteLink}
           onRevoke={onRevoke}
+          onRevokeVoteLink={onRevokeVoteLink}
           people={people}
         />
       ) : (
@@ -455,10 +464,12 @@ function LiveStage({
   votingLoading,
   canManage,
   busy,
+  myAccreditations,
   onOpenVoting,
   onCloseVoting,
   onCastVote,
-  onRevokeVote
+  onRevokeVote,
+  onCastSelfServiceVote
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   capabilities: AssemblyCapabilities;
@@ -467,10 +478,12 @@ function LiveStage({
   votingLoading: boolean;
   canManage: boolean;
   busy: string | null;
+  myAccreditations: AssemblyOwnAccreditation[];
   onOpenVoting: (itemId: string) => Promise<unknown>;
   onCloseVoting: (itemId: string) => Promise<unknown>;
   onCastVote: (itemId: string, input: CastVote) => Promise<unknown>;
   onRevokeVote: (itemId: string, voteId: string) => Promise<unknown>;
+  onCastSelfServiceVote: (itemId: string, input: CastSelfServiceVote) => Promise<unknown>;
 }) {
   const hasVoting =
     capabilities.unit_voting ||
@@ -510,6 +523,8 @@ function LiveStage({
           canManage={canManage}
           capabilities={capabilities}
           loading={votingLoading}
+          myAccreditations={myAccreditations}
+          onCastSelfServiceVote={onCastSelfServiceVote}
           onCastVote={onCastVote}
           onClose={onCloseVoting}
           onOpen={onOpenVoting}
@@ -663,6 +678,7 @@ function StageContent({
   decisions,
   decisionsLoading,
   canSuperviseDecisions,
+  myAccreditations,
   onToggleChecklist,
   onUploadSupport,
   onSupportStatusChange,
@@ -671,6 +687,8 @@ function StageContent({
   onAccreditAttendee,
   onRevokeAttendee,
   onDownloadProxy,
+  onGenerateVoteLink,
+  onRevokeVoteLink,
   onCreateAgendaItem,
   onUpdateAgendaItem,
   onDeleteAgendaItem,
@@ -679,6 +697,7 @@ function StageContent({
   onCloseVoting,
   onCastVote,
   onRevokeVote,
+  onCastSelfServiceVote,
   onSaveMinutes,
   onSignMinutes,
   onPublishMinutes,
@@ -706,6 +725,7 @@ function StageContent({
   decisions: AssemblyDecisionsOverview | null;
   decisionsLoading: boolean;
   canSuperviseDecisions: boolean;
+  myAccreditations: AssemblyOwnAccreditation[];
   onToggleChecklist: (
     assemblyId: string,
     input: UpdateAssemblyChecklist
@@ -731,6 +751,8 @@ function StageContent({
   ) => Promise<AssemblyAttendee | null>;
   onRevokeAttendee: (attendeeId: string) => Promise<{ id: string } | null>;
   onDownloadProxy: (attendee: AssemblyAttendee) => Promise<void>;
+  onGenerateVoteLink: (accreditationId: string) => Promise<AssemblyVoteLink | null>;
+  onRevokeVoteLink: (accreditationId: string) => Promise<{ acreditacionId: string } | null>;
   onCreateAgendaItem: (input: CreateAgendaItem) => Promise<AssemblyAgendaItem | null>;
   onUpdateAgendaItem: (itemId: string, input: UpdateAgendaItem) => Promise<{ id: string } | null>;
   onDeleteAgendaItem: (itemId: string) => Promise<{ id: string } | null>;
@@ -739,6 +761,7 @@ function StageContent({
   onCloseVoting: (itemId: string) => Promise<unknown>;
   onCastVote: (itemId: string, input: CastVote) => Promise<unknown>;
   onRevokeVote: (itemId: string, voteId: string) => Promise<unknown>;
+  onCastSelfServiceVote: (itemId: string, input: CastSelfServiceVote) => Promise<unknown>;
   onSaveMinutes: (input: SaveAssemblyMinutes) => Promise<unknown>;
   onSignMinutes: () => Promise<unknown>;
   onPublishMinutes: () => Promise<unknown>;
@@ -794,7 +817,9 @@ function StageContent({
           capabilities={capabilities}
           onAccredit={onAccreditAttendee}
           onDownloadProxy={onDownloadProxy}
+          onGenerateVoteLink={onGenerateVoteLink}
           onRevoke={onRevokeAttendee}
+          onRevokeVoteLink={onRevokeVoteLink}
           people={people}
         />
       ) : null}
@@ -805,6 +830,8 @@ function StageContent({
           busy={busy}
           canManage={canManage}
           capabilities={capabilities}
+          myAccreditations={myAccreditations}
+          onCastSelfServiceVote={onCastSelfServiceVote}
           onCastVote={onCastVote}
           onCloseVoting={onCloseVoting}
           onOpenVoting={onOpenVoting}
@@ -883,6 +910,10 @@ function AssemblyWorkspace({
   onCloseVoting,
   onCastVote,
   onRevokeVote,
+  onFetchMyAccreditations,
+  onCastSelfServiceVote,
+  onGenerateVoteLink,
+  onRevokeVoteLink,
   onStartAssembly,
   onCloseAssembly,
   onFetchMinutes,
@@ -961,6 +992,20 @@ function AssemblyWorkspace({
     itemId: string,
     voteId: string
   ) => Promise<{ id: string } | null>;
+  onFetchMyAccreditations: (assemblyId: string) => Promise<AssemblyOwnAccreditation[]>;
+  onCastSelfServiceVote: (
+    assemblyId: string,
+    itemId: string,
+    input: CastSelfServiceVote
+  ) => Promise<AssemblyVoteRecord | null>;
+  onGenerateVoteLink: (
+    assemblyId: string,
+    accreditationId: string
+  ) => Promise<AssemblyVoteLink | null>;
+  onRevokeVoteLink: (
+    assemblyId: string,
+    accreditationId: string
+  ) => Promise<{ acreditacionId: string } | null>;
   onStartAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
   onCloseAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
   onFetchMinutes: (assemblyId: string) => Promise<AssemblyMinutesOverview>;
@@ -1057,7 +1102,11 @@ function AssemblyWorkspace({
   }, [assembly.id]);
 
   useEffect(() => {
-    if (open && activeStage === "preparation") void refreshAgenda();
+    // "live" también depende de agendaItems (título, regla, umbral de cada
+    // punto votable): sin este segundo disparador, abrir el expediente
+    // directo en "live" (lo normal con la asamblea ya en_curso, sin pasar
+    // por "preparation") deja el panel de votaciones sin puntos que mostrar.
+    if (open && (activeStage === "preparation" || activeStage === "live")) void refreshAgenda();
   }, [activeStage, open, refreshAgenda]);
 
   // Mismo patrón que refreshAgenda: legible por los cuatro roles, disparado
@@ -1084,6 +1133,25 @@ function AssemblyWorkspace({
   useEffect(() => {
     if (open && activeStage === "live") void refreshVoting();
   }, [activeStage, open, refreshVoting]);
+
+  // Mismo patrón que refreshVoting, también disparado en "live": es lo que
+  // alimenta el aviso "Vota ahora" para el asistente autenticado.
+  const [myAccreditations, setMyAccreditations] = useState<AssemblyOwnAccreditation[]>([]);
+  const onFetchMyAccreditationsRef = useRef(onFetchMyAccreditations);
+  onFetchMyAccreditationsRef.current = onFetchMyAccreditations;
+  const myAccreditationsRequestIdRef = useRef(0);
+
+  const refreshMyAccreditations = useCallback(async () => {
+    const requestId = ++myAccreditationsRequestIdRef.current;
+    const result = await onFetchMyAccreditationsRef.current(assembly.id);
+    if (mountedRef.current && myAccreditationsRequestIdRef.current === requestId) {
+      setMyAccreditations(result);
+    }
+  }, [assembly.id]);
+
+  useEffect(() => {
+    if (open && activeStage === "live") void refreshMyAccreditations();
+  }, [activeStage, open, refreshMyAccreditations]);
 
   // Mismo patrón que refreshVoting, disparado solo en la etapa "minutes"
   // donde vive el acta.
@@ -1279,6 +1347,8 @@ function AssemblyWorkspace({
           }}
           onDownloadProxy={onDownloadProxy}
           onDownloadSupport={onDownloadSupport}
+          onGenerateVoteLink={(accreditationId) => onGenerateVoteLink(assembly.id, accreditationId)}
+          onRevokeVoteLink={(accreditationId) => onRevokeVoteLink(assembly.id, accreditationId)}
           onRevokeAttendee={async (attendeeId) => {
             const result = await onRevokeAttendee(assembly.id, attendeeId);
             if (result) await refreshAttendees();
@@ -1320,6 +1390,15 @@ function AssemblyWorkspace({
           onRevokeVote={async (itemId, voteId) => {
             const result = await onRevokeVote(assembly.id, itemId, voteId);
             if (result) await refreshVoting();
+            return result;
+          }}
+          myAccreditations={myAccreditations}
+          onCastSelfServiceVote={async (itemId, input) => {
+            const result = await onCastSelfServiceVote(assembly.id, itemId, input);
+            if (result) {
+              await refreshVoting();
+              await refreshMyAccreditations();
+            }
             return result;
           }}
           minutes={minutes}
@@ -1504,6 +1583,10 @@ export function AssemblyManagement({
   onCloseVoting,
   onCastVote,
   onRevokeVote,
+  onFetchMyAccreditations,
+  onCastSelfServiceVote,
+  onGenerateVoteLink,
+  onRevokeVoteLink,
   onStartAssembly,
   onCloseAssembly,
   onFetchMinutes,
@@ -1581,6 +1664,20 @@ export function AssemblyManagement({
     itemId: string,
     voteId: string
   ) => Promise<{ id: string } | null>;
+  onFetchMyAccreditations: (assemblyId: string) => Promise<AssemblyOwnAccreditation[]>;
+  onCastSelfServiceVote: (
+    assemblyId: string,
+    itemId: string,
+    input: CastSelfServiceVote
+  ) => Promise<AssemblyVoteRecord | null>;
+  onGenerateVoteLink: (
+    assemblyId: string,
+    accreditationId: string
+  ) => Promise<AssemblyVoteLink | null>;
+  onRevokeVoteLink: (
+    assemblyId: string,
+    accreditationId: string
+  ) => Promise<{ acreditacionId: string } | null>;
   onStartAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
   onCloseAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
   onFetchMinutes: (assemblyId: string) => Promise<AssemblyMinutesOverview>;
@@ -1814,6 +1911,10 @@ export function AssemblyManagement({
           onCloseVoting={onCloseVoting}
           onCastVote={onCastVote}
           onRevokeVote={onRevokeVote}
+          onFetchMyAccreditations={onFetchMyAccreditations}
+          onCastSelfServiceVote={onCastSelfServiceVote}
+          onGenerateVoteLink={onGenerateVoteLink}
+          onRevokeVoteLink={onRevokeVoteLink}
           onStartAssembly={onStartAssembly}
           onCloseAssembly={onCloseAssembly}
           onFetchMinutes={onFetchMinutes}

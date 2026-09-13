@@ -42,10 +42,21 @@ export async function refreshSessionAndAuthorize(request: NextRequest): Promise<
     }
   });
 
+  const pathname = request.nextUrl.pathname;
+
+  // El voto por enlace (specs/eve-conecta/voto-autoservicio-asamblea) llega
+  // sin sesión de Supabase a propósito: quien vota por autoservicio sin
+  // cuenta en el portal nunca inicia sesión. La autorización la hace la
+  // propia RPC a partir del token, no este proxy. Cubre tanto la ruta
+  // pública del API como la página que la consume.
+  if (pathname.startsWith("/api/v1/public/") || pathname.startsWith("/votar/")) {
+    response.headers.set("Cache-Control", "private, no-store");
+    return response;
+  }
+
   const {
     data: { user }
   } = await supabase.auth.getUser();
-  const pathname = request.nextUrl.pathname;
   const isAuthRoute = pathname.startsWith("/auth/");
 
   if (!user) {
