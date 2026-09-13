@@ -14,8 +14,8 @@ import type { Metadata } from "next";
  * guarde.
  */
 export const metadata: Metadata = {
-  title: "Eve-Store — en construcción",
-  description: "La tienda de Evetev está en preparación.",
+  title: "Eve-Orígenes — en construcción",
+  description: "Eve-Orígenes está en preparación.",
   robots: { index: false, follow: false }
 };
 
@@ -24,31 +24,35 @@ export default function EnConstruccion() {
     <main className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-6 py-16">
       <div className="flex items-center gap-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/marca/isotipo-azul-noche.svg" alt="" width={30} height={30} />
-        <span className="font-display text-xl font-bold">Eve-Store</span>
+        <img
+          src="/marca/logotipo-oliva.svg"
+          alt="Eve-Orígenes"
+          width={190}
+          height={36}
+          className="h-9 w-auto"
+        />
       </div>
 
-      <p className="mt-10 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-teal">
-        <span aria-hidden="true" className="unidad-teal size-4" />
-        Tienda Evetev
+      <p className="mt-10 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-petroleo">
+        Cuidado de la piel · Hecho en Colombia
       </p>
       <h1 className="mt-2 font-display text-4xl font-bold leading-[1.1]">
         Estamos montando la tienda
       </h1>
-      <p className="mt-5 text-base leading-relaxed text-pizarra">
+      <p className="mt-5 text-base leading-relaxed text-oliva">
         Aceites naturales, cuidado facial y suplementos de marcas colombianas, con envío desde
         Bogotá. Todavía no está abierta: el catálogo está en revisión y ningún producto sale a la
         venta hasta que sus datos estén completos.
       </p>
-      <p className="mt-4 text-base leading-relaxed text-pizarra">
+      <p className="mt-4 text-base leading-relaxed text-oliva">
         Mientras tanto, lo demás de Evetev sigue en pie en{" "}
-        <a href="https://evetev.com" className="font-medium text-noche underline">
+        <a href="https://evetev.com" className="font-medium text-oliva underline">
           evetev.com
         </a>
         .
       </p>
 
-      <p className="mt-12 border-t border-linea pt-6 text-sm text-pizarra">
+      <p className="mt-12 border-t border-salvia pt-6 text-sm text-oliva">
         © 2026 Evetev S.A.S. · Bogotá, Colombia
       </p>
     </main>

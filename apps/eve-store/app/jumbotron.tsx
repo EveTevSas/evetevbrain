@@ -77,8 +77,8 @@ export function Jumbotron({
   const velo =
     tono === "oscuro"
       ? lado === "derecha"
-        ? "bg-gradient-to-t from-noche/90 via-noche/70 to-noche/25 sm:bg-gradient-to-l sm:from-noche/90 sm:via-noche/80 sm:via-55% sm:to-noche/5"
-        : "bg-gradient-to-t from-noche/90 via-noche/70 to-noche/25 sm:bg-gradient-to-r sm:from-noche/90 sm:via-noche/80 sm:via-55% sm:to-noche/5"
+        ? "bg-gradient-to-t from-oliva/90 via-oliva/70 to-oliva/25 sm:bg-gradient-to-l sm:from-oliva/90 sm:via-oliva/80 sm:via-55% sm:to-oliva/5"
+        : "bg-gradient-to-t from-oliva/90 via-oliva/70 to-oliva/25 sm:bg-gradient-to-r sm:from-oliva/90 sm:via-oliva/80 sm:via-55% sm:to-oliva/5"
       : lado === "derecha"
         ? "bg-gradient-to-t from-white/95 via-white/80 to-white/20 sm:bg-gradient-to-l sm:from-white/95 sm:via-white/85 sm:via-55% sm:to-white/5"
         : "bg-gradient-to-t from-white/95 via-white/80 to-white/20 sm:bg-gradient-to-r sm:from-white/95 sm:via-white/85 sm:via-55% sm:to-white/5";
@@ -86,7 +86,7 @@ export function Jumbotron({
   return (
     <section
       className={`relative isolate flex overflow-hidden ${alto} ${
-        tono === "oscuro" ? "text-white" : "text-noche"
+        tono === "oscuro" ? "text-white" : "text-oliva"
       } items-end sm:items-center`}
     >
       {/* Sin `lazy` y con prioridad: es la imagen más grande de la primera

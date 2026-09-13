@@ -29,7 +29,7 @@ export const revalidate = 60;
 export async function generateMetadata(): Promise<Metadata> {
   const hay = (await publicados()).length > 0;
   return {
-    title: hay ? "Eve-Store" : "Eve-Store — próximamente",
+    title: hay ? "Eve-Orígenes" : "Eve-Orígenes — próximamente",
     description:
       "Aceites naturales, cuidado facial y suplementos de marcas colombianas. Envío desde Bogotá.",
     robots: hay ? undefined : { index: false, follow: false }
@@ -55,9 +55,9 @@ export default async function Tienda() {
   if (productos.length === 0) {
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">Eve-Store</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-oliva">Eve-Orígenes</p>
         <h1 className="mt-1 font-display text-3xl font-bold">Todavía no hay tienda</h1>
-        <p className="mt-3 text-sm leading-relaxed text-pizarra">
+        <p className="mt-3 text-sm leading-relaxed text-oliva">
           El catálogo está cargado y en revisión: ningún producto sale a la venta hasta que sus
           datos estén completos. Mientras tanto, el panel de administración vive en{" "}
           <a href="/panel" className="underline">
@@ -85,11 +85,11 @@ export default async function Tienda() {
         {/* Cian y no teal: sobre azul noche, el cian es el realce que el manual
             da por contrastado. El teal identifica la línea Tienda en fondo
             claro, que es donde se lee. */}
-        <p className="text-xs font-semibold uppercase tracking-widest text-cian">Tienda Evetev</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-arena">Eve-Orígenes</p>
         <h1 className="mt-2 font-display text-4xl font-bold leading-[1.1] sm:text-5xl">
           Aceites naturales y cuidado de la piel
         </h1>
-        <p className="mt-5 max-w-xl text-base leading-relaxed text-hielo">
+        <p className="mt-5 max-w-xl text-base leading-relaxed text-niebla">
           Marcas colombianas: {listaDeMarcas}. Cada ficha lleva el precio, el contenido y las
           unidades que hay hoy — si dice que hay, hay.
         </p>

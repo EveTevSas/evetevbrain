@@ -116,14 +116,14 @@ export default async function Ficha({
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
-      <a href="/panel" className="text-sm text-pizarra hover:underline">
+      <a href="/panel" className="text-sm text-oliva hover:underline">
         ← Cola de trabajo
       </a>
 
-      <header className="mt-4 border-b border-linea pb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">{p.marca}</p>
+      <header className="mt-4 border-b border-salvia pb-6">
+        <p className="text-xs font-semibold uppercase tracking-widest text-oliva">{p.marca}</p>
         <h1 className="font-display text-3xl font-bold">{p.nombre}</h1>
-        <p className="mt-2 text-sm text-pizarra">
+        <p className="mt-2 text-sm text-oliva">
           {pesos.format(p.precioMinor)} · {p.existencias} en bodega · GTIN {p.gtin ?? "sin asignar"}
         </p>
       </header>
@@ -138,23 +138,23 @@ export default async function Ficha({
           {avisos.map((a) => (
             <li
               key={a.id}
-              className={`flex items-start gap-3 rounded-lg border border-linea bg-white p-3 text-sm ${
+              className={`flex items-start gap-3 rounded-lg border border-salvia bg-white p-3 text-sm ${
                 a.resueltoEn ? "opacity-50" : ""
               }`}
             >
               <span className="flex-1 leading-relaxed">{a.texto}</span>
               {a.resueltoEn ? (
-                <span className="shrink-0 text-xs text-exito">resuelto</span>
+                <span className="shrink-0 text-xs text-petroleo">resuelto</span>
               ) : a.origen === "automatico" ? (
                 /* Los avisos automáticos no se resuelven a mano: se retiran
                    cuando el dato se arregla. Ofrecer un botón aquí sería
                    ofrecer una forma de publicar un producto sin GTIN. */
-                <span className="shrink-0 text-xs text-pizarra">se retira al corregir el dato</span>
+                <span className="shrink-0 text-xs text-oliva">se retira al corregir el dato</span>
               ) : (
                 <form action={resolverAviso} className="shrink-0">
                   <input type="hidden" name="id" value={a.id} />
                   <input type="hidden" name="slug" value={slug} />
-                  <button className="rounded-md border border-linea px-2.5 py-1 text-xs font-medium hover:bg-hielo">
+                  <button className="rounded-md border border-salvia px-2.5 py-1 text-xs font-medium hover:bg-salvia">
                     Resolver
                   </button>
                 </form>
@@ -176,7 +176,7 @@ export default async function Ficha({
               min={1}
               step={1}
               defaultValue={p.precioMinor}
-              className="w-full rounded-lg border border-linea bg-white px-3 py-2 tabular-nums"
+              className="w-full rounded-lg border border-salvia bg-white px-3 py-2 tabular-nums"
             />
           </Campo>
           <Campo etiqueta="Existencias">
@@ -186,7 +186,7 @@ export default async function Ficha({
               min={0}
               step={1}
               defaultValue={p.existencias}
-              className="w-full rounded-lg border border-linea bg-white px-3 py-2 tabular-nums"
+              className="w-full rounded-lg border border-salvia bg-white px-3 py-2 tabular-nums"
             />
           </Campo>
         </div>
@@ -199,7 +199,7 @@ export default async function Ficha({
             name="contenido"
             defaultValue={p.contenido ?? ""}
             placeholder="250 ml"
-            className="w-full rounded-lg border border-linea bg-white px-3 py-2"
+            className="w-full rounded-lg border border-salvia bg-white px-3 py-2"
           />
         </Campo>
 
@@ -217,12 +217,12 @@ export default async function Ficha({
                 <label key={c} className="flex items-center gap-2 text-sm">
                   <input type="radio" name="gtin" value={c} defaultChecked={c === p.gtin} />
                   <span className="tabular-nums">{c}</span>
-                  {c === p.gtin && <span className="text-xs text-pizarra">(el actual)</span>}
+                  {c === p.gtin && <span className="text-xs text-oliva">(el actual)</span>}
                 </label>
               ))}
               <label className="flex items-center gap-2 text-sm">
                 <input type="radio" name="gtin" value="" defaultChecked={!p.gtin} />
-                <span className="text-pizarra">ninguno de los dos</span>
+                <span className="text-oliva">ninguno de los dos</span>
               </label>
             </div>
           ) : (
@@ -230,7 +230,7 @@ export default async function Ficha({
               name="gtin"
               inputMode="numeric"
               defaultValue={p.gtin ?? ""}
-              className="w-full rounded-lg border border-linea bg-white px-3 py-2 tabular-nums"
+              className="w-full rounded-lg border border-salvia bg-white px-3 py-2 tabular-nums"
             />
           )}
         </Campo>
@@ -240,7 +240,7 @@ export default async function Ficha({
             name="imagen"
             type="url"
             defaultValue={p.imagen ?? ""}
-            className="w-full rounded-lg border border-linea bg-white px-3 py-2"
+            className="w-full rounded-lg border border-salvia bg-white px-3 py-2"
           />
         </Campo>
 
@@ -249,7 +249,7 @@ export default async function Ficha({
             name="descripcion"
             rows={6}
             defaultValue={p.descripcion ?? ""}
-            className="w-full rounded-lg border border-linea bg-white px-3 py-2 leading-relaxed"
+            className="w-full rounded-lg border border-salvia bg-white px-3 py-2 leading-relaxed"
           />
         </Campo>
 
@@ -263,12 +263,12 @@ export default async function Ficha({
           La descripción está revisada y aprobada
         </label>
 
-        <button className="self-start rounded-lg bg-noche px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+        <button className="self-start rounded-lg bg-oliva px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
           Guardar
         </button>
       </form>
 
-      <section className="mt-10 rounded-xl border border-linea bg-white p-5">
+      <section className="mt-10 rounded-xl border border-salvia bg-white p-5">
         <h2 className="font-display text-lg font-bold">Publicación</h2>
         {fallo && (
           <p className="mt-2 rounded-lg bg-[#fdeaea] px-3 py-2 text-sm text-[#b91c1c]">
@@ -278,7 +278,7 @@ export default async function Ficha({
           </p>
         )}
         {p.publicado ? (
-          <p className="mt-1 text-sm text-exito">Este producto está publicado en la tienda.</p>
+          <p className="mt-1 text-sm text-petroleo">Este producto está publicado en la tienda.</p>
         ) : pendientes.length > 0 ? (
           <p className="mt-1 text-sm text-alerta">
             No se puede publicar: {pendientes.length} aviso
@@ -287,14 +287,14 @@ export default async function Ficha({
             no esta pantalla.
           </p>
         ) : (
-          <p className="mt-1 text-sm text-pizarra">Listo para publicar.</p>
+          <p className="mt-1 text-sm text-oliva">Listo para publicar.</p>
         )}
         <form action={publicar} className="mt-3">
           <input type="hidden" name="slug" value={slug} />
           <input type="hidden" name="publicar" value={p.publicado ? "no" : "si"} />
           <button
             disabled={!p.publicado && pendientes.length > 0}
-            className="rounded-lg border border-linea px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-lg border border-salvia px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
           >
             {p.publicado ? "Retirar de la tienda" : "Publicar"}
           </button>
@@ -317,7 +317,7 @@ function Campo({
     <label className="flex flex-col gap-1.5">
       <span className="text-sm font-medium">{etiqueta}</span>
       {children}
-      {nota && <span className="text-xs text-pizarra">{nota}</span>}
+      {nota && <span className="text-xs text-oliva">{nota}</span>}
     </label>
   );
 }

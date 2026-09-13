@@ -32,7 +32,7 @@ const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
  *  está fuera; este mapa traduce entre las dos formas para que el manifiesto se
  *  escriba con los nombres de siempre. */
 const ORIGEN = (activo) =>
-  activo.startsWith("ilustraciones/")
+  activo.startsWith("ilustraciones/") || activo.startsWith("eve-origenes/")
     ? join(raiz, "packages/brand", activo)
     : join(raiz, "packages/brand/assets", activo);
 
@@ -91,22 +91,22 @@ const APPS = [
     ]
   },
   {
-    // La tienda es la única app con escaparate público de marca propia: el
-    // teal identifica la línea Tienda desde la tabla de decisión del manual, y
-    // la media unidad izquierda es su icono de producto. Las dos van al
-    // encabezado, así que se sirven desde su propio origen como todo lo demás.
+    // La tienda lleva la identidad de Eve-Orígenes, submarca de Evetev (ver
+    // packages/brand/eve-origenes/README.md): su logotipo, su hoja en círculo
+    // como favicon y su paleta. La marca corporativa ya no se pinta aquí; solo
+    // se nombra en el pie. Las fotos son las portadas de la tienda y de cada
+    // marca.
     nombre: "eve-store",
     destino: "apps/eve-store/public/marca",
     activos: [
-      "favicon/favicon.svg",
-      "favicon/favicon-32.png",
-      "favicon/apple-touch-icon.png",
-      "favicon/mask-icon.svg",
-      "isotipos/isotipo-azul-noche.svg",
-      // El pie va sobre azul noche, y ahí la blanca es la única que asegura
-      // contraste (regla T2 del manual): la de color se funde con el fondo.
-      "isotipos/isotipo-blanco.svg",
-      "unidades/unidad-izquierda-negro.svg",
+      "eve-origenes/colores.css",
+      "eve-origenes/logotipo-oliva.svg",
+      "eve-origenes/logotipo-blanco.svg",
+      "eve-origenes/hoja-oliva.svg",
+      "eve-origenes/hoja-circulo-oliva.svg",
+      "eve-origenes/favicon/favicon.svg",
+      "eve-origenes/favicon/favicon-32.png",
+      "eve-origenes/favicon/apple-touch-icon.png",
       "ilustraciones/spa-still-life.webp",
       "ilustraciones/dermanat-pic.webp",
       "ilustraciones/allen-pic.webp",

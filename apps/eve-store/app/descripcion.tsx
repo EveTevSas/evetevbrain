@@ -35,7 +35,7 @@ export function Descripcion({ parrafos, id }: { parrafos: string[]; id: string }
   if (!largo) return <div className="mt-8">{texto}</div>;
 
   const boton =
-    "cursor-pointer select-none text-sm font-semibold text-noche underline underline-offset-4 hover:opacity-70";
+    "cursor-pointer select-none text-sm font-semibold text-oliva underline underline-offset-4 hover:opacity-70";
 
   return (
     <div className="mt-8">
@@ -45,7 +45,7 @@ export function Descripcion({ parrafos, id }: { parrafos: string[]; id: string }
         {texto}
         {/* El degradado dice «esto sigue» sin escribirlo. Desaparece al
             desplegar, porque entonces ya no hay nada cortado que insinuar. */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-tinte to-transparent peer-checked:hidden" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-niebla to-transparent peer-checked:hidden" />
       </div>
 
       <label htmlFor={id} className={`mt-3 inline-block peer-checked:hidden ${boton}`}>

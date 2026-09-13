@@ -40,7 +40,7 @@ export function AvisoCarrito() {
       {aviso && (
         <div
           key={aviso.id}
-          className="aviso-entra pointer-events-auto flex max-w-md items-center gap-3 rounded-xl bg-noche px-4 py-3 text-sm text-white shadow-lg"
+          className="aviso-entra pointer-events-auto flex max-w-md items-center gap-3 rounded-xl bg-oliva px-4 py-3 text-sm text-white shadow-lg"
         >
           <span className="truncate">
             Añadiste <strong className="font-semibold">{aviso.nombre}</strong>

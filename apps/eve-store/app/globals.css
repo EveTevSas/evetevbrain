@@ -1,41 +1,113 @@
 @import "tailwindcss";
 
-/* Tokens de marca. El teal es el color de línea de Eve-Store: era el de la
-   Tienda antes de que saliera de la web, y sigue sin usarlo ninguna otra
-   vertical. El coral queda reservado a la acción (regla C2). */
-@theme {
-  --color-noche: #0a2540;
-  --color-pizarra: #64748b;
-  --color-hielo: #eaf2fb;
-  --color-tinte: #f4f9fd;
-  --color-linea: #e2ecf7;
-  --color-teal: #3baec2;
-  --color-coral: #ee3d22;
-  --color-cian: #22d3ee;
+/* La paleta de Eve-Orígenes NO se escribe aquí.
+ *
+ * Vive en `packages/brand/eve-origenes/colores.css` —la regla 7 del CLAUDE.md:
+ * la marca no se redefine por app— y `pnpm marca:sync` la copia a
+ * `public/marca/colores.css`, que el layout enlaza. Aquí solo se le ponen
+ * nombres de Tailwind. `inline` hace que cada utilidad apunte directamente a la
+ * variable de marca: si mañana cambia un color en el paquete, la tienda lo
+ * recoge sin tocar este archivo.
+ *
+ * Son los colores que SE VEN en el manual, no los códigos que imprime; ver el
+ * README del paquete. Y los usos que siguen están medidos, no supuestos: el
+ * blanco sobre petróleo da 7,9:1 y va en el botón de compra; el jade da 3,2:1
+ * con blanco y por eso solo decora. */
+@theme inline {
+  --color-oliva: var(--eo-oliva);
+  --color-petroleo: var(--eo-petroleo);
+  --color-jade: var(--eo-jade);
+  --color-salvia: var(--eo-salvia);
+  --color-gris-azulado: var(--eo-gris-azulado);
+  --color-niebla: var(--eo-niebla);
+  --color-arena: var(--eo-arena);
+  --color-durazno: var(--eo-durazno);
+  --color-topo: var(--eo-topo);
+  --color-gris: var(--eo-gris);
+  --color-tinta: var(--eo-tinta);
+
+  /* El papel antes que el color: la acción de compra es petróleo con texto
+     blanco. Nombrarlo por su función evita que un botón «de compra» acabe en
+     jade por gusto, que con blanco no llega a AA. */
+  --color-accion: var(--eo-petroleo);
+
+  /* Estado, no marca: el manual no los define y un aviso no puede confundirse
+     con un acento. */
   --color-alerta: #b06405;
-  --color-exito: #15803d;
-  --font-display: "Baloo 2", system-ui, sans-serif;
+
+  /* Las tres del manual en su versión libre: El Messiri para títulos, Didact
+     Gothic en lugar de Century Gothic (licencia web de pago) y Caveat en lugar
+     de Jenna Sue (su webfont también se paga). Las carga `next/font` en el
+     layout y las sirve desde este mismo dominio. */
+  --font-display: var(--fuente-titulos), Georgia, serif;
+  --font-sans: var(--fuente-texto), "Century Gothic", system-ui, sans-serif;
+  --font-acento: var(--fuente-acento), cursive;
 }
 
 body {
-  background: var(--color-tinte);
-  color: var(--color-noche);
+  background: var(--eo-niebla);
+  color: var(--eo-tinta);
 }
 
-/* La media unidad izquierda, teñida de teal: el icono de la línea Tienda.
+/* La prosa de los artículos.
  *
- * Se tiñe con `mask` sobre el archivo negro en vez de servir un SVG por color,
- * que es lo que pide el manual de marca — el dibujo es idéntico en todas las
- * variantes y sólo cambia la tinta, así que duplicar archivos es duplicar algo
- * que tiene que ser el mismo trazo para siempre.
- *
- * Funciona igual sobre el fondo claro y sobre el azul noche del pie porque el
- * relleno es un color plano y no el degradado, que sí se fundiría con el fondo
- * oscuro (regla T2). */
-.unidad-teal {
-  background: var(--color-teal);
-  -webkit-mask: url("/marca/unidad-izquierda-negro.svg") center / contain no-repeat;
-  mask: url("/marca/unidad-izquierda-negro.svg") center / contain no-repeat;
+ * Escrita a mano en vez de con el plugin de tipografía de Tailwind: son quince
+ * reglas, y el plugin es una dependencia más para pintar párrafos. Los títulos
+ * en El Messiri y oliva, el texto en Didact Gothic y negro, como el ejemplo
+ * tipográfico del manual; los enlaces en petróleo, que es el color de acción.
+ * La medida de línea la pone el contenedor (`max-w-3xl`, unos 70 caracteres). */
+.prosa {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+.prosa > * + * {
+  margin-top: 1.1em;
+}
+.prosa h2 {
+  margin-top: 2.2em;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--eo-oliva);
+}
+.prosa h3 {
+  margin-top: 1.8em;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--eo-oliva);
+}
+.prosa a {
+  color: var(--eo-petroleo);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prosa ul,
+.prosa ol {
+  padding-left: 1.4em;
+}
+.prosa ul {
+  list-style: disc;
+}
+.prosa ol {
+  list-style: decimal;
+}
+.prosa li + li {
+  margin-top: 0.45em;
+}
+.prosa strong {
+  font-weight: 600;
+}
+.prosa blockquote {
+  border-left: 3px solid var(--eo-jade);
+  padding-left: 1em;
+  color: var(--eo-oliva);
+}
+.prosa sup.cita a {
+  font-size: 0.72em;
+  text-decoration: none;
 }
 
 /* Las dos animaciones del carrito.

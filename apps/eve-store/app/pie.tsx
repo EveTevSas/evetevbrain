@@ -30,26 +30,28 @@ export async function Pie({ minimo = false }: { minimo?: boolean }) {
   const lista = minimo ? [] : await marcas();
 
   return (
-    <footer className="mt-20 bg-noche text-[#b9cce0]">
+    <footer className="mt-20 bg-oliva text-niebla">
       {!minimo && (
-        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-5">
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/marca/isotipo-blanco.svg" alt="" width={26} height={26} />
-              <span className="font-display text-lg font-bold text-white">Eve-Store</span>
+              <img
+                src="/marca/logotipo-blanco.svg"
+                alt="Eve-Orígenes"
+                width={160}
+                height={30}
+                className="h-8 w-auto"
+              />
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed">
-              La tienda propia de Evetev: aceites naturales, cuidado facial y suplementos de marcas
-              colombianas, con existencias reales y envío desde Bogotá.
+              Cuidado de la piel y vida saludable con productos de fabricación colombiana: aceites
+              naturales, cuidado facial y suplementos de marcas colombianas, con existencias reales
+              y envío desde Bogotá.
             </p>
-            {/* La media unidad izquierda en teal es el icono de la línea Tienda
-                en el manual de marca. Se tiñe con `mask` sobre el archivo negro,
-                que es lo que permite un color por línea sin duplicar el SVG. */}
-            <p className="mt-5 flex items-center gap-2 text-xs uppercase tracking-widest">
-              <span aria-hidden="true" className="unidad-teal size-5" />
-              Línea Tienda
-            </p>
+            {/* Eve-Orígenes es una submarca: se dice de quién es, en texto y sin el
+                logo corporativo, que competiría con el propio. */}
+            <p className="mt-5 text-sm">Una marca de Evetev S.A.S.</p>
           </div>
 
           <Columna titulo="Comprar">
@@ -64,6 +66,11 @@ export async function Pie({ minimo = false }: { minimo?: boolean }) {
                 {marca}
               </Enlace>
             ))}
+          </Columna>
+
+          <Columna titulo="Leer">
+            <Enlace href="/blog">Blog</Enlace>
+            <Enlace href="/politica-editorial">Cómo escribimos</Enlace>
           </Columna>
 
           <Columna titulo="Evetev">
@@ -97,7 +104,7 @@ function Columna({ titulo, children }: { titulo: string; children: React.ReactNo
 function Enlace({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <li>
-      <a href={href} className="transition-colors hover:text-[#22d3ee]">
+      <a href={href} className="transition-colors hover:text-arena">
         {children}
       </a>
     </li>

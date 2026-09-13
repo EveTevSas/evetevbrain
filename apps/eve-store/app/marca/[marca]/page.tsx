@@ -133,7 +133,7 @@ export async function generateMetadata({
 
   const { marca, cuantos } = encontrada;
   return {
-    title: `${marca} — ${cuantos} producto${cuantos === 1 ? "" : "s"} · Eve-Store`,
+    title: `${marca} — ${cuantos} producto${cuantos === 1 ? "" : "s"} · Eve-Orígenes`,
     description: `Todo lo de ${marca} que tenemos en existencia: ${cuantos} producto${
       cuantos === 1 ? "" : "s"
     } con precio y unidades reales. Envío desde Bogotá.`,
@@ -167,7 +167,7 @@ export default async function PaginaMarca({ params }: { params: Promise<{ marca:
           <Titular marca={marca} cuantos={cuantos} fondo={portada.tono} />
         </Jumbotron>
       ) : (
-        <div className="border-b border-linea bg-white">
+        <div className="border-b border-salvia bg-white">
           <header className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
             <Titular marca={marca} cuantos={cuantos} />
           </header>
@@ -205,9 +205,9 @@ function Titular({
   cuantos: number;
   fondo?: "banda" | "claro" | "oscuro";
 }) {
-  const antetitulo = fondo === "oscuro" ? "text-cian" : "text-teal";
+  const antetitulo = fondo === "oscuro" ? "text-arena" : "text-petroleo";
   const entradilla =
-    fondo === "oscuro" ? "text-hielo" : fondo === "claro" ? "text-noche" : "text-pizarra";
+    fondo === "oscuro" ? "text-niebla" : fondo === "claro" ? "text-oliva" : "text-oliva";
 
   return (
     <>

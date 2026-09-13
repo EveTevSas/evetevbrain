@@ -14,7 +14,7 @@ cuando esta guía y la constitución se contradigan, manda la constitución.
 | `apps/evepay-admin`  | Consola de operación de EvePay (Next.js, rol super_admin)  | Activa (aún sin desplegar)                    | 3004         |
 | `apps/website`       | evetev.com + landings `/evepay` `/conecta` `/intelligence` | **Producción**                                | —            |
 | `apps/rag-assistant` | **Fluxi**, asistente RAG (Kimi + embeddings)               | Producción — `rag-assistant-ochre.vercel.app` | —            |
-| `apps/eve-store`     | Tienda (Postgres schema `tienda`)                          | En desarrollo                                 | 3006         |
+| `apps/eve-store`     | **Eve-Orígenes**: tienda (schema `tienda`) y blog          | En desarrollo — cerrada al público            | 3006         |
 | `apps/eve-merchants` | Panel de comercios                                         | En desarrollo                                 | —            |
 | `apps/eve-studio`    | Generador con Kimi — **solo local**, escribe en tu árbol   | Experimental — no se despliega                | 3003         |
 

@@ -1,0 +1,37 @@
+/* Eve-Orígenes — tokens de color.
+ *
+ * Fuente: «Manual de Identidad Corporativa · SkinCare Orígenes» (2020), con el
+ * nombre cambiado a Eve-Orígenes. Ver README.md de esta carpeta.
+ *
+ * SON LOS COLORES QUE SE VEN EN EL MANUAL, NO LOS CÓDIGOS QUE ESCRIBE. El manual
+ * trae cinco muestras donde el hex impreso no coincide con lo pintado: dos
+ * etiquetas copiadas de otra muestra (ponen `#58595b` sobre un verde jade y
+ * sobre un gris medio) y tres muestras con transparencia, cuyo hex es el color
+ * antes de aclararse sobre el blanco. Se decidió (12-sep-2026) quedarse con lo
+ * que se ve. Los códigos del manual quedan anotados al lado de cada una para que
+ * nadie los «corrija» de vuelta.
+ *
+ * Uso: cada app lo sirve desde `/marca` con `pnpm marca:sync`. No se redefine
+ * por app (regla 7 del CLAUDE.md).
+ */
+
+:root {
+  /* ── Principales ─────────────────────────────────────────────── */
+  --eo-oliva: #565d47; /* títulos, fondos de peso, pie */
+  --eo-petroleo: #255958; /* acción: botones de compra, enlaces, antetítulos */
+  --eo-jade: #2ca089; /* acento — el manual escribe #58595b. Solo decorativo o texto ≥ 24 px */
+  --eo-salvia: #cbcead; /* bordes, bandas suaves — el manual escribe #babd92 (al 75 %) */
+  --eo-gris-azulado: #a5b3b3; /* fondos decorativos — el manual escribe #395858 (al 46 %) */
+  --eo-niebla: #f5f5f5; /* fondo de página — el manual escribe #e0e0e0 (al 32 %) */
+
+  /* ── Secundarios ─────────────────────────────────────────────── */
+  --eo-arena: #f2d6ae; /* bandas y etiquetas; sobre oliva, acento claro */
+  --eo-durazno: #f5b895; /* etiquetas y avisos cálidos */
+  --eo-topo: #a58d7f; /* ilustración, detalles */
+  --eo-gris: #84898c; /* bordes y texto grande — el manual escribe #58595b */
+
+  /* ── Tinta ───────────────────────────────────────────────────── */
+  /* El manual no la lista en la paleta, pero su ejemplo tipográfico compone el
+     texto corrido en negro y los títulos en oliva. */
+  --eo-tinta: #000000;
+}

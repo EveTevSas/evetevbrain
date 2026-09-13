@@ -8,7 +8,7 @@ import { administrador } from "@/lib/supabase";
  * nadie tenga que acordarse. Antes esto lo cubría el `noindex` del layout raíz,
  * que de paso hacía invisible la tienda entera. */
 export const metadata: Metadata = {
-  title: "Panel · Eve-Store",
+  title: "Panel · Eve-Orígenes",
   robots: { index: false, follow: false }
 };
 
@@ -26,13 +26,11 @@ export default async function LayoutPanel({ children }: { children: React.ReactN
 
   return (
     <>
-      <div className="border-b border-linea bg-white">
+      <div className="border-b border-salvia bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-2.5 text-xs">
-          <span className="text-pizarra">{quien.correo}</span>
+          <span className="text-oliva">{quien.correo}</span>
           <form action={cerrarSesion}>
-            <button className="text-pizarra underline-offset-2 hover:underline">
-              Cerrar sesión
-            </button>
+            <button className="text-oliva underline-offset-2 hover:underline">Cerrar sesión</button>
           </form>
         </div>
       </div>

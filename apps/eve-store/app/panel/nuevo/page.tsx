@@ -87,12 +87,12 @@ export default async function Nuevo({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
-      <a href="/panel" className="text-sm text-pizarra hover:underline">
+      <a href="/panel" className="text-sm text-oliva hover:underline">
         ← Cola de trabajo
       </a>
 
       <h1 className="mt-4 font-display text-3xl font-bold">Nuevo producto</h1>
-      <p className="mt-2 text-sm text-pizarra">
+      <p className="mt-2 text-sm text-oliva">
         Con el nombre, la marca y el precio basta para crearlo. Nacerá bloqueado y la ficha dirá
         exactamente qué le falta para poder publicarse.
       </p>
@@ -153,7 +153,7 @@ export default async function Nuevo({
           <textarea name="descripcion" rows={6} className={`${entrada} leading-relaxed`} />
         </Campo>
 
-        <button className="self-start rounded-lg bg-noche px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+        <button className="self-start rounded-lg bg-oliva px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
           Crear producto
         </button>
       </form>
@@ -161,7 +161,7 @@ export default async function Nuevo({
   );
 }
 
-const entrada = "w-full rounded-lg border border-linea bg-white px-3 py-2";
+const entrada = "w-full rounded-lg border border-salvia bg-white px-3 py-2";
 
 function Campo({
   etiqueta,
@@ -178,10 +178,10 @@ function Campo({
     <label className="flex flex-col gap-1.5">
       <span className="text-sm font-medium">
         {etiqueta}
-        {requerido && <span className="ml-1 text-coral">*</span>}
+        {requerido && <span className="ml-1 text-accion">*</span>}
       </span>
       {children}
-      {nota && <span className="text-xs text-pizarra">{nota}</span>}
+      {nota && <span className="text-xs text-oliva">{nota}</span>}
     </label>
   );
 }

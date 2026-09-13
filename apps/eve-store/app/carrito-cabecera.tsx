@@ -52,13 +52,13 @@ export function CarritoCabecera() {
     <a
       href="/carrito"
       aria-label={unidades > 0 ? `Carrito, ${unidades} unidades` : "Carrito, vacío"}
-      className="relative grid size-10 shrink-0 place-items-center rounded-lg border border-linea text-noche hover:bg-hielo"
+      className="relative grid size-10 shrink-0 place-items-center rounded-lg border border-salvia text-oliva hover:bg-salvia"
     >
       <span key={pulsos} className={pulsos > 0 ? "salta" : undefined}>
         <IconoCarrito />
       </span>
       {unidades > 0 && (
-        <span className="absolute -right-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-coral px-1 text-xs font-semibold tabular-nums text-white">
+        <span className="absolute -right-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-accion px-1 text-xs font-semibold tabular-nums text-white">
           {unidades}
         </span>
       )}

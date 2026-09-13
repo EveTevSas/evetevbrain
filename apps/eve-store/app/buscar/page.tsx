@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
    valiendo: generan infinitas URL con contenido casi idéntico y compiten con
    las fichas, que son las que queremos que se citen. */
 export const metadata: Metadata = {
-  title: "Buscar · Eve-Store",
+  title: "Buscar · Eve-Orígenes",
   robots: { index: false, follow: true }
 };
 
@@ -46,13 +46,13 @@ export default async function Buscar({ searchParams }: { searchParams: Promise<{
           </h1>
 
           {q.trim() ? (
-            <p className="mt-2 text-sm text-pizarra">
+            <p className="mt-2 text-sm text-oliva">
               {resultados.length === 0
                 ? "No encontramos nada."
                 : `${resultados.length} producto${resultados.length === 1 ? "" : "s"}.`}
             </p>
           ) : (
-            <p className="mt-2 text-sm text-pizarra">
+            <p className="mt-2 text-sm text-oliva">
               Escribe arriba qué buscas — un producto, una marca o para qué lo quieres («piel
               grasa», «cabello»). También puedes ver{" "}
               <a href="/" className="underline">
@@ -63,7 +63,7 @@ export default async function Buscar({ searchParams }: { searchParams: Promise<{
           )}
 
           {resultados.length === 0 && q.trim() && (
-            <p className="mt-2 text-sm text-pizarra">
+            <p className="mt-2 text-sm text-oliva">
               Prueba con menos palabras, o mira{" "}
               <a href="/" className="underline">
                 el catálogo completo
@@ -82,20 +82,20 @@ export default async function Buscar({ searchParams }: { searchParams: Promise<{
                 <li key={p.slug}>
                   <a
                     href={`/producto/${p.slug}`}
-                    className="group flex items-center gap-4 rounded-xl border border-transparent p-3 transition-colors hover:border-linea hover:bg-white"
+                    className="group flex items-center gap-4 rounded-xl border border-transparent p-3 transition-colors hover:border-salvia hover:bg-white"
                   >
-                    <div className="size-16 shrink-0 overflow-hidden rounded-lg border border-linea bg-white">
+                    <div className="size-16 shrink-0 overflow-hidden rounded-lg border border-salvia bg-white">
                       {p.imagen && (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img src={p.imagen} alt="" className="size-full object-contain p-1.5" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs uppercase tracking-wide text-pizarra">{p.marca}</p>
+                      <p className="text-xs uppercase tracking-wide text-oliva">{p.marca}</p>
                       <p className="font-semibold group-hover:underline">
                         {p.nombre}
                         {p.contenido && (
-                          <span className="font-normal text-pizarra"> · {p.contenido}</span>
+                          <span className="font-normal text-oliva"> · {p.contenido}</span>
                         )}
                       </p>
                       {/* Agotado se dice EN el resultado. Sin esto había que abrir
@@ -105,7 +105,7 @@ export default async function Buscar({ searchParams }: { searchParams: Promise<{
                     </div>
                     <p
                       className={`shrink-0 font-display font-bold tabular-nums ${
-                        hay ? "" : "text-pizarra"
+                        hay ? "" : "text-oliva"
                       }`}
                     >
                       {pesos.format(p.precio_minor)}

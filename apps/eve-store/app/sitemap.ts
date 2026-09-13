@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { tiendaAbierta } from "@/lib/apertura";
+import { articulos } from "@/lib/articulos";
 import { marcas, publicados, slugDeMarca } from "@/lib/producto";
 import { urlBase } from "@/lib/url";
 
@@ -30,6 +31,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}/marca/${slugDeMarca(marca)}`,
       changeFrequency: "weekly" as const,
       priority: 0.6
+    })),
+    { url: `${base}/blog`, changeFrequency: "weekly" as const, priority: 0.7 },
+    { url: `${base}/politica-editorial`, changeFrequency: "yearly" as const, priority: 0.3 },
+    /* `lastModified` es la fecha de revisión del artículo, no la del
+       despliegue, por lo mismo que en las fichas: una fecha que se mueve sola
+       deja de significar algo. */
+    ...articulos().map((a) => ({
+      url: `${base}/blog/${a.slug}`,
+      lastModified: new Date(`${a.revisadoEn}T00:00:00Z`),
+      changeFrequency: "monthly" as const,
+      priority: 0.7
     })),
     ...productos.map((p) => ({
       url: `${base}/producto/${p.slug}`,

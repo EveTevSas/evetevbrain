@@ -16,7 +16,7 @@ import { pesos } from "@/lib/producto";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Pedido confirmado · Eve-Store",
+  title: "Pedido confirmado · Eve-Orígenes",
   robots: { index: false, follow: false }
 };
 
@@ -52,20 +52,20 @@ export default async function Pedido({ params }: { params: Promise<{ numero: str
     <>
       <Cabecera />
       <main className="mx-auto max-w-2xl px-6 py-12">
-        <p className="text-xs font-semibold uppercase tracking-widest text-exito">
+        <p className="text-xs font-semibold uppercase tracking-widest text-petroleo">
           Pedido confirmado
         </p>
         <h1 className="mt-1 font-display text-3xl font-bold">{pedido.numero}</h1>
-        <p className="mt-3 text-sm leading-relaxed text-pizarra">
+        <p className="mt-3 text-sm leading-relaxed text-oliva">
           Apartamos las unidades a tu nombre. Te escribimos hoy mismo para cobrarlo y coordinar la
           entrega en {pedido.ciudad}. Guarda este número: es con el que te vamos a identificar.
         </p>
 
-        <div className="mt-8 rounded-xl border border-linea bg-white p-5">
+        <div className="mt-8 rounded-xl border border-salvia bg-white p-5">
           <ul className="flex flex-col gap-1.5 text-sm">
             {pedido.lineas.map((l, i) => (
               <li key={i} className="flex justify-between gap-4">
-                <span className="text-pizarra">
+                <span className="text-oliva">
                   {l.cantidad} × {l.nombre}
                 </span>
                 <span className="shrink-0 tabular-nums">
@@ -73,7 +73,7 @@ export default async function Pedido({ params }: { params: Promise<{ numero: str
                 </span>
               </li>
             ))}
-            <li className="flex justify-between border-t border-linea pt-2 text-pizarra">
+            <li className="flex justify-between border-t border-salvia pt-2 text-oliva">
               <span>Envío</span>
               <span className="tabular-nums">{pesos.format(pedido.envio_minor)}</span>
             </li>
@@ -84,7 +84,7 @@ export default async function Pedido({ params }: { params: Promise<{ numero: str
           </ul>
         </div>
 
-        <a href="/" className="mt-8 inline-block text-sm text-pizarra hover:underline">
+        <a href="/" className="mt-8 inline-block text-sm text-oliva hover:underline">
           ← Seguir comprando
         </a>
       </main>

@@ -67,20 +67,20 @@ export default async function Panel() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
-      <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-linea pb-6">
+      <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-salvia pb-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">
-            Eve-Store · Panel
+          <p className="text-xs font-semibold uppercase tracking-widest text-oliva">
+            Eve-Orígenes · Panel
           </p>
           <h1 className="font-display text-3xl font-bold">Qué falta para abrir</h1>
         </div>
         <a
           href="/panel/nuevo"
-          className="rounded-lg border border-linea bg-white px-4 py-2 text-sm font-semibold hover:bg-hielo"
+          className="rounded-lg border border-salvia bg-white px-4 py-2 text-sm font-semibold hover:bg-salvia"
         >
           Nuevo producto
         </a>
-        <p className="max-w-md text-sm text-pizarra">
+        <p className="max-w-md text-sm text-oliva">
           El catálogo ya está importado. Lo que falta es revisarlo: ningún producto sale a la tienda
           con avisos bloqueantes sin resolver.
         </p>
@@ -107,14 +107,14 @@ export default async function Panel() {
         {filas.map((f) => (
           <li
             key={f.slug}
-            className="rounded-xl border border-linea bg-white p-5 shadow-[0_1px_2px_rgba(10,37,64,.05)]"
+            className="rounded-xl border border-salvia bg-white p-5 shadow-[0_1px_2px_rgba(86,93,71,.05)]"
           >
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <h3 className="font-semibold">
                 <a href={`/panel/producto/${f.slug}`} className="hover:underline">
                   {f.nombre}
                   {f.contenido ? (
-                    <span className="font-normal text-pizarra"> · {f.contenido}</span>
+                    <span className="font-normal text-oliva"> · {f.contenido}</span>
                   ) : (
                     <span className="ml-2 rounded bg-[#fdf3e3] px-1.5 py-0.5 text-xs font-medium text-alerta">
                       sin contenido
@@ -122,7 +122,7 @@ export default async function Panel() {
                   )}
                 </a>
               </h3>
-              <p className="text-sm tabular-nums text-pizarra">
+              <p className="text-sm tabular-nums text-oliva">
                 {f.marca} · {pesos.format(f.precio_minor)} · {f.existencias} en bodega
               </p>
             </div>
@@ -139,9 +139,9 @@ export default async function Panel() {
             </div>
 
             {f.avisos.length > 0 && (
-              <ul className="mt-3 flex flex-col gap-1.5 border-l-2 border-linea pl-4">
+              <ul className="mt-3 flex flex-col gap-1.5 border-l-2 border-salvia pl-4">
                 {f.avisos.map((a, i) => (
-                  <li key={i} className="text-sm leading-relaxed text-pizarra">
+                  <li key={i} className="text-sm leading-relaxed text-oliva">
                     {a}
                   </li>
                 ))}
@@ -166,7 +166,7 @@ function Dato({
   tono?: string;
 }) {
   return (
-    <div className="rounded-xl border border-linea bg-white px-4 py-3">
+    <div className="rounded-xl border border-salvia bg-white px-4 py-3">
       <p
         className={`font-display text-2xl font-bold tabular-nums ${
           tono === "alerta" ? "text-alerta" : ""
@@ -174,7 +174,7 @@ function Dato({
       >
         {texto ?? n}
       </p>
-      <p className="mt-0.5 text-xs leading-tight text-pizarra">{etiqueta}</p>
+      <p className="mt-0.5 text-xs leading-tight text-oliva">{etiqueta}</p>
     </div>
   );
 }
@@ -182,10 +182,10 @@ function Dato({
 function Chip({ children, tono = "" }: { children: React.ReactNode; tono?: string }) {
   const color =
     tono === "exito"
-      ? "bg-[#e8f6ec] text-exito"
+      ? "bg-[#e8f6ec] text-petroleo"
       : tono === "alerta"
         ? "bg-[#fdf3e3] text-alerta"
-        : "bg-hielo text-pizarra";
+        : "bg-salvia text-oliva";
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}>{children}</span>
   );

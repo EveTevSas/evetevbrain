@@ -16,7 +16,7 @@ import { db } from "@/db/connection";
 import { pesos } from "@/lib/producto";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Pedidos · Eve-Store" };
+export const metadata: Metadata = { title: "Pedidos · Eve-Orígenes" };
 
 type Fila = {
   id: number;
@@ -75,11 +75,11 @@ export default async function Pedidos() {
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
-      <a href="/panel" className="text-sm text-pizarra hover:underline">
+      <a href="/panel" className="text-sm text-oliva hover:underline">
         ← Cola de trabajo
       </a>
       <h1 className="mt-4 font-display text-3xl font-bold">Pedidos</h1>
-      <p className="mt-2 text-sm text-pizarra">
+      <p className="mt-2 text-sm text-oliva">
         {pedidos.length === 0
           ? "Todavía no ha entrado ninguno."
           : `${pendientes.length} por cobrar de ${pedidos.length} en total.`}
@@ -90,12 +90,12 @@ export default async function Pedidos() {
           <li
             key={p.id}
             className={`rounded-xl border bg-white p-5 ${
-              p.estado === "pendiente_de_pago" ? "border-alerta/40" : "border-linea"
+              p.estado === "pendiente_de_pago" ? "border-alerta/40" : "border-salvia"
             }`}
           >
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <h2 className="font-display text-lg font-bold">{p.numero}</h2>
-              <p className="text-sm tabular-nums text-pizarra">
+              <p className="text-sm tabular-nums text-oliva">
                 {new Date(p.creado_en).toLocaleString("es-CO", {
                   dateStyle: "medium",
                   timeStyle: "short"
@@ -126,23 +126,23 @@ export default async function Pedidos() {
                   </p>
                 )}
               </div>
-              <div className="text-sm text-pizarra">
+              <div className="text-sm text-oliva">
                 <p>{p.envio_direccion}</p>
                 <p>{p.envio_ciudad}</p>
                 {p.envio_notas && <p className="italic">{p.envio_notas}</p>}
               </div>
             </div>
 
-            <ul className="mt-4 flex flex-col gap-1 border-t border-linea pt-3 text-sm">
+            <ul className="mt-4 flex flex-col gap-1 border-t border-salvia pt-3 text-sm">
               {p.lineas.map((l, i) => (
                 <li key={i} className="flex justify-between gap-4">
-                  <span className="text-pizarra">
+                  <span className="text-oliva">
                     {l.cantidad} × {l.nombre}
                   </span>
                   <span className="tabular-nums">{pesos.format(l.precio_minor * l.cantidad)}</span>
                 </li>
               ))}
-              <li className="flex justify-between text-pizarra">
+              <li className="flex justify-between text-oliva">
                 <span>Envío</span>
                 <span className="tabular-nums">{pesos.format(p.envio_minor)}</span>
               </li>
@@ -152,13 +152,13 @@ export default async function Pedidos() {
               </li>
             </ul>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-linea pt-3">
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-salvia pt-3">
               <span
                 className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                   p.estado === "pagado"
-                    ? "bg-[#e8f6ec] text-exito"
+                    ? "bg-[#e8f6ec] text-petroleo"
                     : p.estado === "cancelado"
-                      ? "bg-hielo text-pizarra"
+                      ? "bg-salvia text-oliva"
                       : "bg-[#fdf3e3] text-alerta"
                 }`}
               >
@@ -169,7 +169,7 @@ export default async function Pedidos() {
                 <form action={marcar}>
                   <input type="hidden" name="id" value={p.id} />
                   <input type="hidden" name="estado" value="pagado" />
-                  <button className="rounded-md border border-linea px-2.5 py-1 text-xs font-medium hover:bg-hielo">
+                  <button className="rounded-md border border-salvia px-2.5 py-1 text-xs font-medium hover:bg-salvia">
                     Marcar cobrado
                   </button>
                 </form>
@@ -178,7 +178,7 @@ export default async function Pedidos() {
                 <form action={marcar}>
                   <input type="hidden" name="id" value={p.id} />
                   <input type="hidden" name="estado" value="cancelado" />
-                  <button className="rounded-md border border-linea px-2.5 py-1 text-xs font-medium hover:bg-hielo">
+                  <button className="rounded-md border border-salvia px-2.5 py-1 text-xs font-medium hover:bg-salvia">
                     Cancelar y devolver al inventario
                   </button>
                 </form>
