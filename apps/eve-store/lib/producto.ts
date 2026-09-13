@@ -4,6 +4,7 @@ import { cache } from "react";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db/connection";
+import { buscarEnFixture, catalogoDeFixture, usarFixture } from "@/lib/fixture";
 
 /* Ninguna consulta de la tienda puede colgar la página.
  *
@@ -94,6 +95,13 @@ const CONSULTA_CATALOGO = sql`
 let memoDeCompilacion: Promise<Publico[]> | null = null;
 
 export const catalogo = cache(async (): Promise<Publico[]> => {
+  /* La bifurcación del fixture va aquí arriba, antes del plazo y antes de la
+     memoria de compilación, porque leer un JSON del disco no puede colgarse en
+     un socket muerto ni agotar un pooler: las dos redes de seguridad de abajo
+     protegen de cosas que sin base no existen. Ver `lib/fixture.ts` para qué
+     NO reproduce — sobre todo, `publicado`. */
+  if (usarFixture) return catalogoDeFixture();
+
   if (process.env.NEXT_PHASE === "phase-production-build") {
     memoDeCompilacion ??= conPlazo(db().execute<Publico>(CONSULTA_CATALOGO));
     return memoDeCompilacion;
@@ -188,6 +196,7 @@ export async function publicado(slug: string): Promise<Publico | null> {
 export async function buscar(consulta: string): Promise<Publico[]> {
   const limpia = consulta.trim();
   if (!limpia) return [];
+  if (usarFixture) return buscarEnFixture(await catalogo(), limpia);
   return conPlazo(
     db().execute<Publico>(sql`
     select p.slug, p.nombre, p.marca, p.gtin, p.precio_minor::int as precio_minor, p.moneda,

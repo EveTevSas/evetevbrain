@@ -8,7 +8,7 @@
 import type { Metadata } from "next";
 
 import { Cabecera } from "@/app/cabecera";
-import { FiltroMarcas } from "@/app/filtro-marcas";
+import { Jumbotron } from "@/app/jumbotron";
 import { Pie } from "@/app/pie";
 import { Rejilla } from "@/app/rejilla";
 import { marcas, publicados } from "@/lib/producto";
@@ -72,22 +72,57 @@ export default async function Tienda() {
   return (
     <>
       <Cabecera />
-      <main className="mx-auto max-w-6xl px-6 py-12">
-        <header className="border-b border-linea pb-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">Eve-Store</p>
-          <h1 className="mt-1 font-display text-4xl font-bold">
-            Aceites naturales y cuidado de la piel
-          </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-pizarra">
-            Marcas colombianas: {listaDeMarcas}. {productos.length} productos, con existencias
-            reales — si dice que hay, hay.
-          </p>
-          <FiltroMarcas />
-        </header>
 
-        <Rejilla productos={productos} />
+      {/* La foto tiene el bodegón abajo a la izquierda y aire a la derecha, así
+          que el texto va ahí. En móvil el encuadre baja y se va al centro: con
+          la columna estrecha, `35%` dejaba la bandeja fuera. */}
+      <Jumbotron
+        imagen="/marca/spa-still-life.webp"
+        encuadre="object-[40%_70%] sm:object-[35%_65%]"
+        lado="derecha"
+        tono="oscuro"
+      >
+        {/* Cian y no teal: sobre azul noche, el cian es el realce que el manual
+            da por contrastado. El teal identifica la línea Tienda en fondo
+            claro, que es donde se lee. */}
+        <p className="text-xs font-semibold uppercase tracking-widest text-cian">Tienda Evetev</p>
+        <h1 className="mt-2 font-display text-4xl font-bold leading-[1.1] sm:text-5xl">
+          Aceites naturales y cuidado de la piel
+        </h1>
+        <p className="mt-5 max-w-xl text-base leading-relaxed text-hielo">
+          Marcas colombianas: {listaDeMarcas}. Cada ficha lleva el precio, el contenido y las
+          unidades que hay hoy — si dice que hay, hay.
+        </p>
+
+        {/* Las cifras salen del catálogo. Escritas a mano mienten en cuanto entre
+            o salga un producto, que es el mismo error ya corregido en la lista de
+            marcas de arriba. */}
+        <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
+          <Cifra n={productos.length} que={productos.length === 1 ? "producto" : "productos"} />
+          <Cifra n={nombres.length} que={nombres.length === 1 ? "marca" : "marcas"} />
+          <Cifra n={productos.filter((p) => p.existencias > 0).length} que="con existencias hoy" />
+        </dl>
+      </Jumbotron>
+
+      <main className="mx-auto max-w-6xl px-6 py-12">
+        <h2 className="font-display text-2xl font-bold">Todo el catálogo</h2>
+        <Rejilla productos={productos} nivel={3} />
       </main>
       <Pie />
     </>
+  );
+}
+
+/* Una cifra y lo que cuenta. Baloo 700 para el número, que es la regla de la
+ * marca para cualquier monto o cantidad destacada. */
+function Cifra({ n, que }: { n: number; que: string }) {
+  return (
+    <div>
+      <dt className="sr-only">{que}</dt>
+      <dd>
+        <span className="font-display text-3xl font-bold tabular-nums">{n}</span>
+        <span className="ml-2 text-sm opacity-80">{que}</span>
+      </dd>
+    </div>
   );
 }

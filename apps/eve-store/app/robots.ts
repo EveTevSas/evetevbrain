@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { tiendaAbierta } from "@/lib/apertura";
 import { publicados } from "@/lib/producto";
 import { urlBase } from "@/lib/url";
 
@@ -11,6 +12,11 @@ import { urlBase } from "@/lib/url";
 export const revalidate = 300;
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
+  /* Cerrada quiere decir cerrada también para los rastreadores. Y va antes de
+     consultar el catálogo: con la tienda en obras da igual cuántos productos
+     haya, la respuesta es la misma. */
+  if (!tiendaAbierta) return { rules: [{ userAgent: "*", disallow: "/" }] };
+
   const hay = (await publicados()).length > 0;
   const base = urlBase();
 

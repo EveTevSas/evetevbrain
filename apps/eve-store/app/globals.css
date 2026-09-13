@@ -11,6 +11,7 @@
   --color-linea: #e2ecf7;
   --color-teal: #3baec2;
   --color-coral: #ee3d22;
+  --color-cian: #22d3ee;
   --color-alerta: #b06405;
   --color-exito: #15803d;
   --font-display: "Baloo 2", system-ui, sans-serif;
@@ -19,6 +20,22 @@
 body {
   background: var(--color-tinte);
   color: var(--color-noche);
+}
+
+/* La media unidad izquierda, teñida de teal: el icono de la línea Tienda.
+ *
+ * Se tiñe con `mask` sobre el archivo negro en vez de servir un SVG por color,
+ * que es lo que pide el manual de marca — el dibujo es idéntico en todas las
+ * variantes y sólo cambia la tinta, así que duplicar archivos es duplicar algo
+ * que tiene que ser el mismo trazo para siempre.
+ *
+ * Funciona igual sobre el fondo claro y sobre el azul noche del pie porque el
+ * relleno es un color plano y no el degradado, que sí se fundiría con el fondo
+ * oscuro (regla T2). */
+.unidad-teal {
+  background: var(--color-teal);
+  -webkit-mask: url("/marca/unidad-izquierda-negro.svg") center / contain no-repeat;
+  mask: url("/marca/unidad-izquierda-negro.svg") center / contain no-repeat;
 }
 
 /* Las dos animaciones del carrito.

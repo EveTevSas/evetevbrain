@@ -8,10 +8,11 @@
 import type { Metadata } from "next";
 
 import { Cabecera } from "@/app/cabecera";
+import { IconoCarrito } from "@/app/icono-carrito";
 import { Pie } from "@/app/pie";
 import { cambiar, quitar } from "@/lib/acciones-carrito";
 import { detalle, ENVIO_MINOR } from "@/lib/carrito";
-import { pesos } from "@/lib/producto";
+import { pesos, publicados } from "@/lib/producto";
 
 export const dynamic = "force-dynamic";
 
@@ -32,18 +33,30 @@ export default async function Carrito({
     return (
       <>
         <Cabecera />
-        <main className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-6">
-          <h1 className="font-display text-3xl font-bold">Tu carrito está vacío</h1>
-          <p className="mt-3 text-sm text-pizarra">
-            <a href="/" className="underline">
-              Mira el catálogo
-            </a>{" "}
-            o{" "}
-            <a href="/buscar" className="underline">
-              busca algo concreto
-            </a>
-            .
+        {/* El vacío también es una pantalla, y esta no ofrecía nada que pulsar:
+            un titular y dos enlaces subrayados perdidos en medio del blanco. Un
+            carrito vacío es el momento exacto en que hay que devolver a alguien
+            al catálogo, así que lleva el icono para que se entienda de un
+            vistazo de qué pantalla se trata y un botón de verdad. Es la única
+            acción de la vista, así que es la que va en coral (regla C2). */}
+        <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-6 text-center">
+          <span className="grid size-16 place-items-center rounded-full bg-hielo text-pizarra">
+            <IconoCarrito className="size-7" />
+          </span>
+          <h1 className="mt-5 font-display text-3xl font-bold">Tu carrito está vacío</h1>
+          <p className="mt-3 text-sm leading-relaxed text-pizarra">
+            Todavía no has añadido nada. El catálogo son {(await publicados()).length} productos de
+            marcas colombianas, con las unidades que hay hoy.
           </p>
+          <a
+            href="/"
+            className="mt-7 rounded-full bg-coral px-7 py-3 font-semibold text-white transition hover:opacity-90"
+          >
+            Ver el catálogo
+          </a>
+          <a href="/buscar" className="mt-4 text-sm text-pizarra underline hover:text-noche">
+            o busca algo concreto
+          </a>
         </main>
         <Pie />
       </>

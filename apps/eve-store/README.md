@@ -39,11 +39,74 @@ imprime ni un carácter de ninguna llave.
 Después:
 
 ```bash
-pnpm --filter @evetev/eve-store db:migrate     # crea el schema `tienda`
+export DATABASE_URL="…"                     # solo para db:migrate — ver abajo
+pnpm --filter @evetev/eve-store db:migrate  # crea el schema `tienda`
 pnpm --filter @evetev/eve-store db:import   # carga los 25 productos
-pnpm --filter @evetev/eve-store db:check  # confronta base y aplicación
-pnpm --filter @evetev/eve-store dev           # arranca en el puerto 3003; el panel está en /panel
+pnpm --filter @evetev/eve-store db:check    # confronta base y aplicación
+pnpm --filter @evetev/eve-store dev         # arranca en el puerto 3006; el panel está en /panel
 ```
+
+`db:import`, `db:check` y `dev` leen `.env.local` solos. **`db:migrate` no**:
+es un bucle de `psql`, no un script de Node, y `psql` no sabe nada de ese
+archivo. Hasta que la migración deje de ser un bucle de shell, esa línea hay que
+exportarla a mano.
+
+> Los tres comandos de Node **no** lo leían tampoco: `db:check` y `db:import`
+> daban por hecho que la variable venía exportada y fallaban con «Falta
+> DATABASE_URL» aunque `creds` dijera que todo estaba bien. Ahora la cargan con
+> `scripts/entorno.mjs`, que no pisa lo que ya venga puesto en la terminal.
+
+## La tienda está cerrada al público
+
+**Cerrada por defecto.** Sin `TIENDA_ABIERTA=1`, todo lo público —portada,
+fichas, marcas, búsqueda, carrito, checkout— es el letrero de
+`/en-construccion`, con `noindex, nofollow`; el `robots.txt` prohíbe todo, el
+sitemap va vacío y el feed responde 404. `/panel` sigue funcionando: la tienda
+está cerrada al público, no a quien la está montando.
+
+```bash
+TIENDA_ABIERTA=1 pnpm --filter @evetev/eve-store dev   # verla como la vería un cliente
+```
+
+El sentido por defecto es deliberado. Una variable que se olvida deja la tienda
+**cerrada**, no abierta: el fallo posible es que siga en obras más tiempo del
+debido —se nota y se arregla en un minuto— y no que un catálogo a medio revisar
+salga a la venta sin que nadie lo decida. Es la misma disciplina del schema,
+`publicado boolean not null default false`.
+
+La puerta vive en `middleware.ts` y no en cada página, para que una página nueva
+no pueda saltársela por descuido.
+
+> **Esto no es una cerradura**, es un letrero: el código y las rutas siguen
+> respondiendo. Para que no llegue ni una petición hay que activar **Deployment
+> Protection** en el proyecto de Vercel, que es un ajuste del panel, no del
+> repositorio.
+
+## Trabajar la tienda sin base de datos
+
+Para tocar diseño no hace falta Supabase. Con la variable puesta, el catálogo
+sale de `catalogo/catalogo.json` —los veinticinco productos que ya están en el
+repo— y la tienda se pinta entera:
+
+```bash
+TIENDA_FIXTURE=1 pnpm --filter @evetev/eve-store dev
+```
+
+**No es un respaldo.** No se enciende solo ni salta cuando la base falla: hay
+que pedirlo. Un respaldo automático haría que una base caída se viera igual que
+una sana, y en una tienda eso es vender lo que no hay. Puesto en el entorno de
+producción de Vercel, el arranque falla a propósito.
+
+Lo que el fixture **no** reproduce, y conviene saber antes de fiarse de una
+pantalla:
+
+| No reproduce               | Por qué                                                                                                                                                              |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `publicado`                | El JSON es el volcado **anterior** a la revisión: los 25 traen avisos por confirmar y con la regla real no saldría ninguno. Aquí se ven todos — uno más que en vivo. |
+| Carrito y checkout         | `lib/carrito.ts` consulta la tabla por su cuenta y las acciones escriben. Siguen necesitando base.                                                                   |
+| El orden de los resultados | Postgres lo calcula con `ts_rank`; el fixture filtra por palabras y conserva el orden del catálogo.                                                                  |
+
+El detalle, en `lib/fixture.ts`.
 
 ## Qué hay hoy
 
@@ -54,10 +117,12 @@ pnpm --filter @evetev/eve-store dev           # arranca en el puerto 3003; el pa
 | `db/schema.ts`                 | El mismo schema en Drizzle, para darle tipos a la app.        |
 | `scripts/importar.mjs`         | Carga el JSON en la base. Idempotente.                        |
 | `scripts/comprobar-schema.mjs` | Falla si la base y la aplicación se separan.                  |
-| `app/page.tsx`                 | La raíz: reservada para la tienda, hoy una portada mínima.    |
+| `app/page.tsx`                 | La portada: presentación y rejilla del catálogo publicado.    |
 | `app/panel/`                   | El panel de administración, tras autenticación.               |
 | `app/producto/[slug]/`         | La ficha pública, con su JSON-LD `Product` + `Offer`.         |
 | `app/buscar/`                  | Búsqueda en español, sin tildes.                              |
+| `app/cabecera.tsx`             | Promesa, marca, buscador, carrito y navegación por marcas.    |
+| `lib/fixture.ts`               | El catálogo de mentira para trabajar sin base (ver arriba).   |
 | `app/feed.xml/`                | El feed de producto para los canales de compra.               |
 
 ## Encontrable

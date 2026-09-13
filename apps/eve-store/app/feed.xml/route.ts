@@ -16,6 +16,7 @@
  * No hay copia intermedia que pueda quedarse vieja — y una copia vieja es peor
  * que no tener feed, porque el canal aprende a desconfiar.
  */
+import { tiendaAbierta } from "@/lib/apertura";
 import { publicados } from "@/lib/producto";
 import { urlBase } from "@/lib/url";
 
@@ -31,6 +32,11 @@ function xml(t: string | null | undefined) {
 }
 
 export async function GET() {
+  /* El feed es el canal por el que la tienda se ofrece a Google Merchant y a
+     los agentes de compra: publicarlo con el catálogo sin revisar es ofrecer
+     para la venta lo que todavía no lo está. Con la tienda cerrada, 404. */
+  if (!tiendaAbierta) return new Response("La tienda no está abierta.", { status: 404 });
+
   const base = urlBase();
   const productos = await publicados();
 

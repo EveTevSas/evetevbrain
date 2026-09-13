@@ -12,9 +12,9 @@
     "lint": "echo \"(eve-store) sin lint todavía\" && exit 0",
     "typecheck": "tsc --noEmit",
     "test": "echo \"(eve-store) sin tests todavía\" && exit 0",
-    "dev": "next dev --port 3003",
+    "dev": "next dev --port 3006",
     "build": "next build",
-    "start": "next start --port 3003",
+    "start": "next start --port 3006",
     "creds": "node scripts/comprobar-credenciales.mjs",
     "creds:arreglar": "node scripts/comprobar-credenciales.mjs --arreglar"
   },

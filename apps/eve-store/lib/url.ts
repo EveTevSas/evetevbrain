@@ -3,6 +3,6 @@ export function urlBase() {
   const v =
     process.env.NEXT_PUBLIC_URL_TIENDA ??
     process.env.VERCEL_PROJECT_PRODUCTION_URL ??
-    "http://localhost:3003";
+    "http://localhost:3006";
   return v.startsWith("http") ? v.replace(/\/$/, "") : `https://${v}`;
 }

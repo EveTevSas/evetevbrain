@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { tiendaAbierta } from "@/lib/apertura";
 import { marcas, publicados, slugDeMarca } from "@/lib/producto";
 import { urlBase } from "@/lib/url";
 
@@ -11,6 +12,12 @@ import { urlBase } from "@/lib/url";
 export const revalidate = 300;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  /* Con la tienda cerrada no se anuncia ni una URL. Un sitemap es una
+     invitación explícita a rastrear, y es justo lo que no queremos mientras el
+     catálogo está en revisión: sin él, estas páginas sólo se alcanzan
+     escribiendo la dirección a mano. */
+  if (!tiendaAbierta) return [];
+
   const base = urlBase();
   const [productos, listaDeMarcas] = await Promise.all([publicados(), marcas()]);
 
