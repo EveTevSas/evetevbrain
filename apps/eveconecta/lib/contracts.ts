@@ -421,14 +421,105 @@ export interface AssemblyChecklistItem {
   capability?: AssemblyCapability;
 }
 
+export const agendaDecisionTypeSchema = z.enum([
+  "informative",
+  "economic",
+  "non_economic",
+  "qualified"
+]);
+export const agendaVotingRuleSchema = z.enum([
+  "none",
+  "unit",
+  "coefficient",
+  "qualified_coefficient"
+]);
+
 export interface AssemblyAgendaItem {
   id: string;
+  posicion: number;
   title: string;
-  decisionType: "informative" | "economic" | "non_economic" | "qualified";
-  votingRule: "none" | "unit" | "coefficient" | "qualified_coefficient";
+  decisionType: z.infer<typeof agendaDecisionTypeSchema>;
+  votingRule: z.infer<typeof agendaVotingRuleSchema>;
   thresholdPercent: number | null;
   status: "draft" | "ready" | "voted";
 }
+
+export interface AssemblyAgendaOverview {
+  items: AssemblyAgendaItem[];
+  locked: boolean;
+  lockedReason: "in_progress" | "closed" | "extraordinary_convocation_sent" | null;
+}
+
+function refineAgendaShape<
+  T extends {
+    decisionType: z.infer<typeof agendaDecisionTypeSchema>;
+    votingRule: z.infer<typeof agendaVotingRuleSchema>;
+    thresholdPercent: number | null;
+  }
+>(value: T, context: z.RefinementCtx) {
+  if (value.decisionType === "informative") {
+    if (value.votingRule !== "none") {
+      context.addIssue({
+        code: "custom",
+        path: ["votingRule"],
+        message: "Un punto informativo no lleva regla de votación."
+      });
+    }
+    if (value.thresholdPercent !== null) {
+      context.addIssue({
+        code: "custom",
+        path: ["thresholdPercent"],
+        message: "Un punto informativo no lleva umbral."
+      });
+    }
+    return;
+  }
+  if (value.votingRule === "none") {
+    context.addIssue({
+      code: "custom",
+      path: ["votingRule"],
+      message: "Esta decisión exige una regla de votación."
+    });
+  }
+  if (value.thresholdPercent === null) {
+    context.addIssue({
+      code: "custom",
+      path: ["thresholdPercent"],
+      message: "Esta decisión exige un umbral."
+    });
+  } else if (value.decisionType === "qualified" && value.thresholdPercent <= 50) {
+    context.addIssue({
+      code: "custom",
+      path: ["thresholdPercent"],
+      message: "Una mayoría calificada exige un umbral superior al 50%."
+    });
+  }
+}
+
+export const createAgendaItemSchema = z
+  .object({
+    title: z.string().trim().min(5).max(200),
+    decisionType: agendaDecisionTypeSchema,
+    votingRule: agendaVotingRuleSchema,
+    thresholdPercent: z.number().min(0.01).max(100).nullable().default(null)
+  })
+  .strict()
+  .superRefine(refineAgendaShape);
+
+export const updateAgendaItemSchema = z
+  .object({
+    title: z.string().trim().min(5).max(200),
+    decisionType: agendaDecisionTypeSchema,
+    votingRule: agendaVotingRuleSchema,
+    thresholdPercent: z.number().min(0.01).max(100).nullable().default(null),
+    status: z.enum(["draft", "ready"]).default("draft")
+  })
+  .strict()
+  .superRefine(refineAgendaShape);
+
+export const reorderAgendaSchema = z
+  .object({ orderedIds: z.array(z.string().uuid()).min(1).max(200) })
+  .strict();
 
 export interface AssemblyVoteItem {
   id: string;
@@ -566,7 +657,6 @@ export interface AssemblyDossier {
   currentStage: AssemblyStage;
   callType: "first" | "second";
   propertyUse: "residential" | "mixed";
-  agendaLocked: boolean;
   delivery: {
     sent: number;
     delivered: number;
@@ -912,6 +1002,9 @@ export type UpdateAssemblyCapabilities = z.infer<typeof updateAssemblyCapabiliti
 export type UpdateAssemblyChecklist = z.infer<typeof updateAssemblyChecklistSchema>;
 export type SendAssemblyEmailConvocation = z.infer<typeof sendAssemblyEmailConvocationSchema>;
 export type AccreditAssemblyAttendee = z.infer<typeof accreditAssemblyAttendeeSchema>;
+export type CreateAgendaItem = z.infer<typeof createAgendaItemSchema>;
+export type UpdateAgendaItem = z.infer<typeof updateAgendaItemSchema>;
+export type ReorderAgenda = z.infer<typeof reorderAgendaSchema>;
 export type CreateAssemblySupport = z.infer<typeof createAssemblySupportSchema>;
 export type UpdateAssemblySupportStatus = z.infer<typeof updateAssemblySupportStatusSchema>;
 export type CastVote = z.infer<typeof castVoteSchema>;

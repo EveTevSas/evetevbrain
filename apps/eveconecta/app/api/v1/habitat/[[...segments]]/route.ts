@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ZodError, z } from "zod";
 import {
   accreditAssemblyAttendeeSchema,
+  createAgendaItemSchema,
   createAnnouncementSchema,
   createAssemblySupportSchema,
   createCaseSchema,
@@ -14,8 +15,10 @@ import {
   createVisitorSchema,
   createWorkOrderSchema,
   registerVehicleAccessSchema,
+  reorderAgendaSchema,
   scheduleAssemblySchema,
   sendAssemblyEmailConvocationSchema,
+  updateAgendaItemSchema,
   updateAssemblyCapabilitiesSchema,
   updateAssemblyChecklistSchema,
   updateAssemblySupportStatusSchema,
@@ -40,19 +43,24 @@ import {
   accreditAssemblyAttendee,
   approveExpense,
   canSelectConjunto,
+  createAgendaItem,
   createAmenityReservation,
   createAnnouncement,
   createCase,
   createResidentPet,
   createResidentVehicle,
   createVisitorAuthorization,
+  deleteAgendaItem,
   DemoApiError,
   getDemoSnapshot,
+  listAssemblyAgenda,
   listAssemblyAttendees,
   mutateDemoSnapshot,
   payDemoFee,
+  reorderAgenda,
   revokeAssemblyAccreditation,
   scheduleAssembly,
+  updateAgendaItem,
   updateResidentPetPhoto,
   updateResidentPetStatus
 } from "@/lib/demo/store";
@@ -92,6 +100,12 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     if (attendeesMatch) {
       const assemblyId = z.string().uuid().parse(attendeesMatch[1]);
       return NextResponse.json(await listAssemblyAttendees(assemblyId));
+    }
+
+    const agendaMatch = path.match(/^assemblies\/([0-9a-f-]+)\/agenda$/i);
+    if (agendaMatch) {
+      const assemblyId = z.string().uuid().parse(agendaMatch[1]);
+      return NextResponse.json(await listAssemblyAgenda(assemblyId));
     }
 
     return problem("Ruta no encontrada.", 404);
@@ -141,6 +155,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
       });
     }
 
+    const agendaCreateMatch = path.match(/^assemblies\/([0-9a-f-]+)\/agenda$/i);
+    if (agendaCreateMatch) {
+      const assemblyId = z.string().uuid().parse(agendaCreateMatch[1]);
+      const input = createAgendaItemSchema.parse(body);
+      return NextResponse.json(await createAgendaItem(assemblyId, input), { status: 201 });
+    }
+
     const assemblySupportMatch = path.match(/^assemblies\/([0-9a-f-]+)\/supports$/i);
     if (assemblySupportMatch) {
       const assemblyId = z.string().uuid().parse(assemblySupportMatch[1]);
@@ -166,11 +187,25 @@ export async function POST(request: NextRequest, context: RouteContext) {
           }
 
           const assembly = normalizeAssembly(snapshot.assemblies[assemblyIndex]!);
-          if (
-            input.agendaItemId &&
-            !assembly.dossier.agendaItems.some((item) => item.id === input.agendaItemId)
-          ) {
-            throw new DemoApiError("El punto del orden del día no pertenece a esta asamblea.", 400);
+          if (input.agendaItemId) {
+            // El orden del día real vive en conjuntos.asamblea_orden_dia, no
+            // en el dossier sintético del snapshot demo; validar contra este
+            // último aceptaría solo los 3 puntos fijos heredados y rechazaría
+            // cualquier punto real creado desde el panel de agenda.
+            const { data: agendaItem, error: agendaError } = await access.supabase
+              .schema("conjuntos")
+              .from("asamblea_orden_dia")
+              .select("id")
+              .eq("conjunto_id", access.conjuntoId)
+              .eq("asamblea_id", assemblyId)
+              .eq("id", input.agendaItemId)
+              .maybeSingle();
+            if (agendaError || !agendaItem) {
+              throw new DemoApiError(
+                "El punto del orden del día no pertenece a esta asamblea.",
+                400
+              );
+            }
           }
           const existingIndex = assembly.dossier.documents.findIndex(
             (document) => document.id === input.documentId
@@ -717,6 +752,21 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json(await revokeAssemblyAccreditation(assemblyId, attendeeId));
     }
 
+    const agendaReorderMatch = path.match(/^assemblies\/([0-9a-f-]+)\/agenda\/reorder$/i);
+    if (agendaReorderMatch) {
+      const assemblyId = z.string().uuid().parse(agendaReorderMatch[1]);
+      const input = reorderAgendaSchema.parse(body);
+      return NextResponse.json(await reorderAgenda(assemblyId, input));
+    }
+
+    const agendaItemMatch = path.match(/^assemblies\/([0-9a-f-]+)\/agenda\/([0-9a-f-]+)$/i);
+    if (agendaItemMatch) {
+      const assemblyId = z.string().uuid().parse(agendaItemMatch[1]);
+      const itemId = z.string().uuid().parse(agendaItemMatch[2]);
+      const input = updateAgendaItemSchema.parse(body);
+      return NextResponse.json(await updateAgendaItem(assemblyId, itemId, input));
+    }
+
     const petPhotoMatch = path.match(/^pets\/([0-9a-f-]+)\/photo$/i);
     if (petPhotoMatch) {
       const petId = z.string().uuid().parse(petPhotoMatch[1]);
@@ -767,6 +817,24 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         };
       })
     );
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function DELETE(_request: NextRequest, context: RouteContext) {
+  try {
+    const { segments = [] } = await context.params;
+    const path = segments.join("/");
+
+    const agendaItemMatch = path.match(/^assemblies\/([0-9a-f-]+)\/agenda\/([0-9a-f-]+)$/i);
+    if (agendaItemMatch) {
+      const assemblyId = z.string().uuid().parse(agendaItemMatch[1]);
+      const itemId = z.string().uuid().parse(agendaItemMatch[2]);
+      return NextResponse.json(await deleteAgendaItem(assemblyId, itemId));
+    }
+
+    return problem("Ruta no encontrada.", 404);
   } catch (error) {
     return handleError(error);
   }

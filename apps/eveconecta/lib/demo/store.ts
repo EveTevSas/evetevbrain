@@ -5,9 +5,12 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type {
   AccreditAssemblyAttendee,
   AnnouncementItem,
+  AssemblyAgendaItem,
+  AssemblyAgendaOverview,
   AssemblyAttendee,
   AssemblyItem,
   CaseItem,
+  CreateAgendaItem,
   CreateAnnouncement,
   CreateCase,
   CreatePet,
@@ -19,8 +22,10 @@ import type {
   Payment,
   PetItem,
   RegisteredVehicleItem,
+  ReorderAgenda,
   ReservationItem,
   ScheduleAssembly,
+  UpdateAgendaItem,
   UpdatePetPhoto,
   UpdatePetStatus,
   VisitorItem
@@ -596,6 +601,141 @@ export async function listAssemblyAttendees(assemblyId: string): Promise<Assembl
     throw new DemoApiError("No fue posible consultar los asistentes.", 500);
   }
   return (data as AssemblyAttendee[] | null) ?? [];
+}
+
+export async function listAssemblyAgenda(assemblyId: string): Promise<AssemblyAgendaOverview> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase.schema("conjuntos").rpc("listar_orden_dia_demo", {
+    p_conjunto_id: access.conjuntoId,
+    p_asamblea_id: assemblyId
+  });
+
+  if (error) {
+    if (error.code === "42501") throw new DemoApiError(error.message, 403);
+    throw new DemoApiError("No fue posible consultar el orden del día.", 500);
+  }
+  return data as AssemblyAgendaOverview;
+}
+
+const decisionTypeToSql: Record<CreateAgendaItem["decisionType"], string> = {
+  informative: "informativa",
+  economic: "economica",
+  non_economic: "no_economica",
+  qualified: "calificada"
+};
+
+const votingRuleToSql: Record<CreateAgendaItem["votingRule"], string> = {
+  none: "ninguna",
+  unit: "unidad",
+  coefficient: "coeficiente",
+  qualified_coefficient: "coeficiente_calificado"
+};
+
+const agendaStatusToSql: Record<UpdateAgendaItem["status"], string> = {
+  draft: "borrador",
+  ready: "listo"
+};
+
+function mapAgendaError(error: { code?: string; message: string }): never {
+  if (error.code === "42501") throw new DemoApiError(error.message, 403);
+  if (error.code === "22023") throw new DemoApiError(error.message, 400);
+  if (error.code === "55000") throw new DemoApiError(error.message, 409);
+  if (error.code === "P0002") throw new DemoApiError(error.message, 404);
+  throw new DemoApiError("No fue posible actualizar el orden del día.", 500);
+}
+
+export async function createAgendaItem(
+  assemblyId: string,
+  input: CreateAgendaItem
+): Promise<AssemblyAgendaItem> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("agregar_punto_orden_dia_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_titulo: input.title,
+      p_tipo_decision: decisionTypeToSql[input.decisionType],
+      p_regla_votacion: votingRuleToSql[input.votingRule],
+      p_umbral_porcentaje: input.thresholdPercent
+    });
+
+  if (error) mapAgendaError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el punto creado.", 500);
+  }
+  return data as AssemblyAgendaItem;
+}
+
+export async function updateAgendaItem(
+  assemblyId: string,
+  itemId: string,
+  input: UpdateAgendaItem
+): Promise<{ id: string }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("actualizar_punto_orden_dia_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_punto_id: itemId,
+      p_titulo: input.title,
+      p_tipo_decision: decisionTypeToSql[input.decisionType],
+      p_regla_votacion: votingRuleToSql[input.votingRule],
+      p_umbral_porcentaje: input.thresholdPercent,
+      p_estado: agendaStatusToSql[input.status]
+    });
+
+  if (error) mapAgendaError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el punto actualizado.", 500);
+  }
+  return data as { id: string };
+}
+
+export async function deleteAgendaItem(
+  assemblyId: string,
+  itemId: string
+): Promise<{ id: string }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("eliminar_punto_orden_dia_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_punto_id: itemId
+    });
+
+  if (error) mapAgendaError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió la eliminación.", 500);
+  }
+  return data as { id: string };
+}
+
+export async function reorderAgenda(
+  assemblyId: string,
+  input: ReorderAgenda
+): Promise<{ asambleaId: string; total: number }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("reordenar_orden_dia_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_orden_ids: input.orderedIds
+    });
+
+  if (error) mapAgendaError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el nuevo orden.", 500);
+  }
+  return data as { asambleaId: string; total: number };
 }
 
 export async function updateResidentPetPhoto(

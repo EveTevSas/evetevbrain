@@ -2387,6 +2387,11 @@ export function AssembliesPage() {
     revokeAssemblyAttendee,
     fetchAssemblyAttendees,
     downloadAssemblyProxy,
+    fetchAssemblyAgenda,
+    createAgendaItem,
+    updateAgendaItem,
+    deleteAgendaItem,
+    reorderAgenda,
     busy
   } = useData();
   const { user } = useAuthUser();
@@ -2438,13 +2443,18 @@ export function AssembliesPage() {
         canManage={canScheduleAssembly}
         canManageSupports={canScheduleAssembly}
         onAccreditAttendee={accreditAssemblyAttendee}
+        onCreateAgendaItem={createAgendaItem}
+        onDeleteAgendaItem={deleteAgendaItem}
         onDownloadProxy={downloadAssemblyProxy}
         onDownloadSupport={downloadAssemblySupport}
+        onFetchAgenda={fetchAssemblyAgenda}
         onFetchAttendees={fetchAssemblyAttendees}
         onRevokeAttendee={revokeAssemblyAttendee}
+        onReorderAgenda={reorderAgenda}
         onSendEmailConvocation={sendAssemblyEmailConvocation}
         onSupportStatusChange={updateAssemblySupportStatus}
         onToggleChecklist={updateAssemblyChecklist}
+        onUpdateAgendaItem={updateAgendaItem}
         onUpdateCapabilities={updateAssemblyCapabilities}
         onUploadSupport={uploadAssemblySupport}
         people={snapshot.people}

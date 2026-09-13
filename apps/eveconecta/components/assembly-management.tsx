@@ -11,6 +11,8 @@ import {
 } from "@/lib/assemblies";
 import type {
   AccreditAssemblyAttendee,
+  AssemblyAgendaItem,
+  AssemblyAgendaOverview,
   AssemblyAttendee,
   AssemblyCapabilities,
   AssemblyItem,
@@ -18,8 +20,10 @@ import type {
   AssemblyStage,
   AssemblySupportDocument,
   CommunityPerson,
+  CreateAgendaItem,
   CreateAssemblySupport,
   SendAssemblyEmailConvocation,
+  UpdateAgendaItem,
   UpdateAssemblyCapabilities,
   UpdateAssemblyChecklist,
   UpdateAssemblySupportStatus
@@ -40,7 +44,6 @@ import {
   History,
   Landmark,
   ListChecks,
-  LockKeyhole,
   MailCheck,
   MessageSquareText,
   Settings2,
@@ -54,6 +57,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "./modal";
 import { StatusBadge } from "./status-badge";
 import { AssemblyAccreditationPanel } from "./assembly-accreditation";
+import { AssemblyAgendaPanel } from "./assembly-agenda";
 import { AssemblySupportPanel } from "./assembly-supports";
 import { AssemblyConvocationPanel } from "./assembly-convocation";
 
@@ -232,16 +236,30 @@ function Checklist({
 function PreparationStage({
   assembly,
   capabilities,
+  canManage,
   canManageSupports,
   busy,
+  agenda,
+  agendaLoading,
+  onCreateAgendaItem,
+  onUpdateAgendaItem,
+  onDeleteAgendaItem,
+  onReorderAgenda,
   onUploadSupport,
   onSupportStatusChange,
   onDownloadSupport
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   capabilities: AssemblyCapabilities;
+  canManage: boolean;
   canManageSupports: boolean;
   busy: string | null;
+  agenda: AssemblyAgendaOverview | null;
+  agendaLoading: boolean;
+  onCreateAgendaItem: (input: CreateAgendaItem) => Promise<AssemblyAgendaItem | null>;
+  onUpdateAgendaItem: (itemId: string, input: UpdateAgendaItem) => Promise<{ id: string } | null>;
+  onDeleteAgendaItem: (itemId: string) => Promise<{ id: string } | null>;
+  onReorderAgenda: (orderedIds: string[]) => Promise<unknown>;
   onUploadSupport: (
     assemblyId: string,
     input: Omit<CreateAssemblySupport, "filePath" | "mimeType" | "sizeBytes">,
@@ -256,46 +274,20 @@ function PreparationStage({
 }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[1.25fr_.75fr]">
-      <Card className="p-5 hover:translate-y-0">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className="font-extrabold">Orden del día y reglas</h3>
-            <p className="mt-1 text-xs text-[var(--muted)]">
-              Cada punto declara el universo electoral y la mayoría aplicable.
-            </p>
-          </div>
-          {assembly.dossier.agendaLocked ? (
-            <Badge tone="warning">
-              <LockKeyhole size={12} className="mr-1" /> Agenda bloqueada
-            </Badge>
-          ) : (
-            <Badge tone="info">Editable</Badge>
-          )}
-        </div>
-        <div className="mt-4 space-y-3">
-          {assembly.dossier.agendaItems.map((item, index) => (
-            <div className="rounded-xl border border-[var(--line)] p-4" key={item.id}>
-              <div className="flex items-start gap-3">
-                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[var(--accent-soft)] text-xs font-extrabold text-[var(--accent)]">
-                  {index + 1}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold">{item.title}</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <Badge tone="neutral">{votingRuleLabels[item.votingRule]}</Badge>
-                    {item.thresholdPercent ? (
-                      <Badge tone="info">Umbral {item.thresholdPercent}%</Badge>
-                    ) : null}
-                    <Badge tone={statusTone(item.status)}>{statusLabel(item.status)}</Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+      <AssemblyAgendaPanel
+        assemblyId={assembly.id}
+        busy={busy}
+        canManage={canManage}
+        loading={agendaLoading}
+        onCreate={onCreateAgendaItem}
+        onDelete={onDeleteAgendaItem}
+        onReorder={onReorderAgenda}
+        onUpdate={onUpdateAgendaItem}
+        overview={agenda}
+      />
       {capabilities.document_repository ? (
         <AssemblySupportPanel
+          agendaItems={agenda?.items ?? []}
           assembly={assembly}
           busy={busy}
           canManage={canManageSupports}
@@ -721,6 +713,8 @@ function StageContent({
   busy,
   attendees,
   attendeesLoading,
+  agenda,
+  agendaLoading,
   onToggleChecklist,
   onUploadSupport,
   onSupportStatusChange,
@@ -728,7 +722,11 @@ function StageContent({
   onSendEmailConvocation,
   onAccreditAttendee,
   onRevokeAttendee,
-  onDownloadProxy
+  onDownloadProxy,
+  onCreateAgendaItem,
+  onUpdateAgendaItem,
+  onDeleteAgendaItem,
+  onReorderAgenda
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   people: CommunityPerson[];
@@ -739,6 +737,8 @@ function StageContent({
   busy: string | null;
   attendees: AssemblyAttendee[];
   attendeesLoading: boolean;
+  agenda: AssemblyAgendaOverview | null;
+  agendaLoading: boolean;
   onToggleChecklist: (
     assemblyId: string,
     input: UpdateAssemblyChecklist
@@ -764,17 +764,28 @@ function StageContent({
   ) => Promise<AssemblyAttendee | null>;
   onRevokeAttendee: (attendeeId: string) => Promise<{ id: string } | null>;
   onDownloadProxy: (attendee: AssemblyAttendee) => Promise<void>;
+  onCreateAgendaItem: (input: CreateAgendaItem) => Promise<AssemblyAgendaItem | null>;
+  onUpdateAgendaItem: (itemId: string, input: UpdateAgendaItem) => Promise<{ id: string } | null>;
+  onDeleteAgendaItem: (itemId: string) => Promise<{ id: string } | null>;
+  onReorderAgenda: (orderedIds: string[]) => Promise<unknown>;
 }) {
   return (
     <div className="space-y-4">
       {stage === "preparation" ? (
         <PreparationStage
+          agenda={agenda}
+          agendaLoading={agendaLoading}
           assembly={assembly}
           busy={busy}
+          canManage={canManage}
           canManageSupports={canManageSupports}
           capabilities={capabilities}
+          onCreateAgendaItem={onCreateAgendaItem}
+          onDeleteAgendaItem={onDeleteAgendaItem}
           onDownloadSupport={onDownloadSupport}
+          onReorderAgenda={onReorderAgenda}
           onSupportStatusChange={onSupportStatusChange}
+          onUpdateAgendaItem={onUpdateAgendaItem}
           onUploadSupport={onUploadSupport}
         />
       ) : null}
@@ -838,7 +849,12 @@ function AssemblyWorkspace({
   onAccreditAttendee,
   onRevokeAttendee,
   onFetchAttendees,
-  onDownloadProxy
+  onDownloadProxy,
+  onFetchAgenda,
+  onCreateAgendaItem,
+  onUpdateAgendaItem,
+  onDeleteAgendaItem,
+  onReorderAgenda
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   people: CommunityPerson[];
@@ -875,6 +891,21 @@ function AssemblyWorkspace({
   onRevokeAttendee: (assemblyId: string, attendeeId: string) => Promise<{ id: string } | null>;
   onFetchAttendees: (assemblyId: string) => Promise<AssemblyAttendee[]>;
   onDownloadProxy: (attendee: AssemblyAttendee) => Promise<void>;
+  onFetchAgenda: (assemblyId: string) => Promise<AssemblyAgendaOverview>;
+  onCreateAgendaItem: (
+    assemblyId: string,
+    input: CreateAgendaItem
+  ) => Promise<AssemblyAgendaItem | null>;
+  onUpdateAgendaItem: (
+    assemblyId: string,
+    itemId: string,
+    input: UpdateAgendaItem
+  ) => Promise<{ id: string } | null>;
+  onDeleteAgendaItem: (assemblyId: string, itemId: string) => Promise<{ id: string } | null>;
+  onReorderAgenda: (
+    assemblyId: string,
+    orderedIds: string[]
+  ) => Promise<{ asambleaId: string; total: number } | null>;
 }) {
   const [activeStage, setActiveStage] = useState<AssemblyStage>(assembly.dossier.currentStage);
   const [attendees, setAttendees] = useState<AssemblyAttendee[]>([]);
@@ -917,6 +948,32 @@ function AssemblyWorkspace({
   useEffect(() => {
     if (open && activeStage === "registration") void refreshAttendees();
   }, [activeStage, open, refreshAttendees]);
+
+  // Mismo patrón y mismas razones que refreshAttendees arriba, salvo que el
+  // orden del día es legible por los cuatro roles (no solo administración):
+  // no hay guard de canManage.
+  const [agenda, setAgenda] = useState<AssemblyAgendaOverview | null>(null);
+  const [agendaLoading, setAgendaLoading] = useState(false);
+  const onFetchAgendaRef = useRef(onFetchAgenda);
+  onFetchAgendaRef.current = onFetchAgenda;
+  const agendaRequestIdRef = useRef(0);
+
+  const refreshAgenda = useCallback(async () => {
+    const requestId = ++agendaRequestIdRef.current;
+    setAgendaLoading(true);
+    try {
+      const result = await onFetchAgendaRef.current(assembly.id);
+      if (mountedRef.current && agendaRequestIdRef.current === requestId) setAgenda(result);
+    } finally {
+      if (mountedRef.current && agendaRequestIdRef.current === requestId) {
+        setAgendaLoading(false);
+      }
+    }
+  }, [assembly.id]);
+
+  useEffect(() => {
+    if (open && activeStage === "preparation") void refreshAgenda();
+  }, [activeStage, open, refreshAgenda]);
   return (
     <Modal
       description="Expediente único de preparación, decisión, acta y cumplimiento."
@@ -1008,6 +1065,8 @@ function AssemblyWorkspace({
         </div>
 
         <StageContent
+          agenda={agenda}
+          agendaLoading={agendaLoading}
           assembly={assembly}
           attendees={attendees}
           attendeesLoading={attendeesLoading}
@@ -1020,6 +1079,16 @@ function AssemblyWorkspace({
             if (result) await refreshAttendees();
             return result;
           }}
+          onCreateAgendaItem={async (input) => {
+            const result = await onCreateAgendaItem(assembly.id, input);
+            if (result) await refreshAgenda();
+            return result;
+          }}
+          onDeleteAgendaItem={async (itemId) => {
+            const result = await onDeleteAgendaItem(assembly.id, itemId);
+            if (result) await refreshAgenda();
+            return result;
+          }}
           onDownloadProxy={onDownloadProxy}
           onDownloadSupport={onDownloadSupport}
           onRevokeAttendee={async (attendeeId) => {
@@ -1027,9 +1096,19 @@ function AssemblyWorkspace({
             if (result) await refreshAttendees();
             return result;
           }}
+          onReorderAgenda={async (orderedIds) => {
+            const result = await onReorderAgenda(assembly.id, orderedIds);
+            if (result) await refreshAgenda();
+            return result;
+          }}
           onSendEmailConvocation={onSendEmailConvocation}
           onSupportStatusChange={onSupportStatusChange}
           onToggleChecklist={onToggleChecklist}
+          onUpdateAgendaItem={async (itemId, input) => {
+            const result = await onUpdateAgendaItem(assembly.id, itemId, input);
+            if (result) await refreshAgenda();
+            return result;
+          }}
           onUploadSupport={onUploadSupport}
           people={people}
           stage={activeStage}
@@ -1159,7 +1238,12 @@ export function AssemblyManagement({
   onAccreditAttendee,
   onRevokeAttendee,
   onFetchAttendees,
-  onDownloadProxy
+  onDownloadProxy,
+  onFetchAgenda,
+  onCreateAgendaItem,
+  onUpdateAgendaItem,
+  onDeleteAgendaItem,
+  onReorderAgenda
 }: {
   assemblies: AssemblyItem[];
   people: CommunityPerson[];
@@ -1195,6 +1279,21 @@ export function AssemblyManagement({
   onRevokeAttendee: (assemblyId: string, attendeeId: string) => Promise<{ id: string } | null>;
   onFetchAttendees: (assemblyId: string) => Promise<AssemblyAttendee[]>;
   onDownloadProxy: (attendee: AssemblyAttendee) => Promise<void>;
+  onFetchAgenda: (assemblyId: string) => Promise<AssemblyAgendaOverview>;
+  onCreateAgendaItem: (
+    assemblyId: string,
+    input: CreateAgendaItem
+  ) => Promise<AssemblyAgendaItem | null>;
+  onUpdateAgendaItem: (
+    assemblyId: string,
+    itemId: string,
+    input: UpdateAgendaItem
+  ) => Promise<{ id: string } | null>;
+  onDeleteAgendaItem: (assemblyId: string, itemId: string) => Promise<{ id: string } | null>;
+  onReorderAgenda: (
+    assemblyId: string,
+    orderedIds: string[]
+  ) => Promise<{ asambleaId: string; total: number } | null>;
 }) {
   const settings = normalizeAssemblySettings(rawSettings);
   const normalizedAssemblies = useMemo(
@@ -1260,11 +1359,6 @@ export function AssemblyManagement({
                       <StatusBadge status={assembly.status} />
                       <Badge tone="info">{assembly.mode}</Badge>
                       <Badge tone="neutral">{typeLabel(assembly.type)}</Badge>
-                      {assembly.dossier.agendaLocked ? (
-                        <Badge tone="warning">
-                          <LockKeyhole className="mr-1" size={12} /> Orden cerrado
-                        </Badge>
-                      ) : null}
                     </div>
                     <h2 className="mt-3 text-lg font-extrabold">{assembly.title}</h2>
                     <p className="mt-1.5 flex items-center gap-2 text-sm text-[var(--muted)]">
@@ -1392,16 +1486,21 @@ export function AssemblyManagement({
           canManage={canManage}
           canManageSupports={canManageSupports}
           onAccreditAttendee={onAccreditAttendee}
+          onCreateAgendaItem={onCreateAgendaItem}
+          onDeleteAgendaItem={onDeleteAgendaItem}
           onDownloadProxy={onDownloadProxy}
           onDownloadSupport={onDownloadSupport}
+          onFetchAgenda={onFetchAgenda}
           onFetchAttendees={onFetchAttendees}
           onRevokeAttendee={onRevokeAttendee}
+          onReorderAgenda={onReorderAgenda}
           onSendEmailConvocation={onSendEmailConvocation}
           onOpenChange={(open) => {
             if (!open) setSelectedAssemblyId(null);
           }}
           onSupportStatusChange={onSupportStatusChange}
           onToggleChecklist={onToggleChecklist}
+          onUpdateAgendaItem={onUpdateAgendaItem}
           onUploadSupport={onUploadSupport}
           open
           people={people}

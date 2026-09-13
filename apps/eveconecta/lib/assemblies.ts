@@ -245,6 +245,7 @@ function defaultAgendaItems(assembly: AssemblyItem): AssemblyDossier["agendaItem
     return [
       {
         id: "agenda-1",
+        posicion: 1,
         title: assembly.agenda ?? "Presentación y espacio de preguntas",
         decisionType: "informative",
         votingRule: "none",
@@ -256,6 +257,7 @@ function defaultAgendaItems(assembly: AssemblyItem): AssemblyDossier["agendaItem
   return [
     {
       id: "agenda-1",
+      posicion: 1,
       title: "Verificación del quórum y aprobación del orden del día",
       decisionType: "non_economic",
       votingRule: "unit",
@@ -264,6 +266,7 @@ function defaultAgendaItems(assembly: AssemblyItem): AssemblyDossier["agendaItem
     },
     {
       id: "agenda-2",
+      posicion: 2,
       title:
         assembly.type === "ordinary"
           ? "Aprobación de estados financieros y presupuesto"
@@ -275,6 +278,7 @@ function defaultAgendaItems(assembly: AssemblyItem): AssemblyDossier["agendaItem
     },
     {
       id: "agenda-3",
+      posicion: 3,
       title:
         assembly.type === "ordinary"
           ? "Elección de órganos de administración"
@@ -335,7 +339,6 @@ export function createAssemblyDossier(assembly: AssemblyItem): AssemblyDossier {
           : "preparation",
     callType: "first",
     propertyUse: "residential",
-    agendaLocked: assembly.type === "extraordinary",
     delivery: {
       sent,
       delivered,
@@ -477,4 +480,16 @@ export function stageProgressPercent(
   const checklist = enabledChecklist(dossier, capabilities).filter((item) => item.stage === stage);
   if (!checklist.length) return 100;
   return Math.round((checklist.filter((item) => item.completed).length / checklist.length) * 100);
+}
+
+// parseFloat descarta el resto de la cadena tras el prefijo numérico válido
+// ("50.5.5" → 50.5 sin error, "50x" → 50): exige que la cadena completa sea
+// un número antes de confiar en el valor parseado, para que un typo en el
+// umbral de un punto del orden del día no se guarde silenciosamente distinto
+// a lo que el usuario escribió.
+export function parseAgendaThreshold(raw: string): number | null {
+  const normalized = raw.trim().replace(",", ".");
+  if (!/^\d+(\.\d+)?$/.test(normalized)) return null;
+  const value = Number.parseFloat(normalized);
+  return value > 0 ? value : null;
 }

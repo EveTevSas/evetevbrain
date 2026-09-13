@@ -6,12 +6,15 @@ import {
   DEMO_USER_ID,
   type AccreditAssemblyAttendee,
   type AnnouncementItem,
+  type AssemblyAgendaItem,
+  type AssemblyAgendaOverview,
   type AssemblyAttendee,
   type AssemblySettings,
   type AssemblyItem,
   type AssemblySupportDocument,
   type CaseItem,
   type CommunityPerson,
+  type CreateAgendaItem,
   type CreateCase,
   type CreateAnnouncement,
   type CreateAssemblySupport,
@@ -34,6 +37,7 @@ import {
   type SendAssemblyEmailConvocation,
   type RegisteredVehicleItem,
   type RegisterVehicleAccess,
+  type UpdateAgendaItem,
   type UpdateCommunityPerson,
   type UpdateAssemblyCapabilities,
   type UpdateAssemblyChecklist,
@@ -120,6 +124,21 @@ interface DataContextValue {
   ) => Promise<{ id: string } | null>;
   fetchAssemblyAttendees: (assemblyId: string) => Promise<AssemblyAttendee[]>;
   downloadAssemblyProxy: (attendee: AssemblyAttendee) => Promise<void>;
+  fetchAssemblyAgenda: (assemblyId: string) => Promise<AssemblyAgendaOverview>;
+  createAgendaItem: (
+    assemblyId: string,
+    input: CreateAgendaItem
+  ) => Promise<AssemblyAgendaItem | null>;
+  updateAgendaItem: (
+    assemblyId: string,
+    itemId: string,
+    input: UpdateAgendaItem
+  ) => Promise<{ id: string } | null>;
+  deleteAgendaItem: (assemblyId: string, itemId: string) => Promise<{ id: string } | null>;
+  reorderAgenda: (
+    assemblyId: string,
+    orderedIds: string[]
+  ) => Promise<{ asambleaId: string; total: number } | null>;
   createReservation: (input: CreateReservation) => Promise<ReservationItem | null>;
   createVisitor: (input: CreateVisitor) => Promise<VisitorItem | null>;
   createParkingSpot: (input: CreateParkingSpot) => Promise<ParkingSpotItem | null>;
@@ -608,6 +627,47 @@ export function DataProvider({ children }: { children: ReactNode }) {
         link.rel = "noopener noreferrer";
         link.click();
       },
+      fetchAssemblyAgenda: (assemblyId) =>
+        apiRequest<AssemblyAgendaOverview>(`/v1/habitat/assemblies/${assemblyId}/agenda`),
+      createAgendaItem: (assemblyId, input) =>
+        mutate(
+          `assembly-agenda-create-${assemblyId}`,
+          () =>
+            apiRequest<AssemblyAgendaItem>(`/v1/habitat/assemblies/${assemblyId}/agenda`, {
+              method: "POST",
+              body: JSON.stringify(input)
+            }),
+          "Punto agregado"
+        ),
+      updateAgendaItem: (assemblyId, itemId, input) =>
+        mutate(
+          `assembly-agenda-update-${itemId}`,
+          () =>
+            apiRequest<{ id: string }>(`/v1/habitat/assemblies/${assemblyId}/agenda/${itemId}`, {
+              method: "PATCH",
+              body: JSON.stringify(input)
+            }),
+          "Punto actualizado"
+        ),
+      deleteAgendaItem: (assemblyId, itemId) =>
+        mutate(
+          `assembly-agenda-delete-${itemId}`,
+          () =>
+            apiRequest<{ id: string }>(`/v1/habitat/assemblies/${assemblyId}/agenda/${itemId}`, {
+              method: "DELETE"
+            }),
+          "Punto eliminado"
+        ),
+      reorderAgenda: (assemblyId, orderedIds) =>
+        mutate(
+          `assembly-agenda-reorder-${assemblyId}`,
+          () =>
+            apiRequest<{ asambleaId: string; total: number }>(
+              `/v1/habitat/assemblies/${assemblyId}/agenda/reorder`,
+              { method: "PATCH", body: JSON.stringify({ orderedIds }) }
+            ),
+          "Orden del día actualizado"
+        ),
       createCase: (input, images) =>
         mutate("case", () => createCaseWithImages(input, images), "Caso creado"),
       createReservation: (input) =>

@@ -7,6 +7,7 @@ import {
   validateAssemblySupport
 } from "@/lib/assembly-supports";
 import type {
+  AssemblyAgendaItem,
   AssemblyItem,
   AssemblySupportDocument,
   CreateAssemblySupport,
@@ -56,6 +57,7 @@ function statusLabel(status: AssemblySupportDocument["status"]): string {
 
 function SupportUploadModal({
   assembly,
+  agendaItems,
   existing,
   busy,
   open,
@@ -63,6 +65,7 @@ function SupportUploadModal({
   onUpload
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
+  agendaItems: AssemblyAgendaItem[];
   existing: AssemblySupportDocument | null;
   busy: string | null;
   open: boolean;
@@ -194,9 +197,9 @@ function SupportUploadModal({
               value={agendaItemId}
             >
               <option value="">Soporte general</option>
-              {assembly.dossier.agendaItems.map((item, index) => (
+              {agendaItems.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {index + 1}. {item.title}
+                  {item.posicion}. {item.title}
                 </option>
               ))}
             </SelectInput>
@@ -228,6 +231,7 @@ function SupportUploadModal({
 
 export function AssemblySupportPanel({
   assembly,
+  agendaItems,
   canManage,
   busy,
   onUpload,
@@ -235,6 +239,7 @@ export function AssemblySupportPanel({
   onDownload
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
+  agendaItems: AssemblyAgendaItem[];
   canManage: boolean;
   busy: string | null;
   onUpload: (
@@ -376,6 +381,7 @@ export function AssemblySupportPanel({
 
       {uploadOpen ? (
         <SupportUploadModal
+          agendaItems={agendaItems}
           assembly={assembly}
           busy={busy}
           existing={versionDocument}

@@ -56,9 +56,4 @@ describe("assembly workspace", () => {
       assemblyReadinessPercent(dossier, fullSettings.capabilities)
     );
   });
-
-  it("locks the agenda of an extraordinary assembly", () => {
-    const dossier = createAssemblyDossier({ ...assembly, type: "extraordinary" });
-    expect(dossier.agendaLocked).toBe(true);
-  });
 });
