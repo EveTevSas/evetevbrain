@@ -291,30 +291,6 @@ function defaultAgendaItems(assembly: AssemblyItem): AssemblyDossier["agendaItem
   ];
 }
 
-function defaultVotes(assembly: AssemblyItem): AssemblyDossier["votes"] {
-  const amount = Math.max(assembly.openVotes, assembly.status === "closed" ? 2 : 0);
-  return Array.from({ length: amount }, (_, index) => ({
-    id: `vote-${index + 1}`,
-    title:
-      index === 0
-        ? "Aprobación de la propuesta principal"
-        : index === 1
-          ? "Elección de representantes"
-          : `Proposición ${index + 1}`,
-    rule:
-      index === 0
-        ? ("coefficient" as const)
-        : index === 1
-          ? ("unit" as const)
-          : ("qualified_coefficient" as const),
-    thresholdPercent: index === 2 ? 70 : 50,
-    status: assembly.status === "closed" ? ("closed" as const) : ("open" as const),
-    yesPercent: assembly.status === "closed" ? 72 : 0,
-    noPercent: assembly.status === "closed" ? 21 : 0,
-    abstentionPercent: assembly.status === "closed" ? 7 : 0
-  }));
-}
-
 export function createAssemblyDossier(assembly: AssemblyItem): AssemblyDossier {
   const closed = assembly.status === "closed";
   const inProgress = assembly.status === "in_progress";
@@ -391,7 +367,6 @@ export function createAssemblyDossier(assembly: AssemblyItem): AssemblyDossier {
         uploadedBy: null
       }
     ],
-    votes: defaultVotes(assembly),
     minutes: {
       version: closed ? 2 : 0,
       status: closed ? "published" : "not_started",

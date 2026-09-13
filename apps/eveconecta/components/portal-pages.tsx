@@ -2392,6 +2392,11 @@ export function AssembliesPage() {
     updateAgendaItem,
     deleteAgendaItem,
     reorderAgenda,
+    fetchAssemblyVoting,
+    openVoting,
+    closeVoting,
+    castVote,
+    revokeVote,
     busy
   } = useData();
   const { user } = useAuthUser();
@@ -2449,6 +2454,11 @@ export function AssembliesPage() {
         onDownloadSupport={downloadAssemblySupport}
         onFetchAgenda={fetchAssemblyAgenda}
         onFetchAttendees={fetchAssemblyAttendees}
+        onFetchVoting={fetchAssemblyVoting}
+        onOpenVoting={openVoting}
+        onCloseVoting={closeVoting}
+        onCastVote={castVote}
+        onRevokeVote={revokeVote}
         onRevokeAttendee={revokeAssemblyAttendee}
         onReorderAgenda={reorderAgenda}
         onSendEmailConvocation={sendAssemblyEmailConvocation}

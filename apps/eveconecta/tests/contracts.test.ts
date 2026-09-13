@@ -1,4 +1,5 @@
 import {
+  castVoteSchema,
   createAnnouncementSchema,
   createCaseSchema,
   createExpenseSchema,
@@ -9,7 +10,8 @@ import {
   registerVehicleAccessSchema,
   scheduleAssemblySchema,
   updateCommunityPersonSchema,
-  updatePetPhotoSchema
+  updatePetPhotoSchema,
+  voteOptionSchema
 } from "@/lib/contracts";
 import { describe, expect, it } from "vitest";
 
@@ -240,6 +242,30 @@ describe("web contract helpers", () => {
   it("rejects external URLs as pet photo paths", () => {
     expect(() =>
       updatePetPhotoSchema.parse({ photoPath: "https://example.com/mascota.jpg" })
+    ).toThrow();
+  });
+
+  it("accepts each vote option in English", () => {
+    expect(voteOptionSchema.parse("yes")).toBe("yes");
+    expect(voteOptionSchema.parse("no")).toBe("no");
+    expect(voteOptionSchema.parse("abstain")).toBe("abstain");
+  });
+
+  it("rejects a Spanish vote option value from the client", () => {
+    expect(() => voteOptionSchema.parse("si")).toThrow();
+  });
+
+  it("validates a cast vote input", () => {
+    expect(castVoteSchema.parse({ unidadCodigo: "A-101", option: "yes" })).toMatchObject({
+      unidadCodigo: "A-101",
+      option: "yes"
+    });
+  });
+
+  it("rejects a cast vote with an empty unit code or unknown fields", () => {
+    expect(() => castVoteSchema.parse({ unidadCodigo: "", option: "yes" })).toThrow();
+    expect(() =>
+      castVoteSchema.parse({ unidadCodigo: "A-101", option: "yes", extra: true })
     ).toThrow();
   });
 });

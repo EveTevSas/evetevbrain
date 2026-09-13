@@ -8,11 +8,15 @@ import {
   type AnnouncementItem,
   type AssemblyAgendaItem,
   type AssemblyAgendaOverview,
+  type AssemblyAgendaVoting,
   type AssemblyAttendee,
   type AssemblySettings,
   type AssemblyItem,
   type AssemblySupportDocument,
+  type AssemblyVoteRecord,
+  type AssemblyVoteTally,
   type CaseItem,
+  type CastVote,
   type CommunityPerson,
   type CreateAgendaItem,
   type CreateCase,
@@ -139,6 +143,19 @@ interface DataContextValue {
     assemblyId: string,
     orderedIds: string[]
   ) => Promise<{ asambleaId: string; total: number } | null>;
+  fetchAssemblyVoting: (assemblyId: string) => Promise<AssemblyAgendaVoting[]>;
+  openVoting: (assemblyId: string, itemId: string) => Promise<{ status: string } | null>;
+  closeVoting: (assemblyId: string, itemId: string) => Promise<AssemblyVoteTally | null>;
+  castVote: (
+    assemblyId: string,
+    itemId: string,
+    input: CastVote
+  ) => Promise<AssemblyVoteRecord | null>;
+  revokeVote: (
+    assemblyId: string,
+    itemId: string,
+    voteId: string
+  ) => Promise<{ id: string } | null>;
   createReservation: (input: CreateReservation) => Promise<ReservationItem | null>;
   createVisitor: (input: CreateVisitor) => Promise<VisitorItem | null>;
   createParkingSpot: (input: CreateParkingSpot) => Promise<ParkingSpotItem | null>;
@@ -667,6 +684,48 @@ export function DataProvider({ children }: { children: ReactNode }) {
               { method: "PATCH", body: JSON.stringify({ orderedIds }) }
             ),
           "Orden del día actualizado"
+        ),
+      fetchAssemblyVoting: (assemblyId) =>
+        apiRequest<AssemblyAgendaVoting[]>(`/v1/habitat/assemblies/${assemblyId}/voting`),
+      openVoting: (assemblyId, itemId) =>
+        mutate(
+          `assembly-voting-open-${itemId}`,
+          () =>
+            apiRequest<{ status: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/agenda/${itemId}/voting/open`,
+              { method: "POST" }
+            ),
+          "Votación abierta"
+        ),
+      closeVoting: (assemblyId, itemId) =>
+        mutate(
+          `assembly-voting-close-${itemId}`,
+          () =>
+            apiRequest<AssemblyVoteTally>(
+              `/v1/habitat/assemblies/${assemblyId}/agenda/${itemId}/voting/close`,
+              { method: "POST" }
+            ),
+          "Votación cerrada"
+        ),
+      castVote: (assemblyId, itemId, input) =>
+        mutate(
+          `assembly-voting-cast-${itemId}`,
+          () =>
+            apiRequest<AssemblyVoteRecord>(
+              `/v1/habitat/assemblies/${assemblyId}/agenda/${itemId}/votes`,
+              { method: "POST", body: JSON.stringify(input) }
+            ),
+          "Voto registrado"
+        ),
+      revokeVote: (assemblyId, itemId, voteId) =>
+        mutate(
+          `assembly-voting-revoke-${voteId}`,
+          () =>
+            apiRequest<{ id: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/agenda/${itemId}/votes/${voteId}`,
+              { method: "DELETE" }
+            ),
+          "Voto revocado"
         ),
       createCase: (input, images) =>
         mutate("case", () => createCaseWithImages(input, images), "Caso creado"),

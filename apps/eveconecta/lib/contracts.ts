@@ -521,15 +521,39 @@ export const reorderAgendaSchema = z
   .object({ orderedIds: z.array(z.string().uuid()).min(1).max(200) })
   .strict();
 
-export interface AssemblyVoteItem {
+export const voteOptionSchema = z.enum(["yes", "no", "abstain"]);
+export type VoteOption = z.infer<typeof voteOptionSchema>;
+
+export const castVoteSchema = z
+  .object({
+    unidadCodigo: z.string().trim().min(1).max(20),
+    option: voteOptionSchema
+  })
+  .strict();
+
+export interface AssemblyVoteTally {
+  yesUnits: number;
+  noUnits: number;
+  abstainUnits: number;
+  yesCoefficient: number;
+  noCoefficient: number;
+  abstainCoefficient: number;
+  approved: boolean | null;
+}
+
+export interface AssemblyVoteRecord {
   id: string;
-  title: string;
-  rule: "unit" | "coefficient" | "qualified_coefficient";
-  thresholdPercent: number;
-  status: "draft" | "open" | "closed";
-  yesPercent: number;
-  noPercent: number;
-  abstentionPercent: number;
+  unidadCodigo: string;
+  option: VoteOption;
+  coeficienteAplicado: number;
+  registradoEn: string;
+}
+
+export interface AssemblyAgendaVoting {
+  agendaItemId: string;
+  status: "not_started" | "open" | "closed";
+  tally: AssemblyVoteTally;
+  roster: AssemblyVoteRecord[] | null;
 }
 
 export interface AssemblyDecisionItem {
@@ -669,7 +693,6 @@ export interface AssemblyDossier {
   checklist: AssemblyChecklistItem[];
   agendaItems: AssemblyAgendaItem[];
   documents: AssemblySupportDocument[];
-  votes: AssemblyVoteItem[];
   minutes: {
     version: number;
     status: "not_started" | "draft" | "in_review" | "published";
@@ -962,14 +985,6 @@ export const createExpenseSchema = z.object({
     "Imprevistos"
   ]),
   amountMinor: z.number().int().positive().max(2_000_000_000)
-});
-
-export const castVoteSchema = z.object({
-  assemblyId: z.string().min(1),
-  questionId: z.string().min(1).max(80),
-  unitId: z.string().min(1).max(80),
-  coefficient: z.number().positive().max(1),
-  choice: z.string().min(1).max(80)
 });
 
 export const dataSubjectRequestSchema = z.object({

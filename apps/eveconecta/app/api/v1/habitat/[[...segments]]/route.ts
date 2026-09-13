@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ZodError, z } from "zod";
 import {
   accreditAssemblyAttendeeSchema,
+  castVoteSchema,
   createAgendaItemSchema,
   createAnnouncementSchema,
   createAssemblySupportSchema,
@@ -43,6 +44,8 @@ import {
   accreditAssemblyAttendee,
   approveExpense,
   canSelectConjunto,
+  castVote,
+  closeVoting,
   createAgendaItem,
   createAmenityReservation,
   createAnnouncement,
@@ -55,10 +58,13 @@ import {
   getDemoSnapshot,
   listAssemblyAgenda,
   listAssemblyAttendees,
+  listAssemblyVoting,
   mutateDemoSnapshot,
+  openVoting,
   payDemoFee,
   reorderAgenda,
   revokeAssemblyAccreditation,
+  revokeVote,
   scheduleAssembly,
   updateAgendaItem,
   updateResidentPetPhoto,
@@ -106,6 +112,12 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     if (agendaMatch) {
       const assemblyId = z.string().uuid().parse(agendaMatch[1]);
       return NextResponse.json(await listAssemblyAgenda(assemblyId));
+    }
+
+    const votingMatch = path.match(/^assemblies\/([0-9a-f-]+)\/voting$/i);
+    if (votingMatch) {
+      const assemblyId = z.string().uuid().parse(votingMatch[1]);
+      return NextResponse.json(await listAssemblyVoting(assemblyId));
     }
 
     return problem("Ruta no encontrada.", 404);
@@ -160,6 +172,33 @@ export async function POST(request: NextRequest, context: RouteContext) {
       const assemblyId = z.string().uuid().parse(agendaCreateMatch[1]);
       const input = createAgendaItemSchema.parse(body);
       return NextResponse.json(await createAgendaItem(assemblyId, input), { status: 201 });
+    }
+
+    const votingOpenMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/agenda\/([0-9a-f-]+)\/voting\/open$/i
+    );
+    if (votingOpenMatch) {
+      const assemblyId = z.string().uuid().parse(votingOpenMatch[1]);
+      const itemId = z.string().uuid().parse(votingOpenMatch[2]);
+      await openVoting(assemblyId, itemId);
+      return NextResponse.json({ status: "open" });
+    }
+
+    const votingCloseMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/agenda\/([0-9a-f-]+)\/voting\/close$/i
+    );
+    if (votingCloseMatch) {
+      const assemblyId = z.string().uuid().parse(votingCloseMatch[1]);
+      const itemId = z.string().uuid().parse(votingCloseMatch[2]);
+      return NextResponse.json(await closeVoting(assemblyId, itemId));
+    }
+
+    const castVoteMatch = path.match(/^assemblies\/([0-9a-f-]+)\/agenda\/([0-9a-f-]+)\/votes$/i);
+    if (castVoteMatch) {
+      const assemblyId = z.string().uuid().parse(castVoteMatch[1]);
+      const itemId = z.string().uuid().parse(castVoteMatch[2]);
+      const input = castVoteSchema.parse(body);
+      return NextResponse.json(await castVote(assemblyId, itemId, input), { status: 201 });
     }
 
     const assemblySupportMatch = path.match(/^assemblies\/([0-9a-f-]+)\/supports$/i);
@@ -660,13 +699,28 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (path === "assembly-settings") {
       const input = updateAssemblyCapabilitiesSchema.parse(body);
       return NextResponse.json(
-        await mutateDemoSnapshot((snapshot) => {
+        await mutateDemoSnapshot(async (snapshot, access) => {
           const current = normalizeAssemblySettings(snapshot.assemblySettings);
           const settings = {
             capabilities: { ...current.capabilities, ...input.capabilities },
             updatedAt: new Date().toISOString()
           };
           snapshot.assemblySettings = settings;
+          // conjuntos.funcionalidades_asamblea es la fuente real que leen las
+          // RPCs de votación (p.ej. secret_ballots en
+          // listar_votaciones_asamblea_demo); se mantiene en el mismo cambio
+          // para que no se desincronice del snapshot que lee el cliente.
+          const { error: capabilitiesError } = await access.supabase
+            .schema("conjuntos")
+            .from("conjuntos")
+            .update({ funcionalidades_asamblea: settings.capabilities })
+            .eq("id", access.conjuntoId);
+          if (capabilitiesError) {
+            throw new DemoApiError(
+              "No fue posible actualizar las funcionalidades de asambleas.",
+              500
+            );
+          }
           return {
             action: "asambleas.funcionalidades_actualizadas",
             detail: "La matriz funcional de asambleas fue actualizada para la copropiedad",
@@ -832,6 +886,16 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
       const assemblyId = z.string().uuid().parse(agendaItemMatch[1]);
       const itemId = z.string().uuid().parse(agendaItemMatch[2]);
       return NextResponse.json(await deleteAgendaItem(assemblyId, itemId));
+    }
+
+    const voteRevokeMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/agenda\/([0-9a-f-]+)\/votes\/([0-9a-f-]+)$/i
+    );
+    if (voteRevokeMatch) {
+      const assemblyId = z.string().uuid().parse(voteRevokeMatch[1]);
+      z.string().uuid().parse(voteRevokeMatch[2]);
+      const voteId = z.string().uuid().parse(voteRevokeMatch[3]);
+      return NextResponse.json(await revokeVote(assemblyId, voteId));
     }
 
     return problem("Ruta no encontrada.", 404);

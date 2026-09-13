@@ -13,12 +13,16 @@ import type {
   AccreditAssemblyAttendee,
   AssemblyAgendaItem,
   AssemblyAgendaOverview,
+  AssemblyAgendaVoting,
   AssemblyAttendee,
   AssemblyCapabilities,
   AssemblyItem,
   AssemblySettings,
   AssemblyStage,
   AssemblySupportDocument,
+  AssemblyVoteRecord,
+  AssemblyVoteTally,
+  CastVote,
   CommunityPerson,
   CreateAgendaItem,
   CreateAssemblySupport,
@@ -60,6 +64,7 @@ import { AssemblyAccreditationPanel } from "./assembly-accreditation";
 import { AssemblyAgendaPanel } from "./assembly-agenda";
 import { AssemblySupportPanel } from "./assembly-supports";
 import { AssemblyConvocationPanel } from "./assembly-convocation";
+import { AssemblyVotingPanel, VotingCapabilityNotice } from "./assembly-voting";
 
 const dateTimeFormatter = new Intl.DateTimeFormat("es-CO", {
   day: "numeric",
@@ -82,13 +87,6 @@ const stageIcons: Record<AssemblyStage, typeof ClipboardCheck> = {
   minutes: Signature,
   follow_up: ListChecks
 };
-
-const votingRuleLabels = {
-  none: "Sin votación",
-  unit: "Un voto por unidad",
-  coefficient: "Por coeficiente representado",
-  qualified_coefficient: "Mayoría calificada · total de coeficientes"
-} as const;
 
 function formatDateTime(value: string): string {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -466,10 +464,28 @@ function RegistrationStage({
 
 function LiveStage({
   assembly,
-  capabilities
+  capabilities,
+  agendaItems,
+  voting,
+  votingLoading,
+  canManage,
+  busy,
+  onOpenVoting,
+  onCloseVoting,
+  onCastVote,
+  onRevokeVote
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   capabilities: AssemblyCapabilities;
+  agendaItems: AssemblyAgendaItem[];
+  voting: AssemblyAgendaVoting[] | null;
+  votingLoading: boolean;
+  canManage: boolean;
+  busy: string | null;
+  onOpenVoting: (itemId: string) => Promise<unknown>;
+  onCloseVoting: (itemId: string) => Promise<unknown>;
+  onCastVote: (itemId: string, input: CastVote) => Promise<unknown>;
+  onRevokeVote: (itemId: string, voteId: string) => Promise<unknown>;
 }) {
   const hasVoting =
     capabilities.unit_voting ||
@@ -503,66 +519,20 @@ function LiveStage({
       )}
 
       {hasVoting ? (
-        <Card className="p-5 hover:translate-y-0">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="font-extrabold">Votaciones</h3>
-              <p className="mt-1 text-xs text-[var(--muted)]">
-                El resultado explica regla, denominador y umbral.
-              </p>
-            </div>
-            <Badge tone="info">{assembly.dossier.votes.length} configuradas</Badge>
-          </div>
-          <div className="mt-4 space-y-3">
-            {assembly.dossier.votes.length ? (
-              assembly.dossier.votes.map((voteItem) => {
-                const enabled =
-                  voteItem.rule === "unit"
-                    ? capabilities.unit_voting
-                    : voteItem.rule === "coefficient"
-                      ? capabilities.coefficient_voting
-                      : capabilities.qualified_majorities;
-                if (!enabled) return null;
-                return (
-                  <div className="rounded-xl border border-[var(--line)] p-4" key={voteItem.id}>
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-bold">{voteItem.title}</p>
-                        <p className="mt-1 text-xs text-[var(--muted)]">
-                          {votingRuleLabels[voteItem.rule]} · Umbral {voteItem.thresholdPercent}%
-                        </p>
-                      </div>
-                      <Badge tone={statusTone(voteItem.status)}>
-                        {statusLabel(voteItem.status)}
-                      </Badge>
-                    </div>
-                    {voteItem.status === "closed" ? (
-                      <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
-                        <span className="rounded-lg bg-[#F0FDF4] p-2 font-bold text-[var(--eve-exito)]">
-                          Sí {voteItem.yesPercent}%
-                        </span>
-                        <span className="rounded-lg bg-[#FEF2F2] p-2 font-bold text-[var(--eve-error)]">
-                          No {voteItem.noPercent}%
-                        </span>
-                        <span className="rounded-lg bg-[var(--wash)] p-2 font-bold text-[var(--muted)]">
-                          Abst. {voteItem.abstentionPercent}%
-                        </span>
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })
-            ) : (
-              <EmptyState
-                icon={<Vote size={20} />}
-                title="Sin votaciones configuradas"
-                description="Los puntos informativos no requieren una decisión electrónica."
-              />
-            )}
-          </div>
-        </Card>
+        <AssemblyVotingPanel
+          agendaItems={agendaItems}
+          busy={busy}
+          canManage={canManage}
+          capabilities={capabilities}
+          loading={votingLoading}
+          onCastVote={onCastVote}
+          onClose={onCloseVoting}
+          onOpen={onOpenVoting}
+          onRevokeVote={onRevokeVote}
+          voting={voting}
+        />
       ) : (
-        <CapabilityNotice label="Las votaciones digitales" />
+        <VotingCapabilityNotice />
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -715,6 +685,8 @@ function StageContent({
   attendeesLoading,
   agenda,
   agendaLoading,
+  voting,
+  votingLoading,
   onToggleChecklist,
   onUploadSupport,
   onSupportStatusChange,
@@ -726,7 +698,11 @@ function StageContent({
   onCreateAgendaItem,
   onUpdateAgendaItem,
   onDeleteAgendaItem,
-  onReorderAgenda
+  onReorderAgenda,
+  onOpenVoting,
+  onCloseVoting,
+  onCastVote,
+  onRevokeVote
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   people: CommunityPerson[];
@@ -739,6 +715,8 @@ function StageContent({
   attendeesLoading: boolean;
   agenda: AssemblyAgendaOverview | null;
   agendaLoading: boolean;
+  voting: AssemblyAgendaVoting[] | null;
+  votingLoading: boolean;
   onToggleChecklist: (
     assemblyId: string,
     input: UpdateAssemblyChecklist
@@ -768,6 +746,10 @@ function StageContent({
   onUpdateAgendaItem: (itemId: string, input: UpdateAgendaItem) => Promise<{ id: string } | null>;
   onDeleteAgendaItem: (itemId: string) => Promise<{ id: string } | null>;
   onReorderAgenda: (orderedIds: string[]) => Promise<unknown>;
+  onOpenVoting: (itemId: string) => Promise<unknown>;
+  onCloseVoting: (itemId: string) => Promise<unknown>;
+  onCastVote: (itemId: string, input: CastVote) => Promise<unknown>;
+  onRevokeVote: (itemId: string, voteId: string) => Promise<unknown>;
 }) {
   return (
     <div className="space-y-4">
@@ -813,7 +795,21 @@ function StageContent({
           people={people}
         />
       ) : null}
-      {stage === "live" ? <LiveStage assembly={assembly} capabilities={capabilities} /> : null}
+      {stage === "live" ? (
+        <LiveStage
+          agendaItems={agenda?.items ?? []}
+          assembly={assembly}
+          busy={busy}
+          canManage={canManage}
+          capabilities={capabilities}
+          onCastVote={onCastVote}
+          onCloseVoting={onCloseVoting}
+          onOpenVoting={onOpenVoting}
+          onRevokeVote={onRevokeVote}
+          voting={voting}
+          votingLoading={votingLoading}
+        />
+      ) : null}
       {stage === "minutes" ? (
         <MinutesStage assembly={assembly} capabilities={capabilities} />
       ) : null}
@@ -854,7 +850,12 @@ function AssemblyWorkspace({
   onCreateAgendaItem,
   onUpdateAgendaItem,
   onDeleteAgendaItem,
-  onReorderAgenda
+  onReorderAgenda,
+  onFetchVoting,
+  onOpenVoting,
+  onCloseVoting,
+  onCastVote,
+  onRevokeVote
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   people: CommunityPerson[];
@@ -906,6 +907,19 @@ function AssemblyWorkspace({
     assemblyId: string,
     orderedIds: string[]
   ) => Promise<{ asambleaId: string; total: number } | null>;
+  onFetchVoting: (assemblyId: string) => Promise<AssemblyAgendaVoting[]>;
+  onOpenVoting: (assemblyId: string, itemId: string) => Promise<{ status: string } | null>;
+  onCloseVoting: (assemblyId: string, itemId: string) => Promise<AssemblyVoteTally | null>;
+  onCastVote: (
+    assemblyId: string,
+    itemId: string,
+    input: CastVote
+  ) => Promise<AssemblyVoteRecord | null>;
+  onRevokeVote: (
+    assemblyId: string,
+    itemId: string,
+    voteId: string
+  ) => Promise<{ id: string } | null>;
 }) {
   const [activeStage, setActiveStage] = useState<AssemblyStage>(assembly.dossier.currentStage);
   const [attendees, setAttendees] = useState<AssemblyAttendee[]>([]);
@@ -974,6 +988,31 @@ function AssemblyWorkspace({
   useEffect(() => {
     if (open && activeStage === "preparation") void refreshAgenda();
   }, [activeStage, open, refreshAgenda]);
+
+  // Mismo patrón que refreshAgenda: legible por los cuatro roles, disparado
+  // solo en la etapa "live" donde vive el panel de votaciones.
+  const [voting, setVoting] = useState<AssemblyAgendaVoting[] | null>(null);
+  const [votingLoading, setVotingLoading] = useState(false);
+  const onFetchVotingRef = useRef(onFetchVoting);
+  onFetchVotingRef.current = onFetchVoting;
+  const votingRequestIdRef = useRef(0);
+
+  const refreshVoting = useCallback(async () => {
+    const requestId = ++votingRequestIdRef.current;
+    setVotingLoading(true);
+    try {
+      const result = await onFetchVotingRef.current(assembly.id);
+      if (mountedRef.current && votingRequestIdRef.current === requestId) setVoting(result);
+    } finally {
+      if (mountedRef.current && votingRequestIdRef.current === requestId) {
+        setVotingLoading(false);
+      }
+    }
+  }, [assembly.id]);
+
+  useEffect(() => {
+    if (open && activeStage === "live") void refreshVoting();
+  }, [activeStage, open, refreshVoting]);
   return (
     <Modal
       description="Expediente único de preparación, decisión, acta y cumplimiento."
@@ -1112,6 +1151,28 @@ function AssemblyWorkspace({
           onUploadSupport={onUploadSupport}
           people={people}
           stage={activeStage}
+          voting={voting}
+          votingLoading={votingLoading}
+          onOpenVoting={async (itemId) => {
+            const result = await onOpenVoting(assembly.id, itemId);
+            if (result) await refreshVoting();
+            return result;
+          }}
+          onCloseVoting={async (itemId) => {
+            const result = await onCloseVoting(assembly.id, itemId);
+            if (result) await refreshVoting();
+            return result;
+          }}
+          onCastVote={async (itemId, input) => {
+            const result = await onCastVote(assembly.id, itemId, input);
+            if (result) await refreshVoting();
+            return result;
+          }}
+          onRevokeVote={async (itemId, voteId) => {
+            const result = await onRevokeVote(assembly.id, itemId, voteId);
+            if (result) await refreshVoting();
+            return result;
+          }}
         />
       </div>
     </Modal>
@@ -1243,7 +1304,12 @@ export function AssemblyManagement({
   onCreateAgendaItem,
   onUpdateAgendaItem,
   onDeleteAgendaItem,
-  onReorderAgenda
+  onReorderAgenda,
+  onFetchVoting,
+  onOpenVoting,
+  onCloseVoting,
+  onCastVote,
+  onRevokeVote
 }: {
   assemblies: AssemblyItem[];
   people: CommunityPerson[];
@@ -1294,6 +1360,19 @@ export function AssemblyManagement({
     assemblyId: string,
     orderedIds: string[]
   ) => Promise<{ asambleaId: string; total: number } | null>;
+  onFetchVoting: (assemblyId: string) => Promise<AssemblyAgendaVoting[]>;
+  onOpenVoting: (assemblyId: string, itemId: string) => Promise<{ status: string } | null>;
+  onCloseVoting: (assemblyId: string, itemId: string) => Promise<AssemblyVoteTally | null>;
+  onCastVote: (
+    assemblyId: string,
+    itemId: string,
+    input: CastVote
+  ) => Promise<AssemblyVoteRecord | null>;
+  onRevokeVote: (
+    assemblyId: string,
+    itemId: string,
+    voteId: string
+  ) => Promise<{ id: string } | null>;
 }) {
   const settings = normalizeAssemblySettings(rawSettings);
   const normalizedAssemblies = useMemo(
@@ -1492,6 +1571,11 @@ export function AssemblyManagement({
           onDownloadSupport={onDownloadSupport}
           onFetchAgenda={onFetchAgenda}
           onFetchAttendees={onFetchAttendees}
+          onFetchVoting={onFetchVoting}
+          onOpenVoting={onOpenVoting}
+          onCloseVoting={onCloseVoting}
+          onCastVote={onCastVote}
+          onRevokeVote={onRevokeVote}
           onRevokeAttendee={onRevokeAttendee}
           onReorderAgenda={onReorderAgenda}
           onSendEmailConvocation={onSendEmailConvocation}

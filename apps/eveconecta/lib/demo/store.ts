@@ -7,9 +7,13 @@ import type {
   AnnouncementItem,
   AssemblyAgendaItem,
   AssemblyAgendaOverview,
+  AssemblyAgendaVoting,
   AssemblyAttendee,
   AssemblyItem,
+  AssemblyVoteRecord,
+  AssemblyVoteTally,
   CaseItem,
+  CastVote,
   CreateAgendaItem,
   CreateAnnouncement,
   CreateCase,
@@ -28,6 +32,7 @@ import type {
   UpdateAgendaItem,
   UpdatePetPhoto,
   UpdatePetStatus,
+  VoteOption,
   VisitorItem
 } from "@/lib/contracts";
 import {
@@ -637,12 +642,13 @@ const agendaStatusToSql: Record<UpdateAgendaItem["status"], string> = {
   ready: "listo"
 };
 
-function mapAgendaError(error: { code?: string; message: string }): never {
+function mapAssemblyWorkflowError(error: { code?: string; message: string }): never {
   if (error.code === "42501") throw new DemoApiError(error.message, 403);
   if (error.code === "22023") throw new DemoApiError(error.message, 400);
   if (error.code === "55000") throw new DemoApiError(error.message, 409);
+  if (error.code === "23505") throw new DemoApiError(error.message, 409);
   if (error.code === "P0002") throw new DemoApiError(error.message, 404);
-  throw new DemoApiError("No fue posible actualizar el orden del día.", 500);
+  throw new DemoApiError("No fue posible completar la operación.", 500);
 }
 
 export async function createAgendaItem(
@@ -662,7 +668,7 @@ export async function createAgendaItem(
       p_umbral_porcentaje: input.thresholdPercent
     });
 
-  if (error) mapAgendaError(error);
+  if (error) mapAssemblyWorkflowError(error);
   if (!data || typeof data !== "object") {
     throw new DemoApiError("Supabase no devolvió el punto creado.", 500);
   }
@@ -689,7 +695,7 @@ export async function updateAgendaItem(
       p_estado: agendaStatusToSql[input.status]
     });
 
-  if (error) mapAgendaError(error);
+  if (error) mapAssemblyWorkflowError(error);
   if (!data || typeof data !== "object") {
     throw new DemoApiError("Supabase no devolvió el punto actualizado.", 500);
   }
@@ -710,7 +716,7 @@ export async function deleteAgendaItem(
       p_punto_id: itemId
     });
 
-  if (error) mapAgendaError(error);
+  if (error) mapAssemblyWorkflowError(error);
   if (!data || typeof data !== "object") {
     throw new DemoApiError("Supabase no devolvió la eliminación.", 500);
   }
@@ -731,11 +737,112 @@ export async function reorderAgenda(
       p_orden_ids: input.orderedIds
     });
 
-  if (error) mapAgendaError(error);
+  if (error) mapAssemblyWorkflowError(error);
   if (!data || typeof data !== "object") {
     throw new DemoApiError("Supabase no devolvió el nuevo orden.", 500);
   }
   return data as { asambleaId: string; total: number };
+}
+
+const voteOptionToSql: Record<VoteOption, string> = {
+  yes: "si",
+  no: "no",
+  abstain: "abstencion"
+};
+
+export async function openVoting(assemblyId: string, agendaItemId: string): Promise<void> {
+  const access = await getDemoAccess();
+
+  const { error } = await access.supabase.schema("conjuntos").rpc("abrir_votacion_punto_demo", {
+    p_conjunto_id: access.conjuntoId,
+    p_asamblea_id: assemblyId,
+    p_punto_id: agendaItemId
+  });
+
+  if (error) mapAssemblyWorkflowError(error);
+}
+
+export async function closeVoting(
+  assemblyId: string,
+  agendaItemId: string
+): Promise<AssemblyVoteTally> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("cerrar_votacion_punto_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_punto_id: agendaItemId
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el resultado de la votación.", 500);
+  }
+  return data as AssemblyVoteTally;
+}
+
+export async function castVote(
+  assemblyId: string,
+  agendaItemId: string,
+  input: CastVote
+): Promise<AssemblyVoteRecord> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("votar_punto_orden_dia_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_punto_id: agendaItemId,
+      p_unidad_codigo: input.unidadCodigo,
+      p_opcion: voteOptionToSql[input.option]
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el voto registrado.", 500);
+  }
+  return data as AssemblyVoteRecord;
+}
+
+export async function revokeVote(
+  assemblyId: string,
+  voteId: string
+): Promise<{ id: string }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("revocar_voto_punto_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_voto_id: voteId
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió la revocación.", 500);
+  }
+  return data as { id: string };
+}
+
+export async function listAssemblyVoting(assemblyId: string): Promise<AssemblyAgendaVoting[]> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("listar_votaciones_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId
+    });
+
+  if (error) {
+    if (error.code === "42501") throw new DemoApiError(error.message, 403);
+    throw new DemoApiError("No fue posible consultar las votaciones.", 500);
+  }
+  return (data as AssemblyAgendaVoting[] | null) ?? [];
 }
 
 export async function updateResidentPetPhoto(
