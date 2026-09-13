@@ -367,13 +367,6 @@ export function createAssemblyDossier(assembly: AssemblyItem): AssemblyDossier {
         uploadedBy: null
       }
     ],
-    minutes: {
-      version: closed ? 2 : 0,
-      status: closed ? "published" : "not_started",
-      signaturesCompleted: closed ? 2 : 0,
-      signaturesRequired: 2,
-      publishedAt: closed ? assembly.date : null
-    },
     decisions: closed
       ? [
           {

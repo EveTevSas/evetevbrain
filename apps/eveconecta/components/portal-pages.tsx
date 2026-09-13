@@ -2397,6 +2397,12 @@ export function AssembliesPage() {
     closeVoting,
     castVote,
     revokeVote,
+    startAssembly,
+    closeAssembly,
+    fetchAssemblyMinutes,
+    saveAssemblyMinutes,
+    signAssemblyMinutes,
+    publishAssemblyMinutes,
     busy
   } = useData();
   const { user } = useAuthUser();
@@ -2459,6 +2465,12 @@ export function AssembliesPage() {
         onCloseVoting={closeVoting}
         onCastVote={castVote}
         onRevokeVote={revokeVote}
+        onStartAssembly={startAssembly}
+        onCloseAssembly={closeAssembly}
+        onFetchMinutes={fetchAssemblyMinutes}
+        onSaveMinutes={saveAssemblyMinutes}
+        onSignMinutes={signAssemblyMinutes}
+        onPublishMinutes={publishAssemblyMinutes}
         onRevokeAttendee={revokeAssemblyAttendee}
         onReorderAgenda={reorderAgenda}
         onSendEmailConvocation={sendAssemblyEmailConvocation}

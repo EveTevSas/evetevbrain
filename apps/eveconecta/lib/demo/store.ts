@@ -10,6 +10,7 @@ import type {
   AssemblyAgendaVoting,
   AssemblyAttendee,
   AssemblyItem,
+  AssemblyMinutesOverview,
   AssemblyVoteRecord,
   AssemblyVoteTally,
   CaseItem,
@@ -28,6 +29,7 @@ import type {
   RegisteredVehicleItem,
   ReorderAgenda,
   ReservationItem,
+  SaveAssemblyMinutes,
   ScheduleAssembly,
   UpdateAgendaItem,
   UpdatePetPhoto,
@@ -843,6 +845,85 @@ export async function listAssemblyVoting(assemblyId: string): Promise<AssemblyAg
     throw new DemoApiError("No fue posible consultar las votaciones.", 500);
   }
   return (data as AssemblyAgendaVoting[] | null) ?? [];
+}
+
+export async function startAssembly(assemblyId: string): Promise<void> {
+  const access = await getDemoAccess();
+  const { error } = await access.supabase.schema("conjuntos").rpc("iniciar_asamblea_demo", {
+    p_conjunto_id: access.conjuntoId,
+    p_asamblea_id: assemblyId
+  });
+  if (error) mapAssemblyWorkflowError(error);
+}
+
+export async function closeAssembly(assemblyId: string): Promise<void> {
+  const access = await getDemoAccess();
+  const { error } = await access.supabase.schema("conjuntos").rpc("cerrar_asamblea_demo", {
+    p_conjunto_id: access.conjuntoId,
+    p_asamblea_id: assemblyId
+  });
+  if (error) mapAssemblyWorkflowError(error);
+}
+
+export async function fetchAssemblyMinutes(assemblyId: string): Promise<AssemblyMinutesOverview> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("obtener_acta_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId
+    });
+
+  if (error) {
+    if (error.code === "42501") throw new DemoApiError(error.message, 403);
+    throw new DemoApiError("No fue posible consultar el acta.", 500);
+  }
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el acta.", 500);
+  }
+  return data as AssemblyMinutesOverview;
+}
+
+export async function saveAssemblyMinutes(
+  assemblyId: string,
+  input: SaveAssemblyMinutes
+): Promise<{ id: string; version: number }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("guardar_acta_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_presidente_persona_id: input.presidentePersonaId,
+      p_secretario_persona_id: input.secretarioPersonaId,
+      p_resumen: input.resumen
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el acta guardada.", 500);
+  }
+  return data as { id: string; version: number };
+}
+
+export async function signAssemblyMinutes(assemblyId: string): Promise<void> {
+  const access = await getDemoAccess();
+  const { error } = await access.supabase.schema("conjuntos").rpc("firmar_acta_asamblea_demo", {
+    p_conjunto_id: access.conjuntoId,
+    p_asamblea_id: assemblyId
+  });
+  if (error) mapAssemblyWorkflowError(error);
+}
+
+export async function publishAssemblyMinutes(assemblyId: string): Promise<void> {
+  const access = await getDemoAccess();
+  const { error } = await access.supabase.schema("conjuntos").rpc("publicar_acta_asamblea_demo", {
+    p_conjunto_id: access.conjuntoId,
+    p_asamblea_id: assemblyId
+  });
+  if (error) mapAssemblyWorkflowError(error);
 }
 
 export async function updateResidentPetPhoto(

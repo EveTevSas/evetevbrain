@@ -1,5 +1,6 @@
 import {
   castVoteSchema,
+  saveAssemblyMinutesSchema,
   createAnnouncementSchema,
   createCaseSchema,
   createExpenseSchema,
@@ -266,6 +267,38 @@ describe("web contract helpers", () => {
     expect(() => castVoteSchema.parse({ unidadCodigo: "", option: "yes" })).toThrow();
     expect(() =>
       castVoteSchema.parse({ unidadCodigo: "A-101", option: "yes", extra: true })
+    ).toThrow();
+  });
+
+  it("validates saving the assembly minutes", () => {
+    const uuidA = "11111111-1111-4111-8111-111111111111";
+    const uuidB = "22222222-2222-4222-8222-222222222222";
+    expect(
+      saveAssemblyMinutesSchema.parse({
+        presidentePersonaId: uuidA,
+        secretarioPersonaId: uuidB,
+        resumen: "Resumen de la sesión con suficiente contenido narrativo."
+      })
+    ).toMatchObject({ presidentePersonaId: uuidA, secretarioPersonaId: uuidB });
+  });
+
+  it("rejects minutes with a summary shorter than 20 characters", () => {
+    expect(() =>
+      saveAssemblyMinutesSchema.parse({
+        presidentePersonaId: "11111111-1111-4111-8111-111111111111",
+        secretarioPersonaId: "22222222-2222-4222-8222-222222222222",
+        resumen: "Muy corto"
+      })
+    ).toThrow();
+  });
+
+  it("rejects minutes with a non-uuid officer id", () => {
+    expect(() =>
+      saveAssemblyMinutesSchema.parse({
+        presidentePersonaId: "not-a-uuid",
+        secretarioPersonaId: "22222222-2222-4222-8222-222222222222",
+        resumen: "Resumen de la sesión con suficiente contenido narrativo."
+      })
     ).toThrow();
   });
 });

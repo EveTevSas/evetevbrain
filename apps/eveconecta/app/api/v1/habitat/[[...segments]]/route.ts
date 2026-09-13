@@ -17,6 +17,7 @@ import {
   createWorkOrderSchema,
   registerVehicleAccessSchema,
   reorderAgendaSchema,
+  saveAssemblyMinutesSchema,
   scheduleAssemblySchema,
   sendAssemblyEmailConvocationSchema,
   updateAgendaItemSchema,
@@ -45,6 +46,7 @@ import {
   approveExpense,
   canSelectConjunto,
   castVote,
+  closeAssembly,
   closeVoting,
   createAgendaItem,
   createAmenityReservation,
@@ -55,6 +57,7 @@ import {
   createVisitorAuthorization,
   deleteAgendaItem,
   DemoApiError,
+  fetchAssemblyMinutes,
   getDemoSnapshot,
   listAssemblyAgenda,
   listAssemblyAttendees,
@@ -62,10 +65,14 @@ import {
   mutateDemoSnapshot,
   openVoting,
   payDemoFee,
+  publishAssemblyMinutes,
   reorderAgenda,
   revokeAssemblyAccreditation,
   revokeVote,
+  saveAssemblyMinutes,
   scheduleAssembly,
+  signAssemblyMinutes,
+  startAssembly,
   updateAgendaItem,
   updateResidentPetPhoto,
   updateResidentPetStatus
@@ -118,6 +125,12 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     if (votingMatch) {
       const assemblyId = z.string().uuid().parse(votingMatch[1]);
       return NextResponse.json(await listAssemblyVoting(assemblyId));
+    }
+
+    const minutesMatch = path.match(/^assemblies\/([0-9a-f-]+)\/minutes$/i);
+    if (minutesMatch) {
+      const assemblyId = z.string().uuid().parse(minutesMatch[1]);
+      return NextResponse.json(await fetchAssemblyMinutes(assemblyId));
     }
 
     return problem("Ruta no encontrada.", 404);
@@ -199,6 +212,34 @@ export async function POST(request: NextRequest, context: RouteContext) {
       const itemId = z.string().uuid().parse(castVoteMatch[2]);
       const input = castVoteSchema.parse(body);
       return NextResponse.json(await castVote(assemblyId, itemId, input), { status: 201 });
+    }
+
+    const assemblyStartMatch = path.match(/^assemblies\/([0-9a-f-]+)\/start$/i);
+    if (assemblyStartMatch) {
+      const assemblyId = z.string().uuid().parse(assemblyStartMatch[1]);
+      await startAssembly(assemblyId);
+      return NextResponse.json({ status: "in_progress" });
+    }
+
+    const assemblyCloseMatch = path.match(/^assemblies\/([0-9a-f-]+)\/close$/i);
+    if (assemblyCloseMatch) {
+      const assemblyId = z.string().uuid().parse(assemblyCloseMatch[1]);
+      await closeAssembly(assemblyId);
+      return NextResponse.json({ status: "closed" });
+    }
+
+    const minutesSignMatch = path.match(/^assemblies\/([0-9a-f-]+)\/minutes\/sign$/i);
+    if (minutesSignMatch) {
+      const assemblyId = z.string().uuid().parse(minutesSignMatch[1]);
+      await signAssemblyMinutes(assemblyId);
+      return NextResponse.json({ status: "signed" });
+    }
+
+    const minutesPublishMatch = path.match(/^assemblies\/([0-9a-f-]+)\/minutes\/publish$/i);
+    if (minutesPublishMatch) {
+      const assemblyId = z.string().uuid().parse(minutesPublishMatch[1]);
+      await publishAssemblyMinutes(assemblyId);
+      return NextResponse.json({ status: "published" });
     }
 
     const assemblySupportMatch = path.match(/^assemblies\/([0-9a-f-]+)\/supports$/i);
@@ -729,6 +770,13 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
           };
         })
       );
+    }
+
+    const minutesMatch = path.match(/^assemblies\/([0-9a-f-]+)\/minutes$/i);
+    if (minutesMatch) {
+      const assemblyId = z.string().uuid().parse(minutesMatch[1]);
+      const input = saveAssemblyMinutesSchema.parse(body);
+      return NextResponse.json(await saveAssemblyMinutes(assemblyId, input));
     }
 
     const checklistMatch = path.match(/^assemblies\/([0-9a-f-]+)\/checklist$/i);

@@ -17,6 +17,7 @@ import type {
   AssemblyAttendee,
   AssemblyCapabilities,
   AssemblyItem,
+  AssemblyMinutesOverview,
   AssemblySettings,
   AssemblyStage,
   AssemblySupportDocument,
@@ -26,6 +27,7 @@ import type {
   CommunityPerson,
   CreateAgendaItem,
   CreateAssemblySupport,
+  SaveAssemblyMinutes,
   SendAssemblyEmailConvocation,
   UpdateAgendaItem,
   UpdateAssemblyCapabilities,
@@ -36,7 +38,6 @@ import { Badge, Button, Card, EmptyState, Progress, cn } from "@/lib/ui";
 import {
   ArrowRight,
   BellRing,
-  BookOpenCheck,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -65,6 +66,7 @@ import { AssemblyAgendaPanel } from "./assembly-agenda";
 import { AssemblySupportPanel } from "./assembly-supports";
 import { AssemblyConvocationPanel } from "./assembly-convocation";
 import { AssemblyVotingPanel, VotingCapabilityNotice } from "./assembly-voting";
+import { AssemblyMinutesPanel } from "./assembly-minutes";
 
 const dateTimeFormatter = new Intl.DateTimeFormat("es-CO", {
   day: "numeric",
@@ -569,57 +571,38 @@ function LiveStage({
 
 function MinutesStage({
   assembly,
-  capabilities
+  capabilities,
+  canManage,
+  busy,
+  minutes,
+  minutesLoading,
+  onSaveMinutes,
+  onSignMinutes,
+  onPublishMinutes
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   capabilities: AssemblyCapabilities;
+  canManage: boolean;
+  busy: string | null;
+  minutes: AssemblyMinutesOverview | null;
+  minutesLoading: boolean;
+  onSaveMinutes: (input: SaveAssemblyMinutes) => Promise<unknown>;
+  onSignMinutes: () => Promise<unknown>;
+  onPublishMinutes: () => Promise<unknown>;
 }) {
   if (!capabilities.minutes_workflow) return <CapabilityNotice label="El flujo de acta" />;
-  const minutes = assembly.dossier.minutes;
   return (
-    <div className="grid gap-4 lg:grid-cols-[.75fr_1.25fr]">
-      <Card className="p-5 hover:translate-y-0">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Signature size={19} className="text-[var(--accent)]" />
-            <h3 className="font-extrabold">Estado del acta</h3>
-          </div>
-          <Badge tone={statusTone(minutes.status)}>{statusLabel(minutes.status)}</Badge>
-        </div>
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <Stat
-            label="Versión"
-            value={minutes.version ? `v${minutes.version}` : "—"}
-            detail="Historial conservado"
-          />
-          <Stat
-            label="Firmas"
-            value={`${minutes.signaturesCompleted} / ${minutes.signaturesRequired}`}
-            detail="Presidencia y secretaría"
-          />
-        </div>
-      </Card>
-      <Card className="p-5 hover:translate-y-0">
-        <div className="flex items-start gap-3">
-          <BookOpenCheck size={21} className="mt-0.5 text-[var(--accent)]" />
-          <div>
-            <h3 className="font-extrabold">Contenido reproducible</h3>
-            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-              Convocatoria, asistentes, unidades, coeficientes, poderes, intervenciones y resultado
-              de cada votación se reconstruyen desde la evidencia.
-            </p>
-          </div>
-        </div>
-        <div className="mt-4 rounded-xl bg-[var(--wash)]/65 p-4 text-sm">
-          <span className="font-bold">Publicación:</span>{" "}
-          <span className="text-[var(--muted)]">
-            {minutes.publishedAt
-              ? formatDateTime(minutes.publishedAt)
-              : "Pendiente después de firmas y verificación"}
-          </span>
-        </div>
-      </Card>
-    </div>
+    <AssemblyMinutesPanel
+      assemblyId={assembly.id}
+      assemblyStatus={assembly.status}
+      busy={busy}
+      canManage={canManage}
+      loading={minutesLoading}
+      onPublish={onPublishMinutes}
+      onSave={onSaveMinutes}
+      onSign={onSignMinutes}
+      overview={minutes}
+    />
   );
 }
 
@@ -687,6 +670,8 @@ function StageContent({
   agendaLoading,
   voting,
   votingLoading,
+  minutes,
+  minutesLoading,
   onToggleChecklist,
   onUploadSupport,
   onSupportStatusChange,
@@ -702,7 +687,10 @@ function StageContent({
   onOpenVoting,
   onCloseVoting,
   onCastVote,
-  onRevokeVote
+  onRevokeVote,
+  onSaveMinutes,
+  onSignMinutes,
+  onPublishMinutes
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   people: CommunityPerson[];
@@ -717,6 +705,8 @@ function StageContent({
   agendaLoading: boolean;
   voting: AssemblyAgendaVoting[] | null;
   votingLoading: boolean;
+  minutes: AssemblyMinutesOverview | null;
+  minutesLoading: boolean;
   onToggleChecklist: (
     assemblyId: string,
     input: UpdateAssemblyChecklist
@@ -750,6 +740,9 @@ function StageContent({
   onCloseVoting: (itemId: string) => Promise<unknown>;
   onCastVote: (itemId: string, input: CastVote) => Promise<unknown>;
   onRevokeVote: (itemId: string, voteId: string) => Promise<unknown>;
+  onSaveMinutes: (input: SaveAssemblyMinutes) => Promise<unknown>;
+  onSignMinutes: () => Promise<unknown>;
+  onPublishMinutes: () => Promise<unknown>;
 }) {
   return (
     <div className="space-y-4">
@@ -811,7 +804,17 @@ function StageContent({
         />
       ) : null}
       {stage === "minutes" ? (
-        <MinutesStage assembly={assembly} capabilities={capabilities} />
+        <MinutesStage
+          assembly={assembly}
+          busy={busy}
+          canManage={canManage}
+          capabilities={capabilities}
+          minutes={minutes}
+          minutesLoading={minutesLoading}
+          onPublishMinutes={onPublishMinutes}
+          onSaveMinutes={onSaveMinutes}
+          onSignMinutes={onSignMinutes}
+        />
       ) : null}
       {stage === "follow_up" ? (
         <FollowUpStage assembly={assembly} capabilities={capabilities} />
@@ -855,7 +858,13 @@ function AssemblyWorkspace({
   onOpenVoting,
   onCloseVoting,
   onCastVote,
-  onRevokeVote
+  onRevokeVote,
+  onStartAssembly,
+  onCloseAssembly,
+  onFetchMinutes,
+  onSaveMinutes,
+  onSignMinutes,
+  onPublishMinutes
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   people: CommunityPerson[];
@@ -920,6 +929,15 @@ function AssemblyWorkspace({
     itemId: string,
     voteId: string
   ) => Promise<{ id: string } | null>;
+  onStartAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
+  onCloseAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
+  onFetchMinutes: (assemblyId: string) => Promise<AssemblyMinutesOverview>;
+  onSaveMinutes: (
+    assemblyId: string,
+    input: SaveAssemblyMinutes
+  ) => Promise<{ id: string; version: number } | null>;
+  onSignMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
+  onPublishMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
 }) {
   const [activeStage, setActiveStage] = useState<AssemblyStage>(assembly.dossier.currentStage);
   const [attendees, setAttendees] = useState<AssemblyAttendee[]>([]);
@@ -1013,6 +1031,31 @@ function AssemblyWorkspace({
   useEffect(() => {
     if (open && activeStage === "live") void refreshVoting();
   }, [activeStage, open, refreshVoting]);
+
+  // Mismo patrón que refreshVoting, disparado solo en la etapa "minutes"
+  // donde vive el acta.
+  const [minutes, setMinutes] = useState<AssemblyMinutesOverview | null>(null);
+  const [minutesLoading, setMinutesLoading] = useState(false);
+  const onFetchMinutesRef = useRef(onFetchMinutes);
+  onFetchMinutesRef.current = onFetchMinutes;
+  const minutesRequestIdRef = useRef(0);
+
+  const refreshMinutes = useCallback(async () => {
+    const requestId = ++minutesRequestIdRef.current;
+    setMinutesLoading(true);
+    try {
+      const result = await onFetchMinutesRef.current(assembly.id);
+      if (mountedRef.current && minutesRequestIdRef.current === requestId) setMinutes(result);
+    } finally {
+      if (mountedRef.current && minutesRequestIdRef.current === requestId) {
+        setMinutesLoading(false);
+      }
+    }
+  }, [assembly.id]);
+
+  useEffect(() => {
+    if (open && activeStage === "minutes") void refreshMinutes();
+  }, [activeStage, open, refreshMinutes]);
   return (
     <Modal
       description="Expediente único de preparación, decisión, acta y cumplimiento."
@@ -1034,6 +1077,34 @@ function AssemblyWorkspace({
           <Badge tone="neutral">
             {assembly.dossier.propertyUse === "mixed" ? "Uso mixto" : "Residencial"}
           </Badge>
+          {canManage && assembly.status === "scheduled" ? (
+            <Button
+              disabled={busy === `assembly-start-${assembly.id}`}
+              onClick={() => void onStartAssembly(assembly.id)}
+              size="sm"
+              variant="secondary"
+            >
+              {busy === `assembly-start-${assembly.id}` ? "Iniciando…" : "Iniciar asamblea"}
+            </Button>
+          ) : null}
+          {canManage && assembly.status === "in_progress" ? (
+            <Button
+              disabled={busy === `assembly-close-${assembly.id}`}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    "Cerrar la asamblea es necesario para poder firmar su acta y no puede deshacerse. ¿Continuar?"
+                  )
+                ) {
+                  void onCloseAssembly(assembly.id);
+                }
+              }}
+              size="sm"
+              variant="secondary"
+            >
+              {busy === `assembly-close-${assembly.id}` ? "Cerrando…" : "Cerrar asamblea"}
+            </Button>
+          ) : null}
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <Stat label="Preparación" value={`${readiness}%`} detail="Lista de control activa" />
@@ -1173,6 +1244,23 @@ function AssemblyWorkspace({
             if (result) await refreshVoting();
             return result;
           }}
+          minutes={minutes}
+          minutesLoading={minutesLoading}
+          onSaveMinutes={async (input) => {
+            const result = await onSaveMinutes(assembly.id, input);
+            if (result) await refreshMinutes();
+            return result;
+          }}
+          onSignMinutes={async () => {
+            const result = await onSignMinutes(assembly.id);
+            if (result) await refreshMinutes();
+            return result;
+          }}
+          onPublishMinutes={async () => {
+            const result = await onPublishMinutes(assembly.id);
+            if (result) await refreshMinutes();
+            return result;
+          }}
         />
       </div>
     </Modal>
@@ -1309,7 +1397,13 @@ export function AssemblyManagement({
   onOpenVoting,
   onCloseVoting,
   onCastVote,
-  onRevokeVote
+  onRevokeVote,
+  onStartAssembly,
+  onCloseAssembly,
+  onFetchMinutes,
+  onSaveMinutes,
+  onSignMinutes,
+  onPublishMinutes
 }: {
   assemblies: AssemblyItem[];
   people: CommunityPerson[];
@@ -1373,6 +1467,15 @@ export function AssemblyManagement({
     itemId: string,
     voteId: string
   ) => Promise<{ id: string } | null>;
+  onStartAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
+  onCloseAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
+  onFetchMinutes: (assemblyId: string) => Promise<AssemblyMinutesOverview>;
+  onSaveMinutes: (
+    assemblyId: string,
+    input: SaveAssemblyMinutes
+  ) => Promise<{ id: string; version: number } | null>;
+  onSignMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
+  onPublishMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
 }) {
   const settings = normalizeAssemblySettings(rawSettings);
   const normalizedAssemblies = useMemo(
@@ -1576,6 +1679,12 @@ export function AssemblyManagement({
           onCloseVoting={onCloseVoting}
           onCastVote={onCastVote}
           onRevokeVote={onRevokeVote}
+          onStartAssembly={onStartAssembly}
+          onCloseAssembly={onCloseAssembly}
+          onFetchMinutes={onFetchMinutes}
+          onSaveMinutes={onSaveMinutes}
+          onSignMinutes={onSignMinutes}
+          onPublishMinutes={onPublishMinutes}
           onRevokeAttendee={onRevokeAttendee}
           onReorderAgenda={onReorderAgenda}
           onSendEmailConvocation={onSendEmailConvocation}

@@ -12,6 +12,7 @@ import {
   type AssemblyAttendee,
   type AssemblySettings,
   type AssemblyItem,
+  type AssemblyMinutesOverview,
   type AssemblySupportDocument,
   type AssemblyVoteRecord,
   type AssemblyVoteTally,
@@ -37,6 +38,7 @@ import {
   type PetItem,
   type ReconciliationResult,
   type ReservationItem,
+  type SaveAssemblyMinutes,
   type ScheduleAssembly,
   type SendAssemblyEmailConvocation,
   type RegisteredVehicleItem,
@@ -156,6 +158,15 @@ interface DataContextValue {
     itemId: string,
     voteId: string
   ) => Promise<{ id: string } | null>;
+  startAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
+  closeAssembly: (assemblyId: string) => Promise<{ status: string } | null>;
+  fetchAssemblyMinutes: (assemblyId: string) => Promise<AssemblyMinutesOverview>;
+  saveAssemblyMinutes: (
+    assemblyId: string,
+    input: SaveAssemblyMinutes
+  ) => Promise<{ id: string; version: number } | null>;
+  signAssemblyMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
+  publishAssemblyMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
   createReservation: (input: CreateReservation) => Promise<ReservationItem | null>;
   createVisitor: (input: CreateVisitor) => Promise<VisitorItem | null>;
   createParkingSpot: (input: CreateParkingSpot) => Promise<ParkingSpotItem | null>;
@@ -726,6 +737,56 @@ export function DataProvider({ children }: { children: ReactNode }) {
               { method: "DELETE" }
             ),
           "Voto revocado"
+        ),
+      startAssembly: (assemblyId) =>
+        mutate(
+          `assembly-start-${assemblyId}`,
+          () =>
+            apiRequest<{ status: string }>(`/v1/habitat/assemblies/${assemblyId}/start`, {
+              method: "POST"
+            }),
+          "Asamblea iniciada"
+        ),
+      closeAssembly: (assemblyId) =>
+        mutate(
+          `assembly-close-${assemblyId}`,
+          () =>
+            apiRequest<{ status: string }>(`/v1/habitat/assemblies/${assemblyId}/close`, {
+              method: "POST"
+            }),
+          "Asamblea cerrada"
+        ),
+      fetchAssemblyMinutes: (assemblyId) =>
+        apiRequest<AssemblyMinutesOverview>(`/v1/habitat/assemblies/${assemblyId}/minutes`),
+      saveAssemblyMinutes: (assemblyId, input) =>
+        mutate(
+          `assembly-minutes-save-${assemblyId}`,
+          () =>
+            apiRequest<{ id: string; version: number }>(
+              `/v1/habitat/assemblies/${assemblyId}/minutes`,
+              { method: "PATCH", body: JSON.stringify(input) }
+            ),
+          "Acta guardada"
+        ),
+      signAssemblyMinutes: (assemblyId) =>
+        mutate(
+          `assembly-minutes-sign-${assemblyId}`,
+          () =>
+            apiRequest<{ status: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/minutes/sign`,
+              { method: "POST" }
+            ),
+          "Acta firmada"
+        ),
+      publishAssemblyMinutes: (assemblyId) =>
+        mutate(
+          `assembly-minutes-publish-${assemblyId}`,
+          () =>
+            apiRequest<{ status: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/minutes/publish`,
+              { method: "POST" }
+            ),
+          "Acta publicada"
         ),
       createCase: (input, images) =>
         mutate("case", () => createCaseWithImages(input, images), "Caso creado"),

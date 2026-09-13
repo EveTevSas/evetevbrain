@@ -556,6 +556,48 @@ export interface AssemblyAgendaVoting {
   roster: AssemblyVoteRecord[] | null;
 }
 
+export const saveAssemblyMinutesSchema = z
+  .object({
+    presidentePersonaId: z.string().uuid(),
+    secretarioPersonaId: z.string().uuid(),
+    resumen: z.string().trim().min(20).max(4000)
+  })
+  .strict()
+  .refine((value) => value.presidentePersonaId !== value.secretarioPersonaId, {
+    message: "Presidencia y secretaría deben ser personas distintas.",
+    path: ["secretarioPersonaId"]
+  });
+
+export interface AssemblyMinutesRecord {
+  presidentePersonaId: string;
+  presidenteNombre: string | null;
+  presidenteAcreditado: boolean;
+  secretarioPersonaId: string;
+  secretarioNombre: string | null;
+  secretarioAcreditado: boolean;
+  resumen: string;
+  version: number;
+  status: "draft" | "signed" | "published";
+  signedAt: string | null;
+  publishedAt: string | null;
+}
+
+export interface AssemblyMinutesAgendaItem {
+  id: string;
+  title: string;
+  decisionType: z.infer<typeof agendaDecisionTypeSchema>;
+  votingRule: z.infer<typeof agendaVotingRuleSchema>;
+  thresholdPercent: number | null;
+  status: "draft" | "ready" | "voted";
+  tally: AssemblyVoteTally | null;
+}
+
+export interface AssemblyMinutesOverview {
+  minutes: AssemblyMinutesRecord | null;
+  attendees: AssemblyAttendee[];
+  agendaItems: AssemblyMinutesAgendaItem[];
+}
+
 export interface AssemblyDecisionItem {
   id: string;
   title: string;
@@ -693,13 +735,6 @@ export interface AssemblyDossier {
   checklist: AssemblyChecklistItem[];
   agendaItems: AssemblyAgendaItem[];
   documents: AssemblySupportDocument[];
-  minutes: {
-    version: number;
-    status: "not_started" | "draft" | "in_review" | "published";
-    signaturesCompleted: number;
-    signaturesRequired: number;
-    publishedAt: string | null;
-  };
   decisions: AssemblyDecisionItem[];
 }
 
@@ -1023,6 +1058,7 @@ export type ReorderAgenda = z.infer<typeof reorderAgendaSchema>;
 export type CreateAssemblySupport = z.infer<typeof createAssemblySupportSchema>;
 export type UpdateAssemblySupportStatus = z.infer<typeof updateAssemblySupportStatusSchema>;
 export type CastVote = z.infer<typeof castVoteSchema>;
+export type SaveAssemblyMinutes = z.infer<typeof saveAssemblyMinutesSchema>;
 export type DataSubjectRequestInput = z.infer<typeof dataSubjectRequestSchema>;
 export type FeeAssessmentRun = z.infer<typeof feeAssessmentRunSchema>;
 

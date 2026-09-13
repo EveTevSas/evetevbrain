@@ -1,5 +1,10 @@
 import { cn } from "@/lib/ui";
-import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from "react";
+import type {
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes
+} from "react";
 
 export function Field({
   label,
@@ -27,6 +32,18 @@ export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
       {...props}
       className={cn(
         "focus-ring h-11 w-full rounded-[9px] border border-[#DCE7F2] bg-white px-3.5 text-sm text-[var(--ink)] placeholder:text-[var(--eve-muted)]",
+        props.className
+      )}
+    />
+  );
+}
+
+export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      {...props}
+      className={cn(
+        "focus-ring w-full resize-y rounded-[9px] border border-[#DCE7F2] bg-white px-3.5 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--eve-muted)]",
         props.className
       )}
     />
