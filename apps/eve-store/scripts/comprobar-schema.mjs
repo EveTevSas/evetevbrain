@@ -13,6 +13,9 @@
  *   DATABASE_URL=postgres://… node apps/eve-store/scripts/comprobar-schema.mjs
  */
 import postgres from "postgres";
+import { cargarEntorno } from "./entorno.mjs";
+
+cargarEntorno();
 
 const url = process.env.DATABASE_URL;
 if (!url) {

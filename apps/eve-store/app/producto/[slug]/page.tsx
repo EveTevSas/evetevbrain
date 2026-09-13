@@ -100,8 +100,14 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
 
   return (
     <>
-      <Cabecera />
-      <main className="mx-auto max-w-5xl px-6 py-12">
+      {/* `marcaActiva` enciende esta marca en la navegación de la cabecera. Sin
+          ella, entrar a una ficha desde una búsqueda dejaba «Todo el catálogo»
+          marcado: la tienda no decía en qué parte de sí misma estabas. */}
+      <Cabecera marcaActiva={p.marca} />
+      {/* `max-w-6xl`, el mismo de la cabecera y el pie. Con `5xl` el contenido
+          arrancaba cuarenta píxeles más adentro que el logotipo de arriba, y
+          ese desajuste se ve aunque no se sepa nombrar. */}
+      <main className="mx-auto max-w-6xl px-6 py-12">
         {/* El JSON-LD va en el HTML servido, no inyectado por script: es el canal
           de datos que consultan los agentes de compra. */}
         <script
@@ -109,9 +115,30 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(p, urlBase())) }}
         />
 
-        <a href="/" className="text-sm text-pizarra hover:underline">
-          ← Todos los productos
-        </a>
+        {/* Miga de pan, no un «volver» suelto. Quien llega a esta ficha desde
+            una respuesta de IA o una búsqueda no viene «de» ninguna parte, así
+            que «← Todos los productos» prometía una vuelta atrás que no existe.
+            Un rastro dice dónde está y ofrece dos salidas útiles: el catálogo y
+            la marca. El enlace a la marca es además el camino por el que se
+            descubre el resto de su surtido. */}
+        <nav aria-label="Migas de pan" className="text-sm text-pizarra">
+          <ol className="flex flex-wrap items-center gap-2">
+            <li>
+              <a href="/" className="hover:text-noche hover:underline">
+                Catálogo
+              </a>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <a
+                href={`/marca/${slugDeMarca(p.marca)}`}
+                className="hover:text-noche hover:underline"
+              >
+                {p.marca}
+              </a>
+            </li>
+          </ol>
+        </nav>
 
         <div className="mt-6 grid gap-10 md:grid-cols-2">
           {/* Cuadrada y `self-start`: antes la caja se estiraba hasta igualar

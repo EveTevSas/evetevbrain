@@ -18,7 +18,23 @@ import "./globals.css";
  * Ahora cada zona declara lo suyo — `/panel`, `/entrar` y `/sin-acceso` se
  * excluyen en su propio layout o página, y el carrito, el checkout y la
  * búsqueda ya lo hacían. */
-export const metadata: Metadata = { title: "Eve-Store" };
+/* El favicon y el isotipo salen de `/marca`, servido por esta misma app.
+ *
+ * Eve-Store era la única app del repo sin marca propia: pestaña con el icono
+ * por defecto del navegador y la palabra «Eve-Store» en texto plano por todo
+ * logotipo. No hay CDN de marca —el repo que lo servía se borró—, así que cada
+ * app copia lo suyo con `pnpm marca:sync` y lo sirve desde su propio origen. */
+export const metadata: Metadata = {
+  title: "Eve-Store",
+  icons: {
+    icon: [
+      { url: "/marca/favicon.svg", type: "image/svg+xml" },
+      { url: "/marca/favicon-32.png", sizes: "32x32", type: "image/png" }
+    ],
+    apple: "/marca/apple-touch-icon.png",
+    other: [{ rel: "mask-icon", url: "/marca/mask-icon.svg", color: "#0a2540" }]
+  }
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

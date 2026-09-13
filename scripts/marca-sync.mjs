@@ -91,6 +91,30 @@ const APPS = [
     ]
   },
   {
+    // La tienda es la única app con escaparate público de marca propia: el
+    // teal identifica la línea Tienda desde la tabla de decisión del manual, y
+    // la media unidad izquierda es su icono de producto. Las dos van al
+    // encabezado, así que se sirven desde su propio origen como todo lo demás.
+    nombre: "eve-store",
+    destino: "apps/eve-store/public/marca",
+    activos: [
+      "favicon/favicon.svg",
+      "favicon/favicon-32.png",
+      "favicon/apple-touch-icon.png",
+      "favicon/mask-icon.svg",
+      "isotipos/isotipo-azul-noche.svg",
+      // El pie va sobre azul noche, y ahí la blanca es la única que asegura
+      // contraste (regla T2 del manual): la de color se funde con el fondo.
+      "isotipos/isotipo-blanco.svg",
+      "unidades/unidad-izquierda-negro.svg",
+      "ilustraciones/spa-still-life.webp",
+      "ilustraciones/dermanat-pic.webp",
+      "ilustraciones/allen-pic.webp",
+      "ilustraciones/ilovepinch-pic.webp",
+      "ilustraciones/bioessens-pic.webp"
+    ]
+  },
+  {
     nombre: "eve-merchants",
     destino: "apps/eve-merchants/public/marca",
     activos: [

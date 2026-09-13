@@ -202,7 +202,7 @@ export default async function Checkout({
           </p>
         </form>
       </main>
-      <Pie />
+      <Pie minimo />
     </>
   );
 }
