@@ -16,6 +16,7 @@ import type {
   AssemblyAgendaVoting,
   AssemblyAttendee,
   AssemblyCapabilities,
+  AssemblyDecisionsOverview,
   AssemblyItem,
   AssemblyMinutesOverview,
   AssemblySettings,
@@ -23,15 +24,19 @@ import type {
   AssemblySupportDocument,
   AssemblyVoteRecord,
   AssemblyVoteTally,
+  AttachDecisionEvidence,
   CastVote,
   CommunityPerson,
   CreateAgendaItem,
+  CreateAssemblyDecision,
   CreateAssemblySupport,
   SaveAssemblyMinutes,
   SendAssemblyEmailConvocation,
   UpdateAgendaItem,
   UpdateAssemblyCapabilities,
   UpdateAssemblyChecklist,
+  UpdateAssemblyDecision,
+  UpdateAssemblyDecisionStatus,
   UpdateAssemblySupportStatus
 } from "@/lib/contracts";
 import { Badge, Button, Card, EmptyState, Progress, cn } from "@/lib/ui";
@@ -67,6 +72,7 @@ import { AssemblySupportPanel } from "./assembly-supports";
 import { AssemblyConvocationPanel } from "./assembly-convocation";
 import { AssemblyVotingPanel, VotingCapabilityNotice } from "./assembly-voting";
 import { AssemblyMinutesPanel } from "./assembly-minutes";
+import { AssemblyDecisionsPanel } from "./assembly-decisions";
 
 const dateTimeFormatter = new Intl.DateTimeFormat("es-CO", {
   day: "numeric",
@@ -95,29 +101,6 @@ function formatDateTime(value: string): string {
     return dateFormatter.format(new Date(`${value}T12:00:00`));
   }
   return dateTimeFormatter.format(new Date(value));
-}
-
-function statusTone(status: string): "success" | "warning" | "info" | "neutral" {
-  if (["ready", "published", "completed", "closed"].includes(status)) return "success";
-  if (["pending", "in_progress", "open", "in_review"].includes(status)) return "warning";
-  if (["draft", "not_started"].includes(status)) return "neutral";
-  return "info";
-}
-
-function statusLabel(status: string): string {
-  const labels: Record<string, string> = {
-    ready: "Listo",
-    published: "Publicado",
-    pending: "Pendiente",
-    completed: "Completada",
-    in_progress: "En curso",
-    open: "Abierta",
-    closed: "Cerrada",
-    draft: "Borrador",
-    not_started: "Sin iniciar",
-    in_review: "En revisión"
-  };
-  return labels[status] ?? status;
 }
 
 function typeLabel(type: AssemblyItem["type"]): string {
@@ -607,52 +590,57 @@ function MinutesStage({
 }
 
 function FollowUpStage({
-  assembly,
-  capabilities
+  assemblyId,
+  capabilities,
+  canManage,
+  canSuperviseDecisions,
+  busy,
+  agendaItems,
+  decisions,
+  decisionsLoading,
+  onCreateDecision,
+  onUpdateDecision,
+  onUpdateDecisionStatus,
+  onAttachDecisionEvidence,
+  onDeleteDecision
 }: {
-  assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
+  assemblyId: string;
   capabilities: AssemblyCapabilities;
+  canManage: boolean;
+  canSuperviseDecisions: boolean;
+  busy: string | null;
+  agendaItems: AssemblyAgendaItem[];
+  decisions: AssemblyDecisionsOverview | null;
+  decisionsLoading: boolean;
+  onCreateDecision: (input: CreateAssemblyDecision) => Promise<unknown>;
+  onUpdateDecision: (decisionId: string, input: UpdateAssemblyDecision) => Promise<unknown>;
+  onUpdateDecisionStatus: (
+    decisionId: string,
+    input: UpdateAssemblyDecisionStatus
+  ) => Promise<unknown>;
+  onAttachDecisionEvidence: (
+    decisionId: string,
+    input: AttachDecisionEvidence
+  ) => Promise<unknown>;
+  onDeleteDecision: (decisionId: string) => Promise<unknown>;
 }) {
   if (!capabilities.decision_tracking)
     return <CapabilityNotice label="El seguimiento de decisiones" />;
-  if (!assembly.dossier.decisions.length) {
-    return (
-      <EmptyState
-        icon={<ListChecks size={20} />}
-        title="Todavía no hay decisiones por ejecutar"
-        description="Al cerrar las votaciones, cada decisión podrá asignarse con responsable, fecha y evidencia."
-      />
-    );
-  }
   return (
-    <Card className="overflow-hidden hover:translate-y-0">
-      <div className="border-b border-[var(--line)] p-5">
-        <h3 className="font-extrabold">Compromisos aprobados</h3>
-        <p className="mt-1 text-xs text-[var(--muted)]">
-          El consejo supervisa su ejecución y la administración aporta evidencias.
-        </p>
-      </div>
-      <div className="divide-y divide-[var(--line)]">
-        {assembly.dossier.decisions.map((decision) => (
-          <div
-            className="grid gap-3 p-4 sm:grid-cols-[1fr_180px_130px] sm:items-center"
-            key={decision.id}
-          >
-            <div>
-              <p className="text-sm font-bold">{decision.title}</p>
-              <p className="mt-1 text-xs text-[var(--muted)]">Responsable: {decision.owner}</p>
-            </div>
-            <p className="text-xs text-[var(--muted)]">Vence {formatDateTime(decision.dueDate)}</p>
-            <Badge
-              className="justify-self-start sm:justify-self-end"
-              tone={statusTone(decision.status)}
-            >
-              {statusLabel(decision.status)}
-            </Badge>
-          </div>
-        ))}
-      </div>
-    </Card>
+    <AssemblyDecisionsPanel
+      agendaItems={agendaItems}
+      assemblyId={assemblyId}
+      busy={busy}
+      canManage={canManage}
+      canSuperviseDecisions={canSuperviseDecisions}
+      loading={decisionsLoading}
+      onAttachEvidence={onAttachDecisionEvidence}
+      onCreate={onCreateDecision}
+      onDelete={onDeleteDecision}
+      onUpdate={onUpdateDecision}
+      onUpdateStatus={onUpdateDecisionStatus}
+      overview={decisions}
+    />
   );
 }
 
@@ -672,6 +660,9 @@ function StageContent({
   votingLoading,
   minutes,
   minutesLoading,
+  decisions,
+  decisionsLoading,
+  canSuperviseDecisions,
   onToggleChecklist,
   onUploadSupport,
   onSupportStatusChange,
@@ -690,7 +681,12 @@ function StageContent({
   onRevokeVote,
   onSaveMinutes,
   onSignMinutes,
-  onPublishMinutes
+  onPublishMinutes,
+  onCreateDecision,
+  onUpdateDecision,
+  onUpdateDecisionStatus,
+  onAttachDecisionEvidence,
+  onDeleteDecision
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   people: CommunityPerson[];
@@ -707,6 +703,9 @@ function StageContent({
   votingLoading: boolean;
   minutes: AssemblyMinutesOverview | null;
   minutesLoading: boolean;
+  decisions: AssemblyDecisionsOverview | null;
+  decisionsLoading: boolean;
+  canSuperviseDecisions: boolean;
   onToggleChecklist: (
     assemblyId: string,
     input: UpdateAssemblyChecklist
@@ -743,6 +742,17 @@ function StageContent({
   onSaveMinutes: (input: SaveAssemblyMinutes) => Promise<unknown>;
   onSignMinutes: () => Promise<unknown>;
   onPublishMinutes: () => Promise<unknown>;
+  onCreateDecision: (input: CreateAssemblyDecision) => Promise<unknown>;
+  onUpdateDecision: (decisionId: string, input: UpdateAssemblyDecision) => Promise<unknown>;
+  onUpdateDecisionStatus: (
+    decisionId: string,
+    input: UpdateAssemblyDecisionStatus
+  ) => Promise<unknown>;
+  onAttachDecisionEvidence: (
+    decisionId: string,
+    input: AttachDecisionEvidence
+  ) => Promise<unknown>;
+  onDeleteDecision: (decisionId: string) => Promise<unknown>;
 }) {
   return (
     <div className="space-y-4">
@@ -817,7 +827,21 @@ function StageContent({
         />
       ) : null}
       {stage === "follow_up" ? (
-        <FollowUpStage assembly={assembly} capabilities={capabilities} />
+        <FollowUpStage
+          agendaItems={agenda?.items ?? []}
+          assemblyId={assembly.id}
+          busy={busy}
+          canManage={canManage}
+          canSuperviseDecisions={canSuperviseDecisions}
+          capabilities={capabilities}
+          decisions={decisions}
+          decisionsLoading={decisionsLoading}
+          onAttachDecisionEvidence={onAttachDecisionEvidence}
+          onCreateDecision={onCreateDecision}
+          onDeleteDecision={onDeleteDecision}
+          onUpdateDecision={onUpdateDecision}
+          onUpdateDecisionStatus={onUpdateDecisionStatus}
+        />
       ) : null}
       <Checklist
         assembly={assembly}
@@ -864,13 +888,21 @@ function AssemblyWorkspace({
   onFetchMinutes,
   onSaveMinutes,
   onSignMinutes,
-  onPublishMinutes
+  onPublishMinutes,
+  canSuperviseDecisions,
+  onFetchDecisions,
+  onCreateDecision,
+  onUpdateDecision,
+  onUpdateDecisionStatus,
+  onAttachDecisionEvidence,
+  onDeleteDecision
 }: {
   assembly: AssemblyItem & { dossier: NonNullable<AssemblyItem["dossier"]> };
   people: CommunityPerson[];
   settings: AssemblySettings;
   canManage: boolean;
   canManageSupports: boolean;
+  canSuperviseDecisions: boolean;
   busy: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -938,6 +970,27 @@ function AssemblyWorkspace({
   ) => Promise<{ id: string; version: number } | null>;
   onSignMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
   onPublishMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
+  onFetchDecisions: (assemblyId: string) => Promise<AssemblyDecisionsOverview>;
+  onCreateDecision: (
+    assemblyId: string,
+    input: CreateAssemblyDecision
+  ) => Promise<{ id: string; status: string } | null>;
+  onUpdateDecision: (
+    assemblyId: string,
+    decisionId: string,
+    input: UpdateAssemblyDecision
+  ) => Promise<{ id: string } | null>;
+  onUpdateDecisionStatus: (
+    assemblyId: string,
+    decisionId: string,
+    input: UpdateAssemblyDecisionStatus
+  ) => Promise<{ id: string; status: string } | null>;
+  onAttachDecisionEvidence: (
+    assemblyId: string,
+    decisionId: string,
+    input: AttachDecisionEvidence
+  ) => Promise<{ id: string } | null>;
+  onDeleteDecision: (assemblyId: string, decisionId: string) => Promise<{ id: string } | null>;
 }) {
   const [activeStage, setActiveStage] = useState<AssemblyStage>(assembly.dossier.currentStage);
   const [attendees, setAttendees] = useState<AssemblyAttendee[]>([]);
@@ -1056,6 +1109,31 @@ function AssemblyWorkspace({
   useEffect(() => {
     if (open && activeStage === "minutes") void refreshMinutes();
   }, [activeStage, open, refreshMinutes]);
+
+  // Mismo patrón que refreshMinutes, disparado en la etapa "follow_up"
+  // donde vive el seguimiento de decisiones.
+  const [decisions, setDecisions] = useState<AssemblyDecisionsOverview | null>(null);
+  const [decisionsLoading, setDecisionsLoading] = useState(false);
+  const onFetchDecisionsRef = useRef(onFetchDecisions);
+  onFetchDecisionsRef.current = onFetchDecisions;
+  const decisionsRequestIdRef = useRef(0);
+
+  const refreshDecisions = useCallback(async () => {
+    const requestId = ++decisionsRequestIdRef.current;
+    setDecisionsLoading(true);
+    try {
+      const result = await onFetchDecisionsRef.current(assembly.id);
+      if (mountedRef.current && decisionsRequestIdRef.current === requestId) setDecisions(result);
+    } finally {
+      if (mountedRef.current && decisionsRequestIdRef.current === requestId) {
+        setDecisionsLoading(false);
+      }
+    }
+  }, [assembly.id]);
+
+  useEffect(() => {
+    if (open && activeStage === "follow_up") void refreshDecisions();
+  }, [activeStage, open, refreshDecisions]);
   return (
     <Modal
       description="Expediente único de preparación, decisión, acta y cumplimiento."
@@ -1261,6 +1339,34 @@ function AssemblyWorkspace({
             if (result) await refreshMinutes();
             return result;
           }}
+          canSuperviseDecisions={canSuperviseDecisions}
+          decisions={decisions}
+          decisionsLoading={decisionsLoading}
+          onCreateDecision={async (input) => {
+            const result = await onCreateDecision(assembly.id, input);
+            if (result) await refreshDecisions();
+            return result;
+          }}
+          onUpdateDecision={async (decisionId, input) => {
+            const result = await onUpdateDecision(assembly.id, decisionId, input);
+            if (result) await refreshDecisions();
+            return result;
+          }}
+          onUpdateDecisionStatus={async (decisionId, input) => {
+            const result = await onUpdateDecisionStatus(assembly.id, decisionId, input);
+            if (result) await refreshDecisions();
+            return result;
+          }}
+          onAttachDecisionEvidence={async (decisionId, input) => {
+            const result = await onAttachDecisionEvidence(assembly.id, decisionId, input);
+            if (result) await refreshDecisions();
+            return result;
+          }}
+          onDeleteDecision={async (decisionId) => {
+            const result = await onDeleteDecision(assembly.id, decisionId);
+            if (result) await refreshDecisions();
+            return result;
+          }}
         />
       </div>
     </Modal>
@@ -1403,13 +1509,21 @@ export function AssemblyManagement({
   onFetchMinutes,
   onSaveMinutes,
   onSignMinutes,
-  onPublishMinutes
+  onPublishMinutes,
+  canSuperviseDecisions,
+  onFetchDecisions,
+  onCreateDecision,
+  onUpdateDecision,
+  onUpdateDecisionStatus,
+  onAttachDecisionEvidence,
+  onDeleteDecision
 }: {
   assemblies: AssemblyItem[];
   people: CommunityPerson[];
   settings?: AssemblySettings;
   canManage: boolean;
   canManageSupports: boolean;
+  canSuperviseDecisions: boolean;
   busy: string | null;
   onUpdateCapabilities: (input: UpdateAssemblyCapabilities) => Promise<AssemblySettings | null>;
   onToggleChecklist: (
@@ -1476,6 +1590,27 @@ export function AssemblyManagement({
   ) => Promise<{ id: string; version: number } | null>;
   onSignMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
   onPublishMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
+  onFetchDecisions: (assemblyId: string) => Promise<AssemblyDecisionsOverview>;
+  onCreateDecision: (
+    assemblyId: string,
+    input: CreateAssemblyDecision
+  ) => Promise<{ id: string; status: string } | null>;
+  onUpdateDecision: (
+    assemblyId: string,
+    decisionId: string,
+    input: UpdateAssemblyDecision
+  ) => Promise<{ id: string } | null>;
+  onUpdateDecisionStatus: (
+    assemblyId: string,
+    decisionId: string,
+    input: UpdateAssemblyDecisionStatus
+  ) => Promise<{ id: string; status: string } | null>;
+  onAttachDecisionEvidence: (
+    assemblyId: string,
+    decisionId: string,
+    input: AttachDecisionEvidence
+  ) => Promise<{ id: string } | null>;
+  onDeleteDecision: (assemblyId: string, decisionId: string) => Promise<{ id: string } | null>;
 }) {
   const settings = normalizeAssemblySettings(rawSettings);
   const normalizedAssemblies = useMemo(
@@ -1685,6 +1820,13 @@ export function AssemblyManagement({
           onSaveMinutes={onSaveMinutes}
           onSignMinutes={onSignMinutes}
           onPublishMinutes={onPublishMinutes}
+          canSuperviseDecisions={canSuperviseDecisions}
+          onFetchDecisions={onFetchDecisions}
+          onCreateDecision={onCreateDecision}
+          onUpdateDecision={onUpdateDecision}
+          onUpdateDecisionStatus={onUpdateDecisionStatus}
+          onAttachDecisionEvidence={onAttachDecisionEvidence}
+          onDeleteDecision={onDeleteDecision}
           onRevokeAttendee={onRevokeAttendee}
           onReorderAgenda={onReorderAgenda}
           onSendEmailConvocation={onSendEmailConvocation}

@@ -9,14 +9,17 @@ import type {
   AssemblyAgendaOverview,
   AssemblyAgendaVoting,
   AssemblyAttendee,
+  AssemblyDecisionsOverview,
   AssemblyItem,
   AssemblyMinutesOverview,
   AssemblyVoteRecord,
   AssemblyVoteTally,
+  AttachDecisionEvidence,
   CaseItem,
   CastVote,
   CreateAgendaItem,
   CreateAnnouncement,
+  CreateAssemblyDecision,
   CreateCase,
   CreatePet,
   CreateRegisteredVehicle,
@@ -32,6 +35,8 @@ import type {
   SaveAssemblyMinutes,
   ScheduleAssembly,
   UpdateAgendaItem,
+  UpdateAssemblyDecision,
+  UpdateAssemblyDecisionStatus,
   UpdatePetPhoto,
   UpdatePetStatus,
   VoteOption,
@@ -924,6 +929,150 @@ export async function publishAssemblyMinutes(assemblyId: string): Promise<void> 
     p_asamblea_id: assemblyId
   });
   if (error) mapAssemblyWorkflowError(error);
+}
+
+export async function listAssemblyDecisions(
+  assemblyId: string
+): Promise<AssemblyDecisionsOverview> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("listar_decisiones_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId
+    });
+
+  if (error) {
+    if (error.code === "42501") throw new DemoApiError(error.message, 403);
+    throw new DemoApiError("No fue posible consultar las decisiones.", 500);
+  }
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió las decisiones.", 500);
+  }
+  return data as AssemblyDecisionsOverview;
+}
+
+export async function createAssemblyDecision(
+  assemblyId: string,
+  input: CreateAssemblyDecision
+): Promise<{ id: string; status: string }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("crear_decision_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_punto_orden_dia_id: input.agendaItemId,
+      p_titulo: input.title,
+      p_responsable_persona_id: input.ownerPersonId,
+      p_fecha_limite: input.dueDate
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió la decisión creada.", 500);
+  }
+  return data as { id: string; status: string };
+}
+
+export async function updateAssemblyDecision(
+  assemblyId: string,
+  decisionId: string,
+  input: UpdateAssemblyDecision
+): Promise<{ id: string }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("actualizar_decision_asamblea_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_decision_id: decisionId,
+      p_titulo: input.title,
+      p_responsable_persona_id: input.ownerPersonId,
+      p_fecha_limite: input.dueDate
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió la decisión actualizada.", 500);
+  }
+  return data as { id: string };
+}
+
+const decisionStatusToSql: Record<UpdateAssemblyDecisionStatus["status"], string> = {
+  pending: "pendiente",
+  in_progress: "en_progreso",
+  completed: "completada"
+};
+
+export async function updateAssemblyDecisionStatus(
+  assemblyId: string,
+  decisionId: string,
+  input: UpdateAssemblyDecisionStatus
+): Promise<{ id: string; status: string }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("actualizar_estado_decision_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_decision_id: decisionId,
+      p_nuevo_estado: decisionStatusToSql[input.status]
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió el estado actualizado.", 500);
+  }
+  return data as { id: string; status: string };
+}
+
+export async function attachDecisionEvidence(
+  assemblyId: string,
+  decisionId: string,
+  input: AttachDecisionEvidence
+): Promise<{ id: string }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("adjuntar_evidencia_decision_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_decision_id: decisionId,
+      p_evidencia_nota: input.evidenceNote
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió la evidencia registrada.", 500);
+  }
+  return data as { id: string };
+}
+
+export async function deleteAssemblyDecision(
+  assemblyId: string,
+  decisionId: string
+): Promise<{ id: string }> {
+  const access = await getDemoAccess();
+
+  const { data, error } = await access.supabase
+    .schema("conjuntos")
+    .rpc("eliminar_decision_demo", {
+      p_conjunto_id: access.conjuntoId,
+      p_asamblea_id: assemblyId,
+      p_decision_id: decisionId
+    });
+
+  if (error) mapAssemblyWorkflowError(error);
+  if (!data || typeof data !== "object") {
+    throw new DemoApiError("Supabase no devolvió la eliminación.", 500);
+  }
+  return data as { id: string };
 }
 
 export async function updateResidentPetPhoto(

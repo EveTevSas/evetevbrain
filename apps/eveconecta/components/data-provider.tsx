@@ -10,16 +10,19 @@ import {
   type AssemblyAgendaOverview,
   type AssemblyAgendaVoting,
   type AssemblyAttendee,
+  type AssemblyDecisionsOverview,
   type AssemblySettings,
   type AssemblyItem,
   type AssemblyMinutesOverview,
   type AssemblySupportDocument,
   type AssemblyVoteRecord,
   type AssemblyVoteTally,
+  type AttachDecisionEvidence,
   type CaseItem,
   type CastVote,
   type CommunityPerson,
   type CreateAgendaItem,
+  type CreateAssemblyDecision,
   type CreateCase,
   type CreateAnnouncement,
   type CreateAssemblySupport,
@@ -44,6 +47,8 @@ import {
   type RegisteredVehicleItem,
   type RegisterVehicleAccess,
   type UpdateAgendaItem,
+  type UpdateAssemblyDecision,
+  type UpdateAssemblyDecisionStatus,
   type UpdateCommunityPerson,
   type UpdateAssemblyCapabilities,
   type UpdateAssemblyChecklist,
@@ -167,6 +172,30 @@ interface DataContextValue {
   ) => Promise<{ id: string; version: number } | null>;
   signAssemblyMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
   publishAssemblyMinutes: (assemblyId: string) => Promise<{ status: string } | null>;
+  fetchAssemblyDecisions: (assemblyId: string) => Promise<AssemblyDecisionsOverview>;
+  createAssemblyDecision: (
+    assemblyId: string,
+    input: CreateAssemblyDecision
+  ) => Promise<{ id: string; status: string } | null>;
+  updateAssemblyDecision: (
+    assemblyId: string,
+    decisionId: string,
+    input: UpdateAssemblyDecision
+  ) => Promise<{ id: string } | null>;
+  updateAssemblyDecisionStatus: (
+    assemblyId: string,
+    decisionId: string,
+    input: UpdateAssemblyDecisionStatus
+  ) => Promise<{ id: string; status: string } | null>;
+  attachDecisionEvidence: (
+    assemblyId: string,
+    decisionId: string,
+    input: AttachDecisionEvidence
+  ) => Promise<{ id: string } | null>;
+  deleteAssemblyDecision: (
+    assemblyId: string,
+    decisionId: string
+  ) => Promise<{ id: string } | null>;
   createReservation: (input: CreateReservation) => Promise<ReservationItem | null>;
   createVisitor: (input: CreateVisitor) => Promise<VisitorItem | null>;
   createParkingSpot: (input: CreateParkingSpot) => Promise<ParkingSpotItem | null>;
@@ -787,6 +816,58 @@ export function DataProvider({ children }: { children: ReactNode }) {
               { method: "POST" }
             ),
           "Acta publicada"
+        ),
+      fetchAssemblyDecisions: (assemblyId) =>
+        apiRequest<AssemblyDecisionsOverview>(`/v1/habitat/assemblies/${assemblyId}/decisions`),
+      createAssemblyDecision: (assemblyId, input) =>
+        mutate(
+          `assembly-decisions-create-${assemblyId}`,
+          () =>
+            apiRequest<{ id: string; status: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/decisions`,
+              { method: "POST", body: JSON.stringify(input) }
+            ),
+          "Decisión creada"
+        ),
+      updateAssemblyDecision: (assemblyId, decisionId, input) =>
+        mutate(
+          `assembly-decisions-update-${decisionId}`,
+          () =>
+            apiRequest<{ id: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/decisions/${decisionId}`,
+              { method: "PATCH", body: JSON.stringify(input) }
+            ),
+          "Decisión actualizada"
+        ),
+      updateAssemblyDecisionStatus: (assemblyId, decisionId, input) =>
+        mutate(
+          `assembly-decisions-status-${decisionId}`,
+          () =>
+            apiRequest<{ id: string; status: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/decisions/${decisionId}/status`,
+              { method: "PATCH", body: JSON.stringify(input) }
+            ),
+          "Estado actualizado"
+        ),
+      attachDecisionEvidence: (assemblyId, decisionId, input) =>
+        mutate(
+          `assembly-decisions-evidence-${decisionId}`,
+          () =>
+            apiRequest<{ id: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/decisions/${decisionId}/evidence`,
+              { method: "PATCH", body: JSON.stringify(input) }
+            ),
+          "Evidencia registrada"
+        ),
+      deleteAssemblyDecision: (assemblyId, decisionId) =>
+        mutate(
+          `assembly-decisions-delete-${decisionId}`,
+          () =>
+            apiRequest<{ id: string }>(
+              `/v1/habitat/assemblies/${assemblyId}/decisions/${decisionId}`,
+              { method: "DELETE" }
+            ),
+          "Decisión eliminada"
         ),
       createCase: (input, images) =>
         mutate("case", () => createCaseWithImages(input, images), "Caso creado"),

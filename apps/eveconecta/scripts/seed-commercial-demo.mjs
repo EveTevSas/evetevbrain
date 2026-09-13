@@ -954,8 +954,15 @@ async function main() {
         ocurrido_en: iso(28, "09:04:00")
       }
     ];
+    const { data: existingGeneration } = await db
+      .from("generaciones_cuotas")
+      .select("id")
+      .eq("conjunto_id", conjunto.id)
+      .eq("periodo", "2026-07-01")
+      .eq("tipo", "administracion")
+      .maybeSingle();
     const generation = {
-      id: stableId(conjunto.digit, 4, 1),
+      id: existingGeneration?.id ?? stableId(conjunto.digit, 4, 1),
       conjunto_id: conjunto.id,
       periodo: "2026-07-01",
       tipo: "administracion",

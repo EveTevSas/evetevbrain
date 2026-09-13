@@ -598,12 +598,51 @@ export interface AssemblyMinutesOverview {
   agendaItems: AssemblyMinutesAgendaItem[];
 }
 
+export const decisionStatusSchema = z.enum(["pending", "in_progress", "completed"]);
+export type DecisionStatus = z.infer<typeof decisionStatusSchema>;
+
+export const createAssemblyDecisionSchema = z
+  .object({
+    agendaItemId: z.string().uuid().nullable().default(null),
+    title: z.string().trim().min(5).max(200),
+    ownerPersonId: z.string().uuid(),
+    dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida")
+  })
+  .strict();
+
+export const updateAssemblyDecisionSchema = z
+  .object({
+    title: z.string().trim().min(5).max(200),
+    ownerPersonId: z.string().uuid(),
+    dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida")
+  })
+  .strict();
+
+export const updateAssemblyDecisionStatusSchema = z
+  .object({ status: decisionStatusSchema })
+  .strict();
+
+export const attachDecisionEvidenceSchema = z
+  .object({ evidenceNote: z.string().trim().min(1).max(2000) })
+  .strict();
+
 export interface AssemblyDecisionItem {
   id: string;
+  agendaItemId: string | null;
+  agendaItemTitle: string | null;
   title: string;
-  owner: string;
+  ownerPersonId: string;
+  ownerName: string | null;
   dueDate: string;
-  status: "pending" | "in_progress" | "completed";
+  status: DecisionStatus;
+  evidenceNote: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+export interface AssemblyDecisionsOverview {
+  decisions: AssemblyDecisionItem[];
+  attendees: AssemblyAttendee[];
 }
 
 export const assemblyAttendeeQualitySchema = z.enum([
@@ -735,7 +774,6 @@ export interface AssemblyDossier {
   checklist: AssemblyChecklistItem[];
   agendaItems: AssemblyAgendaItem[];
   documents: AssemblySupportDocument[];
-  decisions: AssemblyDecisionItem[];
 }
 
 export const scheduleAssemblySchema = z
@@ -1059,6 +1097,10 @@ export type CreateAssemblySupport = z.infer<typeof createAssemblySupportSchema>;
 export type UpdateAssemblySupportStatus = z.infer<typeof updateAssemblySupportStatusSchema>;
 export type CastVote = z.infer<typeof castVoteSchema>;
 export type SaveAssemblyMinutes = z.infer<typeof saveAssemblyMinutesSchema>;
+export type CreateAssemblyDecision = z.infer<typeof createAssemblyDecisionSchema>;
+export type UpdateAssemblyDecision = z.infer<typeof updateAssemblyDecisionSchema>;
+export type UpdateAssemblyDecisionStatus = z.infer<typeof updateAssemblyDecisionStatusSchema>;
+export type AttachDecisionEvidence = z.infer<typeof attachDecisionEvidenceSchema>;
 export type DataSubjectRequestInput = z.infer<typeof dataSubjectRequestSchema>;
 export type FeeAssessmentRun = z.infer<typeof feeAssessmentRunSchema>;
 

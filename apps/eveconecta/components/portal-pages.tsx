@@ -2403,12 +2403,19 @@ export function AssembliesPage() {
     saveAssemblyMinutes,
     signAssemblyMinutes,
     publishAssemblyMinutes,
+    fetchAssemblyDecisions,
+    createAssemblyDecision,
+    updateAssemblyDecision,
+    updateAssemblyDecisionStatus,
+    attachDecisionEvidence,
+    deleteAssemblyDecision,
     busy
   } = useData();
   const { user } = useAuthUser();
   const [assemblyOpen, setAssemblyOpen] = useState(false);
   const [assemblyMode, setAssemblyMode] = useState<"in_person" | "virtual" | "hybrid">("in_person");
   const canScheduleAssembly = user.role === "super_admin" || user.role === "admin_conjunto";
+  const canSuperviseDecisions = canScheduleAssembly || user.role === "consejo";
 
   function closeAssemblyForm() {
     setAssemblyOpen(false);
@@ -2453,6 +2460,7 @@ export function AssembliesPage() {
         busy={busy}
         canManage={canScheduleAssembly}
         canManageSupports={canScheduleAssembly}
+        canSuperviseDecisions={canSuperviseDecisions}
         onAccreditAttendee={accreditAssemblyAttendee}
         onCreateAgendaItem={createAgendaItem}
         onDeleteAgendaItem={deleteAgendaItem}
@@ -2471,6 +2479,12 @@ export function AssembliesPage() {
         onSaveMinutes={saveAssemblyMinutes}
         onSignMinutes={signAssemblyMinutes}
         onPublishMinutes={publishAssemblyMinutes}
+        onFetchDecisions={fetchAssemblyDecisions}
+        onCreateDecision={createAssemblyDecision}
+        onUpdateDecision={updateAssemblyDecision}
+        onUpdateDecisionStatus={updateAssemblyDecisionStatus}
+        onAttachDecisionEvidence={attachDecisionEvidence}
+        onDeleteDecision={deleteAssemblyDecision}
         onRevokeAttendee={revokeAssemblyAttendee}
         onReorderAgenda={reorderAgenda}
         onSendEmailConvocation={sendAssemblyEmailConvocation}

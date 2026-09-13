@@ -366,32 +366,7 @@ export function createAssemblyDossier(assembly: AssemblyItem): AssemblyDossier {
         uploadedAt: null,
         uploadedBy: null
       }
-    ],
-    decisions: closed
-      ? [
-          {
-            id: "decision-1",
-            title: "Publicar el presupuesto aprobado",
-            owner: "Administración",
-            dueDate: assembly.date,
-            status: "completed"
-          },
-          {
-            id: "decision-2",
-            title: "Formalizar los órganos elegidos",
-            owner: "Secretaría de la asamblea",
-            dueDate: assembly.date,
-            status: "in_progress"
-          },
-          {
-            id: "decision-3",
-            title: "Presentar avance de compromisos",
-            owner: "Consejo de administración",
-            dueDate: assembly.date,
-            status: "pending"
-          }
-        ]
-      : []
+    ]
   };
 }
 

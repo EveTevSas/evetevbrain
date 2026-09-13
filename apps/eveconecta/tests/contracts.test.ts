@@ -1,5 +1,7 @@
 import {
+  attachDecisionEvidenceSchema,
   castVoteSchema,
+  createAssemblyDecisionSchema,
   saveAssemblyMinutesSchema,
   createAnnouncementSchema,
   createCaseSchema,
@@ -10,6 +12,8 @@ import {
   formatCop,
   registerVehicleAccessSchema,
   scheduleAssemblySchema,
+  updateAssemblyDecisionSchema,
+  updateAssemblyDecisionStatusSchema,
   updateCommunityPersonSchema,
   updatePetPhotoSchema,
   voteOptionSchema
@@ -300,5 +304,68 @@ describe("web contract helpers", () => {
         resumen: "Resumen de la sesión con suficiente contenido narrativo."
       })
     ).toThrow();
+  });
+
+  it("validates creating an assembly decision with an optional agenda item", () => {
+    const ownerPersonId = "11111111-1111-4111-8111-111111111111";
+    expect(
+      createAssemblyDecisionSchema.parse({
+        title: "Publicar el balance financiero aprobado",
+        ownerPersonId,
+        dueDate: "2027-01-15"
+      })
+    ).toMatchObject({ agendaItemId: null, title: "Publicar el balance financiero aprobado" });
+
+    const agendaItemId = "22222222-2222-4222-8222-222222222222";
+    expect(
+      createAssemblyDecisionSchema.parse({
+        agendaItemId,
+        title: "Publicar el balance financiero aprobado",
+        ownerPersonId,
+        dueDate: "2027-01-15"
+      })
+    ).toMatchObject({ agendaItemId });
+  });
+
+  it("rejects a decision with a title shorter than 5 characters or a malformed date", () => {
+    const ownerPersonId = "11111111-1111-4111-8111-111111111111";
+    expect(() =>
+      createAssemblyDecisionSchema.parse({
+        title: "Mini",
+        ownerPersonId,
+        dueDate: "2027-01-15"
+      })
+    ).toThrow();
+    expect(() =>
+      createAssemblyDecisionSchema.parse({
+        title: "Publicar el balance financiero aprobado",
+        ownerPersonId,
+        dueDate: "15/01/2027"
+      })
+    ).toThrow();
+  });
+
+  it("validates editing a decision's title, owner and due date", () => {
+    expect(
+      updateAssemblyDecisionSchema.parse({
+        title: "Publicar el balance financiero aprobado y firmado",
+        ownerPersonId: "11111111-1111-4111-8111-111111111111",
+        dueDate: "2027-01-20"
+      })
+    ).toMatchObject({ dueDate: "2027-01-20" });
+  });
+
+  it("only accepts the three known decision statuses", () => {
+    expect(updateAssemblyDecisionStatusSchema.parse({ status: "in_progress" })).toMatchObject({
+      status: "in_progress"
+    });
+    expect(() => updateAssemblyDecisionStatusSchema.parse({ status: "bogus" })).toThrow();
+  });
+
+  it("rejects an empty evidence note", () => {
+    expect(
+      attachDecisionEvidenceSchema.parse({ evidenceNote: "https://evidencia.example/foto.jpg" })
+    ).toMatchObject({ evidenceNote: "https://evidencia.example/foto.jpg" });
+    expect(() => attachDecisionEvidenceSchema.parse({ evidenceNote: "   " })).toThrow();
   });
 });

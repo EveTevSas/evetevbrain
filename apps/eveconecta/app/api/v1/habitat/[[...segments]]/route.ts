@@ -3,9 +3,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ZodError, z } from "zod";
 import {
   accreditAssemblyAttendeeSchema,
+  attachDecisionEvidenceSchema,
   castVoteSchema,
   createAgendaItemSchema,
   createAnnouncementSchema,
+  createAssemblyDecisionSchema,
   createAssemblySupportSchema,
   createCaseSchema,
   createExpenseSchema,
@@ -23,6 +25,8 @@ import {
   updateAgendaItemSchema,
   updateAssemblyCapabilitiesSchema,
   updateAssemblyChecklistSchema,
+  updateAssemblyDecisionSchema,
+  updateAssemblyDecisionStatusSchema,
   updateAssemblySupportStatusSchema,
   updateCommunityPersonSchema,
   updatePetPhotoSchema,
@@ -44,6 +48,7 @@ import { communityContactChannels } from "@/lib/community-contacts";
 import {
   accreditAssemblyAttendee,
   approveExpense,
+  attachDecisionEvidence,
   canSelectConjunto,
   castVote,
   closeAssembly,
@@ -51,16 +56,19 @@ import {
   createAgendaItem,
   createAmenityReservation,
   createAnnouncement,
+  createAssemblyDecision,
   createCase,
   createResidentPet,
   createResidentVehicle,
   createVisitorAuthorization,
   deleteAgendaItem,
+  deleteAssemblyDecision,
   DemoApiError,
   fetchAssemblyMinutes,
   getDemoSnapshot,
   listAssemblyAgenda,
   listAssemblyAttendees,
+  listAssemblyDecisions,
   listAssemblyVoting,
   mutateDemoSnapshot,
   openVoting,
@@ -74,6 +82,8 @@ import {
   signAssemblyMinutes,
   startAssembly,
   updateAgendaItem,
+  updateAssemblyDecision,
+  updateAssemblyDecisionStatus,
   updateResidentPetPhoto,
   updateResidentPetStatus
 } from "@/lib/demo/store";
@@ -131,6 +141,12 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     if (minutesMatch) {
       const assemblyId = z.string().uuid().parse(minutesMatch[1]);
       return NextResponse.json(await fetchAssemblyMinutes(assemblyId));
+    }
+
+    const decisionsMatch = path.match(/^assemblies\/([0-9a-f-]+)\/decisions$/i);
+    if (decisionsMatch) {
+      const assemblyId = z.string().uuid().parse(decisionsMatch[1]);
+      return NextResponse.json(await listAssemblyDecisions(assemblyId));
     }
 
     return problem("Ruta no encontrada.", 404);
@@ -240,6 +256,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
       const assemblyId = z.string().uuid().parse(minutesPublishMatch[1]);
       await publishAssemblyMinutes(assemblyId);
       return NextResponse.json({ status: "published" });
+    }
+
+    const decisionCreateMatch = path.match(/^assemblies\/([0-9a-f-]+)\/decisions$/i);
+    if (decisionCreateMatch) {
+      const assemblyId = z.string().uuid().parse(decisionCreateMatch[1]);
+      const input = createAssemblyDecisionSchema.parse(body);
+      return NextResponse.json(await createAssemblyDecision(assemblyId, input), {
+        status: 201
+      });
     }
 
     const assemblySupportMatch = path.match(/^assemblies\/([0-9a-f-]+)\/supports$/i);
@@ -779,6 +804,38 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json(await saveAssemblyMinutes(assemblyId, input));
     }
 
+    const decisionStatusMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/decisions\/([0-9a-f-]+)\/status$/i
+    );
+    if (decisionStatusMatch) {
+      const assemblyId = z.string().uuid().parse(decisionStatusMatch[1]);
+      const decisionId = z.string().uuid().parse(decisionStatusMatch[2]);
+      const input = updateAssemblyDecisionStatusSchema.parse(body);
+      return NextResponse.json(
+        await updateAssemblyDecisionStatus(assemblyId, decisionId, input)
+      );
+    }
+
+    const decisionEvidenceMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/decisions\/([0-9a-f-]+)\/evidence$/i
+    );
+    if (decisionEvidenceMatch) {
+      const assemblyId = z.string().uuid().parse(decisionEvidenceMatch[1]);
+      const decisionId = z.string().uuid().parse(decisionEvidenceMatch[2]);
+      const input = attachDecisionEvidenceSchema.parse(body);
+      return NextResponse.json(await attachDecisionEvidence(assemblyId, decisionId, input));
+    }
+
+    const decisionUpdateMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/decisions\/([0-9a-f-]+)$/i
+    );
+    if (decisionUpdateMatch) {
+      const assemblyId = z.string().uuid().parse(decisionUpdateMatch[1]);
+      const decisionId = z.string().uuid().parse(decisionUpdateMatch[2]);
+      const input = updateAssemblyDecisionSchema.parse(body);
+      return NextResponse.json(await updateAssemblyDecision(assemblyId, decisionId, input));
+    }
+
     const checklistMatch = path.match(/^assemblies\/([0-9a-f-]+)\/checklist$/i);
     if (checklistMatch) {
       const assemblyId = z.string().uuid().parse(checklistMatch[1]);
@@ -934,6 +991,15 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
       const assemblyId = z.string().uuid().parse(agendaItemMatch[1]);
       const itemId = z.string().uuid().parse(agendaItemMatch[2]);
       return NextResponse.json(await deleteAgendaItem(assemblyId, itemId));
+    }
+
+    const decisionDeleteMatch = path.match(
+      /^assemblies\/([0-9a-f-]+)\/decisions\/([0-9a-f-]+)$/i
+    );
+    if (decisionDeleteMatch) {
+      const assemblyId = z.string().uuid().parse(decisionDeleteMatch[1]);
+      const decisionId = z.string().uuid().parse(decisionDeleteMatch[2]);
+      return NextResponse.json(await deleteAssemblyDecision(assemblyId, decisionId));
     }
 
     const voteRevokeMatch = path.match(
