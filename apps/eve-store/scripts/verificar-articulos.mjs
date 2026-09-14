@@ -46,8 +46,13 @@ const MAX_CTA_EN_CUERPO = 3;
    publicidad la apruebe antes el INVIMA, y un artículo que enlaza a la compra
    puede contar como publicidad. Hasta que eso lo revise un abogado, no hay
    enlace de compra a ninguno. Se identifica por marca porque el catálogo no
-   guarda la categoría del producto. */
+   guarda la categoría del producto, y por producto cuando la marca vende de
+   todo: el Aceite de Linaza de Bio Essens tiene registro SD (suplemento
+   dietario), aunque sus otros aceites son alimentos o cosméticos. */
 const MARCAS_SUPLEMENTOS = new Set(["Allen Nutrition"]);
+const PRODUCTOS_SUPLEMENTOS = new Set(["bio-essens-aceite-de-linaza-250-ml"]);
+const esSuplemento = (slug, productos) =>
+  PRODUCTOS_SUPLEMENTOS.has(slug) || MARCAS_SUPLEMENTOS.has(productos.get(slug));
 
 /* Frases que delatan escritura de IA. Adaptadas al español de la guía de
    Wikipedia «Signs of AI writing», que es la que pide la guía de redacción. Solo
@@ -288,7 +293,7 @@ function verificar(archivo, todos, productos) {
         e(`enlace a un artículo en borrador: ${ruta}`);
     } else if (zona === "producto") {
       if (!productos.has(id)) e(`enlace a un producto que no existe: ${ruta}`);
-      else if (MARCAS_SUPLEMENTOS.has(productos.get(id)))
+      else if (esSuplemento(id, productos))
         e(`enlace de compra a un suplemento: ${ruta} (Decreto 3249)`);
     } else if (zona === "marca") {
       if (
@@ -309,8 +314,7 @@ function verificar(archivo, todos, productos) {
   const prods = Array.isArray(c.productos) ? c.productos : [];
   for (const p of prods) {
     if (!productos.has(p)) e(`producto de la cabecera que no existe: ${p}`);
-    else if (MARCAS_SUPLEMENTOS.has(productos.get(p)))
-      e(`CTA hacia un suplemento: ${p} (Decreto 3249)`);
+    else if (esSuplemento(p, productos)) e(`CTA hacia un suplemento: ${p} (Decreto 3249)`);
   }
   const ctas = [...cuerpo.matchAll(/^::producto\[([^\]]*)\]\s*$/gm)].map((x) => x[1]);
   for (const p of ctas)

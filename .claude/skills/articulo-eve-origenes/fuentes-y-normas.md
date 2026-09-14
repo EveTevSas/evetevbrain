@@ -83,7 +83,7 @@ terapéuticas, y **debe ser aprobada previamente por el INVIMA**.
 Fuente: https://www.invima.gov.co/biblioteca/decreto-3249-2006-suplementos-dietarios
 
 En la práctica: **ningún CTA ni enlace de compra a un suplemento** (hoy, Allen
-Nutrition). Se puede escribir sobre nutrición o suplementación como tema, con
+Nutrition y el Aceite de Linaza de Bio Essens, que tiene registro SD). Se puede escribir sobre nutrición o suplementación como tema, con
 fuentes, sin llevar a la compra. El verificador lo bloquea.
 
 ### Publicidad identificable — SIC
