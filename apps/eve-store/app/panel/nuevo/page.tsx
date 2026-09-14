@@ -2,8 +2,8 @@
  *
  * Deliberadamente NO valida la calidad del dato. Un producto se puede crear con
  * lo mínimo para existir —nombre, marca y precio— y nace bloqueado con los
- * avisos que la base deduce: sin GTIN, sin contenido, sin imagen, descripción
- * corta o sin confirmar. Esos avisos no se «resuelven»: desaparecen cuando el
+ * avisos que la base deduce: sin GTIN, sin contenido, sin imagen, sin registro
+ * sanitario, descripción corta o sin confirmar. Esos avisos no se «resuelven»: desaparecen cuando el
  * dato se arregla.
  *
  * El motivo de hacerlo así es que hay más de una puerta de entrada —esta y el
@@ -18,6 +18,7 @@ import { sql } from "drizzle-orm";
 
 import { db } from "@/db/connection";
 import { producto } from "@/db/schema";
+import { FORMATO_REGISTRO, normalizarRegistro } from "@/lib/producto";
 
 export const dynamic = "force-dynamic";
 
@@ -40,10 +41,12 @@ async function crear(datos: FormData) {
   const imagen = String(datos.get("imagen") ?? "").trim();
   const descripcion = String(datos.get("descripcion") ?? "").trim();
   const existencias = Number(datos.get("existencias") ?? 0);
+  const registro = normalizarRegistro(String(datos.get("registro") ?? ""));
 
   if (!nombre || !marca || !Number.isInteger(precio) || precio <= 0) {
     redirect("/panel/nuevo?error=faltan");
   }
+  if (registro && !FORMATO_REGISTRO.test(registro)) redirect("/panel/nuevo?error=registro");
 
   const base = babosa(`${marca}-${nombre}-${contenido}`);
   let slug = base;
@@ -71,6 +74,7 @@ async function crear(datos: FormData) {
       gtin: gtin || null,
       imagen: imagen || null,
       descripcion: descripcion || null,
+      registroSanitario: registro || null,
       descripcionPorConfirmar: true
     });
 
@@ -100,6 +104,12 @@ export default async function Nuevo({
       {error === "faltan" && (
         <p className="mt-4 rounded-lg bg-[#fdeaea] px-4 py-3 text-sm text-[#b91c1c]">
           Faltan el nombre, la marca o un precio mayor que cero.
+        </p>
+      )}
+      {error === "registro" && (
+        <p className="mt-4 rounded-lg bg-[#fdeaea] px-4 py-3 text-sm text-[#b91c1c]">
+          El registro sanitario no tiene la forma de uno del INVIMA. Cópialo de la etiqueta, por
+          ejemplo NSOC78812-17CO o PSA-001738-2018, o déjalo vacío por ahora.
         </p>
       )}
       {error === "choque" && (
@@ -143,6 +153,13 @@ export default async function Nuevo({
           nota="El código de barras. Si no lo tienes a mano, déjalo vacío: es preferible a inventarlo."
         >
           <input name="gtin" inputMode="numeric" className={entrada} />
+        </Campo>
+
+        <Campo
+          etiqueta="Registro sanitario INVIMA"
+          nota="Tal como aparece en la etiqueta. Si no lo tienes a mano, déjalo vacío: el producto nacerá con el aviso y no se podrá publicar hasta tenerlo."
+        >
+          <input name="registro" className={`${entrada} uppercase tabular-nums`} />
         </Campo>
 
         <Campo etiqueta="Imagen (URL)">

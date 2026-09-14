@@ -184,7 +184,7 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
               <Descripcion parrafos={parrafos(p.descripcion)} id={`ver-mas-${p.slug}`} />
             )}
 
-            {atributos.length > 0 && (
+            {(atributos.length > 0 || p.gtin || p.registro_sanitario) && (
               <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 border-t border-salvia pt-6 text-sm">
                 {atributos.map(([k, v]) => (
                   <div key={k} className="col-span-2 grid grid-cols-subgrid">
@@ -201,6 +201,12 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
                   <div className="col-span-2 grid grid-cols-subgrid">
                     <dt className="text-oliva first-letter:uppercase">código</dt>
                     <dd className="tabular-nums">{p.gtin}</dd>
+                  </div>
+                )}
+                {p.registro_sanitario && (
+                  <div className="col-span-2 grid grid-cols-subgrid">
+                    <dt className="text-oliva first-letter:uppercase">registro INVIMA</dt>
+                    <dd className="tabular-nums">{p.registro_sanitario}</dd>
                   </div>
                 )}
               </dl>

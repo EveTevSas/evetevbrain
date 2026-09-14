@@ -26,6 +26,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parse as leerYaml } from "yaml";
+import { cargarEntorno } from "./entorno.mjs";
+
+cargarEntorno();
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CARPETA = join(raiz, "contenido", "articulos");
@@ -45,14 +48,35 @@ const MAX_CTA_EN_CUERPO = 3;
 /* Sin CTA hacia suplementos dietarios. El Decreto 3249 de 2006 exige que su
    publicidad la apruebe antes el INVIMA, y un artículo que enlaza a la compra
    puede contar como publicidad. Hasta que eso lo revise un abogado, no hay
-   enlace de compra a ninguno. Se identifica por marca porque el catálogo no
-   guarda la categoría del producto, y por producto cuando la marca vende de
-   todo: el Aceite de Linaza de Bio Essens tiene registro SD (suplemento
-   dietario), aunque sus otros aceites son alimentos o cosméticos. */
+   enlace de compra a ninguno.
+
+   Se reconoce por el registro sanitario: el prefijo SD es de suplemento
+   dietario. La marca no basta —Bio Essens vende alimentos, cosméticos y un
+   suplemento, el Aceite de Linaza—, pero se mantiene como segunda vía porque el
+   registro vive en la base y en CI no hay base: allí solo se ve la marca. Por
+   eso la skill corre este verificador en local antes de publicar. */
 const MARCAS_SUPLEMENTOS = new Set(["Allen Nutrition"]);
-const PRODUCTOS_SUPLEMENTOS = new Set(["bio-essens-aceite-de-linaza-250-ml"]);
+let registros = null; // slug → registro sanitario; null si no hay base
 const esSuplemento = (slug, productos) =>
-  PRODUCTOS_SUPLEMENTOS.has(slug) || MARCAS_SUPLEMENTOS.has(productos.get(slug));
+  MARCAS_SUPLEMENTOS.has(productos.get(slug)) || /^SD/.test(registros?.get(slug) ?? "");
+
+async function registrosSanitarios() {
+  if (!process.env.DATABASE_URL || process.env.TIENDA_FIXTURE === "1") return null;
+  try {
+    const postgres = (await import("postgres")).default;
+    const sql = postgres(process.env.DATABASE_URL, {
+      prepare: false,
+      onnotice: () => {},
+      connect_timeout: 12
+    });
+    const filas = await sql`select slug, registro_sanitario from tienda.producto`;
+    await sql.end();
+    return new Map(filas.map((f) => [f.slug, f.registro_sanitario]));
+  } catch (x) {
+    console.warn(`· La base no respondió (${x.message}).`);
+    return null;
+  }
+}
 
 /* Frases que delatan escritura de IA. Adaptadas al español de la guía de
    Wikipedia «Signs of AI writing», que es la que pide la guía de redacción. Solo
@@ -385,6 +409,11 @@ const todos = new Map(
   })
 );
 const productos = catalogo();
+registros = await registrosSanitarios();
+if (!registros)
+  console.log(
+    "· Sin base de datos: los suplementos se reconocen solo por la marca, no por el registro SD."
+  );
 const pedido = process.argv[2];
 const objetivo = pedido ? archivos.filter((f) => f === `${pedido}.md`) : archivos;
 if (pedido && !objetivo.length) {

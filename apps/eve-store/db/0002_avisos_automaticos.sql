@@ -16,6 +16,9 @@ alter table tienda.aviso
 
 -- Un aviso automático desaparece arreglando el dato, no marcándolo como
 -- resuelto: es la diferencia entre una tarea y un síntoma.
+--
+-- 0007 la amplía con el aviso de registro sanitario y rehace el disparador; como
+-- `db:migrate` corre todas las migraciones en orden, la vigente es la de 0007.
 create or replace function tienda.recalcular_avisos(p_slug text)
 returns void language plpgsql as $$
 declare p tienda.producto%rowtype;

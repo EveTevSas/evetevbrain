@@ -12,6 +12,7 @@ import { eq, sql } from "drizzle-orm";
 
 import { db } from "@/db/connection";
 import { aviso, producto } from "@/db/schema";
+import { FORMATO_REGISTRO, normalizarRegistro } from "@/lib/producto";
 
 export const dynamic = "force-dynamic";
 
@@ -42,11 +43,14 @@ async function guardar(datos: FormData) {
   const descripcion = String(datos.get("descripcion") ?? "").trim();
   const gtin = String(datos.get("gtin") ?? "").trim();
   const imagen = String(datos.get("imagen") ?? "").trim();
+  const registro = normalizarRegistro(String(datos.get("registro") ?? ""));
 
   // Se valida aquí y la base vuelve a validar con sus `check`. Dos capas a
   // propósito: esta da un mensaje útil, la otra hace la regla infranqueable.
   if (!Number.isInteger(precio) || precio <= 0) return;
   if (!Number.isInteger(existencias) || existencias < 0) return;
+  if (registro && !FORMATO_REGISTRO.test(registro))
+    redirect(`/panel/producto/${slug}?fallo=registro`);
 
   await db()
     .update(producto)
@@ -57,6 +61,7 @@ async function guardar(datos: FormData) {
       descripcion: descripcion || null,
       gtin: gtin || null,
       imagen: imagen || null,
+      registroSanitario: registro || null,
       descripcionPorConfirmar: datos.get("confirmada") !== "on"
     })
     .where(eq(producto.slug, slug));
@@ -124,7 +129,8 @@ export default async function Ficha({
         <p className="text-xs font-semibold uppercase tracking-widest text-oliva">{p.marca}</p>
         <h1 className="font-display text-3xl font-bold">{p.nombre}</h1>
         <p className="mt-2 text-sm text-oliva">
-          {pesos.format(p.precioMinor)} · {p.existencias} en bodega · GTIN {p.gtin ?? "sin asignar"}
+          {pesos.format(p.precioMinor)} · {p.existencias} en bodega · GTIN {p.gtin ?? "sin asignar"}{" "}
+          · INVIMA {p.registroSanitario ?? "sin registro"}
         </p>
       </header>
 
@@ -167,6 +173,12 @@ export default async function Ficha({
       <form action={guardar} className="mt-10 flex flex-col gap-5">
         <input type="hidden" name="slug" value={slug} />
         <h2 className="font-display text-xl font-bold">Detalles</h2>
+        {fallo === "registro" && (
+          <p className="rounded-lg bg-[#fdeaea] px-3 py-2 text-sm text-[#b91c1c]">
+            No se guardó: el registro sanitario no tiene la forma de uno del INVIMA. Cópialo de la
+            etiqueta, por ejemplo NSOC78812-17CO o PSA-001738-2018.
+          </p>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <Campo etiqueta="Precio (pesos enteros)" nota="Se guarda como entero, igual que EvePay.">
@@ -233,6 +245,18 @@ export default async function Ficha({
               className="w-full rounded-lg border border-salvia bg-white px-3 py-2 tabular-nums"
             />
           )}
+        </Campo>
+
+        <Campo
+          etiqueta="Registro sanitario INVIMA"
+          nota="Tal como aparece en la etiqueta: NSOC… si es cosmético, PSA/RSA… si es alimento, SD… si es suplemento. Sin él no se puede publicar."
+        >
+          <input
+            name="registro"
+            defaultValue={p.registroSanitario ?? ""}
+            placeholder="NSOC78812-17CO"
+            className="w-full rounded-lg border border-salvia bg-white px-3 py-2 uppercase tabular-nums"
+          />
         </Campo>
 
         <Campo etiqueta="Imagen (URL)" nota="Los canales de compra exigen al menos una.">

@@ -59,6 +59,7 @@ export type Publico = {
   contenido: string | null;
   imagen: string | null;
   descripcion: string | null;
+  registro_sanitario: string | null;
   existencias: number;
   atributos: Record<string, string>;
   actualizado_en: string;
@@ -82,7 +83,7 @@ export type Publico = {
  * más barato que preguntar por trozos. */
 const CONSULTA_CATALOGO = sql`
     select slug, nombre, marca, gtin, precio_minor::int as precio_minor, moneda,
-           contenido, imagen, descripcion, existencias, atributos, actualizado_en
+           contenido, imagen, descripcion, registro_sanitario, existencias, atributos, actualizado_en
       from tienda.producto
      where publicado
      order by existencias = 0, marca, nombre`;
@@ -140,6 +141,13 @@ export async function marcas(): Promise<{ marca: string; cuantos: number }[]> {
  * «bio-essens» tanto podría ser «Bio Essens» como «Bio-Essens». Al resolver una
  * ruta se recorren las marcas que existen y se busca la que produce ese slug,
  * que no puede equivocarse. */
+/* Registro sanitario del INVIMA, tal como lo acepta la base (el `check` de
+ * 0007). El panel lo normaliza antes —mayúsculas, sin espacios— porque así se
+ * copia de una etiqueta, y valida aquí para dar un mensaje en vez de un error de
+ * Postgres. */
+export const FORMATO_REGISTRO = /^[A-Z]{2,5}-?[0-9][0-9A-Z-]{3,30}$/;
+export const normalizarRegistro = (texto: string) => texto.toUpperCase().replace(/\s+/g, "");
+
 export function slugDeMarca(marca: string): string {
   return marca
     .normalize("NFD")
@@ -200,7 +208,8 @@ export async function buscar(consulta: string): Promise<Publico[]> {
   return conPlazo(
     db().execute<Publico>(sql`
     select p.slug, p.nombre, p.marca, p.gtin, p.precio_minor::int as precio_minor, p.moneda,
-           p.contenido, p.imagen, p.descripcion, p.existencias, p.atributos, p.actualizado_en
+           p.contenido, p.imagen, p.descripcion, p.registro_sanitario, p.existencias, p.atributos,
+           p.actualizado_en
       from tienda.producto p, websearch_to_tsquery('tienda.espanol', ${limpia}) q
      where p.publicado and p.busqueda @@ q
      order by ts_rank(p.busqueda, q) desc, p.existencias = 0, p.nombre
