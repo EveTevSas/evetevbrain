@@ -29,3 +29,32 @@ export const trimestreActual = (): string => {
   const d = new Date();
   return `${d.getFullYear()}-Q${Math.floor(d.getMonth() / 3) + 1}`;
 };
+
+/**
+ * Comprueba que la base del Hub está alcanzable y con el schema aplicado.
+ * Devuelve null si todo bien, o un texto que dice qué falta: la URL, el rol
+ * `hub_app`, la migración 0024… Lo usa el layout para mostrar una página
+ * legible en vez de un 500.
+ */
+export async function diagnosticoBase(): Promise<string | null> {
+  if (!process.env.HUB_DATABASE_URL) {
+    return "Falta la variable HUB_DATABASE_URL (conexión al Postgres de EvePay con el rol hub_app).";
+  }
+  try {
+    await db()`select 1 from hub.portales limit 1`;
+    return null;
+  } catch (e) {
+    const err = e as { code?: string; message?: string };
+    const codigo = err.code ?? "";
+    if (codigo === "3F000" || codigo === "42P01") {
+      return "La base responde pero el schema `hub` no existe: falta aplicar la migración 0024_hub.sql en este proyecto Supabase.";
+    }
+    if (codigo === "28P01" || codigo === "28000") {
+      return "La base rechazó la conexión (usuario o contraseña): el rol hub_app no existe en este proyecto o la clave de HUB_DATABASE_URL no coincide.";
+    }
+    if (codigo === "42501") {
+      return "El rol hub_app no tiene permisos sobre el schema `hub`: vuelve a aplicar la migración 0024_hub.sql (los GRANT están ahí).";
+    }
+    return `No se pudo consultar la base del Hub: ${err.message ?? String(e)}${codigo ? ` (código ${codigo})` : ""}.`;
+  }
+}
