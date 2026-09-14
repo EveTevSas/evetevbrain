@@ -380,6 +380,13 @@ jobs:
       - name: Typecheck
         run: pnpm --filter @evetev/eve-store typecheck
 
+      # Los artículos de Eve-Orígenes: extensión, estructura, fuentes, enlaces,
+      # afirmaciones de salud y la verificación final anotada. Lo que no pasa no
+      # llega a main. No abre las fuentes —eso depende de webs de terceros y lo
+      # hace la skill antes de publicar—: aquí solo lo que es del repo.
+      - name: Artículos
+        run: pnpm --filter @evetev/eve-store blog:verificar
+
   # ── El único check que debe exigir la protección de rama ───────────────────
   # Corre siempre, y solo se pone en rojo si algo falló o se canceló. Un job
   # omitido no es un fallo: es que ese área no se tocó.

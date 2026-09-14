@@ -81,6 +81,7 @@ export async function catalogoDeFixture(): Promise<Publico[]> {
       contenido: p.contenido ?? null,
       imagen: p.imagen ?? null,
       descripcion: p.descripcion ?? null,
+      registro_sanitario: p.registro_sanitario ?? null,
       existencias: Number(p.existencias ?? 0),
       atributos: sinVacios(p.atributos),
       actualizado_en: new Date().toISOString()
@@ -139,6 +140,7 @@ type Bruto = {
   contenido?: string | null;
   imagen?: string | null;
   descripcion?: string | null;
+  registro_sanitario?: string | null;
   existencias?: number;
   atributos?: Record<string, string | undefined>;
 };

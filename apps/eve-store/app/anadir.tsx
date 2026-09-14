@@ -57,7 +57,7 @@ function Enviar({ nombre, hay, compacto }: { nombre: string; hay: boolean; compa
         disabled={!hay || pending}
         aria-label={hay ? `Añadir ${nombre} al carrito` : `${nombre}: sin existencias`}
         title={hay ? "Añadir al carrito" : "Sin existencias"}
-        className="grid size-11 place-items-center rounded-full border border-linea bg-white text-noche shadow-sm transition hover:bg-coral hover:text-white disabled:cursor-not-allowed disabled:text-linea disabled:hover:bg-white"
+        className="grid size-11 place-items-center rounded-full border border-salvia bg-white text-oliva shadow-sm transition hover:bg-accion hover:text-white disabled:cursor-not-allowed disabled:text-salvia disabled:hover:bg-white"
       >
         <IconoCarrito className={pending ? "size-5 animate-pulse" : "size-5"} />
       </button>
@@ -67,7 +67,7 @@ function Enviar({ nombre, hay, compacto }: { nombre: string; hay: boolean; compa
   return (
     <button
       disabled={!hay || pending}
-      className="mt-6 w-full rounded-xl bg-coral px-6 py-3.5 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:bg-linea disabled:text-pizarra"
+      className="mt-6 w-full rounded-xl bg-accion px-6 py-3.5 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:bg-salvia disabled:text-oliva"
     >
       {!hay ? "Sin existencias" : pending ? "Añadiendo…" : "Añadir al carrito"}
     </button>

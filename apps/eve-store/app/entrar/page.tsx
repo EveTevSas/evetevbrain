@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 
 /* Fuera de `/panel`, así que no hereda su exclusión: se declara aquí. */
 export const metadata: Metadata = {
-  title: "Entrar · Eve-Store",
+  title: "Entrar · Eve-Orígenes",
   robots: { index: false, follow: false }
 };
 
@@ -39,11 +39,11 @@ export default async function Entrar({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
-      <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">
-        Eve-Store · Panel
+      <p className="text-xs font-semibold uppercase tracking-widest text-oliva">
+        Eve-Orígenes · Panel
       </p>
       <h1 className="mt-1 font-display text-3xl font-bold">Entrar</h1>
-      <p className="mt-2 text-sm text-pizarra">
+      <p className="mt-2 text-sm text-oliva">
         Solo para el equipo de Evetev. Tener cuenta en la plataforma no da acceso a este panel.
       </p>
 
@@ -61,7 +61,7 @@ export default async function Entrar({
             type="email"
             required
             autoComplete="username"
-            className="w-full rounded-lg border border-linea bg-white px-3 py-2"
+            className="w-full rounded-lg border border-salvia bg-white px-3 py-2"
           />
         </label>
         <label className="flex flex-col gap-1.5">
@@ -71,10 +71,10 @@ export default async function Entrar({
             type="password"
             required
             autoComplete="current-password"
-            className="w-full rounded-lg border border-linea bg-white px-3 py-2"
+            className="w-full rounded-lg border border-salvia bg-white px-3 py-2"
           />
         </label>
-        <button className="mt-1 rounded-lg bg-noche px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+        <button className="mt-1 rounded-lg bg-oliva px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
           Entrar
         </button>
       </form>

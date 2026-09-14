@@ -16,16 +16,21 @@
     "build": "next build",
     "start": "next start --port 3006",
     "creds": "node scripts/comprobar-credenciales.mjs",
-    "creds:arreglar": "node scripts/comprobar-credenciales.mjs --arreglar"
+    "creds:arreglar": "node scripts/comprobar-credenciales.mjs --arreglar",
+    "blog:verificar": "node scripts/verificar-articulos.mjs",
+    "blog:fuentes": "node scripts/verificar-fuentes.mjs",
+    "blog:temas": "node scripts/temas.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",
     "@supabase/supabase-js": "2.110.7",
     "drizzle-orm": "^0.45.2",
+    "marked": "18.0.13",
     "next": "16.2.10",
     "postgres": "^3.4.9",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "yaml": "2.9.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",

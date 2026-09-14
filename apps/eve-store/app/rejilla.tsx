@@ -35,7 +35,7 @@ export function Rejilla({ productos, nivel = 2 }: { productos: Tarjeta[]; nivel?
              `motion-reduce` los desactiva: la información no depende de ellos. */
           <li
             key={p.slug}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-linea bg-white transition duration-200 hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(10,37,64,0.09)] motion-reduce:transform-none motion-reduce:transition-none"
+            className="group relative flex flex-col overflow-hidden rounded-2xl border border-salvia bg-white transition duration-200 hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(86,93,71,0.09)] motion-reduce:transform-none motion-reduce:transition-none"
           >
             <a href={`/producto/${p.slug}`} className="flex flex-1 flex-col">
               <div className="relative aspect-square overflow-hidden bg-white">
@@ -57,7 +57,7 @@ export function Rejilla({ productos, nivel = 2 }: { productos: Tarjeta[]; nivel?
                 {!hay && (
                   <>
                     <div className="absolute inset-0 bg-white/55" />
-                    <p className="absolute left-3 top-3 rounded-full bg-noche/85 px-2.5 py-1 text-xs font-semibold text-white">
+                    <p className="absolute left-3 top-3 rounded-full bg-oliva/85 px-2.5 py-1 text-xs font-semibold text-white">
                       Agotado
                     </p>
                   </>
@@ -65,13 +65,13 @@ export function Rejilla({ productos, nivel = 2 }: { productos: Tarjeta[]; nivel?
               </div>
 
               <div className="flex flex-1 flex-col p-4">
-                <p className="text-[0.7rem] font-medium uppercase tracking-wide text-pizarra">
+                <p className="text-[0.7rem] font-medium uppercase tracking-wide text-oliva">
                   {p.marca}
                 </p>
                 <Titular className="mt-0.5 text-sm font-semibold leading-snug group-hover:underline">
                   {p.nombre}
                 </Titular>
-                {p.contenido && <p className="mt-0.5 text-xs text-pizarra">{p.contenido}</p>}
+                {p.contenido && <p className="mt-0.5 text-xs text-oliva">{p.contenido}</p>}
 
                 {/* `mt-auto` clava el precio abajo. Sin él, un nombre de dos
                     líneas y otro de una dejaban los precios a alturas
@@ -79,7 +79,7 @@ export function Rejilla({ productos, nivel = 2 }: { productos: Tarjeta[]; nivel?
                     exactamente lo que impide comparar de un vistazo. */}
                 <p
                   className={`mt-auto pt-3 font-display text-lg font-bold tabular-nums ${
-                    hay ? "" : "text-pizarra"
+                    hay ? "" : "text-oliva"
                   }`}
                 >
                   {pesos.format(p.precio_minor)}

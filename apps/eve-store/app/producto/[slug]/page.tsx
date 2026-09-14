@@ -121,10 +121,10 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
             Un rastro dice dónde está y ofrece dos salidas útiles: el catálogo y
             la marca. El enlace a la marca es además el camino por el que se
             descubre el resto de su surtido. */}
-        <nav aria-label="Migas de pan" className="text-sm text-pizarra">
+        <nav aria-label="Migas de pan" className="text-sm text-oliva">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
-              <a href="/" className="hover:text-noche hover:underline">
+              <a href="/" className="hover:text-oliva hover:underline">
                 Catálogo
               </a>
             </li>
@@ -132,7 +132,7 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
             <li>
               <a
                 href={`/marca/${slugDeMarca(p.marca)}`}
-                className="hover:text-noche hover:underline"
+                className="hover:text-oliva hover:underline"
               >
                 {p.marca}
               </a>
@@ -145,7 +145,7 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
               la columna de texto, así que una descripción larga hacía crecer la
               foto y otra corta la dejaba chata. La misma proporción que en la
               rejilla, para que la ficha no sorprenda. */}
-          <div className="aspect-square self-start overflow-hidden rounded-2xl border border-linea bg-white">
+          <div className="aspect-square self-start overflow-hidden rounded-2xl border border-salvia bg-white">
             {p.imagen && (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={p.imagen} alt={p.nombre} className="size-full object-contain p-8" />
@@ -157,14 +157,14 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
                 es cómo se llega al resto del catálogo desde una ficha a la que
                 se entró por una búsqueda, y cómo un rastreador descubre que
                 hay más. */}
-            <p className="text-xs font-semibold uppercase tracking-widest text-pizarra">
+            <p className="text-xs font-semibold uppercase tracking-widest text-oliva">
               <a href={`/marca/${slugDeMarca(p.marca)}`} className="hover:underline">
                 {p.marca}
               </a>
             </p>
             <h1 className="mt-1 font-display text-3xl font-bold leading-tight">
               {p.nombre}
-              {p.contenido && <span className="font-normal text-pizarra"> · {p.contenido}</span>}
+              {p.contenido && <span className="font-normal text-oliva"> · {p.contenido}</span>}
             </h1>
 
             <p className="mt-5 font-display text-3xl font-bold tabular-nums">
@@ -174,7 +174,7 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
             {/* Existencias reales, con el número. «Consultar disponibilidad» es
               lo que obliga a una persona a escribir para saber si puede
               comprar, y a un agente a descartarnos. */}
-            <p className={`mt-1 text-sm ${hay ? "text-exito" : "text-alerta"}`}>
+            <p className={`mt-1 text-sm ${hay ? "text-petroleo" : "text-alerta"}`}>
               {hay ? `${p.existencias} disponibles · envío desde Bogotá` : "Agotado"}
             </p>
 
@@ -184,11 +184,11 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
               <Descripcion parrafos={parrafos(p.descripcion)} id={`ver-mas-${p.slug}`} />
             )}
 
-            {atributos.length > 0 && (
-              <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 border-t border-linea pt-6 text-sm">
+            {(atributos.length > 0 || p.gtin || p.registro_sanitario) && (
+              <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 border-t border-salvia pt-6 text-sm">
                 {atributos.map(([k, v]) => (
                   <div key={k} className="col-span-2 grid grid-cols-subgrid">
-                    <dt className="text-pizarra first-letter:uppercase">{k.replace(/_/g, " ")}</dt>
+                    <dt className="text-oliva first-letter:uppercase">{k.replace(/_/g, " ")}</dt>
                     {/* Las comas llegan pegadas del volcado —«…deshidratación,Firmeza
                         de la piel,Humecta»— y así no se leen como una lista sino
                         como una palabra larga. Se separan al pintar; el dato no se
@@ -199,8 +199,14 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
                 ))}
                 {p.gtin && (
                   <div className="col-span-2 grid grid-cols-subgrid">
-                    <dt className="text-pizarra first-letter:uppercase">código</dt>
+                    <dt className="text-oliva first-letter:uppercase">código</dt>
                     <dd className="tabular-nums">{p.gtin}</dd>
+                  </div>
+                )}
+                {p.registro_sanitario && (
+                  <div className="col-span-2 grid grid-cols-subgrid">
+                    <dt className="text-oliva first-letter:uppercase">registro INVIMA</dt>
+                    <dd className="tabular-nums">{p.registro_sanitario}</dd>
                   </div>
                 )}
               </dl>
@@ -208,7 +214,7 @@ export default async function Ficha({ params }: { params: Promise<{ slug: string
           </div>
         </div>
         {vecinos.length > 0 && (
-          <section className="mt-16 border-t border-linea pt-10">
+          <section className="mt-16 border-t border-salvia pt-10">
             <h2 className="font-display text-2xl font-bold">
               {mismaMarca ? `Más de ${p.marca}` : "Otros productos"}
             </h2>

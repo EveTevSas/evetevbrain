@@ -18,7 +18,17 @@ const config: NextConfig = {
    * `max` de `db/connection.ts`, el techo son 2 × 3 = 6 conexiones de las quince del pooler, venga de
    * donde venga el build, y quedan nueve libres para la tienda en producción y
    * para EveConecta, que comparten el mismo pooler. */
-  experimental: { cpus: 2 }
+  experimental: { cpus: 2 },
+
+  /* Los artículos se leen del disco con `fs`, y el rastreo de archivos de Next
+     no sigue lecturas con rutas construidas en ejecución. Sin esto el build
+     local funciona —el archivo está ahí— y en Vercel la regeneración ISR de un
+     artículo falla porque la función no lleva la carpeta dentro. */
+  outputFileTracingIncludes: {
+    "/blog": ["./contenido/articulos/**/*"],
+    "/blog/*": ["./contenido/articulos/**/*"],
+    "/sitemap.xml": ["./contenido/articulos/**/*"]
+  }
 };
 
 export default config;

@@ -31,8 +31,8 @@ export async function NavMarcas({ activa }: { activa?: string }) {
   if (lista.length < 2) return null;
 
   const base = "shrink-0 border-b-2 py-2.5 text-sm transition-colors whitespace-nowrap -mb-px";
-  const apagado = "border-transparent text-pizarra hover:text-noche";
-  const encendido = "border-teal font-semibold text-noche";
+  const apagado = "border-transparent text-oliva hover:text-oliva";
+  const encendido = "border-jade font-semibold text-oliva";
 
   return (
     /* El degradado del borde derecho es la única pista de que la fila sigue.
@@ -40,7 +40,7 @@ export async function NavMarcas({ activa }: { activa?: string }) {
        que ahí se acaban las marcas: se desliza quien ya sabe que puede. */
     <nav
       aria-label="Marcas"
-      className="relative border-t border-linea/70 after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-10 after:bg-gradient-to-l after:from-white after:to-transparent sm:after:hidden"
+      className="relative border-t border-salvia/70 after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-10 after:bg-gradient-to-l after:from-white after:to-transparent sm:after:hidden"
     >
       {/* `overflow-x-auto` y no `flex-wrap`: con seis marcas ya son dos
           renglones en móvil, y una cabecera que crece hacia abajo se come la
@@ -60,7 +60,7 @@ export async function NavMarcas({ activa }: { activa?: string }) {
             href={`/marca/${slugDeMarca(marca)}`}
             className={`${base} ${activa === marca ? encendido : apagado}`}
           >
-            {marca} <span className="tabular-nums text-pizarra/60">{cuantos}</span>
+            {marca} <span className="tabular-nums text-oliva/60">{cuantos}</span>
           </a>
         ))}
       </div>

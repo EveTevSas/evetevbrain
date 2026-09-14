@@ -80,7 +80,7 @@ export async function GET() {
   const cuerpo = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
   <channel>
-    <title>Eve-Store</title>
+    <title>Eve-Orígenes</title>
     <link>${base}</link>
     <description>Aceites naturales, cuidado facial y suplementos de marcas colombianas.</description>
 ${items}

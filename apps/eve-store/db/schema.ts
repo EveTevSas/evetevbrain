@@ -51,6 +51,13 @@ export const producto = tiendaSchema.table(
     imagen: text("imagen"),
 
     descripcion: text("descripcion"),
+
+    /**
+     * Registro o notificación sanitaria del INVIMA: NSOC… (cosmético), PSA/RSA…
+     * (alimento), SD… (suplemento dietario). Sin él no se publica (0007), y el
+     * prefijo SD es lo que le dice al blog que no puede enlazar el producto.
+     */
+    registroSanitario: text("registro_sanitario"),
     descripcionPorConfirmar: boolean("descripcion_por_confirmar").notNull().default(true),
 
     /** Variables por categoría; son los campos que un agente compara. */
@@ -68,7 +75,11 @@ export const producto = tiendaSchema.table(
   },
   (t) => [
     check("producto_precio_positivo", sql`${t.precioMinor} > 0`),
-    check("producto_existencias_no_negativas", sql`${t.existencias} >= 0`)
+    check("producto_existencias_no_negativas", sql`${t.existencias} >= 0`),
+    check(
+      "producto_registro_sanitario_formato",
+      sql`${t.registroSanitario} ~ '^[A-Z]{2,5}-?[0-9][0-9A-Z-]{3,30}$'`
+    )
   ]
 );
 

@@ -62,7 +62,7 @@ export function Cabecera({
           fila que se usa —marca, búsqueda, carrito—. En el checkout no aparece:
           ahí ya no hay nada que convencer. */}
       {!minima && (
-        <p className="bg-noche text-center text-xs text-hielo sm:text-[0.8rem]">
+        <p className="bg-oliva text-center text-xs text-niebla sm:text-[0.8rem]">
           {/* La frase larga —«Existencias reales: si dice que hay, hay»— sólo
               aparece desde `sm`. En 375 px las tres promesas completas ocupaban
               TRES renglones de barra oscura antes de que empezara la tienda: más
@@ -71,13 +71,13 @@ export function Cabecera({
               para rematar. */}
           <span className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-2 gap-y-0.5 px-6 py-2">
             <span>Envío desde Bogotá</span>
-            <span aria-hidden="true" className="text-teal">
+            <span aria-hidden="true" className="text-petroleo">
               ·
             </span>
             <span>
               Existencias reales<span className="hidden sm:inline">: si dice que hay, hay</span>
             </span>
-            <span aria-hidden="true" className="text-teal">
+            <span aria-hidden="true" className="text-petroleo">
               ·
             </span>
             <span>Sin registro</span>
@@ -85,7 +85,7 @@ export function Cabecera({
         </p>
       )}
 
-      <header className="sticky top-0 z-30 border-b border-linea bg-white/90 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-salvia bg-white/90 backdrop-blur">
         {/* En móvil el buscador baja a su propia fila.
             Compartiendo renglón con la marca y el carrito se quedaba en unos
             cuarenta píxeles —cabía «acei»— y la búsqueda es justo lo que esta
@@ -94,12 +94,20 @@ export function Cabecera({
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3">
           <a
             href="/"
-            className="order-1 flex shrink-0 items-center gap-2.5 text-noche"
-            aria-label="Eve-Store, ir a la portada"
+            className="order-1 flex shrink-0 items-center gap-2.5 text-oliva"
+            aria-label="Eve-Orígenes, ir a la portada"
           >
+            {/* El logotipo completo —la hoja y el nombre en El Messiri— como un
+                solo SVG extraído del manual. No se compone con texto vivo: así
+                el nombre sale igual aunque la fuente tarde en cargar. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/marca/isotipo-azul-noche.svg" alt="" width={28} height={28} />
-            <span className="font-display text-lg font-bold leading-none">Eve-Store</span>
+            <img
+              src="/marca/logotipo-oliva.svg"
+              alt=""
+              width={148}
+              height={28}
+              className="h-7 w-auto"
+            />
           </a>
 
           {/* En el checkout no hay buscador ni carrito. Ofrecer salidas en el paso
@@ -123,19 +131,28 @@ export function Cabecera({
                     defaultValue={q}
                     placeholder="aceite de coco, piel grasa…"
                     aria-label="Buscar productos"
-                    className="min-w-0 flex-1 rounded-full border border-linea bg-tinte py-2 pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-pizarra/70 focus:border-teal focus:bg-white focus:ring-2 focus:ring-teal/30"
+                    className="min-w-0 flex-1 rounded-full border border-salvia bg-niebla py-2 pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-oliva/70 focus:border-jade focus:bg-white focus:ring-2 focus:ring-jade/30"
                   />
                 </div>
                 {/* Pill, no rectángulo (regla de forma: los botones son pill
                     siempre). Y en azul noche, no coral: el coral está reservado
                     a la acción principal de la vista, que en una tienda es
                     añadir al carrito. */}
-                <button className="shrink-0 rounded-full bg-noche px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90">
+                <button className="shrink-0 rounded-full bg-oliva px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90">
                   Buscar
                 </button>
               </form>
 
-              <div className="order-2 ml-auto sm:order-3 sm:ml-0">
+              {/* El blog va junto al carrito y no en la fila de marcas: esa fila es
+                  el catálogo, y un enlace editorial entre las marcas se leería como
+                  una marca más. */}
+              <div className="order-2 ml-auto flex items-center gap-4 sm:order-3 sm:ml-0">
+                <a
+                  href="/blog"
+                  className="text-sm font-semibold text-oliva hover:text-petroleo hover:underline"
+                >
+                  Blog
+                </a>
                 <CarritoCabecera />
               </div>
             </>
@@ -172,7 +189,7 @@ function IconoLupa() {
       strokeWidth="1.8"
       strokeLinecap="round"
       aria-hidden="true"
-      className="pointer-events-none absolute left-3.5 size-4 text-pizarra"
+      className="pointer-events-none absolute left-3.5 size-4 text-oliva"
     >
       <circle cx="11" cy="11" r="7" />
       <path d="m20 20-3.5-3.5" />

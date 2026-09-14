@@ -82,6 +82,25 @@ no pueda saltársela por descuido.
 > Protection** en el proyecto de Vercel, que es un ajuste del panel, no del
 > repositorio.
 
+## Eve-Orígenes: la marca y el blog
+
+La tienda lleva la identidad de **Eve-Orígenes**, submarca de Evetev: paleta,
+logotipo y tipografías salen de `packages/brand/eve-origenes/` y se sirven
+desde `/marca` con `pnpm marca:sync`.
+
+El **blog** vive en `/blog`. Los artículos son archivos Markdown en
+`contenido/articulos/`, los escribe la IA siguiendo la skill
+`articulo-eve-origenes` y ninguno se publica sin pasar sus verificaciones:
+
+```bash
+pnpm --filter @evetev/eve-store blog:temas            # ideas: catálogo + búsquedas en Colombia
+pnpm --filter @evetev/eve-store blog:verificar [slug] # reglas de la guía (corre en CI)
+pnpm --filter @evetev/eve-store blog:fuentes <slug>   # abre las fuentes y busca las citas
+```
+
+Los borradores solo se ven con `next dev`. Decisiones y porqués en
+[`docs/PLAN_EVE_ORIGENES.md`](../../docs/PLAN_EVE_ORIGENES.md).
+
 ## Trabajar la tienda sin base de datos
 
 Para tocar diseño no hace falta Supabase. Con la variable puesta, el catálogo

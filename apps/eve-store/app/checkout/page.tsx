@@ -20,7 +20,7 @@ import { pesos } from "@/lib/producto";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Pagar · Eve-Store",
+  title: "Pagar · Eve-Orígenes",
   robots: { index: false, follow: false }
 };
 
@@ -98,17 +98,17 @@ export default async function Checkout({
   if (items.length === 0) redirect("/carrito");
 
   const total = subtotal + ENVIO_MINOR;
-  const entrada = "w-full rounded-lg border border-linea bg-white px-3 py-2.5";
+  const entrada = "w-full rounded-lg border border-salvia bg-white px-3 py-2.5";
 
   return (
     <>
       <Cabecera minima />
       <main className="mx-auto max-w-2xl px-6 py-12">
-        <a href="/carrito" className="text-sm text-pizarra hover:underline">
+        <a href="/carrito" className="text-sm text-oliva hover:underline">
           ← Volver al carrito
         </a>
         <h1 className="mt-4 font-display text-3xl font-bold">Últimos datos</h1>
-        <p className="mt-2 text-sm text-pizarra">
+        <p className="mt-2 text-sm text-oliva">
           Paso 2 de 2. Sin cuenta y sin contraseñas: solo lo necesario para llevarte el pedido.
         </p>
 
@@ -118,12 +118,12 @@ export default async function Checkout({
           </p>
         )}
 
-        <div className="mt-8 rounded-xl border border-linea bg-white p-5">
+        <div className="mt-8 rounded-xl border border-salvia bg-white p-5">
           <h2 className="font-semibold">Tu pedido</h2>
           <ul className="mt-3 flex flex-col gap-1.5 text-sm">
             {items.map((i) => (
               <li key={i.slug} className="flex justify-between gap-4">
-                <span className="text-pizarra">
+                <span className="text-oliva">
                   {i.cantidad} × {i.nombre}
                   {i.contenido && ` · ${i.contenido}`}
                 </span>
@@ -132,7 +132,7 @@ export default async function Checkout({
                 </span>
               </li>
             ))}
-            <li className="flex justify-between border-t border-linea pt-2 text-pizarra">
+            <li className="flex justify-between border-t border-salvia pt-2 text-oliva">
               <span>Envío</span>
               <span className="tabular-nums">{pesos.format(ENVIO_MINOR)}</span>
             </li>
@@ -157,7 +157,7 @@ export default async function Checkout({
 
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">
-              Teléfono <span className="font-normal text-pizarra">— opcional</span>
+              Teléfono <span className="font-normal text-oliva">— opcional</span>
             </span>
             <input name="telefono" type="tel" autoComplete="tel" className={entrada} />
           </label>
@@ -188,15 +188,15 @@ export default async function Checkout({
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">
               Indicaciones para la entrega{" "}
-              <span className="font-normal text-pizarra">— opcional</span>
+              <span className="font-normal text-oliva">— opcional</span>
             </span>
             <input name="notas" className={entrada} placeholder="Portería, horario…" />
           </label>
 
-          <button className="mt-2 rounded-xl bg-coral px-6 py-3.5 font-semibold text-white hover:opacity-90">
+          <button className="mt-2 rounded-xl bg-accion px-6 py-3.5 font-semibold text-white hover:opacity-90">
             Confirmar pedido · {pesos.format(total)}
           </button>
-          <p className="text-center text-xs text-pizarra">
+          <p className="text-center text-xs text-oliva">
             El pago todavía no es en línea: registramos el pedido, apartamos las unidades y te
             escribimos para cobrarlo.
           </p>

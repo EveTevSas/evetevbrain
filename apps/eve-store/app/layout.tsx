@@ -1,6 +1,22 @@
 import type { Metadata } from "next";
+import { Caveat, Didact_Gothic, El_Messiri } from "next/font/google";
 
 import "./globals.css";
+
+/* Las tipografías de Eve-Orígenes, en su versión de licencia libre.
+ *
+ * `next/font` las descarga al compilar y las sirve desde este dominio: ninguna
+ * visita hace una petición a Google. Antes se cargaban con un `<link>` a
+ * fonts.googleapis.com, que además de un viaje de red más le contaba a Google
+ * quién visitaba la tienda. Cada una publica una variable CSS que `globals.css`
+ * convierte en `font-display`, `font-sans` y `font-acento`. */
+const titulos = El_Messiri({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--fuente-titulos"
+});
+const texto = Didact_Gothic({ subsets: ["latin"], weight: "400", variable: "--fuente-texto" });
+const acento = Caveat({ subsets: ["latin"], weight: ["400", "600"], variable: "--fuente-acento" });
 
 /* El `noindex` global ESTUVO aquí, y ese día llegó.
  *
@@ -18,36 +34,29 @@ import "./globals.css";
  * Ahora cada zona declara lo suyo — `/panel`, `/entrar` y `/sin-acceso` se
  * excluyen en su propio layout o página, y el carrito, el checkout y la
  * búsqueda ya lo hacían. */
-/* El favicon y el isotipo salen de `/marca`, servido por esta misma app.
- *
- * Eve-Store era la única app del repo sin marca propia: pestaña con el icono
- * por defecto del navegador y la palabra «Eve-Store» en texto plano por todo
- * logotipo. No hay CDN de marca —el repo que lo servía se borró—, así que cada
- * app copia lo suyo con `pnpm marca:sync` y lo sirve desde su propio origen. */
+/* El favicon es la hoja en círculo del manual de Eve-Orígenes —la que su
+ * logotipo usa como «O»—, extraída del PDF y servida desde `/marca` como el
+ * resto de la marca. */
 export const metadata: Metadata = {
-  title: "Eve-Store",
+  title: "Eve-Orígenes",
   icons: {
     icon: [
       { url: "/marca/favicon.svg", type: "image/svg+xml" },
       { url: "/marca/favicon-32.png", sizes: "32x32", type: "image/png" }
     ],
-    apple: "/marca/apple-touch-icon.png",
-    other: [{ rel: "mask-icon", url: "/marca/mask-icon.svg", color: "#0a2540" }]
+    apple: "/marca/apple-touch-icon.png"
   }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" className={`${titulos.variable} ${texto.variable} ${acento.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
+        {/* La paleta de marca, antes que cualquier pintado: sin ella las
+            utilidades de color apuntan a variables vacías. */}
+        <link rel="stylesheet" href="/marca/colores.css" />
       </head>
-      <body className="font-[Inter,system-ui,sans-serif] antialiased">{children}</body>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }

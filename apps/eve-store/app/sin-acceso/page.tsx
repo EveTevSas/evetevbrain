@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 
 /* Fuera de `/panel`, así que no hereda su exclusión: se declara aquí. */
 export const metadata: Metadata = {
-  title: "Sin acceso · Eve-Store",
+  title: "Sin acceso · Eve-Orígenes",
   robots: { index: false, follow: false }
 };
 
@@ -22,13 +22,13 @@ export default function SinAcceso() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
       <h1 className="font-display text-3xl font-bold">Tu cuenta no tiene acceso</h1>
-      <p className="mt-3 text-sm leading-relaxed text-pizarra">
+      <p className="mt-3 text-sm leading-relaxed text-oliva">
         Iniciaste sesión correctamente, pero esta cuenta no está en la lista de administradores de
-        Eve-Store. La plataforma comparte los usuarios entre productos, así que tener cuenta en uno
-        no da acceso a los demás.
+        Eve-Orígenes. La plataforma comparte los usuarios entre productos, así que tener cuenta en
+        uno no da acceso a los demás.
       </p>
       <form action={salir} className="mt-6">
-        <button className="rounded-lg border border-linea bg-white px-4 py-2 text-sm font-semibold hover:bg-hielo">
+        <button className="rounded-lg border border-salvia bg-white px-4 py-2 text-sm font-semibold hover:bg-salvia">
           Cerrar sesión
         </button>
       </form>

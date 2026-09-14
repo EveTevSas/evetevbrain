@@ -17,7 +17,7 @@ import { pesos, publicados } from "@/lib/producto";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Carrito · Eve-Store",
+  title: "Carrito · Eve-Orígenes",
   robots: { index: false, follow: true }
 };
 
@@ -40,21 +40,21 @@ export default async function Carrito({
             vistazo de qué pantalla se trata y un botón de verdad. Es la única
             acción de la vista, así que es la que va en coral (regla C2). */}
         <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-6 text-center">
-          <span className="grid size-16 place-items-center rounded-full bg-hielo text-pizarra">
+          <span className="grid size-16 place-items-center rounded-full bg-salvia text-oliva">
             <IconoCarrito className="size-7" />
           </span>
           <h1 className="mt-5 font-display text-3xl font-bold">Tu carrito está vacío</h1>
-          <p className="mt-3 text-sm leading-relaxed text-pizarra">
+          <p className="mt-3 text-sm leading-relaxed text-oliva">
             Todavía no has añadido nada. El catálogo son {(await publicados()).length} productos de
             marcas colombianas, con las unidades que hay hoy.
           </p>
           <a
             href="/"
-            className="mt-7 rounded-full bg-coral px-7 py-3 font-semibold text-white transition hover:opacity-90"
+            className="mt-7 rounded-full bg-accion px-7 py-3 font-semibold text-white transition hover:opacity-90"
           >
             Ver el catálogo
           </a>
-          <a href="/buscar" className="mt-4 text-sm text-pizarra underline hover:text-noche">
+          <a href="/buscar" className="mt-4 text-sm text-oliva underline hover:text-oliva">
             o busca algo concreto
           </a>
         </main>
@@ -69,7 +69,7 @@ export default async function Carrito({
     <>
       <Cabecera />
       <main className="mx-auto max-w-4xl px-6 py-12">
-        <a href="/" className="text-sm text-pizarra hover:underline">
+        <a href="/" className="text-sm text-oliva hover:underline">
           ← Seguir comprando
         </a>
         <h1 className="mt-4 font-display text-3xl font-bold">
@@ -82,7 +82,7 @@ export default async function Carrito({
           </p>
         )}
 
-        <ul className="mt-8 flex flex-col divide-y divide-linea border-y border-linea">
+        <ul className="mt-8 flex flex-col divide-y divide-salvia border-y border-salvia">
           {items.map((i) => (
             /* Dos niveles, no cinco columnas.
                 En una sola fila cabían imagen, nombre, cantidad, total y quitar
@@ -91,7 +91,7 @@ export default async function Carrito({
                 fuera y el resto se apila: datos arriba, controles abajo. Desde
                 `sm` vuelven a la misma línea de siempre. */
             <li key={i.slug} className="flex items-start gap-4 py-4">
-              <div className="size-20 shrink-0 overflow-hidden rounded-lg border border-linea bg-white">
+              <div className="size-20 shrink-0 overflow-hidden rounded-lg border border-salvia bg-white">
                 {i.imagen && (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={i.imagen} alt="" className="size-full object-contain p-2" />
@@ -100,16 +100,14 @@ export default async function Carrito({
 
               <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs uppercase tracking-wide text-pizarra">{i.marca}</p>
+                  <p className="text-xs uppercase tracking-wide text-oliva">{i.marca}</p>
                   <a href={`/producto/${i.slug}`} className="font-semibold hover:underline">
                     {i.nombre}
                     {i.contenido && (
-                      <span className="font-normal text-pizarra"> · {i.contenido}</span>
+                      <span className="font-normal text-oliva"> · {i.contenido}</span>
                     )}
                   </a>
-                  <p className="text-sm tabular-nums text-pizarra">
-                    {pesos.format(i.precio_minor)}
-                  </p>
+                  <p className="text-sm tabular-nums text-oliva">{pesos.format(i.precio_minor)}</p>
                   {i.recortado && (
                     <p className="mt-1 text-xs text-alerta">
                       Ajustado a {i.cantidad}: es lo que queda en bodega.
@@ -126,7 +124,7 @@ export default async function Carrito({
                       name="cantidad"
                       defaultValue={i.cantidad}
                       aria-label={`Cantidad de ${i.nombre}`}
-                      className="rounded-lg border border-linea bg-white px-2 py-1.5 text-sm tabular-nums"
+                      className="rounded-lg border border-salvia bg-white px-2 py-1.5 text-sm tabular-nums"
                     >
                       {Array.from({ length: i.existencias }, (_, n) => n + 1).map((n) => (
                         <option key={n} value={n}>
@@ -134,7 +132,7 @@ export default async function Carrito({
                         </option>
                       ))}
                     </select>
-                    <button className="ml-2 rounded-lg border border-linea px-2.5 py-1.5 text-xs font-medium hover:bg-hielo">
+                    <button className="ml-2 rounded-lg border border-salvia px-2.5 py-1.5 text-xs font-medium hover:bg-salvia">
                       Actualizar
                     </button>
                   </form>
@@ -147,7 +145,7 @@ export default async function Carrito({
                     <input type="hidden" name="slug" value={i.slug} />
                     <button
                       aria-label={`Quitar ${i.nombre}`}
-                      className="px-2 text-pizarra hover:text-noche"
+                      className="px-2 text-oliva hover:text-oliva"
                     >
                       ×
                     </button>
@@ -161,14 +159,14 @@ export default async function Carrito({
         <div className="ml-auto mt-8 max-w-sm">
           <dl className="flex flex-col gap-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-pizarra">Productos</dt>
+              <dt className="text-oliva">Productos</dt>
               <dd className="tabular-nums">{pesos.format(subtotal)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-pizarra">Envío</dt>
+              <dt className="text-oliva">Envío</dt>
               <dd className="tabular-nums">{pesos.format(ENVIO_MINOR)}</dd>
             </div>
-            <div className="flex justify-between border-t border-linea pt-2 font-display text-lg font-bold">
+            <div className="flex justify-between border-t border-salvia pt-2 font-display text-lg font-bold">
               <dt>Total</dt>
               <dd className="tabular-nums">{pesos.format(total)}</dd>
             </div>
@@ -176,11 +174,11 @@ export default async function Carrito({
 
           <a
             href="/checkout"
-            className="mt-5 block rounded-xl bg-coral px-6 py-3.5 text-center font-semibold text-white hover:opacity-90"
+            className="mt-5 block rounded-xl bg-accion px-6 py-3.5 text-center font-semibold text-white hover:opacity-90"
           >
             Ir a pagar
           </a>
-          <p className="mt-2 text-center text-xs text-pizarra">
+          <p className="mt-2 text-center text-xs text-oliva">
             Un solo paso más. No hace falta crear cuenta.
           </p>
         </div>

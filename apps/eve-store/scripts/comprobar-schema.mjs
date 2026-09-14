@@ -36,6 +36,7 @@ const ESPERADO = {
     "imagen",
     "descripcion",
     "descripcion_por_confirmar",
+    "registro_sanitario",
     "atributos",
     "existencias",
     "publicado",
