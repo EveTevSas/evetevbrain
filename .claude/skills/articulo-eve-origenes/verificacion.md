@@ -31,12 +31,23 @@ Lee también, para las reglas:
    respuesta corta, que son lo que más se lee. Opiniones y consejos obvios
    («lee la etiqueta») no cuentan.
 
-2. **Abre tú cada fuente con WebFetch.** No te fíes de la `cita` de la cabecera:
-   comprueba que esa frase está en la página, que el estudio es el que dice el
-   título, y lee lo suficiente del resumen o del texto para saber qué encontró
-   de verdad —con cuánta gente, en qué condiciones, con qué limitaciones—. Si una
-   fuente no abre, prueba su DOI o busca el mismo trabajo en PubMed; si aun así
-   no puedes leerla, **todas las afirmaciones que dependen de ella fallan**.
+2. **Abre tú cada fuente.** No te fíes de la `cita` de la cabecera: comprueba
+   que esa frase está en la fuente, que el estudio es el que dice el título, y
+   lee lo suficiente del resumen o del texto para saber qué encontró de verdad
+   —con cuánta gente, en qué condiciones, con qué limitaciones—.
+   - **Lee el texto crudo, no un resumen.** WebFetch pasa la página por otro
+     modelo que la resume y puede parafrasear: sirve para entender, no para
+     confirmar una cita literal. Para eso, `curl` desde Bash.
+   - **PubMed** ya no sirve su web a programas (responde 203 con una
+     comprobación de cookies). Léelo por su API oficial:
+     `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=<PMID>&rettype=abstract&retmode=text`
+     y, para título y año,
+     `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=<PMID>&retmode=json`.
+     Admite tres peticiones por segundo: si responde `API rate limit exceeded`,
+     espera y repite; eso no es que la fuente no exista.
+   - **PMC**: `https://www.ebi.ac.uk/europepmc/webservices/rest/<PMCID>/fullTextXML`.
+   - Si una fuente no abre por ninguna vía, **todas las afirmaciones que
+     dependen de ella fallan**.
 
 3. **Contrasta cada afirmación con su fuente.** Falla si:
    - la fuente no dice eso;

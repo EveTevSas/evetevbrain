@@ -43,10 +43,16 @@ Todos los comandos, desde la raíz del repo, con `pnpm --filter @evetev/eve-stor
 ## 2. Investigación
 
 1. Buscar fuentes siguiendo la jerarquía de `fuentes-y-normas.md`. Preferir
-   PubMed y PMC a la web de la revista: se dejan leer.
-2. **Abrir cada fuente con WebFetch.** Una fuente que no se ha abierto no existe.
-   Nada de citar de memoria, ni un título «que suena», ni un DOI que no se ha
-   seguido.
+   PubMed y PMC a la web de la revista: `blog:fuentes` los lee por su API y
+   comprueba además título y año. Para buscar, E-utilities (`esearch.fcgi`).
+2. **Abrir cada fuente y leer el texto crudo.** Una fuente que no se ha abierto
+   no existe. Nada de citar de memoria, ni un título «que suena», ni un DOI que
+   no se ha seguido — al construir la skill, un título escrito de memoria para
+   una prueba resultó falso. La cita literal se copia del texto que devuelve
+   `curl`, no de WebFetch, que resume con otro modelo y puede parafrasear. La
+   web de PubMed no se deja leer por programas: usar E-utilities
+   (`efetch.fcgi?db=pubmed&id=<PMID>&rettype=abstract&retmode=text`), sin pasar
+   de tres peticiones por segundo.
 3. De cada fuente copiar **la frase literal** que sostiene lo que se va a decir.
    Si la idea no está en una frase copiable, esa fuente no sostiene esa idea.
 4. Hacer la tabla de afirmaciones: cada dato del futuro artículo → fuente → cita.
@@ -105,7 +111,11 @@ Con su veredicto:
 - **Rechazado** → corregir cada hallazgo. La corrección por defecto es **quitar o
   matizar** la afirmación. Cambiar de fuente solo vale si la nueva dice
   exactamente eso y es de igual o mayor rango; si hay que buscar mucho para
-  salvar una frase, la frase sobra. Repetir 5 y 6 con **otro agente nuevo**, no
+  salvar una frase, la frase sobra. **Corregir no es añadir**: en el primer
+  artículo, cada ronda tumbó una frase escrita al arreglar la anterior («dos
+  avisos», luego «tres avisos»; la página tenía cuatro). Lo que entre nuevo al
+  corregir se comprueba contra la fuente como el resto, o no entra.
+  Repetir 5 y 6 con **otro agente nuevo**, no
   el mismo: el que ya leyó el texto tiende a dar por buenas sus propias
   objeciones resueltas.
 - **Tres rechazos seguidos** → parar. El artículo queda en `borrador` y se informa

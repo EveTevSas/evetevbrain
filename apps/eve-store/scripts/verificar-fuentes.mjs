@@ -47,22 +47,38 @@ const fuentes = cabecera?.fuentes ?? [];
    y guiones tipográficos reducidos a los simples y los espacios colapsados. Una
    cita no deja de ser literal porque la página use « » y el artículo " ". */
 function normalizar(t) {
-  return t
-    .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;|&#160;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
-    .replace(/&[a-z]+;/gi, " ")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[“”«»„"]/g, '"')
-    .replace(/[‘’´`]/g, "'")
-    .replace(/[\u2010-\u2015\u2212]/g, "-")
-    .replace(/\s+/g, " ")
-    .toLowerCase()
-    .trim();
+  return (
+    t
+      .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;|&#160;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+      .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+      /* Las entidades con nombre se traducen, no se borran. La primera versión
+       las cambiaba por un espacio y la página de la OMS —que escribe
+       «radiaci&oacute;n»— quedaba como «radiaci n»: una cita literal salía como
+       «no literal». Las letras con tilde se reducen a la letra base, porque
+       unas líneas más abajo se quitan las tildes de todos modos. */
+      .replace(/&([a-zA-Z])(acute|grave|circ|tilde|uml|cedil|ring|slash);/g, "$1")
+      .replace(/&(laquo|raquo|ldquo|rdquo|bdquo|quot);/g, '"')
+      .replace(/&(lsquo|rsquo|apos);/g, "'")
+      .replace(/&(ndash|mdash|minus);/g, "-")
+      .replace(/&iquest;/g, "¿")
+      .replace(/&iexcl;/g, "¡")
+      .replace(/&hellip;/g, "...")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&[a-zA-Z]+;/g, " ")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[“”«»„"]/g, '"')
+      .replace(/[‘’´`]/g, "'")
+      .replace(/[\u2010-\u2015\u2212]/g, "-")
+      .replace(/\s+/g, " ")
+      .toLowerCase()
+      .trim()
+  );
 }
 
 /* Cuánto de la cita aparece, por trozos de seis palabras. Sirve para distinguir
@@ -103,15 +119,33 @@ const NAVEGADOR = {
 const pedir = (url, opciones = {}) =>
   fetch(url, { redirect: "follow", signal: AbortSignal.timeout(25_000), ...opciones });
 
+/* NCBI admite tres peticiones por segundo sin clave, y al pasarse NO devuelve
+   un error HTTP: responde 200 con `{"error":"API rate limit exceeded"}` en el
+   cuerpo. La primera versión lanzaba las peticiones seguidas y tomaba ese
+   mensaje por el resumen del artículo, así que informaba «la cita no está en
+   la fuente» o «el PMID no existe» de estudios que existían y la contenían. Se
+   espacian las llamadas y se reintenta si el cuerpo trae ese error. */
+let ultimaNcbi = 0;
+async function ncbi(url) {
+  for (let intento = 1; intento <= 4; intento++) {
+    const espera = ultimaNcbi + 400 - Date.now();
+    if (espera > 0) await new Promise((r) => setTimeout(r, espera));
+    ultimaNcbi = Date.now();
+    const texto = await (await pedir(url)).text();
+    if (!texto.includes("API rate limit exceeded")) return texto;
+    await new Promise((r) => setTimeout(r, 1000 * intento));
+  }
+  throw new Error("NCBI sigue limitando las peticiones; vuelve a intentarlo en un minuto");
+}
+
 async function desdePubmed(pmid) {
   const base = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils";
-  const resumen = (
-    await (await pedir(`${base}/esummary.fcgi?db=pubmed&id=${pmid}&retmode=json`)).json()
-  ).result?.[pmid];
+  const resumen = JSON.parse(await ncbi(`${base}/esummary.fcgi?db=pubmed&id=${pmid}&retmode=json`))
+    .result?.[pmid];
   if (!resumen || resumen.error) return null;
-  const texto = await (
-    await pedir(`${base}/efetch.fcgi?db=pubmed&id=${pmid}&rettype=abstract&retmode=text`)
-  ).text();
+  const texto = await ncbi(
+    `${base}/efetch.fcgi?db=pubmed&id=${pmid}&rettype=abstract&retmode=text`
+  );
   return {
     via: "PubMed (E-utilities)",
     titulo: resumen.title,
@@ -228,10 +262,13 @@ async function comprobar(f) {
     }
     if (problemas.length)
       return { estado: "✗", detalle: `${problemas.join(" · ")}  [leída por ${via}]` };
-    return {
-      estado: "✓",
-      detalle: `cita literal, título${meta?.anio ? " y año" : ""} comprobados  [${via}]`
-    };
+    /* El mensaje dice exactamente lo que se comprobó. En una página web sin
+       ficha bibliográfica solo se busca la cita; decir «título comprobado» ahí
+       sería un ✓ que afirma más de lo que midió. */
+    const extra = meta?.titulo
+      ? `, título${meta.anio ? " y año" : ""} comprobados`
+      : " (en una página web el título no se puede comprobar)";
+    return { estado: "✓", detalle: `cita literal${extra}  [${via}]` };
   } catch (x) {
     return {
       estado: "✗",
