@@ -300,6 +300,32 @@ que muestre Vercel**, por si cambian.
 > tabla: Vercel cambió de IP. Otra razón para pedirle los valores en el momento
 > en vez de fiarse de esta página.
 
+## 3b. Hub de Evetev → `*.vercel.app` (uso interno)
+
+`apps/hub` es la torre de control de la compañía. Comparte el proyecto Supabase
+de EvePay solo para la identidad (Google) y guarda lo suyo en el schema `hub`
+con el rol `hub_app`.
+
+1. Vercel → **Add New → Project** → el mismo repo.
+2. **Root Directory:** `apps/hub`. Su `vercel.json` trae el `buildCommand`
+   que compila `@evetev/shared` antes de `next build`: el paquete resuelve a
+   `dist/`, que en un clon limpio no existe (misma trampa que en CI; ver
+   `CLAUDE.md`). Toda app que importe `@evetev/shared` en tiempo de ejecución
+   necesita ese `buildCommand`.
+3. **Environment Variables:**
+   ```
+   NEXT_PUBLIC_SUPABASE_URL              # proyecto Supabase de EVEPAY
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+   HUB_DATABASE_URL                      # pooler del mismo proyecto, rol hub_app (crearlo una vez, como evepay_api)
+   HUB_DOMINIOS_PERMITIDOS               # evetev.com
+   NEXT_PUBLIC_API_URL                   # https://api.evetev.com
+   ```
+4. Aplicar `0024_hub.sql` en el proyecto alojado y activar **Google** en
+   Authentication → Providers (cliente OAuth «Interno» del Workspace; redirect
+   `https://<ref>.supabase.co/auth/v1/callback`), agregando
+   `https://<hub>/auth/callback` y `https://<hub>/**` a las redirect URLs.
+5. **Deploy.** Sin dominio propio por ahora.
+
 ## 4. Pipeline
 
 - Cada push a una rama con PR levanta un **preview deploy** (URL desechable).
