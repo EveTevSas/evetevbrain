@@ -1,6 +1,6 @@
 ---
 name: articulo-eve-origenes
-description: Escribe, verifica y publica un artículo del blog de Eve-Orígenes (apps/eve-store/contenido/articulos/) siguiendo la guía de redacción — tema en tendencia en Colombia, al menos 3 fuentes abiertas y citadas literalmente, 1000–2000 palabras con voz humana, CTA a productos de la tienda solo donde la evidencia respalda el uso — y lo somete a una verificación final independiente que bloquea la publicación si una sola afirmación no se sostiene. Usar cuando se pida un artículo, entrada o contenido para el blog de Eve-Orígenes, o revisar artículos ya publicados.
+description: Escribe, verifica y publica un artículo del blog de Eve-Orígenes (apps/eve-store/contenido/articulos/) siguiendo la guía de redacción — tema en tendencia en Colombia, al menos 3 fuentes abiertas y citadas literalmente, 1000–2000 palabras con voz humana, CTA a productos de la tienda solo donde la evidencia respalda el uso — y lo somete a una ronda de revisión independiente y acotada que bloquea la publicación si deja al lector con una idea falsa o incumple una norma. Usar cuando se pida un artículo, entrada o contenido para el blog de Eve-Orígenes, o revisar artículos ya publicados.
 ---
 
 # Artículo para Eve-Orígenes
@@ -8,7 +8,7 @@ description: Escribe, verifica y publica un artículo del blog de Eve-Orígenes 
 Los artículos los escribe la IA. **La regla que no se negocia: nunca se publica
 información incorrecta.** No hay garantía humana de lectura, así que la garantía
 es el método: cada afirmación atada a una fuente abierta, dos verificadores
-mecánicos y un revisor independiente que no escribió el texto. Si algo no se
+mecánicos y una ronda de un revisor independiente que no escribió el texto. Si algo no se
 sostiene, se quita. Si no se puede quitar sin romper el artículo, no se publica.
 
 Ante la duda entre publicar algo dudoso y no publicar, **no se publica**.
@@ -98,34 +98,37 @@ pnpm --filter @evetev/eve-store blog:fuentes <slug>
 - `blog:fuentes` tiene que salir sin ✗. Una cita «no literal» se copia exacta;
   una fuente «rota» se sustituye. Las «?» (bloqueo, PDF) quedan para el revisor.
 
-## 6. Verificación final independiente
+## 6. Revisión independiente
 
 Lanzar **un agente nuevo** (herramienta Agent, tipo `general-purpose`) con el
 encargo de `verificacion.md`, pasándole **solo la ruta del artículo**. Nada de
 las notas de investigación ni de esta conversación: tiene que llegar sin saber
 qué se quería decir, para leer lo que efectivamente se dice.
 
+Es **una ronda, acotada**. Lo exhaustivo lo hacen los pasos 2 a 5; el revisor
+busca lo que deja al lector con una idea falsa o crea un problema legal. No es
+una revisión por pares: el primer artículo pasó tres rondas de unos 120.000
+tokens cada una cazando matices, y así no escala.
+
 Con su veredicto:
 
-- **Aprobado** → paso 7.
-- **Rechazado** → corregir cada hallazgo. La corrección por defecto es **quitar o
-  matizar** la afirmación. Cambiar de fuente solo vale si la nueva dice
-  exactamente eso y es de igual o mayor rango; si hay que buscar mucho para
+- **Aprobado** → corregir los menores que se arreglen en un minuto, y al paso 7.
+- **Corregir** → aplicar cada corrección **quitando o matizando**. Cambiar de
+  fuente solo vale si la nueva dice exactamente eso; si hay que buscar mucho para
   salvar una frase, la frase sobra. **Corregir no es añadir**: en el primer
   artículo, cada ronda tumbó una frase escrita al arreglar la anterior («dos
-  avisos», luego «tres avisos»; la página tenía cuatro). Lo que entre nuevo al
-  corregir se comprueba contra la fuente como el resto, o no entra.
-  Repetir 5 y 6 con **otro agente nuevo**, no
-  el mismo: el que ya leyó el texto tiende a dar por buenas sus propias
-  objeciones resueltas.
-- **Tres rechazos seguidos** → parar. El artículo queda en `borrador` y se informa
-  qué no se consiguió sostener. No hay cuarta ronda.
+  avisos», luego «tres avisos»; la página tenía cuatro). Lo que entre nuevo se
+  comprueba contra la fuente, o no entra. Repetir el paso 5 y seguir al 7, **sin
+  otra ronda**.
+- **Rechazado** → rehacer lo que no se sostiene y hacer **una segunda y última
+  ronda** con otro agente nuevo. Si vuelve rechazado, el artículo queda en
+  `borrador` y se informa qué no se consiguió sostener.
 
 ## 7. Publicación
 
 1. En la cabecera: `estado: publicado` y el bloque `verificacion` con lo que
-   devolvió el revisor (`estado: aprobado`, `fecha`, `afirmaciones`,
-   `fuentes_abiertas`).
+   devolvió el revisor (`estado: aprobado`, también tras un «corregir» ya
+   aplicado; `fecha`, `afirmaciones`, `fuentes_abiertas`).
 2. `blog:verificar <slug>` otra vez: con `publicado` comprueba el bloque.
 3. Comprobar contra la tienda en marcha que cada producto de `productos` sigue
    publicado (la tarjeta de un producto retirado no se pinta, y el CTA se pierde).

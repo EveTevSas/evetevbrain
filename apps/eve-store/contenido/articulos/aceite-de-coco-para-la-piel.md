@@ -3,7 +3,7 @@ titulo: "¿Sirve el aceite de coco para la piel? Lo que dicen los estudios"
 descripcion: "Qué muestran los ensayos sobre el aceite de coco en piel seca y dermatitis atópica, qué no se sabe todavía y por qué no es protector solar."
 gancho: "Si lo tienes en la cocina y alguna vez te preguntaste si también sirve para la piel, hay estudios que ayudan a responder. Dicen cosas útiles, y también tienen límites que conviene conocer antes de untártelo."
 respuesta_corta: "En un ensayo con 34 personas con piel seca (xerosis) leve a moderada, el aceite de coco virgen hidrató igual que el aceite mineral en dos semanas. En otro, con 117 niños con dermatitis atópica leve a moderada, la gravedad bajó más con aceite de coco virgen que con aceite mineral en ocho semanas. Una revisión de 2019 pide más estudios antes de hacer recomendaciones definitivas. No es protector solar."
-estado: borrador
+estado: publicado
 publicado_en: 2026-09-13
 revisado_en: 2026-09-13
 temas:
@@ -107,15 +107,20 @@ fuentes:
     url: "https://wwd.com/beauty-industry-news/skin-care/vmv-hypoallergenics-caters-to-sensitivity-5447112/"
     cita: "VMV Hypoallergenics, founded in 1979 by Dr. Vermén Verallo-Rowell, a dermatologist and dermatopathologist based in the Philippines"
     respalda: "Vermén Verallo-Rowell, dermatóloga radicada en Filipinas y autora de dos de los ensayos, fundó en 1979 la marca VMV Hypoallergenics; en 2011 la marca iba a lanzar productos para la piel con aceite de coco virgen orgánico."
+verificacion:
+  estado: aprobado
+  fecha: 2026-09-13
+  afirmaciones: 60
+  fuentes_abiertas: 10
 ---
 
-En los trópicos, el aceite de coco se ha usado durante siglos como hidratante tradicional, según recuerdan los autores de uno de los ensayos que lo pusieron a prueba [1]. Que algo lleve tanto tiempo en uso no demuestra que funcione, y que sea natural tampoco. Por eso vale la pena mirar qué se ha medido en personas. Hay resultados buenos, y también un par de cosas que el aceite de coco no hace.
+En los trópicos, el aceite de coco se ha usado durante siglos como hidratante tradicional, según recuerdan los autores de uno de los ensayos que lo pusieron a prueba [1]. Que algo lleve tanto tiempo en uso no demuestra que funcione, y que sea natural tampoco. Por eso vale la pena mirar qué se ha medido en personas. Hay resultados buenos, y también una cosa que el aceite de coco no hace.
 
 ## Qué se ha probado en piel seca
 
 Lo que en medicina se llama xerosis es una piel seca, áspera, que se descama y pica, relacionada con un defecto en la función de barrera de la piel [1].
 
-En 2004, investigadores de Filipinas compararon el aceite de coco virgen con el aceite mineral en 34 personas con xerosis leve a moderada [1]. Cada participante se aplicó uno de los dos aceites en las piernas dos veces al día durante dos semanas, y la hidratación y los lípidos de la superficie de la piel se midieron con aparatos, y además los participantes calificaron cuánta sequedad, descamación, aspereza y picor notaban [1].
+En 2004, investigadores de Filipinas compararon el aceite de coco virgen con el aceite mineral en 34 personas con xerosis leve a moderada [1]. Cada participante se aplicó uno de los dos aceites en las piernas dos veces al día durante dos semanas [1]. La hidratación y los lípidos de la superficie de la piel se midieron con aparatos, y los participantes y el investigador calificaron por separado la sequedad, la descamación, la aspereza y el picor [1].
 
 El resultado fue un empate. Los dos aceites mejoraron de forma significativa la hidratación y aumentaron los lípidos de la superficie de la piel, y no hubo diferencias significativas en la pérdida de agua ni en el pH, dos medidas que los investigadores usaron para valorar la seguridad [1]. Tanto los investigadores como los participantes vieron una tendencia a más mejoría con el de coco, pero esa diferencia no llegó a ser estadísticamente clara [1]. La conclusión de los autores: el aceite de coco es tan eficaz y seguro como el aceite mineral cuando se usa como hidratante [1].
 
@@ -125,7 +130,7 @@ Es un buen resultado con límites claros. Fueron 34 personas durante dos semanas
 
 La dermatitis atópica es una enfermedad crónica de la piel en la que la barrera cutánea falla, hay inflamación y se pierde más agua a través de la piel [2].
 
-Un ensayo publicado en 2014 incluyó en su análisis a 117 niños con dermatitis atópica leve a moderada [2]. Durante ocho semanas, unos usaron aceite de coco virgen y otros aceite mineral, sin que ni los participantes ni los investigadores supieran cuál le tocaba a cada uno [2]. El SCORAD, una escala de la gravedad de la dermatitis atópica, bajó un 68 % en el grupo del coco y un 38 % en el del aceite mineral [2]. Al final, los niños que usaron coco también perdían menos agua por la piel y la tenían más hidratada que los del otro grupo [2].
+Un ensayo publicado en 2014 incluyó en su análisis a 117 niños con dermatitis atópica leve a moderada [2]. Durante ocho semanas, unos usaron aceite de coco virgen y otros aceite mineral, sin que ni los participantes ni los investigadores supieran cuál le tocaba a cada uno [2]. El SCORAD, una escala de la gravedad de la dermatitis atópica, bajó de media un 68 % en el grupo del coco y un 38 % en el del aceite mineral [2]. Al final, los niños que usaron coco también perdían menos agua por la piel y la tenían más hidratada que los del otro grupo [2].
 
 Otro ensayo, con 52 adultos con dermatitis atópica (26 por grupo), comparó durante cuatro semanas el aceite de coco virgen con el de oliva virgen: cada participante se aplicó uno de los dos, dos veces al día, en dos zonas de piel sin infección [3]. La gravedad bajó con los dos, y más con el de coco [3]. Los investigadores también miraron el _Staphylococcus aureus_, una bacteria que coloniza con facilidad la piel con dermatitis atópica [3]. En el grupo del coco, 20 personas la tenían al empezar y solo una seguía teniéndola al final; en el del aceite de oliva, las que la tenían pasaron de 12 a 6 [3].
 
@@ -133,7 +138,7 @@ Ahora, la letra pequeña. Los tres ensayos fueron pequeños, de 34 a 117 persona
 
 Una revisión publicada en 2019 por investigadores de la Universidad de Columbia concluyó que hacen falta más estudios para hacer recomendaciones definitivas sobre el aceite de coco [4].
 
-La misma revisión recuerda que existen medicamentos eficaces para la dermatitis atópica, y que hay pacientes que prefieren los aceites porque los perciben como menos riesgosos y por miedo a los posibles efectos adversos de los corticoides tópicos [4]. Si en tu casa alguien tiene dermatitis atópica diagnosticada, lo que se aplique en la piel hay que decidirlo con su dermatólogo; un ensayo con 117 niños no alcanza para eso.
+La misma revisión recuerda que existen medicamentos eficaces para la dermatitis atópica, y que hay pacientes que eligen los aceites porque perciben menos riesgo en los productos naturales y por miedo a los posibles efectos adversos de los corticoides tópicos [4]. Si en tu casa alguien tiene dermatitis atópica diagnosticada, lo que se aplique en la piel hay que decidirlo con su dermatólogo; un ensayo con 117 niños no alcanza para eso.
 
 ## No todos los aceites naturales son iguales
 

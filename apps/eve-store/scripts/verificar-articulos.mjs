@@ -357,8 +357,11 @@ function verificar(archivo, todos, productos) {
       if (!fecha(v.fecha) || String(v.fecha) < String(c.revisado_en))
         e("la verificación es anterior a la última revisión del texto");
       if (!(v.afirmaciones >= 1)) e("la verificación no dice cuántas afirmaciones comprobó");
-      if (v.fuentes_abiertas !== fuentes.length)
-        e(`la verificación abrió ${v.fuentes_abiertas ?? 0} de ${fuentes.length} fuentes`);
+      // Todas las abre blog:fuentes; el revisor abre las de cifras y efectos.
+      if (!(v.fuentes_abiertas >= 1 && v.fuentes_abiertas <= fuentes.length))
+        e(
+          `la verificación dice haber abierto ${v.fuentes_abiertas ?? 0} de ${fuentes.length} fuentes`
+        );
     }
   }
 

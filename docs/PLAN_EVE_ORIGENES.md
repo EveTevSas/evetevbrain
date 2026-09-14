@@ -69,9 +69,10 @@ diferente:
    la fuente y que **título, año y DOI** sean los de esa fuente. Lee PubMed y PMC
    por sus API oficiales, porque sus webs ya no se dejan leer por programas.
 4. **Un revisor independiente** —otro agente, que no escribió el texto ni ve
-   las notas de investigación— abre cada fuente y contrasta cada afirmación
-   buscando exageraciones, generalizaciones y errores. Si rechaza, se corrige y
-   revisa **otro agente nuevo**. Tres rechazos y el artículo no se publica.
+   las notas de investigación— contrasta las cifras, los efectos de salud y los
+   CTA con sus fuentes. Bloquea solo lo que deja una idea falsa o un problema
+   legal. Una ronda: si pide correcciones, se aplican quitando o matizando; si
+   rechaza el enfoque, hay una segunda ronda y, si no pasa, no se publica.
 
 ### Lo que se comprobó al construirlo
 
